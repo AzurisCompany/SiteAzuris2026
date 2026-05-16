@@ -9,6 +9,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Cta } from "@/components/sections/Cta";
+import { BlogCover } from "@/components/BlogCover";
 import { getAllSlugs, getAllPosts, getPostBySlug } from "@/lib/posts";
 import { ArrowLeft, Clock } from "lucide-react";
 
@@ -67,7 +68,8 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
         {/* Header */}
         <article>
           <header className="relative isolate overflow-hidden border-b border-slate/40">
-            {post.cover ? (
+            {/* Fundo: foto full-bleed atrás (mode=image) OU gradient sutil (mode=logo) */}
+            {post.cover && post.coverMode !== "logo" ? (
               <div className="absolute inset-0 -z-10 opacity-25">
                 <Image
                   src={post.cover}
@@ -80,14 +82,34 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
                 <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/80 to-ink" />
               </div>
             ) : null}
+            {post.coverMode === "logo" ? (
+              <div
+                className="absolute inset-0 -z-10 opacity-30"
+                style={{
+                  background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${post.coverAccent ?? "#14b7de"}40 0%, transparent 60%)`,
+                }}
+              />
+            ) : null}
 
-            <div className="mx-auto max-w-3xl px-6 py-20 md:py-28">
+            <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
               <Link
                 href="/blog"
                 className="inline-flex items-center gap-1.5 text-sm text-foam/50 hover:text-cyan-brand mb-8"
               >
                 <ArrowLeft className="size-4" /> Todos os posts
               </Link>
+
+              {/* Brand tile destacado quando é logo */}
+              {post.cover && post.coverMode === "logo" ? (
+                <BlogCover
+                  src={post.cover}
+                  alt={post.title}
+                  mode="logo"
+                  accent={post.coverAccent}
+                  priority
+                  className="group relative aspect-[16/9] md:aspect-[21/9] rounded-2xl mb-10 border border-slate/60"
+                />
+              ) : null}
 
               <div className="flex flex-wrap items-center gap-3 text-xs text-foam/50 mb-5">
                 {post.property ? (

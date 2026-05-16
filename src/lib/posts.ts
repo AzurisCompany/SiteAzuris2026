@@ -10,6 +10,10 @@ export type PostFrontmatter = {
   excerpt: string;
   date: string; // ISO yyyy-mm-dd
   cover?: string;
+  /** "image" = object-cover full-bleed; "logo" = object-contain centralizado no tile */
+  coverMode?: "image" | "logo";
+  /** cor hex usada como acento no tile (default: cyan brand) */
+  coverAccent?: string;
   tags?: string[];
   author?: string;
   property?: string; // qual site do ecossistema (hadoop.com.br, ETT, DSSBR…)
