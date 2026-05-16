@@ -1,0 +1,50 @@
+---
+title: "Por que ainda mantemos o Hadoop.com.br em 2026"
+excerpt: "Hadoop não morreu. Mudou de papel. E ter um portal em português ainda é a diferença entre engenheiro júnior preso na documentação e engenheiro produtivo."
+date: "2026-04-22"
+cover: "/products/cloud.webp"
+tags: ["Hadoop", "BigData", "Ecossistema"]
+author: "Binhara"
+property: "hadoop.com.br"
+---
+
+Você ainda usa Hadoop em 2026?
+
+Provavelmente sim — só que não chama mais assim. **Spark roda em cima de HDFS. Iceberg roda em cima de object storage que herdou o pensamento de tabela do Hive. Trino é o Presto, que é o Impala bem-feito. Delta Lake adicionou ACID ao mundo Hadoop**. O ecossistema mudou de roupa, não de DNA.
+
+Há quem ache que Hadoop morreu porque a Cloudera comprou a Hortonworks em 2019. **Quem migrou data lake na vida sabe que isso é miopia de Twitter.** O que se chama hoje de "lakehouse" é Hadoop com cara nova: o mesmo modelo de pensar storage e compute separados, o mesmo princípio de processar dado onde ele está, a mesma necessidade de catalogar metadado.
+
+## Por que um portal em português?
+
+Existe uma indústria gigante de cursos de inglês em dados — e está certa, porque inglês é a língua de trabalho. Mas tem dois problemas práticos:
+
+1. **A documentação oficial é descritiva, não didática.** A wiki do Spark diz o que cada parâmetro faz. Não diz quando você deve usar `repartition` em vez de `coalesce` num pipeline que escreve em Iceberg sobre S3 — onde a resposta certa muda dependendo de quantos arquivos pequenos você tolera no metastore.
+2. **Erro em produção às 3 da manhã é em português.** Quando o pipeline trava e você tem 20 minutos antes do SLA virar incidente, você precisa procurar "Hive ORC bloom filter false positive" e cair num post brasileiro que diz "olha, isso aqui já me ferrou em 2022".
+
+O **[Hadoop.com.br](https://hadoop.com.br)** existe pra esse cenário. É portal de consulta — não é mídia, não é tutorial pra iniciante. É a referência que o engenheiro de dados brasileiro mantém aberta no segundo monitor.
+
+## O que tem lá hoje
+
+Cobertura ativa de **mais de 50 tecnologias** do ecossistema: Hadoop, Spark, Kafka, Delta Lake, Iceberg, ClickHouse, Cloudera, AWS EMR, Google Dataproc, Azure HDInsight, Trino, dbt, Airflow, NiFi. Cada uma com artigos próprios — não é agregador de link gringo traduzido com Google Tradutor.
+
+Os destaques recentes mostram bem o tom:
+
+- **Hadoop vs Spark 2024** — quando ainda faz sentido manter HDFS em vez de migrar tudo pra object storage
+- **Delta Lake Migration** — caminho prático Iceberg ↔ Delta, com os pegadinhos
+- **Cloud Alternatives** — comparativo de EMR vs Dataproc vs HDInsight pra carga típica brasileira (read: tributos em jurídico que ninguém entende)
+- **Kafka 3.6 Features** — o que muda na operação real, não na release note
+
+## Por que a Azuris cuida disso?
+
+Porque a gente vive disso. **Construir um portal de conteúdo técnico é forma de transformar conhecimento em ativo público** — útil pro mercado, útil pra carreira de quem escreve, útil pra Azuris quando alguém chega no nosso site dizendo "vocês são os autores daquele artigo sobre tuning de HDFS, queria conversar".
+
+Hadoop.com.br não é canal de marketing. **É o nosso commit público no Brasil técnico.** Quando 10 anos atrás eu compilei meu primeiro cluster Hadoop a partir do código-fonte na Buscapé (era a era pré-distribuição), não tinha nada em português. Hoje tem — boa parte está lá.
+
+## Por onde começar
+
+- 👉 **[hadoop.com.br](https://hadoop.com.br)** — vai direto
+- Se você é júnior: comece pelos artigos de fundamentos (HDFS, MapReduce, particionamento)
+- Se você é sênior: vai nos artigos de migração e tuning — é onde a coisa fica interessante
+- Se você quer escrever: a porta está aberta. Manda um e-mail.
+
+Hadoop não morreu. Só ficou maduro. E maturidade em dados é uma coisa que se ensina — preferencialmente na sua língua.
