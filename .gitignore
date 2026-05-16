@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Heavy media — kept locally, served via Vercel Blob in production
+public/cloud-bg.mp4
