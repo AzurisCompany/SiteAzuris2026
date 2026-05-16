@@ -1,0 +1,131 @@
+{
+  "name": "Alessandro De Oliveira Binhara",
+  "shortName": "Binhara",
+  "title": "Senior Data Engineer",
+  "email": "binhara@azuris.com.br",
+  "phone": "+55 41 9-9800-3687",
+  "location": "Curitiba, Paraná, Brazil",
+  "linkedin": "https://linkedin.com/in/binhara/",
+  "github": "https://github.com/binharademo",
+  "years": { "bigdata": 10, "software": 20 },
+  "headline": "Senior Data Engineer com 10+ anos em plataformas Big Data e 20+ anos em engenharia de software. Especialista em ecossistemas Hadoop, lakehouses na nuvem e camadas analíticas com Snowflake e ClickHouse sobre GCP, AWS, Azure e OCI.",
+  "signatureWin": {
+    "title": "Migração 100TB OCI→GCP com zero downtime",
+    "kpis": ["-40% OpEx mensal", "35→18 servidores", "+25% performance cluster"]
+  },
+  "experience": [
+    {
+      "company": "Azuris",
+      "role": "Data Engineer",
+      "period": "06/2022 — atual",
+      "summary": "Design, build e operação de plataformas de dados escaláveis para múltiplos clientes. Modernização cloud, lakehouses, treinamentos e mentoria.",
+      "stack": ["AWS","GCP","OCI","Azure","Snowflake","Databricks","ClickHouse","Gaio Data OS","Hadoop","Spark","Airflow","Kafka","NiFi","SQL","Python"]
+    },
+    {
+      "company": "Tecpar — DSSBR",
+      "role": "Founder & Conference Organizer",
+      "period": "2018 — 2025",
+      "summary": "Fundador e organizador do Data Science Summit Brasil (dssbr.com.br), uma das maiores conferências de Dados & IA do Brasil."
+    },
+    {
+      "company": "Logcomex",
+      "role": "Data Engineer Trainer",
+      "period": "08/2025 — 11/2025",
+      "summary": "Programa hands-on de Big Data e Lakehouse: qualidade de dados, confiabilidade de pipeline, governança e otimização de custo."
+    },
+    {
+      "company": "Sicredi",
+      "role": "Data Engineer Trainer",
+      "period": "04/2025 — 06/2025",
+      "summary": "Treinamento em escala para múltiplas unidades de negócio, levando equipes de planilhas a pipelines em produção."
+    },
+    {
+      "company": "Resultados Digitais (RDStation)",
+      "role": "Data Engineer",
+      "period": "Abr 2020 — Fev 2024",
+      "summary": "Estabilizou plataforma Hadoop crítica após migração falha. Liderou migração end-to-end de Data Lake ~100TB OCI→GCP com zero downtime. Snowflake como camada analítica.",
+      "kpis": ["-40% OpEx", "35→18 servidores", "+25% performance HDFS"]
+    },
+    {
+      "company": "Universidade Positivo",
+      "role": "Professor — Pós em Big Data",
+      "period": "01/2015 — 01/2018",
+      "summary": "Co-criou um dos primeiros programas de pós-graduação em Big Data do Paraná. Hadoop, Spark, processamento distribuído."
+    },
+    {
+      "company": "Grupo Buscapé (eBehaviour)",
+      "role": "R&D Engineer",
+      "period": "11/2009 — 05/2012",
+      "summary": "Construiu plataforma de recomendação Hadoop+Mahout suportando grande parte do tráfego de e-commerce do Brasil. Cluster Hadoop compilado a partir do código fonte (era pré-distribuição)."
+    }
+  ],
+  "cases": [
+    {
+      "slug": "rdstation-migracao-100tb",
+      "client": "RD Station",
+      "title": "Migração 100TB OCI → GCP com zero downtime",
+      "tagline": "Data lake crítico migrado sem perder um insight",
+      "kpis": [
+        { "value": "-40%", "label": "OpEx mensal" },
+        { "value": "35→18", "label": "servidores" },
+        { "value": "0", "label": "downtime" },
+        { "value": "+25%", "label": "performance" }
+      ],
+      "tech": ["Hadoop","HDFS","Hive","Spark","Snowflake","GCP","Airflow","Trino"]
+    },
+    {
+      "slug": "buscape-recomendacao",
+      "client": "Buscapé",
+      "title": "Plataforma de recomendação Hadoop pioneira no e-commerce BR",
+      "tagline": "Hadoop compilado do código-fonte para servir o e-commerce brasileiro",
+      "kpis": [
+        { "value": "10M+", "label": "eventos/dia" },
+        { "value": "1ª", "label": "do BR" }
+      ],
+      "tech": ["Hadoop","Mahout","Java","Pig","Cassandra"]
+    },
+    {
+      "slug": "sicredi-treinamento",
+      "client": "Sicredi",
+      "title": "Programa de capacitação: de planilhas a pipelines em produção",
+      "tagline": "Múltiplas unidades de negócio capacitadas em engenharia de dados moderna",
+      "kpis": [
+        { "value": "100+", "label": "profissionais" }
+      ],
+      "tech": ["ClickHouse","Python","SQL","Power BI","Airflow"]
+    },
+    {
+      "slug": "logcomex-lakehouse",
+      "client": "Logcomex",
+      "title": "Lakehouse + Medallion: do conceito à produção",
+      "tagline": "Treinamento aplicado em arquitetura medallion com Delta/Iceberg",
+      "tech": ["Delta Lake","Iceberg","Trino","Starburst","MinIO","Great Expectations","Kafka"]
+    },
+    {
+      "slug": "unimed-mentoria",
+      "client": "Unimed",
+      "title": "Mentoria técnica e modernização de plataforma",
+      "tech": ["Snowflake","Databricks","ClickHouse"]
+    }
+  ],
+  "certifications": [
+    "Oracle Big Data Case — official success story with RD Station on OCI (2021)",
+    "Representou RD Station no Snowflake Summit (Las Vegas)",
+    "Microsoft Xamarin Developer Pro Certified (2018)"
+  ],
+  "education": [
+    { "degree": "M.Sc. em Tecnologia (Gestão de Projetos & Inovação)", "school": "UTFPR", "period": "2003–2006" },
+    { "degree": "B.Sc. em Processamento de Dados (Eng. da Computação)", "school": "ESEEI", "period": "1998–2001" },
+    { "degree": "Técnico em Eletrônica", "school": "CEFET-PR / UTFPR", "period": "1992–1996" }
+  ],
+  "stack": {
+    "clouds": ["AWS","GCP","Azure","OCI"],
+    "lakehouse": ["Databricks","Snowflake","ClickHouse","Delta Lake","Iceberg"],
+    "hadoop": ["HDFS","Hive","Spark","Mahout","Pig","MapReduce"],
+    "orchestration": ["Airflow","NiFi"],
+    "streaming": ["Kafka","Redpanda"],
+    "queryEngines": ["Trino","Starburst","Presto"],
+    "languages": ["Python","Java","SQL","Scala","C#"],
+    "ai": ["LangChain","OpenAI","Embeddings","RAG"]
+  }
+}

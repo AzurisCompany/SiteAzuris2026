@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Azuris 2026
 
-## Getting Started
+Site institucional da **Azuris** — engenharia de dados e IA.
 
-First, run the development server:
+Reconstrução completa do `azuris.com.br` substituindo a versão WordPress/Divi por
+uma stack moderna, dark-first, focada em profissionais de dados.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) + **React 19.2**
+- **Tailwind CSS v4** com tokens de design derivados da logo
+- **react-three-fiber** + **three.js** para o hero 3D (data-flow particles)
+- **motion** (Framer rebrand v12) para microinterações
+- **PostHog** para analytics, A/B testing e session replay
+- **Proxy** (`src/proxy.ts`, ex-middleware do Next 16) para detecção de
+  tráfego incidental e roteamento condicional
+- **MDX** (planejado) para blog e cases
+
+## Rotas
+
+```
+/                              Home (hero 3D, ecossistema, cases, parceiros, stack, founder)
+/sobre                         Quem somos + pilares + bio
+/cases                         Cases reais com KPIs
+/produtos                      Hub dos produtos
+/produtos/curso-pipelines      LP do curso em lançamento
+/blog                          (stub MDX)
+/contato                       Canais diretos
+/azuriz                        Landing dedicada para tráfego incidental do Azuriz FC
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Ecossistema
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+A home destaca produtos próprios e parceiros:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **DSSBR 2026** — Data Science Summit Brasil
+- **English Talk Time** — inglês com IA
+- **OWorkshop** — workshops técnicos
+- **Hadoop.com.br** — portal de conteúdo PT-BR
+- **Curso Pipelines + IA** — lançamento via GU BigData
+- Parceiros: **Snowflake**, **Acceldata**, **Gaio Data OS**
 
-## Learn More
+## Tráfego Azuriz FC
 
-To learn more about Next.js, take a look at the following resources:
+O domínio `azuris.com.br` recebe tráfego acidental de quem busca o `azuriz.com.br`
+(clube de futebol). Implementado em duas camadas A/B:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Banner sutil** no topo da home (acionado por `proxy.ts` via referrer ou
+   `?fc=1`) — `AzurizBanner.tsx`
+2. **Landing dedicada** em `/azuriz` (takeover) com CTA pro ETT, UTMs trackeáveis
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ambas as variantes emitem eventos PostHog para medir conversão.
 
-## Deploy on Vercel
+## Desenvolvimento
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm install
+pnpm dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Servidor sobe em `http://localhost:3000`. Em WSL/Windows, use o IP da WSL
+(`ip -4 addr show eth0`) — já há `allowedDevOrigins` configurado no
+`next.config.ts`.
+
+## Variáveis de ambiente
+
+Copie `.env.example` para `.env.local` e preencha:
+
+```
+NEXT_PUBLIC_POSTHOG_KEY=phc_xxxxxxxxxxxxxxxxxxxx
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+Sem a chave, o site funciona normalmente — apenas o tracking fica inativo.
+
+## Deploy
+
+Vercel é o destino. `vercel link` → `vercel --prod`.
+
+## Identidade visual
+
+- Paleta dark-first derivada da logo: `#14b7de` cyan, `#06101c` ink, `#7dd3fc` mist
+- Fontes: Geist Sans (display + body), Geist Mono (numbers/code)
+- Logo: `AzurisMark.tsx` (SVG inline com gradiente animado — "dados fluindo
+  pela marca") + wordmark "AZURIS" em letter-spacing wide
