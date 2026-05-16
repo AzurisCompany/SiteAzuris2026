@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { WhatsAppFab } from "@/components/WhatsAppFab";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +46,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-foam">
-        <PostHogProvider>{children}</PostHogProvider>
+        <PostHogProvider>
+          {children}
+          <WhatsAppFab />
+        </PostHogProvider>
       </body>
     </html>
   );
