@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageHeader } from "@/components/PageHeader";
 import { BlogCover } from "@/components/BlogCover";
 import { getAllPosts } from "@/lib/posts";
 import { ArrowUpRight, Clock } from "lucide-react";
@@ -24,24 +25,26 @@ export default async function BlogPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 pt-24">
-        {/* Header */}
-        <section className="mx-auto max-w-5xl px-6 pt-12 pb-16">
-          <div className="text-xs uppercase tracking-[0.18em] text-cyan-brand mb-3">
-            Blog
-          </div>
-          <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[0.95]">
-            Insights, não{" "}
-            <span className="text-brand-gradient">opiniões.</span>
-          </h1>
-          <p className="mt-6 text-lg text-foam/70 max-w-2xl">
-            Posts sobre engenharia de dados, IA em produção, e o ecossistema
-            que construímos ao longo de uma década.
-          </p>
-        </section>
+      <main className="flex-1 pt-20">
+        <PageHeader
+          eyebrow="Blog"
+          size="md"
+          title={
+            <>
+              Insights, não{" "}
+              <span className="text-brand-gradient">opiniões.</span>
+            </>
+          }
+          intro={
+            <p>
+              Posts sobre engenharia de dados, IA em produção, e o ecossistema
+              que construímos ao longo de uma década.
+            </p>
+          }
+        />
 
         {/* Lista cronológica */}
-        <section className="mx-auto max-w-5xl px-6 pb-24">
+        <section className="mx-auto max-w-5xl px-6 py-20">
           <ol className="space-y-4">
             {posts.map((p, idx) => (
               <li key={p.slug}>
@@ -54,7 +57,6 @@ export default async function BlogPage() {
                     transition-all duration-300 overflow-hidden
                   "
                 >
-                  {/* Cover/thumbnail */}
                   <BlogCover
                     src={p.cover ?? "/azuris-logo.svg"}
                     alt={p.title}
@@ -64,7 +66,6 @@ export default async function BlogPage() {
                     className="aspect-[16/9] md:aspect-auto md:h-full md:min-h-[200px]"
                   />
 
-                  {/* Texto */}
                   <div className="p-6 md:p-7 md:pl-2 flex flex-col justify-center">
                     <div className="flex flex-wrap items-center gap-3 text-xs text-foam/45 mb-3">
                       {p.property ? (

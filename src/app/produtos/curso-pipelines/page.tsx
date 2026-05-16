@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageHeader } from "@/components/PageHeader";
 import { Cta } from "@/components/sections/Cta";
 import { ArrowRight, Database, Brain, Workflow, Sparkles } from "lucide-react";
 
@@ -33,38 +34,31 @@ export default function CursoPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 pt-24">
-        {/* Hero */}
-        <section className="relative isolate overflow-hidden border-b border-slate/40">
-          <div className="absolute inset-0 -z-10 opacity-30">
-            <Image
-              src="/products/cloud.webp"
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/80 via-deep/70 to-ink" />
-          </div>
-
-          <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 grid md:grid-cols-12 gap-10 items-center">
-            <div className="md:col-span-7">
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-accent bg-amber-accent/10 border border-amber-accent/30 rounded-full px-2.5 py-1 mb-6">
-                <Sparkles className="size-3" /> Lançamento
-              </span>
-              <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[0.95]">
-                Pipelines de
-                <br />
-                <span className="text-brand-gradient">Dados e IA</span>
-              </h1>
-              <p className="mt-8 text-lg md:text-xl text-foam/80 leading-relaxed max-w-xl">
+      <main className="flex-1 pt-20">
+        <PageHeader
+          size="lg"
+          particleCount={2200}
+          eyebrow={
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-accent bg-amber-accent/10 border border-amber-accent/30 rounded-full px-2.5 py-1">
+              <Sparkles className="size-3" /> Lançamento
+            </span>
+          }
+          title={
+            <>
+              Pipelines de
+              <br />
+              <span className="text-brand-gradient">Dados e IA</span>
+            </>
+          }
+          intro={
+            <>
+              <p>
                 Do raw ao modelo em produção. Sem firula, sem aula chata.
                 Conteúdo preparado por quem migrou 100TB de Hadoop entre nuvens
                 e construiu o primeiro motor de recomendação Hadoop do
                 e-commerce brasileiro.
               </p>
-              <div className="mt-10 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap gap-4">
                 <a
                   href="https://gubigdata.com.br/grupo-de-estudos/"
                   target="_blank"
@@ -81,9 +75,10 @@ export default function CursoPage() {
                   Quero ser avisado
                 </a>
               </div>
-            </div>
-
-            <div className="md:col-span-5 relative">
+            </>
+          }
+          aside={
+            <div className="relative">
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-slate/60 bg-deep float-slow">
                 <Image
                   src="/products/mockup.webp"
@@ -96,8 +91,8 @@ export default function CursoPage() {
               </div>
               <div className="absolute -bottom-6 -left-6 size-32 rounded-full blur-3xl bg-cyan-brand/30 pointer-events-none" />
             </div>
-          </div>
-        </section>
+          }
+        />
 
         {/* Módulos */}
         <section className="py-24 md:py-32">

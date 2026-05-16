@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { PageHeader } from "@/components/PageHeader";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/BrandIcons";
 import cv from "@/lib/cv.json";
@@ -14,22 +15,27 @@ export default function ContatoPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 pt-32">
-        <section className="mx-auto max-w-4xl px-6">
-          <div className="text-xs uppercase tracking-[0.18em] text-cyan-brand mb-3">
-            Contato
-          </div>
-          <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[0.95]">
-            Conta o problema.
-            <br />
-            <span className="text-brand-gradient">A gente responde com plano.</span>
-          </h1>
-          <p className="mt-8 text-lg text-foam/70 max-w-2xl">
-            Resposta em até 48h úteis. Para palestras, treinamentos, parcerias
-            e projetos.
-          </p>
+      <main className="flex-1 pt-20">
+        <PageHeader
+          eyebrow="Contato"
+          size="md"
+          title={
+            <>
+              Conta o problema.
+              <br />
+              <span className="text-brand-gradient">A gente responde com plano.</span>
+            </>
+          }
+          intro={
+            <p>
+              Resposta em até 48h úteis. Para palestras, treinamentos,
+              parcerias e projetos.
+            </p>
+          }
+        />
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section className="mx-auto max-w-4xl px-6 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <a
               href={`mailto:${cv.email}`}
               className="group rounded-2xl border border-slate/60 bg-deep p-6 hover:border-cyan-brand/60 transition-colors"
