@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Preview Open Graph — Lakehouse Pipeline na Prática</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #1a1a1a; display: grid; place-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #eee; padding: 24px; }
+  .wrap { max-width: 1240px; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 16px; color: #94a3b8; }
+  .frame { width: 1200px; height: 630px; box-shadow: 0 8px 40px rgba(0,0,0,.4); border-radius: 12px; overflow: hidden; }
+  .frame svg { display: block; width: 100%; height: 100%; }
+  .note { margin-top: 18px; font-size: 13px; color: #64748b; line-height: 1.5; max-width: 1200px; }
+  .note code { background: #131838; padding: 2px 6px; border-radius: 4px; color: #00d4ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Preview Open Graph (1200×630) — abre no Chrome, screenshot na proporção exata, exporta como PNG</h1>
+  <div class="frame">
+    <object data="og-image.svg" type="image/svg+xml" width="1200" height="630"></object>
+  </div>
+  <p class="note">
+    <strong>Como converter pra PNG (necessário pra OG real — Meta/LinkedIn não renderizam SVG):</strong><br>
+    1. Abra este HTML no Chrome/Firefox em monitor que comporte 1200px.<br>
+    2. DevTools (F12) → device toolbar → set viewport 1200×630 → screenshot.<br>
+    3. Alternativa: <code>chromium --headless --screenshot=og-image.png --window-size=1200,630 og-image.svg</code><br>
+    4. Alternativa online: cloudconvert.com/svg-to-png (input SVG 1200×630).<br>
+    Output esperado: PNG ≤ 200 KB. Salvar como <code>og-image.png</code> na mesma pasta.
+  </p>
+</div>
+</body>
+</html>

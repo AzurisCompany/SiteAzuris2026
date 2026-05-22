@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lakehouse: Pipeline na Prática · Curso Online · Azuris</title>
+<meta name="description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Curso online ao vivo com MinIO, Iceberg, Spark, Airflow e Superset. Próxima turma 22/06/2026.">
+<link rel="canonical" href="https://azuris.com.br/lakehouse-comunidade/">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/lakehouse-comunidade/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/lakehouse-comunidade/assets/apple-touch-icon.svg">
+
+<!-- Geist font preload (Azuris brand font) -->
+<link rel="preload" href="/lakehouse-comunidade/assets/fonts/geist-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/lakehouse-comunidade/assets/fonts/geist-bold.woff2" as="font" type="font/woff2" crossorigin>
+
+<!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://azuris.com.br/lakehouse-comunidade/">
+<meta property="og:title" content="Lakehouse: Pipeline na Prática · Curso Online · Azuris">
+<meta property="og:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Turma 1: 22/06/2026.">
+<meta property="og:image" content="https://azuris.com.br/lakehouse-comunidade/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Azuris">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lakehouse: Pipeline na Prática">
+<meta name="twitter:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo. Curso online ao vivo. Turma 1: 22/06/2026.">
+<meta name="twitter:image" content="https://azuris.com.br/lakehouse-comunidade/assets/og-image.png">
+
+<style>
+/* Geist — font da marca Azuris (Vercel open-source) */
+@font-face {
+  font-family: 'Geist';
+  src: url('assets/fonts/geist-regular.woff2') format('woff2');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('assets/fonts/geist-bold.woff2') format('woff2');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Paleta Azuris oficial (azuris.com.br) */
+  --azuris-ink:      #06101c;
+  --azuris-deep:     #0a1929;
+  --azuris-slate:    #11243a;
+  --azuris-surface:  #15324f;
+  --azuris-graphite: #4d555b;
+  --azuris-cyan:     #14b7de;
+  --azuris-mist:     #7dd3fc;
+  --azuris-foam:     #e0f2fe;
+  --azuris-indigo:   #6366f1;
+
+  --bg-primary: var(--azuris-ink);
+  --bg-secondary: var(--azuris-deep);
+  --bg-card: rgba(20, 183, 222, 0.045);
+  --bg-card-hover: rgba(20, 183, 222, 0.08);
+  --border: rgba(20, 183, 222, 0.15);
+  --text-primary: var(--azuris-foam);
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-cyan: var(--azuris-cyan);
+  --accent-purple: var(--azuris-indigo);
+  --gradient: linear-gradient(135deg, var(--azuris-cyan) 0%, var(--azuris-indigo) 100%);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --max-width: 1100px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; color-scheme: dark; }
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Camada 1 — Grid pattern (linhas cyan sutis no topo, dissolvendo abaixo) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(20, 183, 222, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 183, 222, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: 0 0;
+  mask-image: radial-gradient(ellipse at top, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at top, black 0%, transparent 75%);
+}
+
+/* Camada 2 — Aurora glows (manchas cyan + indigo flutuando lentamente) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(20, 183, 222, 0.12), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 15% 75%, rgba(99, 102, 241, 0.09), transparent 70%);
+  animation: auroraDrift 22s ease-in-out infinite alternate;
+}
+@keyframes auroraDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1);     opacity: 0.85; }
+  50%  { transform: translate3d(2%, -1%, 0) scale(1.05); opacity: 1; }
+  100% { transform: translate3d(-2%, 1%, 0) scale(1);   opacity: 0.85; }
+}
+
+/* Camada 3 — Canvas particle network (rede de partículas conectadas) */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; }
+  #bg-canvas { display: none; }
+}
+
+/* Conteúdo acima de todas as camadas de fundo */
+.site-header, section, footer { position: relative; z-index: 1; }
+
+/* Floating brand mark (decoração no hero) */
+.brand-bg {
+  position: absolute;
+  top: 60px;
+  right: -180px;
+  width: 760px; height: 530px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.08;
+  animation: float-slow 6s ease-in-out infinite;
+}
+.brand-bg svg { width: 100%; height: 100%; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-bg { animation: none; }
+}
+@media (max-width: 720px) {
+  .brand-bg { display: none; }
+}
+a { color: var(--accent-cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  background: rgba(20, 183, 222, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--accent-cyan);
+}
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+/* HEADER */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10, 14, 39, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; max-width: var(--max-width); margin: 0 auto;
+}
+.logo {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 18px; letter-spacing: 1.5px;
+  color: var(--azuris-foam);
+  text-decoration: none;
+}
+.logo-mark {
+  width: 46px; height: 32px;
+  display: inline-block; flex-shrink: 0;
+  filter: drop-shadow(0 0 14px rgba(20, 183, 222, 0.45));
+  transition: transform 0.3s;
+}
+.logo:hover .logo-mark { transform: scale(1.05); }
+.logo-mark svg { width: 100%; height: 100%; display: block; }
+.logo-word { font-family: 'Geist', sans-serif; }
+footer .logo { margin-bottom: 10px; }
+footer .logo-mark { width: 40px; height: 28px; }
+.header-nav {
+  display: flex; align-items: center; gap: 4px;
+}
+.header-sections {
+  display: flex; align-items: center; gap: 2px;
+  margin-right: 16px;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+}
+.header-link {
+  display: inline-block; padding: 6px 12px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none !important;
+  position: relative;
+  transition: color 0.2s;
+  border-radius: 6px;
+}
+.header-link::after {
+  content: ''; position: absolute;
+  left: 12px; right: 12px; bottom: 4px;
+  height: 1px; background: var(--accent-cyan);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.2s;
+}
+.header-link:hover {
+  color: var(--text-primary);
+  text-decoration: none !important;
+}
+.header-link:hover::after { transform: scaleX(1); }
+.header-link.is-active {
+  color: var(--accent-cyan);
+}
+.header-link.is-active::after {
+  transform: scaleX(1);
+  background: var(--accent-cyan);
+}
+.header-link.is-emphasis {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.header-cta {
+  display: inline-block; padding: 10px 20px;
+  background: var(--gradient); color: #fff !important;
+  border-radius: 8px; font-weight: 700; font-size: 14px;
+  text-decoration: none !important;
+  box-shadow: 0 2px 12px rgba(20, 183, 222, 0.22);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.header-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(20, 183, 222, 0.35);
+}
+@media (max-width: 1024px) {
+  .header-sections { display: none; }
+}
+@media (max-width: 560px) {
+  .header-link { display: none; }
+}
+
+/* HERO */
+.hero {
+  padding: 80px 0 60px; text-align: center;
+  position: relative; overflow: hidden;
+  background: radial-gradient(ellipse at top, rgba(20, 183, 222, 0.18), transparent 70%);
+}
+.hero .container { position: relative; z-index: 2; }
+.eyebrow {
+  display: inline-block; font-size: 12px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent-cyan); padding: 6px 14px;
+  border: 1px solid var(--border); border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-size: clamp(34px, 5vw, 54px); line-height: 1.1;
+  font-weight: 800; margin-bottom: 20px; letter-spacing: -0.025em;
+  max-width: 900px; margin-left: auto; margin-right: auto;
+}
+.accent {
+  background: var(--gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  font-size: clamp(16px, 2vw, 20px); color: var(--text-secondary);
+  max-width: 720px; margin: 0 auto 28px;
+}
+.hero p strong { color: var(--text-primary); }
+
+/* Hero stack strip — logos oficiais como prova visual no topo */
+.hero-stack-strip {
+  display: flex; justify-content: center; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+  max-width: 820px; margin: 0 auto 40px;
+}
+.hero-tool {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 46px; padding: 0 20px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.2s;
+  opacity: 0;
+  animation: heroToolFadeIn 0.6s ease-out forwards;
+}
+.hero-tool:nth-child(1) { animation-delay: 0.15s; }
+.hero-tool:nth-child(2) { animation-delay: 0.25s; }
+.hero-tool:nth-child(3) { animation-delay: 0.35s; }
+.hero-tool:nth-child(4) { animation-delay: 0.45s; }
+.hero-tool:nth-child(5) { animation-delay: 0.55s; }
+.hero-tool:hover {
+  transform: translateY(-3px);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 183, 222, 0.18), 0 0 0 1px rgba(20, 183, 222, 0.3);
+}
+.hero-tool img {
+  height: 24px; width: auto;
+  display: block;
+}
+.hero-tool[data-tool="airflow"] img { height: 32px; }
+
+@keyframes heroToolFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-tool { animation: none; opacity: 1; }
+}
+.btn-primary {
+  display: inline-block; padding: 16px 36px;
+  background: var(--gradient); color: #fff !important;
+  border-radius: 8px; font-weight: 700; font-size: 18px;
+  text-decoration: none !important;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(20, 183, 222, 0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(20, 183, 222, 0.4);
+}
+
+/* SECTIONS */
+section { padding: 70px 0; border-top: 1px solid var(--border); scroll-margin-top: 80px; }
+.section-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent-cyan);
+  text-align: center; margin-bottom: 14px;
+}
+h2 {
+  font-size: clamp(26px, 3.5vw, 38px); font-weight: 800;
+  text-align: center; margin-bottom: 40px;
+  letter-spacing: -0.02em; line-height: 1.15;
+}
+
+/* CENÁRIO — card metadata + chips das tabelas + aside */
+.cenario-card {
+  max-width: 880px; margin: 32px auto 24px;
+  background: linear-gradient(180deg, rgba(20,183,222,0.045), rgba(99,102,241,0.03));
+  border: 1px solid rgba(20,183,222,0.20);
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.cenario-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding-bottom: 28px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(20,183,222,0.18);
+}
+.cenario-stat { text-align: center; }
+.cenario-stat-value {
+  font-size: 38px; font-weight: 800;
+  background: var(--gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em; line-height: 1;
+  margin-bottom: 10px;
+}
+.cenario-stat-value .unit {
+  font-size: 18px; font-weight: 700;
+  margin-left: 2px;
+}
+.cenario-stat-label {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-muted); line-height: 1.4;
+}
+.cenario-tables-title {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-muted); text-align: center;
+  margin-bottom: 16px;
+}
+.cenario-tables {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 8px;
+}
+.cenario-table-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px;
+  background: rgba(20,183,222,0.08);
+  border: 1px solid rgba(20,183,222,0.28);
+  border-radius: 100px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-primary);
+  font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
+}
+.cenario-table-chip::before {
+  content: '▸'; color: var(--accent-cyan); font-size: 11px;
+}
+.cenario-table-chip:hover {
+  background: rgba(20,183,222,0.16);
+  border-color: rgba(20,183,222,0.5);
+  transform: translateY(-2px);
+}
+.cenario-aside {
+  max-width: 880px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 22px 26px;
+  background: linear-gradient(180deg, rgba(245,158,11,0.07), rgba(245,158,11,0.03));
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 12px;
+  font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary);
+}
+.cenario-aside-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(245,158,11,0.12);
+  border: 1.5px solid rgba(245,158,11,0.45);
+  border-radius: 8px;
+  color: var(--warning);
+  font-size: 22px; font-weight: 800;
+  flex-shrink: 0;
+}
+.cenario-aside strong { color: var(--text-primary); }
+.cenario-aside code {
+  font-size: 13px; padding: 1px 5px;
+}
+
+/* DIAGNÓSTICO — checklist único com setup → punch */
+.diagnostico-card {
+  max-width: 780px; margin: 0 auto;
+  background: linear-gradient(180deg, rgba(245,158,11,0.05) 0%, rgba(245,158,11,0.02) 100%);
+  border: 1px solid rgba(245,158,11,0.20);
+  border-radius: 16px;
+  padding: 8px 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+}
+.diagnostico-item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.2s;
+}
+.diagnostico-item:last-child { border-bottom: none; }
+.diag-check {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(245,158,11,0.10);
+  border: 1.5px solid rgba(245,158,11,0.45);
+  border-radius: 8px;
+  color: var(--warning); font-weight: 800; font-size: 18px;
+  cursor: pointer; user-select: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
+}
+.diag-check:hover {
+  background: rgba(245,158,11,0.22);
+  border-color: rgba(245,158,11,0.75);
+  transform: scale(1.05);
+}
+.diag-check:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+.diag-check:active { transform: scale(0.95); }
+.diag-check.checked {
+  background: var(--gradient);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(20, 183, 222, 0.35);
+}
+.diag-check.checked:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(20, 183, 222, 0.5);
+}
+.diag-text {
+  font-size: 16px; line-height: 1.55;
+  color: var(--text-secondary);
+}
+.diag-setup {
+  display: block; margin-bottom: 2px;
+}
+.diag-text strong {
+  color: var(--text-primary); font-weight: 700;
+}
+.diagnostico-punchline {
+  max-width: 780px; margin: 28px auto 0;
+  text-align: center;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(20,183,222,0.08), rgba(99,102,241,0.08));
+  border: 1px solid rgba(20,183,222,0.25);
+  border-radius: 12px;
+  font-size: 17px; color: var(--text-secondary);
+  line-height: 1.55;
+  transition: transform 0.4s ease, background 0.4s, border-color 0.4s, font-size 0.4s;
+}
+.diagnostico-punchline strong {
+  color: var(--text-primary); font-weight: 700;
+  transition: color 0.3s;
+}
+.diagnostico-punchline .accent {
+  background: var(--gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Estado iluminado — ativado via JS quando 2+ checkboxes estão marcadas */
+.diagnostico-punchline.glowing {
+  background: linear-gradient(135deg, rgba(20,183,222,0.18), rgba(99,102,241,0.20));
+  border: 2px solid transparent;
+  border-image: var(--gradient) 1;
+  transform: scale(1.02);
+  font-size: 18px;
+  animation: punchlinePulse 2.4s ease-in-out infinite;
+}
+.diagnostico-punchline.glowing strong {
+  color: var(--text-primary);
+}
+@keyframes punchlinePulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(20, 183, 222, 0),
+      0 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 48px 8px rgba(20, 183, 222, 0.30),
+      0 0 80px 16px rgba(99, 102, 241, 0.18);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagnostico-punchline.glowing { animation: none; }
+}
+
+/* SOLUTION */
+.solucao-text {
+  text-align: center; max-width: 760px; margin: 0 auto;
+  font-size: 18px; color: var(--text-secondary);
+}
+.solucao-text strong { color: var(--text-primary); }
+/* ROADMAP — timeline vertical de 5 semanas (substitui antiga arquitetura horizontal) */
+.roadmap {
+  max-width: 880px;
+  margin: 50px auto 0;
+  position: relative;
+}
+.roadmap::before {
+  content: '';
+  position: absolute;
+  left: 27px; top: 60px; bottom: 60px;
+  width: 2px;
+  background: linear-gradient(180deg,
+    rgba(20,183,222,0.4) 0%,
+    rgba(99,102,241,0.4) 50%,
+    rgba(20,183,222,0.4) 100%);
+}
+
+/* Marcadores de início e fim (input / output) */
+.roadmap-marker {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.roadmap-marker .marker-icon {
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card);
+  border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: 50%;
+  font-size: 22px; color: var(--text-muted);
+  position: relative; z-index: 2;
+}
+.roadmap-marker-end .marker-icon {
+  border-style: solid;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--success);
+}
+.roadmap-marker .marker-text {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.55;
+}
+.roadmap-marker .marker-text strong {
+  color: var(--text-primary); font-weight: 700;
+  display: block; margin-bottom: 2px;
+  font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+}
+.roadmap-marker-end { margin-top: 24px; margin-bottom: 0; }
+.roadmap-marker-end .marker-text strong { color: var(--success); }
+
+/* Item de semana */
+.roadmap-item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.roadmap-num {
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gradient);
+  border-radius: 50%;
+  font-weight: 800; font-size: 22px; color: #fff;
+  box-shadow: 0 4px 16px rgba(20, 183, 222, 0.25);
+  position: relative; z-index: 2;
+  flex-shrink: 0;
+}
+.roadmap-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 26px;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.roadmap-card:hover {
+  transform: translateX(4px);
+  background: var(--bg-card-hover);
+  border-color: rgba(20, 183, 222, 0.3);
+}
+.roadmap-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 20px;
+  margin-bottom: 10px;
+}
+.roadmap-meta {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 4px;
+}
+.roadmap-title {
+  font-size: 22px; font-weight: 700;
+  color: var(--text-primary); line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.roadmap-tools {
+  display: flex; gap: 8px; flex-shrink: 0;
+  flex-wrap: wrap; justify-content: flex-end;
+  max-width: 240px;
+}
+.roadmap-tools .tool-badge {
+  height: 36px; padding: 0 14px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 8px;
+  display: inline-flex; align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.roadmap-tools .tool-badge img {
+  height: 18px; width: auto; display: block;
+}
+.roadmap-tools .tool-badge[data-tool="airflow"] img { height: 24px; }
+.roadmap-desc {
+  font-size: 15px; color: var(--text-secondary);
+  line-height: 1.6; margin-bottom: 14px;
+}
+.roadmap-entregavel {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600;
+  color: var(--accent-cyan);
+  padding: 6px 12px;
+  background: rgba(20, 183, 222, 0.08);
+  border: 1px solid rgba(20, 183, 222, 0.2);
+  border-radius: 6px;
+}
+.roadmap-entregavel::before { content: '✓'; font-weight: 700; }
+
+/* STACK — showcase com logos oficiais em destaque */
+.stack-showcase {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  max-width: 1180px;
+  margin: 40px auto 32px;
+}
+.stack-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 18px 20px;
+  text-align: center;
+  display: flex; flex-direction: column;
+  transition: transform 0.25s, border-color 0.25s, background 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.stack-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: var(--accent-color, var(--accent-cyan));
+  opacity: 0.8;
+}
+.stack-card:hover {
+  transform: translateY(-4px);
+  background: var(--bg-card-hover);
+  border-color: var(--accent-color, rgba(20,183,222,0.45));
+}
+.stack-card[data-tool="minio"]    { --accent-color: #FF4438; }
+.stack-card[data-tool="iceberg"]  { --accent-color: #3D7FBF; }
+.stack-card[data-tool="spark"]    { --accent-color: #E25A1C; }
+.stack-card[data-tool="airflow"]  { --accent-color: #017CEE; }
+.stack-card[data-tool="superset"] { --accent-color: #20A8D8; }
+
+.stack-card-logo {
+  height: 56px; margin: 12px 0 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+.stack-card-logo img {
+  max-height: 56px; max-width: 100%;
+  width: auto; height: auto;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.stack-card[data-tool="iceberg"] .stack-card-logo img,
+.stack-card[data-tool="spark"] .stack-card-logo img,
+.stack-card[data-tool="superset"] .stack-card-logo img {
+  /* logos com texto escuro precisam fundo claro implícito - usar background pill */
+  background: rgba(255,255,255,0.97);
+  padding: 8px 14px;
+  border-radius: 8px;
+  max-height: 50px;
+}
+.stack-card[data-tool="airflow"] .stack-card-logo img {
+  background: rgba(255,255,255,0.97);
+  padding: 6px;
+  border-radius: 12px;
+  max-height: 60px;
+}
+.stack-card-papel {
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 8px;
+}
+.stack-card-titulo {
+  font-size: 17px; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 8px;
+}
+.stack-card-desc {
+  font-size: 13px; line-height: 1.55;
+  color: var(--text-secondary); flex-grow: 1;
+}
+.stack-aside {
+  text-align: center; font-size: 16px; color: var(--text-secondary);
+  margin-top: 20px; max-width: 820px; margin-left: auto; margin-right: auto;
+}
+.stack-aside strong { color: var(--text-primary); }
+
+/* DIFERENCIAIS */
+.diferenciais-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.diferencial {
+  padding: 36px 28px 28px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: 12px; position: relative;
+}
+.diferencial-num {
+  position: absolute; top: -15px; left: 24px;
+  background: var(--gradient); color: #fff;
+  font-weight: 800; font-size: 13px; letter-spacing: 1px;
+  padding: 5px 12px; border-radius: 100px;
+}
+.diferencial h3 {
+  font-size: 19px; margin-bottom: 12px; font-weight: 700;
+}
+.diferencial p { color: var(--text-secondary); font-size: 15px; }
+
+/* PARA QUEM */
+.para-quem-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  max-width: 900px; margin: 0 auto;
+}
+.para-quem-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px;
+}
+.para-quem-box.positivo { border-color: rgba(16, 185, 129, 0.3); }
+.para-quem-box.negativo { border-color: rgba(245, 158, 11, 0.3); }
+.para-quem-box h3 { font-size: 18px; margin-bottom: 20px; font-weight: 700; }
+.para-quem-box ul { list-style: none; }
+.para-quem-box li {
+  padding: 8px 0 8px 28px; position: relative;
+  color: var(--text-secondary); font-size: 15px;
+}
+.para-quem-box.positivo li::before {
+  content: "✓"; position: absolute; left: 0;
+  color: var(--success); font-weight: 700;
+}
+.para-quem-box.negativo li::before {
+  content: "✕"; position: absolute; left: 0;
+  color: var(--warning); font-weight: 700;
+}
+
+/* PRÉ-REQUISITOS */
+.prereqs-list { max-width: 720px; margin: 0 auto; list-style: none; }
+.prereqs-list li {
+  padding: 14px 0 14px 32px; position: relative;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 16px;
+}
+.prereqs-list li:last-child { border-bottom: none; }
+.prereqs-list li::before {
+  content: "▸"; position: absolute; left: 0;
+  color: var(--accent-cyan); font-weight: 700; font-size: 20px;
+}
+.prereqs-list li strong { color: var(--text-primary); }
+
+/* BÔNUS */
+.bonus-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.bonus-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px;
+}
+.bonus-card h4 {
+  font-size: 16px; margin-bottom: 8px; font-weight: 700; color: var(--accent-cyan);
+}
+.bonus-card p { font-size: 14px; color: var(--text-secondary); }
+
+/* INVESTIMENTO */
+.preco-box {
+  max-width: 480px; margin: 0 auto;
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), var(--gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border-radius: 16px; padding: 48px 32px; text-align: center;
+}
+.preco-old {
+  font-size: 17px; color: var(--text-muted);
+  text-decoration: line-through; margin-bottom: 12px;
+}
+.preco-novo {
+  font-size: 60px; font-weight: 800;
+  background: var(--gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em; line-height: 1; margin-bottom: 10px;
+}
+.preco-novo .moeda { font-size: 22px; vertical-align: top; margin-right: 4px; }
+.preco-parcelas { font-size: 16px; color: var(--text-secondary); margin-bottom: 8px; }
+.preco-pix { font-size: 14px; color: var(--success); margin-bottom: 28px; }
+
+/* LOTES (escada de preços Turma 1 + 1 card de mercado desabilitado) */
+.lotes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 1024px) {
+  .lotes-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .lotes-grid { grid-template-columns: 1fr; }
+}
+.lote-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 24px;
+  display: flex; flex-direction: column;
+  position: relative;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.lote-card.lote-destaque {
+  border: 2px solid transparent;
+  background-image: linear-gradient(var(--bg-primary), var(--bg-primary)), var(--gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  transform: scale(1.03);
+  box-shadow: 0 8px 30px rgba(20, 183, 222, 0.18);
+}
+.lote-card.lote-destaque::before {
+  content: '★ Mais escolhido';
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient);
+  color: #fff;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(20,183,222,0.3);
+}
+.lote-card:hover { transform: translateY(-2px); }
+.lote-card.lote-destaque:hover { transform: scale(1.03) translateY(-2px); }
+.lote-badge {
+  display: inline-block;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 100px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  margin-bottom: 18px; align-self: flex-start;
+}
+.lote-card.lote-destaque .lote-badge {
+  background: var(--gradient); color: #fff;
+}
+.lote-preco {
+  font-size: 44px; font-weight: 800; line-height: 1;
+  letter-spacing: -0.02em; margin-bottom: 6px;
+  color: var(--text-primary);
+}
+.lote-card.lote-destaque .lote-preco {
+  background: var(--gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.lote-preco .moeda { font-size: 18px; vertical-align: top; margin-right: 4px; }
+.lote-vagas {
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.lote-features {
+  list-style: none; flex: 1; margin-bottom: 20px;
+}
+.lote-features li {
+  padding: 6px 0 6px 22px;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.lote-features li::before {
+  content: "✓"; position: absolute; left: 0;
+  color: var(--success); font-weight: 700;
+}
+.lote-features li.lote-feature-no::before {
+  content: "✕";
+  color: var(--warning);
+}
+.lote-features li.lote-feature-no { color: var(--text-muted); }
+.lote-features li strong { color: var(--text-primary); }
+
+/* Lote desabilitado — mercado (Turma 2+) */
+.lote-card.lote-mercado {
+  opacity: 0.55;
+  background: rgba(255,255,255,0.015);
+  border-style: dashed;
+  cursor: default;
+  position: relative;
+}
+.lote-card.lote-mercado:hover {
+  transform: none;
+  opacity: 0.72;
+  border-color: rgba(255,255,255,0.20);
+}
+.lote-card.lote-mercado::before {
+  content: 'Indisponível';
+  position: absolute;
+  top: -10px; right: 20px;
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  font-size: 10px; letter-spacing: 1.4px;
+  text-transform: uppercase; padding: 2px 10px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+}
+.lote-card.lote-mercado .lote-badge {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+}
+.lote-card.lote-mercado .lote-preco {
+  color: var(--text-secondary);
+}
+.lote-card.lote-mercado .lote-status {
+  font-style: italic;
+  color: var(--text-muted);
+}
+.lote-status {
+  font-size: 12px; color: var(--text-muted);
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.lotes-bonus-explain {
+  background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.06));
+  border: 1px solid rgba(20, 183, 222, 0.25);
+  border-radius: 12px; padding: 20px 24px;
+  text-align: center; font-size: 15px;
+  color: var(--text-secondary); max-width: 800px;
+  margin: 0 auto;
+}
+.lotes-bonus-explain strong { color: var(--text-primary); }
+
+/* GARANTIA */
+.garantia-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(20, 183, 222, 0.05));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 16px; padding: 44px 32px; text-align: center;
+  max-width: 720px; margin: 0 auto;
+}
+.garantia-banner h3 {
+  font-size: 22px; margin-bottom: 14px;
+  color: var(--success); font-weight: 700;
+}
+.garantia-banner p {
+  color: var(--text-secondary); font-size: 16px;
+  max-width: 540px; margin: 0 auto 20px;
+}
+.garantia-banner blockquote {
+  font-style: italic; color: var(--text-primary); font-size: 17px;
+  border-left: 3px solid var(--success); padding-left: 16px;
+  text-align: left; max-width: 440px; margin: 16px auto 0;
+}
+
+/* PRÓXIMA TURMA */
+.turma-info { max-width: 600px; margin: 0 auto; text-align: center; }
+.turma-info ul { list-style: none; margin-top: 24px; }
+.turma-info li {
+  padding: 14px 0; font-size: 17px; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.turma-info li strong { color: var(--text-primary); }
+.turma-info li:last-child { border: none; }
+
+/* FAQ */
+.faq-list { max-width: 760px; margin: 0 auto; }
+.faq-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 12px; padding: 4px 24px;
+}
+.faq-item summary {
+  cursor: pointer; padding: 18px 0;
+  font-weight: 600; font-size: 17px; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: color 0.15s;
+}
+.faq-item summary:hover { color: var(--accent-cyan); }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; font-size: 26px; color: var(--accent-cyan);
+  font-weight: 300; transition: transform 0.2s; line-height: 1;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item-answer {
+  padding-bottom: 20px; color: var(--text-secondary); font-size: 15px;
+}
+
+/* CTA FINAL */
+.cta-final {
+  background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.10));
+  text-align: center;
+}
+.cta-final h2 {
+  font-size: clamp(28px, 4vw, 42px); margin-bottom: 30px;
+  max-width: 740px; margin-left: auto; margin-right: auto;
+}
+.cta-final-meta { margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+
+/* FOOTER */
+footer {
+  padding: 50px 0; text-align: center;
+  border-top: 1px solid var(--border);
+  font-size: 14px; color: var(--text-muted);
+}
+footer .links { margin-top: 16px; }
+footer .links a { color: var(--text-muted); margin: 0 8px; }
+footer .copy { margin-top: 16px; }
+
+/* MOBILE */
+@media (max-width: 960px) {
+  .stack-showcase { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .stack-showcase .stack-card:nth-child(5) { grid-column: 1 / -1; max-width: 360px; margin: 0 auto; }
+  .roadmap-header { flex-direction: column; gap: 12px; }
+  .roadmap-tools { justify-content: flex-start; max-width: 100%; }
+  .roadmap-title { font-size: 20px; }
+}
+@media (max-width: 720px) {
+  .para-quem-grid { grid-template-columns: 1fr; }
+  section { padding: 50px 0; }
+  .hero { padding: 50px 0 40px; }
+  h2 { margin-bottom: 32px; }
+  .preco-novo { font-size: 46px; }
+  .stack-showcase { grid-template-columns: 1fr; max-width: 380px; }
+  .stack-showcase .stack-card:nth-child(5) { grid-column: auto; max-width: none; margin: 0; }
+  .hero-stack-strip { gap: 8px; margin-bottom: 32px; }
+  .hero-tool { height: 38px; padding: 0 14px; }
+  .hero-tool img { height: 18px; }
+  .hero-tool[data-tool="airflow"] img { height: 24px; }
+  .roadmap { margin-top: 36px; }
+  .roadmap::before { left: 21px; top: 50px; bottom: 50px; }
+  .roadmap-item, .roadmap-marker { grid-template-columns: 44px 1fr; gap: 16px; }
+  .roadmap-num, .roadmap-marker .marker-icon { width: 44px; height: 44px; font-size: 18px; }
+  .roadmap-card { padding: 18px 20px; }
+  .roadmap-title { font-size: 19px; }
+  .roadmap-desc { font-size: 14.5px; }
+  .diagnostico-card { padding: 4px 22px; }
+  .diagnostico-item { grid-template-columns: 30px 1fr; gap: 14px; padding: 18px 0; }
+  .diag-check { width: 30px; height: 30px; font-size: 15px; }
+  .diag-text { font-size: 15px; }
+  .diagnostico-punchline { padding: 20px 22px; font-size: 16px; }
+  .cenario-card { padding: 28px 22px; }
+  .cenario-meta { grid-template-columns: repeat(2, 1fr); gap: 20px; padding-bottom: 22px; margin-bottom: 22px; }
+  .cenario-stat-value { font-size: 30px; }
+  .cenario-stat-value .unit { font-size: 15px; }
+  .cenario-table-chip { font-size: 13px; padding: 7px 13px; }
+  .cenario-aside { grid-template-columns: 32px 1fr; gap: 14px; padding: 18px 20px; font-size: 14px; }
+  .cenario-aside-icon { width: 32px; height: 32px; font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background canvas (rede de partículas cyan) -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- HEADER STICKY -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo" aria-label="Azuris">
+      <span class="logo-mark">
+        <svg viewBox="60 -5 250 175" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="azuris-header-flow" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#0891b2"/>
+              <stop offset="35%" stop-color="#14b7de"/>
+              <stop offset="50%" stop-color="#7dd3fc"/>
+              <stop offset="65%" stop-color="#14b7de"/>
+              <stop offset="100%" stop-color="#0891b2"/>
+              <animateTransform attributeName="gradientTransform" type="translate" from="0 -1" to="0 1" dur="3s" repeatCount="indefinite"/>
+            </linearGradient>
+            <filter id="azuris-header-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path fill="url(#azuris-header-flow)" filter="url(#azuris-header-glow)" d="m190.82,0c37.53,0,67.96,30.42,67.96,67.96,0,1.5-.05,2.99-.15,4.46,24.4.51,44.2,20.63,44.2,45.15s-20.32,45.16-45.16,45.16h-15.16L185.96,26.5l-56.55,136.22h-8.08c-28.73,0-52.25-23.51-52.25-52.25s23.52-52.25,52.25-52.25h2.22C128.29,25.3,156.6,0,190.82,0h0Zm30.84,162.72h0l-13.29-32.3h-44.81l-13.29,32.3h71.4Zm-19.86-49.69h0l-15.84-40.37-15.84,40.37h31.68Z"/>
+        </svg>
+      </span>
+      <span class="logo-word">AZURIS</span>
+    </a>
+    <nav class="header-nav">
+      <div class="header-sections">
+        <a href="#conteudo" class="header-link" data-spy="conteudo">Conteúdo</a>
+        <a href="#stack" class="header-link" data-spy="stack">Stack</a>
+        <a href="#investimento" class="header-link" data-spy="investimento">Investimento</a>
+        <a href="#faq" class="header-link" data-spy="faq">FAQ</a>
+      </div>
+      <a href="/lakehouse-comunidade/ementa.html" class="header-link is-emphasis">Ementa completa</a>
+      <a href="/contato?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="header-cta">Garantir vaga →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="brand-bg" aria-hidden="true">
+    <svg viewBox="60 -5 250 175" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="azuris-bg-flow" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+          <stop offset="0%" stop-color="#0891b2"/>
+          <stop offset="35%" stop-color="#14b7de"/>
+          <stop offset="50%" stop-color="#7dd3fc"/>
+          <stop offset="65%" stop-color="#14b7de"/>
+          <stop offset="100%" stop-color="#0891b2"/>
+          <animateTransform attributeName="gradientTransform" type="translate" from="0 -1" to="0 1" dur="4s" repeatCount="indefinite"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#azuris-bg-flow)" d="m190.82,0c37.53,0,67.96,30.42,67.96,67.96,0,1.5-.05,2.99-.15,4.46,24.4.51,44.2,20.63,44.2,45.15s-20.32,45.16-45.16,45.16h-15.16L185.96,26.5l-56.55,136.22h-8.08c-28.73,0-52.25-23.51-52.25-52.25s23.52-52.25,52.25-52.25h2.22C128.29,25.3,156.6,0,190.82,0h0Zm30.84,162.72h0l-13.29-32.3h-44.81l-13.29,32.3h71.4Zm-19.86-49.69h0l-15.84-40.37-15.84,40.37h31.68Z"/>
+    </svg>
+  </div>
+  <div class="container">
+    <span class="eyebrow">Turma 1 · Comunidade DSSBR + GUBigData · Início 22/06/2026</span>
+    <h1>Em 5 semanas, construa um <span class="accent">Pipeline Lakehouse completo</span> — do zero ao dashboard.</h1>
+    <p>Curso online ao vivo, <strong>100% hands-on</strong>. Você não assiste — coda junto com o professor, semana após semana, com a stack que o mercado contrata em 2026:</p>
+
+    <div class="hero-stack-strip" aria-label="Stack do curso">
+      <div class="hero-tool" data-tool="minio" title="MinIO"><img src="/lakehouse-comunidade/assets/stack/_oficial/minio.svg" alt="MinIO"></div>
+      <div class="hero-tool" data-tool="iceberg" title="Apache Iceberg"><img src="/lakehouse-comunidade/assets/stack/_oficial/iceberg.png" alt="Apache Iceberg"></div>
+      <div class="hero-tool" data-tool="spark" title="Apache Spark"><img src="/lakehouse-comunidade/assets/stack/_oficial/spark.png" alt="Apache Spark"></div>
+      <div class="hero-tool" data-tool="airflow" title="Apache Airflow"><img src="/lakehouse-comunidade/assets/stack/_oficial/airflow.png" alt="Apache Airflow"></div>
+      <div class="hero-tool" data-tool="superset" title="Apache Superset"><img src="/lakehouse-comunidade/assets/stack/_oficial/superset.svg" alt="Apache Superset"></div>
+    </div>
+
+    <a href="/contato?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary">Garantir minha vaga →</a>
+  </div>
+</section>
+
+<!-- DIAGNÓSTICO — checklist com setup → punch -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Diagnóstico · clique nos que aplicam</div>
+    <h2>Marque quantos se aplicam <span class="accent">a você</span>:</h2>
+
+    <div class="diagnostico-card">
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Leu sobre Lakehouse, viu webinars, assistiu cursos.</span>
+          <strong>Nunca subiu um pipeline real do começo ao fim.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Tem certificação de Spark no LinkedIn.</span>
+          <strong>Nunca rodou um <code>spark-submit</code> num caso de verdade.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Time pede experiência prática em Airflow.</span>
+          <strong>Você só tem a teoria.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Quer migrar pra Engenharia de Dados.</span>
+          <strong>Stack moderno não tá no seu portfólio.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Sabe Medallion no slide.</span>
+          <strong>Não sabe configurar um catálogo Iceberg.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="diagnostico-punchline">
+      <strong>Marcou 2 ou mais?</strong> Esse curso foi feito <span class="accent">pra você</span>. Vamos resolver isso em 5 semanas.
+    </div>
+  </div>
+</section>
+
+<!-- CENÁRIO — dataset metadata + chips das tabelas + aside da sujeira -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">O cenário do curso</div>
+    <h2><span class="accent">Olakehouse</span> — marketplace brasileiro fictício pra mexer de verdade</h2>
+
+    <div class="cenario-card">
+      <div class="cenario-meta">
+        <div class="cenario-stat">
+          <div class="cenario-stat-value">9</div>
+          <div class="cenario-stat-label">Tabelas relacionadas</div>
+        </div>
+        <div class="cenario-stat">
+          <div class="cenario-stat-value">~100<span class="unit">MB</span></div>
+          <div class="cenario-stat-label">Dados sintéticos</div>
+        </div>
+        <div class="cenario-stat">
+          <div class="cenario-stat-value">pt-BR</div>
+          <div class="cenario-stat-label">CPF · CEP · UF · categorias reais</div>
+        </div>
+        <div class="cenario-stat">
+          <div class="cenario-stat-value">5</div>
+          <div class="cenario-stat-label">Semanas, mesmo cenário</div>
+        </div>
+      </div>
+
+      <div class="cenario-tables-title">As 9 tabelas que você vai mexer</div>
+      <div class="cenario-tables">
+        <span class="cenario-table-chip">pedidos</span>
+        <span class="cenario-table-chip">clientes</span>
+        <span class="cenario-table-chip">itens</span>
+        <span class="cenario-table-chip">produtos</span>
+        <span class="cenario-table-chip">pagamentos</span>
+        <span class="cenario-table-chip">avaliações</span>
+        <span class="cenario-table-chip">sellers</span>
+        <span class="cenario-table-chip">geolocalização</span>
+        <span class="cenario-table-chip">categorias</span>
+      </div>
+    </div>
+
+    <div class="cenario-aside">
+      <div class="cenario-aside-icon">△</div>
+      <div>
+        <strong>Sujeira pedagógica controlada.</strong> O dataset vem com nulos, duplicados, encoding misto e timestamps em fuso errado — tudo intencional. Você vai limpar isso na camada Silver com <code>PySpark</code>. Igual à vida real, sem o "Hello World" idealizado.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK SHOWCASE — logos oficiais em destaque (movida pra antes da arquitetura) -->
+<section id="stack">
+  <div class="container">
+    <div class="section-eyebrow">A stack do curso</div>
+    <h2>5 ferramentas open source — <span class="accent">todas em vagas reais</span> de Eng. de Dados em 2026</h2>
+
+    <div class="stack-showcase">
+      <div class="stack-card" data-tool="minio">
+        <div class="stack-card-papel">Object Storage</div>
+        <div class="stack-card-logo"><img src="/lakehouse-comunidade/assets/stack/_oficial/minio.svg" alt="MinIO"></div>
+        <div class="stack-card-titulo">MinIO</div>
+        <div class="stack-card-desc">Data Lake S3-compatível rodando local. Onde os dados vivem.</div>
+      </div>
+
+      <div class="stack-card" data-tool="iceberg">
+        <div class="stack-card-papel">Table Format</div>
+        <div class="stack-card-logo"><img src="/lakehouse-comunidade/assets/stack/_oficial/iceberg.png" alt="Apache Iceberg"></div>
+        <div class="stack-card-titulo">Apache Iceberg</div>
+        <div class="stack-card-desc">Tabelas com ACID, time travel e schema evolution sobre o Lake.</div>
+      </div>
+
+      <div class="stack-card" data-tool="spark">
+        <div class="stack-card-papel">Processing</div>
+        <div class="stack-card-logo"><img src="/lakehouse-comunidade/assets/stack/_oficial/spark.png" alt="Apache Spark"></div>
+        <div class="stack-card-titulo">Apache Spark</div>
+        <div class="stack-card-desc">Motor distribuído pra limpar, juntar e modelar dados em PySpark.</div>
+      </div>
+
+      <div class="stack-card" data-tool="airflow">
+        <div class="stack-card-papel">Orchestration</div>
+        <div class="stack-card-logo"><img src="/lakehouse-comunidade/assets/stack/_oficial/airflow.png" alt="Apache Airflow"></div>
+        <div class="stack-card-titulo">Apache Airflow</div>
+        <div class="stack-card-desc">DAG diária com retry, sensors e observabilidade do pipeline.</div>
+      </div>
+
+      <div class="stack-card" data-tool="superset">
+        <div class="stack-card-papel">BI · Dashboards</div>
+        <div class="stack-card-logo"><img src="/lakehouse-comunidade/assets/stack/_oficial/superset.svg" alt="Apache Superset"></div>
+        <div class="stack-card-titulo">Apache Superset</div>
+        <div class="stack-card-desc">Dashboards interativos conectados via Spark Thrift às tabelas Gold.</div>
+      </div>
+    </div>
+
+    <p class="stack-aside">Todas rodam em Docker, na sua máquina. <strong>Você sai do curso dominando as cinco.</strong></p>
+  </div>
+</section>
+
+<!-- ROADMAP — timeline vertical de 5 semanas -->
+<section id="conteudo">
+  <div class="container">
+    <div class="section-eyebrow">Como o curso se desenrola</div>
+    <h2>Da matrícula ao dashboard, <span class="accent">5 semanas estruturadas</span></h2>
+
+    <div class="roadmap">
+
+      <!-- Ponto de partida -->
+      <div class="roadmap-marker">
+        <div class="marker-icon">▸</div>
+        <div class="marker-text">
+          <strong>Você começa com</strong>
+          9 CSVs do Olakehouse · ~100MB · dados brasileiros sintéticos
+        </div>
+      </div>
+
+      <!-- Semana 1 -->
+      <div class="roadmap-item">
+        <div class="roadmap-num">1</div>
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <div>
+              <div class="roadmap-meta">Semana 1 · 4h ao vivo</div>
+              <h3 class="roadmap-title">Sobe a stack</h3>
+            </div>
+            <div class="roadmap-tools">
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/minio.svg" alt="MinIO"></div>
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/iceberg.png" alt="Iceberg"></div>
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/spark.png" alt="Spark"></div>
+              <div class="tool-badge" data-tool="airflow"><img src="/lakehouse-comunidade/assets/stack/_oficial/airflow.png" alt="Airflow"></div>
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/superset.svg" alt="Superset"></div>
+            </div>
+          </div>
+          <p class="roadmap-desc">Docker compose, Medallion Architecture na prática. Sobe as 5 ferramentas e valida acesso aos UIs.</p>
+          <div class="roadmap-entregavel">Stack rodando + screenshots dos UIs</div>
+        </div>
+      </div>
+
+      <!-- Semana 2 -->
+      <div class="roadmap-item">
+        <div class="roadmap-num">2</div>
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <div>
+              <div class="roadmap-meta">Semana 2 · 4h ao vivo</div>
+              <h3 class="roadmap-title">Carrega os dados</h3>
+            </div>
+            <div class="roadmap-tools">
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/minio.svg" alt="MinIO"></div>
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/iceberg.png" alt="Iceberg"></div>
+            </div>
+          </div>
+          <p class="roadmap-desc">9 CSVs viram tabelas Iceberg versionadas no MinIO. Demo de <strong>ACID</strong> e <strong>time travel</strong> ao vivo.</p>
+          <div class="roadmap-entregavel">9 tabelas Bronze consultáveis</div>
+        </div>
+      </div>
+
+      <!-- Semana 3 -->
+      <div class="roadmap-item">
+        <div class="roadmap-num">3</div>
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <div>
+              <div class="roadmap-meta">Semana 3 · 4h ao vivo</div>
+              <h3 class="roadmap-title">Modela com Spark</h3>
+            </div>
+            <div class="roadmap-tools">
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/spark.png" alt="Spark"></div>
+            </div>
+          </div>
+          <p class="roadmap-desc">Limpeza, joins e modelagem dimensional em PySpark. Sai com <strong>fato_vendas + 4 dimensões</strong> em estrela.</p>
+          <div class="roadmap-entregavel">Modelo Silver + Gold pronto</div>
+        </div>
+      </div>
+
+      <!-- Semana 4 -->
+      <div class="roadmap-item">
+        <div class="roadmap-num">4</div>
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <div>
+              <div class="roadmap-meta">Semana 4 · 4h ao vivo</div>
+              <h3 class="roadmap-title">Automatiza no Airflow</h3>
+            </div>
+            <div class="roadmap-tools">
+              <div class="tool-badge" data-tool="airflow"><img src="/lakehouse-comunidade/assets/stack/_oficial/airflow.png" alt="Airflow"></div>
+            </div>
+          </div>
+          <p class="roadmap-desc">DAG diária com retry, sensors e observabilidade. Orquestra o pipeline inteiro (M2 → M3) — agora roda sozinho.</p>
+          <div class="roadmap-entregavel">Pipeline agendado e observável</div>
+        </div>
+      </div>
+
+      <!-- Semana 5 -->
+      <div class="roadmap-item">
+        <div class="roadmap-num">5</div>
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <div>
+              <div class="roadmap-meta">Semana 5 · 4h ao vivo</div>
+              <h3 class="roadmap-title">Publica o dashboard</h3>
+            </div>
+            <div class="roadmap-tools">
+              <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/superset.svg" alt="Superset"></div>
+            </div>
+          </div>
+          <p class="roadmap-desc">Superset conecta nas tabelas Iceberg via Spark Thrift. Dashboard de negócio publicado e apresentação ao vivo.</p>
+          <div class="roadmap-entregavel">Dashboard + repo GitHub público</div>
+        </div>
+      </div>
+
+      <!-- Ponto de chegada -->
+      <div class="roadmap-marker roadmap-marker-end">
+        <div class="marker-icon">★</div>
+        <div class="marker-text">
+          <strong>Você termina com</strong>
+          Pipeline público no GitHub · Dashboard ao vivo · Certificado de conclusão
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DIFERENCIAIS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Por que aqui</div>
+    <h2>Por que este curso e não outro:</h2>
+    <div class="diferenciais-grid">
+      <div class="diferencial">
+        <span class="diferencial-num">01</span>
+        <h3>Você não assiste — você coda.</h3>
+        <p>O professor compartilha tela e digita ao vivo. Você digita junto. Quem trava, todo mundo espera. Seu cérebro percorre o caminho inteiro, não só o olho.</p>
+      </div>
+      <div class="diferencial">
+        <span class="diferencial-num">02</span>
+        <h3>Cenário brasileiro real.</h3>
+        <p>9 tabelas, ~100MB, sujeira proposital pra limpar. Você resolve problemas reais de modelagem, qualidade e performance — não brinca com <code>SELECT 1</code>.</p>
+      </div>
+      <div class="diferencial">
+        <span class="diferencial-num">03</span>
+        <h3>Stack que o mercado contrata em 2026.</h3>
+        <p>Nada de Hadoop morto, nada de tutorial de 2018. Mesma stack que aparece em job descriptions de Engenheiro de Dados Sênior hoje.</p>
+      </div>
+      <div class="diferencial">
+        <span class="diferencial-num">04</span>
+        <h3>Você sai com portfólio público.</h3>
+        <p>Pipeline + dashboard no GitHub. Recrutador testa em 5 minutos e vê que é seu de verdade. Sem firula, é evidência.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUEM -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Fit do aluno</div>
+    <h2>Pra quem é — e pra quem <span class="accent">NÃO</span> é.</h2>
+    <div class="para-quem-grid">
+      <div class="para-quem-box positivo">
+        <h3>Este curso foi feito pra você se…</h3>
+        <ul>
+          <li>É analista de dados querendo subir pra Engenharia de Dados</li>
+          <li>É dev backend curioso sobre o stack analítico moderno</li>
+          <li>É engenheiro junior e precisa de stack contemporâneo no portfólio</li>
+          <li>É DBA migrando de SQL Server/Oracle pro mundo Big Data</li>
+        </ul>
+      </div>
+      <div class="para-quem-box negativo">
+        <h3>Este curso NÃO é pra você se…</h3>
+        <ul>
+          <li>Nunca programou em Python (exigimos intermediário)</li>
+          <li>Nunca usou Docker (precisa estar instalado e funcionando)</li>
+          <li>Quer curso 100% gravado pra ver no celular no trânsito</li>
+          <li>Busca certificação acadêmica ou validação MEC</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRÉ-REQUISITOS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Checklist técnico</div>
+    <h2>O que você precisa pra começar:</h2>
+    <ul class="prereqs-list">
+      <li><strong>Python intermediário</strong> — loops, funções, instalar pacote via pip</li>
+      <li><strong>SQL básico-intermediário</strong> — SELECT, JOIN, GROUP BY, subqueries</li>
+      <li><strong>Linha de comando Linux</strong> — navegar, editar arquivo, rodar comando</li>
+      <li><strong>Docker Desktop</strong> instalado e rodando</li>
+      <li>Máquina com <strong>16GB de RAM</strong> e <strong>50GB livres</strong> em disco</li>
+      <li><strong>~5h por semana</strong> de dedicação durante as 5 semanas</li>
+    </ul>
+  </div>
+</section>
+
+<!-- BÔNUS -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Tudo que vem junto</div>
+    <h2>Além do curso, você leva:</h2>
+    <div class="bonus-grid">
+      <div class="bonus-card"><h4>★ Acesso vitalício</h4><p>Às aulas gravadas. Revise quantas vezes quiser.</p></div>
+      <div class="bonus-card"><h4>★ Discord da turma</h4><p>Comunidade exclusiva — você, colegas e professor.</p></div>
+      <div class="bonus-card"><h4>★ Cheat sheets</h4><p>PySpark, SQL Iceberg e operators do Airflow.</p></div>
+      <div class="bonus-card"><h4>★ Docker templates</h4><p>Pra acelerar setups futuros no seu trabalho.</p></div>
+      <div class="bonus-card"><h4>★ Certificado</h4><p>De conclusão, após o projeto final aprovado.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTIMENTO -->
+<section id="investimento">
+  <div class="container">
+    <div class="section-eyebrow">O investimento — Turma 1 Comunidade</div>
+    <h2>Preço de comunidade · <span class="accent">3 lotes</span> + referência de mercado</h2>
+    <p class="solucao-text" style="margin-bottom: 36px;">A Turma 1 é oferecida em primeira mão pra base do <strong>DSSBR</strong> e do <strong>GUBigData</strong>. A partir da Turma 2 (set/2026), o curso volta ao preço de mercado.</p>
+
+    <div class="lotes-grid">
+      <div class="lote-card lote-founder">
+        <div class="lote-badge">Founder</div>
+        <div class="lote-preco"><span class="moeda">R$</span>197</div>
+        <div class="lote-vagas">5 vagas · convite pessoal</div>
+        <ul class="lote-features">
+          <li>Curso completo (20h)</li>
+          <li>Ingresso DSSBR 2026 (R$ 520)</li>
+          <li>Discord vitalício + cheat sheets</li>
+          <li>Certificado de conclusão</li>
+        </ul>
+        <div class="lote-status">Apenas por convite</div>
+      </div>
+
+      <div class="lote-card lote-1 lote-destaque">
+        <div class="lote-badge">Lote 1 · Aberto</div>
+        <div class="lote-preco"><span class="moeda">R$</span>550</div>
+        <div class="lote-vagas">15 vagas · esgotando</div>
+        <ul class="lote-features">
+          <li>Curso completo (20h)</li>
+          <li><strong>Ingresso DSSBR 2026 (R$ 520)</strong></li>
+          <li>Discord vitalício + cheat sheets</li>
+          <li>Certificado de conclusão</li>
+          <li>Acesso à comunidade DSSBR/GUBigData</li>
+        </ul>
+        <a href="/contato?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary" style="font-size: 16px; padding: 14px 24px;">Garantir vaga no Lote 1 →</a>
+        <div class="lote-status">12x de R$ 46 sem juros · Pix com 5% off</div>
+      </div>
+
+      <div class="lote-card lote-2">
+        <div class="lote-badge">Lote 2</div>
+        <div class="lote-preco"><span class="moeda">R$</span>750</div>
+        <div class="lote-vagas">20 vagas · abre após Lote 1 esgotar</div>
+        <ul class="lote-features">
+          <li>Curso completo (20h)</li>
+          <li>Ingresso DSSBR 2026 (R$ 520)</li>
+          <li>Discord vitalício + cheat sheets</li>
+          <li>Certificado de conclusão</li>
+        </ul>
+        <div class="lote-status">12x de R$ 63 sem juros · Pix com 5% off</div>
+      </div>
+
+      <div class="lote-card lote-mercado" aria-disabled="true">
+        <div class="lote-badge">Mercado · Turma 2</div>
+        <div class="lote-preco"><span class="moeda">R$</span>1.197</div>
+        <div class="lote-vagas">Próxima turma · set/2026</div>
+        <ul class="lote-features">
+          <li>Curso completo (20h)</li>
+          <li class="lote-feature-no"><strong>Sem ingresso DSSBR</strong></li>
+          <li>Discord vitalício</li>
+          <li>Certificado de conclusão</li>
+        </ul>
+        <div class="lote-status">Indisponível agora · sem preço de comunidade</div>
+      </div>
+    </div>
+
+    <p class="lotes-bonus-explain">
+      ★ <strong>Bônus exclusivo da Turma 1:</strong> todo aluno recebe ingresso completo pro <strong>Data Science Summit Brasil 2026</strong> (27-29 out, IEP Curitiba) — valor pré-venda <strong>R$ 520</strong>. Este bônus não existe nas próximas turmas.
+    </p>
+  </div>
+</section>
+
+<!-- GARANTIA -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Risco zero</div>
+    <h2>7 dias de garantia incondicional.</h2>
+    <div class="garantia-banner">
+      <h3>★ Garantia de 7 dias</h3>
+      <p>Participe da primeira semana inteira. Se achar que não é pra você, devolvemos <strong>100% do seu investimento</strong>. Sem pergunta, sem fricção, sem ressentimento.</p>
+      <blockquote>A gente só fica com seu dinheiro se você ficar com o conhecimento.</blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- PRÓXIMA TURMA -->
+<section>
+  <div class="container">
+    <div class="section-eyebrow">Calendário</div>
+    <h2>Turma 1 começa em <span class="accent">22 de junho de 2026</span></h2>
+    <div class="turma-info">
+      <ul>
+        <li><strong>40 vagas no total</strong>, distribuídas em 3 lotes (Founder · L1 · L2)</li>
+        <li>Encontros ao vivo <strong>às terças e quintas</strong>, das 19h às 21h</li>
+        <li><strong>5 semanas</strong> de duração total</li>
+        <li>Material de apoio liberado no <strong>dia 0</strong></li>
+        <li><strong>Bônus desta turma:</strong> ingresso DSSBR 2026 incluso</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-eyebrow">Dúvidas comuns</div>
+    <h2>Perguntas frequentes</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Preciso saber Spark ou Airflow antes?</summary>
+        <div class="faq-item-answer">Não. O curso ensina os dois do zero. Assumimos só Python intermediário e SQL básico.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Funciona em Mac, Linux e Windows?</summary>
+        <div class="faq-item-answer">Sim. Toda a stack roda em Docker — testado nos três sistemas operacionais.</div>
+      </details>
+      <details class="faq-item">
+        <summary>E se eu perder uma aula ao vivo?</summary>
+        <div class="faq-item-answer">As aulas ficam gravadas. Mas você perde o hands-on em grupo, que é o melhor do curso — recomendamos não perder.</div>
+      </details>
+      <details class="faq-item">
+        <summary>É curso oficial Apache, MEC ou tem pós-graduação?</summary>
+        <div class="faq-item-answer">Não. É curso livre comercial, foco 100% em prática profissional. Você sai com portfólio público, não com certificado de pós.</div>
+      </details>
+      <details class="faq-item">
+        <summary>O curso garante uma vaga depois?</summary>
+        <div class="faq-item-answer">Não. Garantimos que você sai com um pipeline funcional no GitHub — recrutadores podem validar sozinhos. O resto é com você (mas a evidência prática vale ouro em entrevista).</div>
+      </details>
+      <details class="faq-item">
+        <summary>Quantos alunos por turma?</summary>
+        <div class="faq-item-answer">Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter hands-on individualizado.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Por que a Turma 1 tem preço de comunidade?</summary>
+        <div class="faq-item-answer">Os primeiros 40 alunos vêm da base do DSSBR e do GUBigData — pessoas que já participam dos eventos e do grupo de usuários. Estamos retribuindo a comunidade que sustenta nosso trabalho. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497).</div>
+      </details>
+      <details class="faq-item">
+        <summary>O bônus DSSBR vale pra todas as turmas?</summary>
+        <div class="faq-item-answer">Não. <strong>Só Turma 1.</strong> A partir de setembro/2026 (Turma 2), as inscrições não incluem o ingresso DSSBR — é benefício exclusivo de quem entrar agora, na turma de lançamento.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Como funciona a entrega?</summary>
+        <div class="faq-item-answer">Aulas ao vivo via Zoom, comunidade no Discord, gravações no portal do aluno. Após a compra você recebe acesso por e-mail em até 24h.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Posso parcelar?</summary>
+        <div class="faq-item-answer">Sim, até 12x no cartão sem juros. Pix tem 5% de desconto adicional.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final" id="cta-final">
+  <div class="container">
+    <h2>Pronto pra parar de só falar de Lakehouse — <br>e começar a construir um?</h2>
+    <a href="/contato?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary">Garantir minha vaga no Lote 1 →</a>
+    <div class="cta-final-meta">Turma 1 (Comunidade): 22 de junho de 2026 · Lote 1 com 15 vagas · Bônus DSSBR exclusivo · 7 dias de garantia</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="logo">
+      <span class="logo-mark">
+        <svg viewBox="60 -5 250 175" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="azuris-footer-flow" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="#0891b2"/>
+              <stop offset="35%" stop-color="#14b7de"/>
+              <stop offset="50%" stop-color="#7dd3fc"/>
+              <stop offset="65%" stop-color="#14b7de"/>
+              <stop offset="100%" stop-color="#0891b2"/>
+              <animateTransform attributeName="gradientTransform" type="translate" from="0 -1" to="0 1" dur="3s" repeatCount="indefinite"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#azuris-footer-flow)" d="m190.82,0c37.53,0,67.96,30.42,67.96,67.96,0,1.5-.05,2.99-.15,4.46,24.4.51,44.2,20.63,44.2,45.15s-20.32,45.16-45.16,45.16h-15.16L185.96,26.5l-56.55,136.22h-8.08c-28.73,0-52.25-23.51-52.25-52.25s23.52-52.25,52.25-52.25h2.22C128.29,25.3,156.6,0,190.82,0h0Zm30.84,162.72h0l-13.29-32.3h-44.81l-13.29,32.3h71.4Zm-19.86-49.69h0l-15.84-40.37-15.84,40.37h31.68Z"/>
+        </svg>
+      </span>
+      <span class="logo-word">AZURIS</span>
+    </div>
+    <div>Educação em Dados · contato@azuris.com.br</div>
+    <div class="links">
+      <a href="#" aria-disabled="true">LinkedIn</a> ·
+      <a href="#" aria-disabled="true">Instagram</a> ·
+      <a href="#" aria-disabled="true">Política de Privacidade</a> ·
+      <a href="#" aria-disabled="true">Termos de Uso</a> ·
+      <a href="#" aria-disabled="true">Política de Reembolso</a>
+    </div>
+    <div class="copy">© 2026 Azuris. Todos os direitos reservados.</div>
+    <div class="copy" style="font-size: 11px; color: var(--text-muted); margin-top: 8px; opacity: 0.7;">Apache®, Apache Iceberg™, Apache Spark™, Apache Airflow™ e Apache Superset™ são marcas registradas da Apache Software Foundation. MinIO® é marca registrada de MinIO Inc. Docker® é marca registrada de Docker Inc.</div>
+  </div>
+</footer>
+
+<script>
+/* Background particle network — vanilla canvas, no deps */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0, dpr = 1, particles = [], rafId = null, visible = true;
+
+  const CONFIG = {
+    densityDivisor: 18000,
+    minCount: 24,
+    maxCount: 70,
+    speed: 0.25,
+    radiusMin: 0.6,
+    radiusMax: 1.8,
+    linkDistance: 140,
+    color: '20, 183, 222'
+  };
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const target = Math.max(CONFIG.minCount, Math.min(CONFIG.maxCount, Math.floor((w * h) / CONFIG.densityDivisor)));
+    if (particles.length !== target) initParticles(target);
+  }
+
+  function initParticles(n) {
+    particles = [];
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * CONFIG.speed,
+        vy: (Math.random() - 0.5) * CONFIG.speed,
+        r: CONFIG.radiusMin + Math.random() * (CONFIG.radiusMax - CONFIG.radiusMin)
+      });
+    }
+  }
+
+  function step() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + CONFIG.color + ', 0.55)';
+      ctx.fill();
+    }
+
+    const linkDistSq = CONFIG.linkDistance * CONFIG.linkDistance;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < linkDistSq) {
+          const alpha = (1 - distSq / linkDistSq) * 0.22;
+          ctx.strokeStyle = 'rgba(' + CONFIG.color + ', ' + alpha + ')';
+          ctx.lineWidth = 0.65;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    if (visible) rafId = requestAnimationFrame(step);
+  }
+
+  function start() {
+    if (rafId !== null) return;
+    visible = true;
+    rafId = requestAnimationFrame(step);
+  }
+  function stop() {
+    visible = false;
+    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+  window.addEventListener('resize', () => { resize(); }, { passive: true });
+
+  resize();
+  start();
+})();
+
+/* Scrollspy — destaca link da seção atual no header */
+(function() {
+  const links = document.querySelectorAll('[data-spy]');
+  if (!links.length) return;
+
+  const map = {};
+  links.forEach(l => { map[l.dataset.spy] = l; });
+  const sections = Array.from(document.querySelectorAll('section[id]'))
+    .filter(s => map[s.id]);
+  if (!sections.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('is-active'));
+        const link = map[entry.target.id];
+        if (link) link.classList.add('is-active');
+      }
+    });
+  }, {
+    rootMargin: '-40% 0px -55% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(s => observer.observe(s));
+})();
+
+/* Diagnóstico — checkboxes interativos */
+(function() {
+  const checks = document.querySelectorAll('.diag-check');
+  const punchline = document.querySelector('.diagnostico-punchline');
+  if (!checks.length || !punchline) return;
+
+  const updateGlow = () => {
+    const count = document.querySelectorAll('.diag-check.checked').length;
+    punchline.classList.toggle('glowing', count >= 2);
+  };
+
+  checks.forEach((check) => {
+    check.setAttribute('role', 'checkbox');
+    check.setAttribute('aria-checked', 'false');
+    check.setAttribute('tabindex', '0');
+    check.setAttribute('aria-label', 'Marcar item do diagnóstico');
+
+    const toggle = () => {
+      const checked = check.classList.toggle('checked');
+      check.setAttribute('aria-checked', String(checked));
+      check.textContent = checked ? '✓' : '✕';
+      updateGlow();
+    };
+
+    check.addEventListener('click', toggle);
+    check.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
