@@ -1,0 +1,151 @@
+---
+title: "ClickHouse vs Snowflake vs BigQuery: quando escolher cada um"
+excerpt: "Os três bancos analíticos mais comparados em 2026 atendem casos diferentes. Comparativo objetivo de custo, performance e lock-in para você não escolher pelo marketing."
+date: 2026-05-16
+tags: ["ClickHouse", "Snowflake", "BigQuery", "OLAP", "Comparativo"]
+property: "Azuris"
+cover: "/blog/clickhouse.svg"
+coverMode: "logo"
+coverAccent: "#fbbf24"
+author: "Alessandro Binhara"
+---
+
+Conversa que repete em todo projeto novo de dados: **"qual banco analítico a gente usa?"**.
+
+Em 2026 a resposta cai quase sempre em três nomes: **ClickHouse, Snowflake e BigQuery**. Os três são bons. Os três atendem casos diferentes. Escolher errado significa pagar 3x mais por menos performance — ou ficar 18 meses preso a um fornecedor que cresce o preço todo trimestre.
+
+Esse post é o comparativo que eu uso quando cliente pergunta. Sem fanboy, com números reais.
+
+## O que cada um é (em uma frase)
+
+- **Snowflake**: data warehouse SaaS gerenciado, paga por segundo de computação. Ótimo pra time que não quer cuidar de infra.
+- **BigQuery**: data warehouse serverless do Google, paga por TB escaneado em query. Ótimo pra workload imprevisível e quem já está em GCP.
+- **ClickHouse**: banco analítico columnar open-source, roda em VM ou serviço gerenciado (ClickHouse Cloud, Altinity). Ótimo pra workload contínuo e alta vazão de query.
+
+Os três rodam SQL. Os três escalam pra bilhões de linhas. A diferença está em **modelo de cobrança, governança, integração e onde cada um quebra**.
+
+## Matriz comparativa
+
+| Critério | ClickHouse | Snowflake | BigQuery |
+|---|---|---|---|
+| **Modelo de cobrança** | máquina rodando 24/7 | segundo de compute + storage | TB escaneado + storage |
+| **Custo previsível?** | Sim (fixo mensal) | Médio (controla c/ warehouse) | Não (varia com query) |
+| **Performance por query** | Excelente (sub-segundo) | Boa (depende warehouse) | Boa-Excelente |
+| **Workload contínuo** | 🟢 Vence | 🟡 Caro | 🔴 Muito caro |
+| **Workload esporádico** | 🟡 Custo fixo pesa | 🟢 Vence | 🟢 Vence |
+| **Federação (acessa S3/lake)** | Bom | Bom | Excelente (BigLake) |
+| **Time-travel / versioning** | Limitado | Excelente | Excelente |
+| **Governança / compliance** | Manual | Excelente | Excelente |
+| **Vendor lock-in** | Baixo (open-source) | Médio | Alto (GCP) |
+| **Curva de aprendizado** | Maior (DBA-friendly) | Menor (SQL-first) | Menor (SQL-first) |
+| **Operação on-prem** | Sim | Não | Não |
+
+## Quando ClickHouse vence
+
+**Workloads contínuos com query sub-segundo**:
+- Dashboards de monitoramento (logs, métricas, telemetria IoT)
+- Produtos analíticos consumidos por usuário final (cliente abre, vê gráfico em < 1s)
+- BI executivo de alta cadência (CFO recarregando dashboard 50x ao dia)
+- Real-time analytics em event streams (Kafka/Redpanda → ClickHouse)
+
+**Por quê ganha**:
+- Storage columnar com compressão agressiva (3-10x menor que linha-a-linha)
+- MergeTree engine permite ingestão constante sem travar query
+- Materialized views fazem agregação automática
+- Sub-milissegundo em queries top-N, group-by, aggregate sobre bilhões de linhas
+
+**Quando não vence**:
+- Workload com poucas queries/dia e muitos joins complexos (Snowflake aguenta melhor)
+- Time pequeno sem ninguém pra cuidar de infra (vai pra Snowflake ou ClickHouse Cloud)
+- Necessidade forte de time-travel e auditoria (Snowflake/BigQuery fazem nativo)
+
+**Cliente real**: usamos ClickHouse em projetos onde o produto serve **dashboards a usuário final** com SLA de latência. Para a Logcomex, [introduzimos como camada de consumo rápida](/cases/logcomex-lakehouse) no programa de capacitação — substituir Athena/Redshift em queries lentas é o caso clássico.
+
+## Quando Snowflake vence
+
+**Workloads ETL + BI corporativo + ML**:
+- Pipeline analítico clássico (ingest → modelar → BI)
+- Times distribuídos com governança forte (RBAC, audit, masking)
+- Necessidade de Time Travel (recuperar tabela do estado de 7 dias atrás)
+- Cross-cloud (mesmo dado replicado em AWS + Azure + GCP)
+- Snowpark pra ML/Python sem sair do warehouse
+
+**Por quê ganha**:
+- Separação storage/compute permite escalar cada parte independente
+- Auto-scale de warehouse (M → L → XL conforme fila)
+- Catálogo, RBAC, masking, row-access policy nativos
+- Marketplace de dados (compra/vende dataset sem ETL)
+- Operação zero — time não vê servidor, vê SQL
+
+**Quando não vence**:
+- Workload de altíssima cadência e baixa latência (custa muito por segundo de compute)
+- Custo precisa ser **fixo e previsível** (Snowflake é variável por design)
+- On-premise (não existe)
+
+**Custo típico**: R$ 20-80k/mês para cliente médio brasileiro. Cresce com adoção. Multi-cluster + auto-suspend + workload monitoring são obrigatórios pra não estourar conta.
+
+## Quando BigQuery vence
+
+**Workloads na GCP, ad-hoc, com volume variável**:
+- Análise exploratória de cientista de dados (uma query enorme por semana)
+- Eventos de produto vindos de GA4 ou Firebase (integração nativa)
+- Workload imprevisível (mês com 10TB de query, mês com 200TB)
+- Time pequeno em GCP que não quer gerenciar warehouse
+
+**Por quê ganha**:
+- Serverless de verdade (não tem warehouse pra ligar/desligar)
+- Cobrança por TB escaneado funciona bem em workload variável
+- Integração nativa com GA4, Firebase, GCS, Looker
+- BigLake permite consultar dado direto em S3/GCS sem mover
+
+**Quando não vence**:
+- Workload contínuo de alta cadência (TB escaneado vira hemorragia)
+- Empresa em AWS (faz menos sentido cross-cloud)
+- Necessidade de previsibilidade absoluta de custo (existe flat-rate, mas é caro)
+
+**Custo típico**: muito variável. Cliente já bateu R$ 100k em um único mês com query mal escrita. Particionamento e limite por query são obrigatórios.
+
+## Como decidir na prática
+
+Roteiro simples:
+
+1. **Workload é contínuo (query a cada minuto) ou esporádico (query por dia)?**
+   - Contínuo → ClickHouse
+   - Esporádico → Snowflake ou BigQuery
+
+2. **Precisa de previsibilidade absoluta de custo mensal?**
+   - Sim → ClickHouse self-hosted
+   - Não → Snowflake (variável controlado) ou BigQuery (variável puro)
+
+3. **Empresa já está em GCP?**
+   - Sim → BigQuery por default
+   - Não → Snowflake (cross-cloud) ou ClickHouse (lock-in baixo)
+
+4. **Tem alguém pra cuidar de infra/DBA?**
+   - Sim → qualquer um
+   - Não → Snowflake ou ClickHouse Cloud (gerenciado)
+
+5. **Lock-in é uma preocupação real (compliance, contrato governamental, etc)?**
+   - Sim → ClickHouse open-source
+   - Não → Snowflake ou BigQuery
+
+## Combinações que funcionam bem
+
+Não precisa escolher um só. Setups híbridos que vemos rodando bem:
+
+- **Snowflake (warehouse) + ClickHouse (camada de produto/dashboard)**: Snowflake faz o trabalho pesado de modelagem; ClickHouse serve dashboards rápidos.
+- **BigQuery (eventos) + Snowflake (modelagem)**: GA4/Firebase entra direto no BigQuery; modelado vai pro Snowflake.
+- **Lakehouse (Iceberg/Delta em S3) + ClickHouse (hot data) + Snowflake (compliance/audit)**: o setup mais flexível, também o mais complexo de operar.
+
+## Conclusão prática
+
+- Se **dinheiro é o critério** e workload é contínuo → ClickHouse.
+- Se **operação é o critério** e workload é esporádico → Snowflake.
+- Se **já está em GCP** e workload é imprevisível → BigQuery.
+- Se está com dúvida → faça assessment com workload real antes de assinar contrato anual.
+
+Já implementamos os três em clientes diferentes e migramos entre eles quando o cenário mudou. Se você está nesse ponto de decisão, [vamos conversar](/contato) — 30 minutos pra entender seu caso e dar recomendação concreta.
+
+Veja também:
+- [Data Lake em 2026: o que é, quando faz sentido, quanto custa](/blog/data-lake-em-2026)
+- [Custos de Big Data fora de controle? 7 pontos que escapam dinheiro](/blog/custos-big-data-7-pontos)

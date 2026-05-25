@@ -7,8 +7,22 @@ import { GithubIcon, LinkedinIcon } from "@/components/BrandIcons";
 import cv from "@/lib/cv.json";
 
 export const metadata: Metadata = {
-  title: "Contato",
-  description: "Conta seu problema em uma frase. A gente responde em até 48h.",
+  title: "Contato — Azuris Engenharia de Dados",
+  description:
+    "Fale com a Azuris sobre Data Lake, migração de dados, ClickHouse, redução de custo de Big Data ou capacitação corporativa. Resposta em até 48h. WhatsApp, e-mail ou formulário.",
+  keywords: [
+    "contato Azuris",
+    "consultoria dados contato",
+    "orçamento Data Lake",
+    "consultoria ClickHouse Brasil",
+  ],
+  openGraph: {
+    title: "Contato — Azuris Engenharia de Dados",
+    description:
+      "Fale com a Azuris sobre Data Lake, migração, ClickHouse, custos de Big Data ou capacitação.",
+    type: "website",
+  },
+  alternates: { canonical: "/contato" },
 };
 
 export default function ContatoPage() {

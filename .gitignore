@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Heavy media — kept locally, served via Vercel Blob in production
 public/cloud-bg.mp4
+.env*.local
+
+# Secrets — Asaas webhook shared token (kept only in Vercel env)
+.webhook-token.txt

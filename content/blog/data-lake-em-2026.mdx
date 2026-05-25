@@ -1,0 +1,152 @@
+---
+title: "Data Lake em 2026: o que é, quando faz sentido, quanto custa"
+excerpt: "A pergunta que CFO, CTO e diretor de TI fazem antes de assinar projeto de dados: o que é um Data Lake, em que contexto justifica o investimento — e onde a conta vai parar."
+date: 2026-05-18
+tags: ["Data Lake", "Lakehouse", "Big Data", "Arquitetura"]
+property: "Azuris"
+cover: "/tech/iceberg.svg"
+coverMode: "logo"
+coverAccent: "#14b7de"
+author: "Alessandro Binhara"
+---
+
+Toda semana alguém me pergunta a mesma coisa: **"a gente precisa de um Data Lake?"**
+
+Quem pergunta geralmente é diretor de tecnologia, CFO ou dono de operação. Ouviu falar em conferência, leu no LinkedIn, viu o concorrente investir. Quer entender se é hype, se faz sentido pra empresa dele, e — principalmente — quanto vai custar.
+
+Esse post é a resposta longa que eu daria em uma reunião. Sem buzzword, sem "transformação digital", com números reais.
+
+## O que é um Data Lake (sem complicar)
+
+Imagine um galpão enorme onde você joga **tudo o que sua empresa gera de dado**, sem precisar organizar antes:
+
+- Logs do site
+- Tabelas do ERP
+- Planilhas que cada área manda por e-mail
+- Eventos de aplicativo
+- Dados de fornecedores
+- Conversas de WhatsApp processadas por IA
+- Imagens de câmeras, áudios, PDFs
+
+No banco de dados tradicional (Oracle, SQL Server, Postgres), antes de guardar um dado você precisa **definir o schema** — quais colunas, quais tipos, quais relações. Se você quiser começar a gravar um novo tipo de informação amanhã, precisa de migration, deploy, downtime.
+
+No Data Lake, você grava primeiro e organiza depois. Joga arquivo cru em um armazenamento barato (S3, MinIO, GCS), pega esse arquivo quando precisar, transforma sob demanda. Schema só importa na hora de consultar.
+
+Isso parece bagunça, e era — até 2018. Hoje existe uma arquitetura disciplinada por cima do Data Lake que resolve isso: o **Lakehouse**. Falo dela mais abaixo.
+
+## Quando faz sentido (e quando não)
+
+**Faz sentido se você tem pelo menos 3 desses sintomas:**
+
+1. **Mais de 5 fontes de dados diferentes** (ERP, CRM, planilhas, eventos de produto, APIs externas, banco de aplicação...)
+2. **Volume crescendo mais rápido que o data warehouse aguenta** ou que o orçamento do data warehouse aguenta
+3. **Times analíticos esperando dia, semana ou mês** pra um dado novo entrar no relatório
+4. **Necessidade de guardar dado bruto pra auditoria, compliance ou reprocessamento**
+5. **Casos de uso de IA/ML** que precisam de dado histórico bruto, não só agregado
+6. **Múltiplas áreas consumindo dado** com perfis diferentes (engenheiro de dados, analista, cientista de dados, produto)
+
+**Não faz sentido se:**
+
+- Sua operação roda bem com 2-3 tabelas no Postgres e uns Looker Studios
+- Você não tem nem um time dedicado pra cuidar do dado
+- Volume total é menor que 100 GB de dado novo por mês
+- O custo do data warehouse atual nunca passou de "preocupação latente"
+
+Data Lake **não é solução pra empresa que não tem problema de dado**. É solução pra empresa cujo problema de dado está estagnando produto, decisão ou margem.
+
+## Quanto custa (com números reais)
+
+Tem três blocos de custo: **storage, processamento e gente.**
+
+### Storage (armazenamento)
+
+Aqui o Data Lake **ganha do data warehouse com folga**:
+
+| Serviço | Custo por TB / mês | Comentário |
+|---|---|---|
+| **S3 Standard (AWS)** | ~US$ 23 | mais comum no Brasil |
+| **GCS Standard (GCP)** | ~US$ 23 | equivalente |
+| **Azure Blob Hot** | ~US$ 21 | equivalente |
+| **MinIO on-prem** | depende | sem cobrança de fornecedor, paga hardware |
+| **Snowflake (storage)** | ~US$ 23 | igual S3 (porque usa S3 por baixo) |
+| **BigQuery (storage)** | ~US$ 20 | similar |
+
+Storage é **commodity**: paga centavos por GB por mês, todos os fornecedores cobram parecido. O dinheiro escapa em **processamento**.
+
+### Processamento (computação)
+
+Aqui é onde o jogo se complica:
+
+- **Snowflake / BigQuery**: você paga por **query rodada**. Conta cresce com adoção. Um analista curioso pode gerar conta de 5 dígitos sozinho em uma semana.
+- **Databricks / Spark gerenciado**: paga por **hora de cluster**. Cluster ocioso = dinheiro escapando.
+- **ClickHouse self-hosted**: paga pela máquina rodando 24/7. Caro fixo, barato variável.
+- **Trino / Athena**: paga por **TB escaneado**. Particionamento ruim = conta caríssima.
+
+Um cliente nosso (RD Station) **cortou 40% da conta mensal** migrando 100 TB de OCI pra GCP — não porque GCP é mais barato, mas porque a arquitetura foi reescrita pra evitar reprocessamento desnecessário. [Conta toda no case da RD](/cases).
+
+### Gente (o custo que ninguém fala)
+
+Um Data Lake mal mantido é mais caro que data warehouse caro. Custo realista:
+
+- **1 engenheiro de dados sênior**: R$ 20-30k/mês
+- **1 platform engineer / DevOps de dados**: R$ 18-25k/mês
+- **Treinamento contínuo do time**: 10-15% do custo de salário
+
+Para uma operação rodar bem, **2-3 pessoas dedicadas** é o mínimo. Quem corta gente pra economizar, paga em incidente, queda de qualidade e migração-pelo-segundo-fornecedor 18 meses depois.
+
+## A evolução: Lakehouse, não Data Lake puro
+
+O Data Lake puro tinha um problema: ninguém confiava nele. Dado entrava, ninguém sabia se era válido, schema mudava sem aviso, query ficava lenta com o crescimento.
+
+Em 2020-2022 nasceu o **Lakehouse** — Data Lake com disciplina de data warehouse. Os ingredientes:
+
+- **Formato de tabela com ACID**: Delta Lake (Databricks) ou Apache Iceberg (Netflix, hoje padrão de mercado). Garante que duas escritas concorrentes não corrompem o dado.
+- **Camadas Medallion**: dado bruto na camada Bronze, limpo na Silver, pronto pra negócio na Gold. Cada camada tem regra própria.
+- **Engine de query SQL** em cima: Trino, Starburst, Athena, BigQuery External. SQL puro, sem precisar exportar dado.
+- **Validação automática**: Great Expectations garante que dado quebrado não passa pra Silver.
+
+Isso é o que entregamos hoje na maioria dos projetos. Data Lake "cru" virou item de museu.
+
+## Stack que recomendamos em 2026
+
+Pra cliente novo, na cloud, sem legado pesado:
+
+- **Storage**: S3 ou GCS (commodity, lock-in leve)
+- **Formato**: Apache Iceberg (mais aberto que Delta) ou Delta Lake (se já tem Databricks)
+- **Orquestração**: Apache Airflow (padrão de fato, todo mundo conhece)
+- **Transformação**: dbt + Spark (Spark pra volume pesado, dbt pra modelagem analítica)
+- **Validação**: Great Expectations entre camadas
+- **Query**: Trino/Starburst para análise federada, ClickHouse para dashboards rápidos
+- **Catálogo**: Open Metadata ou Unity Catalog (Databricks)
+- **BI**: Power BI, Looker ou Metabase no fim da pilha
+
+Cliente com 100 TB consegue rodar em ~US$ 15-25k/mês de cloud, sem contar gente.
+
+## Como começar sem fazer bobagem
+
+Erro mais comum: comprar Databricks/Snowflake porque "todo mundo usa" e depois descobrir que metade dos casos seria resolvido com Postgres + S3 + dbt.
+
+**Roteiro racional:**
+
+1. **Mapear casos de uso de verdade.** Não "queremos ser data-driven" — quais 3-5 decisões mudam de qualidade se o dado for melhor?
+2. **Medir o volume e a velocidade real.** Sabendo que dado entra a 50 GB/dia ou 5 TB/dia muda tudo de arquitetura.
+3. **Escolher 1 caso e fazer ele do início ao fim.** Não tentar montar a plataforma toda de uma vez. MVP de pipeline com 1 fonte e 1 dashboard. Daí escala.
+4. **Capacitar o time interno.** Não importa que stack você escolha — se o time não dominar, vira refém do fornecedor (ou da consultoria).
+5. **Medir custo desde o primeiro dia.** Alertas de gasto na cloud, FinOps básico. Conta crescente é o cheiro de problema antes do problema chegar.
+
+## E se já temos um Data Lake e quero modernizar?
+
+Aí cai em outro tema: **migração**. Já fizemos 100 TB sem downtime para a RD Station, capacitamos o time da Logcomex pra evoluir o lakehouse interno em produção, otimizamos Snowflake/Databricks na Unimed.
+
+Cada migração tem dois inimigos: **quebrar relatório que CEO usa** e **estourar a janela de mudança**. Os dois se resolvem com plano de ondas, contingência por etapa e dual-run — não tem mágica.
+
+---
+
+**Resumindo:**
+
+- Data Lake faz sentido quando o volume e a diversidade de fontes superam o que o data warehouse atual aguenta.
+- A versão moderna chama Lakehouse — Data Lake com disciplina de qualidade.
+- O custo grande não é storage, é processamento e gente.
+- Começar pequeno, com um caso de uso real, é mais barato que comprar plataforma cheia no primeiro dia.
+
+Se você está nesse momento de decisão, [vamos conversar](/contato) — 30 minutos no WhatsApp tiram qualquer dúvida de arquitetura.

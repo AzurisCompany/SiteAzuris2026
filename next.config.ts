@@ -11,6 +11,18 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "hadoop.com.br" },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/lakehouse-comunidade",
+        destination: "/lakehouse-comunidade/index.html",
+      },
+      {
+        source: "/lakehouse-comunidade/",
+        destination: "/lakehouse-comunidade/index.html",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

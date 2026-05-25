@@ -1,0 +1,175 @@
+---
+title: "Como construir um Data Lake do zero — arquitetura Medallion explicada"
+excerpt: "Sem teoria abstrata: como uma equipe sem Data Lake monta o primeiro do zero usando arquitetura Medallion (Bronze/Silver/Gold), com stack moderna e prazos realistas."
+date: 2026-05-15
+tags: ["Data Lake", "Lakehouse", "Medallion", "Arquitetura", "Tutorial"]
+property: "Azuris"
+cover: "/tech/delta.svg"
+coverMode: "logo"
+coverAccent: "#14b7de"
+author: "Alessandro Binhara"
+---
+
+"A gente vai começar do zero. Como construir um Data Lake?"
+
+Toda primeira reunião de projeto novo tem essa pergunta. Esse post é o passo a passo conceitual — não código, não tutorial de ferramenta. **Como pensar a arquitetura** pra não tomar decisão errada no mês 1 e pagar por ela no mês 12.
+
+Vamos usar a **arquitetura Medallion** — padrão de mercado em 2026, adotado por Databricks, Microsoft, Snowflake e qualquer projeto sério de Lakehouse.
+
+## Pré-requisitos antes de começar
+
+Antes de tocar em qualquer ferramenta, três coisas precisam estar no papel:
+
+1. **Quais decisões de negócio vão usar esse dado?** Se você não consegue listar 3-5 decisões reais, você não precisa de Data Lake — precisa de Excel melhor.
+2. **Quais são as fontes de dado e em que velocidade chegam?** Catalogue: nome, dono, formato, frequência, volume médio.
+3. **Quem mantém o Data Lake depois de pronto?** Se a resposta for "o estagiário" ou "vamos ver", para. Plataforma de dados sem dono morre em 18 meses.
+
+Tendo isso, vai.
+
+## A arquitetura Medallion em 4 camadas
+
+A ideia é simples: dado entra cru, vai sendo refinado em etapas, sai pronto pra consumo. Cada etapa tem regra própria.
+
+```
+Fontes externas → Raw → Bronze → Silver → Gold → Consumo
+```
+
+### Raw — onde o dado pousa
+
+**O que é**: cópia bruta dos dados que vieram das fontes, sem nenhuma transformação. Arquivo do jeito que chegou — JSON, CSV, dump de banco, payload de API.
+
+**Por que importa**: se um problema acontece na Silver ou Gold, você pode **reprocessar do zero** sem pedir o dado pro fornecedor de novo.
+
+**Tooling**:
+- Storage: S3, GCS, MinIO, Azure Blob
+- Ingestão: Airbyte, Fivetran (gerenciado) ou NiFi, Kafka Connect (auto-hospedado)
+- Formato: o que veio (não converte ainda)
+
+**Regra de ouro**: Raw é **append-only**. Você nunca apaga, nunca sobrescreve. Cada arquivo tem timestamp de ingestão.
+
+### Bronze — primeiro tratamento, ainda fiel à origem
+
+**O que é**: mesma estrutura do Raw mas em formato **otimizado pra análise** (Parquet, Delta, Iceberg) e com metadados úteis (`_ingested_at`, `_source`, `_file_path`).
+
+**Por que importa**: Raw é caro de consultar (formato cru, JSON aninhado, CSV sem schema). Bronze permite query rápida sem ainda misturar/limpar dado entre fontes.
+
+**Tooling**:
+- Processamento: Spark, dbt-core
+- Formato: **Delta Lake ou Apache Iceberg** (ACID + schema evolution + time travel)
+- Validação leve: schema enforcement, deduplicação básica
+
+**Regra de ouro**: 1 tabela Bronze por fonte original. Não tenta unir HubSpot com Salesforce ainda. Cada fonte fica isolada.
+
+### Silver — dado limpo, validado, conformado
+
+**O que é**: camada onde o dado vira **utilizável**. Aqui você:
+- Aplica validações de qualidade (Great Expectations)
+- Padroniza tipos (data sempre `DATE`, valores monetários sempre `DECIMAL(18,2)`)
+- Junta fontes que descrevem a mesma entidade (cliente do CRM + cliente do ERP = tabela única `dim_cliente`)
+- Trata nulos, deduplica, normaliza cidades/CNPJs/etc
+
+**Por que importa**: se Silver não existe, **todo analista reinventa a limpeza**. Cada dashboard tem lógica de limpeza diferente, número diverge entre relatórios, ninguém confia em ninguém.
+
+**Tooling**:
+- Transformação: dbt (modelos `view` ou `incremental`)
+- Validação: Great Expectations rodando entre Bronze → Silver
+- Processamento pesado: Spark se volume alto
+
+**Regra de ouro**: regra de qualidade fica **explícita no código**, não na cabeça do engenheiro. Tabela Silver tem teste, tem documentação, tem dono.
+
+### Gold — dado pronto pra negócio
+
+**O que é**: tabelas/views que **respondem perguntas de negócio direto**, otimizadas pra consumo:
+- Métricas pré-agregadas (receita por mês, churn por safra, NPS por região)
+- Modelos dimensionais (fato/dimensão) ou *one big table* dependendo da ferramenta
+- Materialized views pra dashboards mais consultados
+
+**Por que importa**: dashboard executivo não pode esperar 30s pra abrir. Gold serve **rápido** porque já tem o trabalho pesado feito.
+
+**Tooling**:
+- dbt (modelos `incremental` ou `table`)
+- Materialized views no Snowflake/BigQuery
+- ClickHouse pra dashboards de alta cadência
+- Cache no BI (Looker, Power BI, Metabase)
+
+**Regra de ouro**: cada tabela Gold tem **dono no negócio**, não só no time de dados. Métrica vira contrato entre engenharia e área.
+
+## Tooling mínimo viável (sem inventar)
+
+Pra cliente novo, sem legado pesado, em 2026:
+
+| Camada | Recomendação | Alternativa |
+|---|---|---|
+| Storage | **S3 ou GCS** | MinIO (on-prem) |
+| Formato | **Apache Iceberg** | Delta Lake (se Databricks) |
+| Ingestão | **Airbyte** (open-source) | Fivetran (gerenciado) |
+| Processamento | **Spark** (volume) + **dbt** (modelagem) | Apenas dbt (volume baixo) |
+| Orquestração | **Apache Airflow** | Dagster, Prefect |
+| Validação | **Great Expectations** | dbt tests apenas |
+| Query | **Trino/Starburst** (federado) | Athena, BigQuery |
+| Catálogo | **Open Metadata** | DataHub, Unity Catalog |
+| BI | **Power BI** / **Metabase** / **Looker** | qualquer um |
+
+Esse conjunto cobre 80% dos cenários. Não precisa de Databricks, Snowflake ou serviço caríssimo pra começar.
+
+## Roadmap realista de 90 dias
+
+**Mês 1 — Fundação**
+- Storage configurado, segurança, IAM
+- 1 pipeline end-to-end (1 fonte → Raw → Bronze → Silver → Gold)
+- 1 dashboard real consumindo Gold
+- Validações básicas (Great Expectations)
+
+**Mês 2 — Expansão**
+- +3-5 fontes ingeridas até Bronze
+- 2-3 tabelas Gold com dono e teste
+- Catálogo (Open Metadata) com as primeiras tabelas documentadas
+- Alertas de pipeline quebrado (Airflow → Slack)
+
+**Mês 3 — Maturidade**
+- Pipeline com retry, SLA, contingência
+- Documentação viva (dbt docs + Open Metadata)
+- Métricas críticas (NPS, churn, receita) na Gold
+- Time interno operando com autonomia
+
+Cliente que vai mais rápido que isso costuma cortar atalho em qualidade. Cliente que vai mais devagar costuma estar empacado em política interna, não em técnica.
+
+## Erros comuns no primeiro mês
+
+1. **Querer mapear tudo antes de codar.** Documentar 50 fontes leva 3 meses. Faça 1 do início ao fim, daí escala.
+2. **Escolher ferramenta antes de caso de uso.** "Vamos usar Databricks" é decisão pior do que "vamos resolver o problema de churn".
+3. **Esquecer governança.** Ninguém pensa em RBAC, audit log e linhagem no mês 1. Todo mundo se arrepende no mês 12.
+4. **Subdimensionar gente.** 1 engenheiro de dados pra montar tudo isso é cilada. Mínimo 2.
+5. **Não envolver consumidor (negócio).** Dashboard que ninguém usa = projeto morto. Sentar com a área enquanto monta.
+
+## Quando contratar consultoria vs fazer in-house
+
+**Contratar consultoria faz sentido quando**:
+- Você precisa entregar resultado em 90 dias e o time interno está atolado
+- Ninguém no time fez Data Lake antes (curva de aprendizado mata cronograma)
+- Quer transferência de conhecimento estruturada
+- Vai usar stack nova que o time precisa aprender
+
+**Fazer in-house faz sentido quando**:
+- Time já tem 2-3 engenheiros de dados experientes
+- Stack é familiar
+- Tempo não é crítico
+- Quer construir know-how interno desde o dia 1
+
+Já fizemos os dois modelos. Na [Logcomex](/cases/logcomex-lakehouse) capacitamos o time interno (eles já tinham Lakehouse, precisavam evoluir). Em outros projetos, montamos do zero e entregamos rodando.
+
+---
+
+**Resumindo:**
+
+- Arquitetura Medallion (Raw → Bronze → Silver → Gold) é o padrão moderno
+- Tooling em 2026 cabe em uma página — não precisa de stack heroica
+- 90 dias dá pra ter Data Lake produtivo se foco em 1 caso de uso primeiro
+- Erro comum: escolher ferramenta antes de problema
+
+Se você está montando o primeiro Data Lake da empresa, [vamos conversar](/contato) — em 30 minutos eu te ajudo a evitar os 5 erros mais comuns.
+
+Veja também:
+- [Data Lake em 2026: o que é, quando faz sentido, quanto custa](/blog/data-lake-em-2026)
+- [Lakehouse: Delta Lake vs Apache Iceberg](/blog/lakehouse-delta-vs-iceberg)
+- [Custos de Big Data fora de controle?](/blog/custos-big-data-7-pontos)

@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /**
@@ -113,17 +113,44 @@ function WaveField({ count = 3200 }: { count?: number }) {
 }
 
 export function DataFlowHero({ count }: { count?: number }) {
+  const [isMobile, setIsMobile] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const rm = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setIsMobile(mq.matches);
+      setReduceMotion(rm.matches);
+    };
+    update();
+    mq.addEventListener("change", update);
+    rm.addEventListener("change", update);
+    return () => {
+      mq.removeEventListener("change", update);
+      rm.removeEventListener("change", update);
+    };
+  }, []);
+
+  // mobile: ~45% das partículas. reduce-motion: ~30%.
+  const effective = reduceMotion
+    ? Math.round((count ?? 3200) * 0.3)
+    : isMobile
+    ? Math.round((count ?? 3200) * 0.45)
+    : count;
+
   return (
     <div className="absolute inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 8, 22], fov: 55 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        dpr={[1, 1.75]}
+        gl={{ antialias: !isMobile, alpha: true, powerPreference: isMobile ? "low-power" : "high-performance" }}
+        dpr={isMobile ? [1, 1.25] : [1, 1.75]}
+        frameloop={reduceMotion ? "demand" : "always"}
       >
         <color attach="background" args={["#06101c"]} />
         <fog attach="fog" args={["#06101c", 25, 55]} />
         <ambientLight intensity={0.4} />
-        <WaveField count={count} />
+        <WaveField count={effective} />
       </Canvas>
       {/* Glow overlay */}
       <div

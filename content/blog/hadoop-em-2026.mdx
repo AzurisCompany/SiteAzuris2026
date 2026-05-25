@@ -1,0 +1,141 @@
+---
+title: "Hadoop em 2026: morreu? Não — mudou de papel"
+excerpt: "Diz no LinkedIn que Hadoop morreu desde 2018. Mentira parcial. O ecossistema mudou: MapReduce sumiu, HDFS perdeu espaço, mas Hive, YARN e o conceito de cluster distribuído continuam dentro do Lakehouse moderno."
+date: 2026-05-12
+tags: ["Hadoop", "Big Data", "Lakehouse", "Arquitetura"]
+property: "Azuris"
+cover: "/blog/hadoop.svg"
+coverMode: "logo"
+coverAccent: "#fbbf24"
+author: "Alessandro Binhara"
+---
+
+Toda conferência de dados tem o painel "Hadoop morreu?" desde 2018. A resposta verdadeira não cabe em um slide.
+
+**Hadoop como produto monolítico, sim, morreu** — ninguém compra cluster Cloudera/Hortonworks novo em 2026.
+
+**Hadoop como conjunto de tecnologias e ideias, não** — metade do que se chama "Lakehouse" hoje é Hadoop redistribuído. Spark veio do Hadoop. Hive virou Iceberg. HDFS virou S3. A arquitetura de cluster distribuído com armazenamento separado de compute é literalmente o que o Hadoop inventou em 2006.
+
+Esse post separa o que sumiu, o que sobreviveu e o que reapareceu com outro nome — pra você não falar bobagem em reunião técnica.
+
+## O que **sumiu** de verdade (não use em projeto novo)
+
+### MapReduce
+Modelo de programação que era a cara do Hadoop original. Pesado, lento, código verboso. **Foi substituído por Spark** (10-100x mais rápido, API enxuta) e por engines de query SQL (Trino, Presto, ClickHouse) em casos OLAP.
+
+Quem ainda usa MapReduce em 2026? Cluster legado rodando job que ninguém mexe há 5 anos. Em projeto novo: ninguém.
+
+### Pig
+DSL pra escrever pipelines no Hadoop. Pré-dbt, pré-Airflow. Morreu silenciosamente em 2018-2020. dbt e Spark SQL fizeram o trabalho de forma mais limpa.
+
+### Apache Mahout
+Biblioteca de machine learning sobre MapReduce. Foi central no Buscapé em 2010-2012 (case que rodamos), mas hoje **substituída por Spark MLlib, scikit-learn, PyTorch**. Ninguém roda Mahout em 2026.
+
+### Sqoop
+Ingestão de dado relacional pro HDFS. Substituído por **Airbyte, Fivetran, Debezium, NiFi**. Curva pra implementar Sqoop nova em 2026 não compensa.
+
+### Hortonworks / Cloudera CDH antigo
+**Hortonworks foi comprada pela Cloudera em 2019**. Cloudera CDH virou Cloudera Data Platform (CDP) — produto totalmente reescrito, mais cloud-friendly. Distribuições antigas estão em end-of-life ou suporte estendido caríssimo.
+
+## O que **sobreviveu** (ainda usa em 2026)
+
+### Apache Hive
+Não como engine de execução (Spark/Trino são melhores), mas o **Hive Metastore** virou o padrão de catálogo de Lakehouse durante anos. Em 2026, **vem sendo substituído por catálogos modernos** (Polaris, Unity, Glue), mas Hive Metastore ainda existe em muito cliente.
+
+### Apache Spark
+**O que mais sobreviveu do Hadoop**. Spark começou em 2009 como melhoria do MapReduce no AMPLab de Berkeley, virou o produto principal da Databricks. Em 2026 é o **engine padrão** pra processamento batch e streaming de volume pesado.
+
+Spark hoje roda em qualquer lugar: Databricks, EMR Serverless, Dataproc Serverless, Kubernetes, on-prem. É o coração de praticamente todo pipeline de Lakehouse.
+
+### Apache YARN (em produção legada)
+Gerenciador de recursos do Hadoop. Em cluster on-prem ainda vivo, YARN orquestra Spark e outros jobs. Em cloud, **substituído por Kubernetes** ou serviços gerenciados (EMR, Dataproc) que abstraem o agendador.
+
+Não escolheria YARN em greenfield, mas tem cluster grande rodando bem em YARN — e migrar tem custo.
+
+### HDFS (em casos específicos)
+HDFS perdeu espaço pra **S3, GCS, MinIO** em cloud e híbrido. Mas em **on-prem grande** (telecom, governo, banco core), HDFS ainda é o storage distribuído mais barato e maduro.
+
+Caso típico em 2026: cluster on-prem de 1 PB+, usado pra workloads regulados que não podem ir pra cloud pública. HDFS ainda faz sentido nesses.
+
+### Apache Kafka
+Tecnicamente não é Hadoop, mas nasceu do mesmo ecossistema (LinkedIn). **Continua sendo o padrão** de streaming em 2026. Variantes modernas (Redpanda) competem mas seguem a mesma API.
+
+## O que **reapareceu com outro nome**
+
+### Hive ACID → Apache Iceberg / Delta Lake
+A ideia de ter ACID em cima de arquivos no HDFS começou no **Hive ACID 3.0** (2017). Ninguém adotou em massa porque era complicado de operar e tinha amarra com Hive Metastore.
+
+Em 2019-2020 vieram **Delta Lake (Databricks)** e **Apache Iceberg (Netflix)** com a mesma ideia, melhor empacotada. Hoje **Iceberg virou padrão de mercado**. Cobrimos em detalhe em [outro post da série](/blog/lakehouse-delta-vs-iceberg).
+
+### Hadoop Common storage layer → S3, GCS, Lakehouse
+A ideia de **storage commodity barato com compute escalável separado** é literalmente o que Hadoop inventou em 2006. O Lakehouse moderno (Iceberg + S3 + Trino) é a versão 2026 dessa ideia — com 10 anos de aprendizado em cima.
+
+### Hive Metastore → Apache Polaris, Unity Catalog, Glue
+Catálogo de metadados foi a contribuição mais duradoura de Hive. Os catálogos modernos (Polaris da Snowflake, Unity da Databricks, Glue da AWS) são **versões cloud-native do Hive Metastore** com features extras (RBAC, lineage, time-travel).
+
+### MapReduce → Spark
+MapReduce não morreu, **evoluiu**. Spark mantém o conceito de transformação distribuída sobre dado particionado, mas com execução em memória, DAG otimizado e API moderna.
+
+## Onde Hadoop ainda vence em 2026
+
+Cenários reais onde a stack Hadoop tradicional (com algumas modernizações) ainda faz sentido:
+
+### 1. On-premise grande com volume pesado
+Cluster de 500 TB+ em datacenter próprio, com regulação que impede cloud. Modernizar para **Spark + Iceberg + HDFS + Trino** rodando on-prem é melhor que migrar.
+
+### 2. Compliance regional rigorosa
+Setor regulado (saúde, financeiro core) com exigência de dado em território nacional, em datacenter auditável. Cloud pública nem sempre cumpre.
+
+### 3. Workload de simulação / scientific computing
+Bioinformática, simulação climática, IoT industrial. Workloads que rodam por dias em centenas de nós. Cluster on-prem dedicado costuma sair mais barato que cloud comercial.
+
+### 4. Cluster legado funcionando
+Empresa com Cloudera/Hortonworks rodando há 8 anos, sem incidente. ROI de migrar não fecha. Modernizar incrementalmente (trocar engine, formato de tabela) faz mais sentido que rasgar tudo.
+
+## Caminho de modernização (sem rasgar o existente)
+
+Cliente em cluster Hadoop legado, sem orçamento pra migração de cloud completa:
+
+**Fase 1 — Trocar engine** (1-2 meses)
+- MapReduce → Spark
+- Pig → Spark SQL ou dbt
+- Sqoop → Airbyte (open) ou Fivetran (gerenciado)
+
+**Fase 2 — Trocar formato de tabela** (2-4 meses)
+- Hive ACID → Apache Iceberg (mantém Hive Metastore)
+- ORC/Parquet em Hive → Parquet em Iceberg
+- Catálogo continua sendo Hive Metastore (pode trocar depois)
+
+**Fase 3 — Modernizar consumo** (1-2 meses)
+- Athena/Trino externo apontando pro mesmo cluster via Iceberg
+- BI moderno (Power BI, Looker) consultando via Trino
+- Materialized views em ClickHouse pra dashboards rápidos
+
+**Fase 4 — Migrar storage se fizer sentido** (3-6 meses)
+- HDFS → S3/GCS quando ROI fechar
+- Ou manter HDFS se on-prem ainda faz sentido
+
+Esse roteiro foi o que fizemos em projetos diversos. **Não precisa migrar pra cloud pra modernizar**. Pode atualizar dentro do on-prem se a empresa não está pronta.
+
+## Por que ainda mantemos o hadoop.com.br
+
+Confissão: **rodamos um portal em português** sobre Hadoop e ecossistema desde 2011. Em 2026, com Hadoop "morto", a maioria dos engenheiros sêniores diz que devíamos fechar. **Não fechamos**.
+
+O motivo: empresas brasileiras grandes ainda têm Hadoop em produção. Engenheiro júnior caindo nesse cluster precisa de documentação em português. E muito do que se escreve hoje sobre Lakehouse ainda usa o vocabulário do Hadoop — entender a origem ajuda.
+
+[Post sobre o portal aqui](/blog/hadoop-com-br-em-2026).
+
+## Resumindo: o que dizer em reunião
+
+- **"Hadoop morreu"** — meio verdade, meio mentira. Cluster Hadoop comercial monolítico morreu. As ideias dele estão em Lakehouse, Spark, Iceberg.
+- **"Vamos sair de Hadoop"** — se "sair" significa migrar pra cloud + Lakehouse moderno, faz sentido. Se significa "trocar tecnologia toda do zero", não.
+- **"Vamos usar Hadoop em projeto novo"** — não. Em projeto novo, **Lakehouse com Iceberg + S3 + Spark + Trino** é a stack moderna.
+
+Cliente com cluster Hadoop legado precisa de **modernização incremental**, não substituição traumática. Já fizemos isso vários projetos.
+
+Se você tem cluster Hadoop e quer entender o caminho de modernização sem rasgar tudo, [vamos conversar](/contato).
+
+Veja também:
+- [Como migrar de Hadoop on-premise para Cloud sem perder um dado](/blog/migrar-hadoop-para-cloud)
+- [Lakehouse: Delta Lake vs Apache Iceberg](/blog/lakehouse-delta-vs-iceberg)
+- [Por que ainda mantemos o Hadoop.com.br em 2026](/blog/hadoop-com-br-em-2026)

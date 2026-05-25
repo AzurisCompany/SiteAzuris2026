@@ -64,11 +64,11 @@ export function PageHeader({
                 {eyebrow}
               </div>
             ) : null}
-            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-[0.95]">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tight leading-[1.05] sm:leading-[0.95]">
               {title}
             </h1>
             {intro ? (
-              <div className="mt-8 text-lg md:text-xl text-foam/80 leading-relaxed max-w-2xl">
+              <div className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-foam/80 leading-relaxed max-w-2xl">
                 {intro}
               </div>
             ) : null}

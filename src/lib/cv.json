@@ -61,14 +61,77 @@
   ],
   "cases": [
     {
+      "slug": "logcomex-lakehouse",
+      "client": "Logcomex",
+      "period": "Out – Nov 2025",
+      "logo": "/cases/logos/logcomex.svg",
+      "accent": "#6613D0",
+      "title": "Capacitação em Big Data e Lakehouse para fortalecer a engenharia de dados",
+      "tagline": "Treinamento in company que conectou tecnologia, arquitetura e desenvolvimento de pessoas.",
+      "intro": [
+        "A Logcomex, empresa referência em tecnologia para comércio exterior, precisava preparar seu time de Engenharia de Dados para evoluir uma arquitetura moderna baseada em Data Lakehouse — com mais qualidade, confiabilidade, governança e eficiência operacional.",
+        "Para apoiar esse desafio, foi desenvolvido um treinamento in company voltado ao nivelamento técnico e à aplicação prática de ferramentas modernas de Big Data, Data Quality, pipelines, orquestração e arquitetura de dados.",
+        "O trabalho abordou desafios reais da operação: quebras em pipelines, validação de dados, escalabilidade, redução de custos e maior autonomia do time técnico."
+      ],
+      "resultPerceived": "Mais do que um treinamento técnico, a iniciativa gerou alinhamento, troca de conhecimento, fortalecimento do time e novas ideias para evolução da plataforma de dados da Logcomex.",
+      "quote": {
+        "text": "Voltamos desses dias com a cabeça cheia de ideias e o time mais unido do que nunca.",
+        "author": "Darci Schmidt Hort Junior",
+        "role": "Data Manager / Software Engineering Manager — Logcomex"
+      },
+      "tech": ["Lakehouse","Delta Lake","Amazon S3","Airflow","Spark","dbt","Airbyte","Great Expectations","Apache NiFi","Kafka","Redpanda","Apache Iceberg","MinIO","Starburst/Trino","ClickHouse"]
+    },
+    {
+      "slug": "unimed-mentoria",
+      "client": "Unimed",
+      "period": "2024",
+      "accent": "#00995D",
+      "title": "Plataforma de dados mais rápida e mais barata — sem trocar fornecedor",
+      "tagline": "Diagnóstico técnico que separa onde escapa dinheiro e onde está a lentidão.",
+      "star": {
+        "situation": "A conta mensal da plataforma analítica crescia acima da curva e o tempo de resposta dos relatórios não acompanhava o volume de uso interno.",
+        "task": "Encontrar de forma objetiva onde estava o desperdício e onde estava o gargalo — sem refazer arquitetura do zero, sem trocar fornecedor.",
+        "action": "Diagnóstico técnico aprofundado da plataforma e mentoria contínua do time de engenharia em padrões que geram economia direta e ganho de velocidade no consumo.",
+        "result": "Plano de ação entregue com pontos priorizados de economia e performance, prontos para o time interno executar."
+      },
+      "tech": ["Snowflake","Databricks","ClickHouse"]
+    },
+    {
+      "slug": "sicredi-treinamento",
+      "client": "Sicredi",
+      "period": "2023 – 2024",
+      "logo": "/cases/logos/sicredi.png",
+      "accent": "#3FA535",
+      "title": "Mais de 100 profissionais alinhados em uma única forma de trabalhar com dados",
+      "tagline": "Capacitação corporativa que sai do PowerPoint e vira prática comum.",
+      "star": {
+        "situation": "Em diferentes unidades de negócio, equipes analíticas operavam em planilhas e processos manuais — esforço multiplicado, padrão diluído, qualidade variando de área para área.",
+        "task": "Capacitar profissionais de várias unidades em uma forma moderna, replicável e auditável de entregar dados para o negócio.",
+        "action": "Programa estruturado conduzido para múltiplas turmas, com conteúdo prático aplicado a problemas reais da operação.",
+        "result": "Mais de 100 profissionais capacitados em diferentes unidades, agora alinhados em uma forma comum de produzir dado confiável."
+      },
+      "kpis": [
+        { "value": "100+", "label": "profissionais capacitados" }
+      ],
+      "tech": ["ClickHouse","Python","SQL","Power BI","Airflow"]
+    },
+    {
       "slug": "rdstation-migracao-100tb",
       "client": "RD Station",
-      "title": "Migração 100TB OCI → GCP com zero downtime",
-      "tagline": "Data lake crítico migrado sem perder um insight",
+      "period": "2020 – 2022",
+      "accent": "#19B4FE",
+      "title": "100 TB migrados de nuvem sem perder um segundo de operação",
+      "tagline": "Migração crítica que cortou 40% da conta mensal sem assustar o negócio.",
+      "star": {
+        "situation": "Toda a operação analítica rodava sobre 100 TB de dados em uma nuvem onde a conta crescia acima do retorno e a infraestrutura havia sido superdimensionada ao longo dos anos.",
+        "task": "Migrar tudo para outra nuvem sem que a operação parasse, mantendo relatórios e produtos no ar — e enxugar a estrutura para reduzir o custo recorrente.",
+        "action": "Re-arquitetura completa do pipeline e migração executada em ondas planejadas, com plano de contingência para cada etapa e zero interrupção visível para o negócio.",
+        "result": "Zero parada na operação. 40% de redução na conta mensal. Quase metade do parque de servidores desligado. 25% a mais de performance no que ficou."
+      },
       "kpis": [
-        { "value": "-40%", "label": "OpEx mensal" },
+        { "value": "-40%", "label": "custo mensal" },
         { "value": "35→18", "label": "servidores" },
-        { "value": "0", "label": "downtime" },
+        { "value": "0", "label": "interrupção" },
         { "value": "+25%", "label": "performance" }
       ],
       "tech": ["Hadoop","HDFS","Hive","Spark","Snowflake","GCP","Airflow","Trino"]
@@ -76,36 +139,21 @@
     {
       "slug": "buscape-recomendacao",
       "client": "Buscapé",
-      "title": "Plataforma de recomendação Hadoop pioneira no e-commerce BR",
-      "tagline": "Hadoop compilado do código-fonte para servir o e-commerce brasileiro",
+      "period": "2010 – 2012",
+      "accent": "#FF6B00",
+      "title": "A primeira plataforma de recomendação em escala do e-commerce brasileiro",
+      "tagline": "Inovação aplicada quando ainda não existia solução pronta no país.",
+      "star": {
+        "situation": "O maior e-commerce do Brasil precisava recomendar produtos com inteligência em tempo real, em uma escala que nenhuma solução pronta atendia no mercado nacional.",
+        "task": "Construir uma plataforma capaz de processar dezenas de milhões de interações de clientes por dia, integrada às vitrines da operação.",
+        "action": "Plataforma de Big Data construída de ponta a ponta pelo time da Azuris e integrada à operação do e-commerce em produção.",
+        "result": "Mais de 10 milhões de eventos processados por dia em produção. Primeira plataforma de recomendação em escala do Brasil."
+      },
       "kpis": [
         { "value": "10M+", "label": "eventos/dia" },
-        { "value": "1ª", "label": "do BR" }
+        { "value": "1ª", "label": "do Brasil" }
       ],
       "tech": ["Hadoop","Mahout","Java","Pig","Cassandra"]
-    },
-    {
-      "slug": "sicredi-treinamento",
-      "client": "Sicredi",
-      "title": "Programa de capacitação: de planilhas a pipelines em produção",
-      "tagline": "Múltiplas unidades de negócio capacitadas em engenharia de dados moderna",
-      "kpis": [
-        { "value": "100+", "label": "profissionais" }
-      ],
-      "tech": ["ClickHouse","Python","SQL","Power BI","Airflow"]
-    },
-    {
-      "slug": "logcomex-lakehouse",
-      "client": "Logcomex",
-      "title": "Lakehouse + Medallion: do conceito à produção",
-      "tagline": "Treinamento aplicado em arquitetura medallion com Delta/Iceberg",
-      "tech": ["Delta Lake","Iceberg","Trino","Starburst","MinIO","Great Expectations","Kafka"]
-    },
-    {
-      "slug": "unimed-mentoria",
-      "client": "Unimed",
-      "title": "Mentoria técnica e modernização de plataforma",
-      "tech": ["Snowflake","Databricks","ClickHouse"]
     }
   ],
   "certifications": [

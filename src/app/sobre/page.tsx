@@ -7,9 +7,23 @@ import { Stack } from "@/components/sections/Stack";
 import { Cta } from "@/components/sections/Cta";
 
 export const metadata: Metadata = {
-  title: "Sobre",
+  title: "Sobre a Azuris — Consultoria de Engenharia de Dados",
   description:
-    "20+ anos transformando dados em vantagem competitiva. Conheça a Azuris e a história do Binhara.",
+    "Consultoria brasileira em Engenharia de Dados, Lakehouse, ClickHouse e IA. 20+ anos de experiência, cases reais com KPIs verificáveis. Fundada por Alessandro Binhara em Curitiba.",
+  keywords: [
+    "Azuris",
+    "consultoria engenharia de dados",
+    "Alessandro Binhara",
+    "consultoria dados Curitiba",
+    "Big Data Brasil",
+  ],
+  openGraph: {
+    title: "Sobre a Azuris — Consultoria de Engenharia de Dados",
+    description:
+      "Consultoria brasileira em Engenharia de Dados, Lakehouse, ClickHouse e IA.",
+    type: "profile",
+  },
+  alternates: { canonical: "/sobre" },
 };
 
 const PILLARS = [

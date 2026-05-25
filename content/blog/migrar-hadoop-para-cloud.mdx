@@ -1,0 +1,160 @@
+---
+title: "Como migrar de Hadoop on-premise para Cloud sem perder um dado"
+excerpt: "Migrar cluster Hadoop on-prem para cloud é projeto de 6-12 meses com 3 medos reais: perder dado, derrubar relatório de CEO, estourar orçamento. Como evitar os três — com case de 100TB sem downtime."
+date: 2026-05-13
+tags: ["Hadoop", "Migração", "Cloud", "Lakehouse", "Big Data"]
+property: "Azuris"
+cover: "/blog/hadoop.svg"
+coverMode: "logo"
+coverAccent: "#fbbf24"
+author: "Alessandro Binhara"
+---
+
+Cliente liga, mesma história: **"a gente tem um cluster Hadoop on-premise, 50-200 TB, e precisamos migrar pra cloud até o fim do ano".**
+
+Os motivos repetem:
+- Hardware envelhecendo, contrato de manutenção saindo caro
+- Time interno encolheu, ninguém quer cuidar de cluster físico
+- Concorrente migrou e está virando produto em cima do dado
+- CFO viu a fatura de energia/datacenter e quer revisar
+- Compliance/auditoria está pedindo cloud regulamentada
+
+Esse post é o roteiro real de como fazer isso **sem perder dado, sem derrubar relatório de CEO, sem estourar orçamento**. Baseado em projetos que entregamos, incluindo o case de **100 TB migrados sem um segundo de downtime**.
+
+## Os 3 motivos pra migrar (e por que importam)
+
+**1. Custo recorrente** — hardware envelhece, contrato de suporte sobe, datacenter cobra mais a cada ano. Cloud paga por uso (sobe e desce conforme demanda).
+
+**2. Velocidade de evolução** — em 2 anos no on-prem, ninguém atualizou versão do Spark, Hive ou Hadoop. Cluster está em release 5 anos atrás. Cloud entrega versão nova sem mexer em servidor.
+
+**3. Time interno** — manter cluster Hadoop on-prem exige DBA, sysadmin, engenheiro de capacity. Custos de pessoa subiram, papel virou raro. Cloud reduz esse perfil pra perfil de plataforma.
+
+## Os 3 medos reais (e como neutralizar)
+
+### Medo 1: perder dado durante a migração
+
+**Por que dá medo**: cluster Hadoop on-prem geralmente é o **único lugar** onde alguns datasets existem. Backup é em fita, recuperação demora semanas. Perder dado = perder dado.
+
+**Como neutralizamos**:
+- **Dual-write fase de transição**: por 2-4 semanas, dado entra no on-prem **e** na cloud em paralelo. Comparamos consistência diariamente.
+- **Hash de arquivo**: cada Parquet do on-prem tem hash gravado. Hash do destino na cloud confere. Se diverge, sabemos antes de DELETAR a origem.
+- **Snapshot incremental**: HDFS Snapshot ou ferramenta como `distcp` com checkpoint. Possibilidade de retomar se cair internet.
+- **Plano de rollback explícito**: cada onda tem comando de desfazer documentado. CTO consegue voltar atrás em 1h.
+
+### Medo 2: derrubar relatório que CEO usa
+
+**Por que dá medo**: relatório no Power BI bate em Hive on-prem via JDBC. Cliente migra cluster, esquece de migrar a conexão. CEO abre dashboard segunda de manhã: tudo zerado.
+
+**Como neutralizamos**:
+- **Inventário completo de consumidores** antes de mexer em qualquer tabela: cada Power BI, cada notebook Jupyter, cada DAG do Airflow, cada API que lê do cluster.
+- **Migração em ondas por consumidor, não por tabela**: garantimos que todo consumidor de uma tabela está apontando pro destino antes de derrubar a origem.
+- **Dual-read durante validação**: dashboard lê do on-prem e da cloud em paralelo, compara automaticamente. Discrepância = alerta.
+- **Sinalização explícita ao negócio**: lista de stakeholders por área, comunicação semanal de status, janela de manutenção combinada.
+
+### Medo 3: estourar orçamento
+
+**Por que dá medo**: projeto pedido como "6 meses" vira 14 meses. Custo de cloud subiu junto. CFO cancela meio caminho.
+
+**Como neutralizamos**:
+- **MVP de 1 caso de uso primeiro**: 1 pipeline ponta-a-ponta em produção na cloud em 30 dias. Garante que stack funciona e gera referência de custo.
+- **Ondas de migração paralelas, mas independentes**: cada onda entrega valor sozinha. Se projeto for cancelado no meio, o que foi feito continua funcionando.
+- **Monitoramento de custo cloud diário**: alertas de gasto desde dia 1, FinOps básico, painel de gasto por área.
+- **Reserva de capacidade quando faz sentido**: AWS Savings Plans, GCP committed use — economiza 30-60% quando workload é previsível.
+
+## O roteiro em 4 fases
+
+### Fase 1 — Assessment (3-4 semanas)
+
+- Mapeamento completo: tabelas, jobs, consumidores, owners de negócio
+- Inventário de tecnologia: versões, dependências, jars customizados, UDFs
+- Análise de uso: top tabelas consultadas vs tabelas zumbis (em geral 30-50% das tabelas não tem consulta há > 6 meses)
+- Estimativa de custo no destino (cenários: AWS, GCP, Azure)
+- Definição de ondas
+
+**Entregável**: documento de roadmap com ondas, riscos e estimativa de custo.
+
+### Fase 2 — Fundação cloud (4-8 semanas)
+
+- Storage configurado (S3, GCS) com IAM, criptografia, lifecycle
+- Catálogo (Glue, Polaris, Unity) com primeiras tabelas
+- Engine de query (Athena, BigQuery, Trino) operacional
+- 1 pipeline ETL completo na cloud — referência pros próximos
+- Monitoramento, alertas, custo
+
+**Entregável**: cloud "casa nova" pronta pra receber migração.
+
+### Fase 3 — Migração em ondas (3-6 meses, depende do volume)
+
+Cada onda tem 4 etapas iguais:
+
+1. **Copiar dado** do on-prem pra cloud (distcp, AzCopy, gsutil, depende destino)
+2. **Validar consistência** (hash, contagem, sample-by-sample)
+3. **Apontar consumidores** pra cloud (mudar JDBC, mudar variável Airflow, mudar Power BI)
+4. **Dual-run** por 1-2 semanas comparando resultados
+
+Quando dual-run fica limpo por 2 semanas, on-prem dessa onda pode ser desativado.
+
+### Fase 4 — Decomissionamento (4-6 semanas)
+
+- Apagar dado on-prem onda por onda (com backup final em cold storage como rede de segurança)
+- Desligar cluster, devolver hardware
+- Documentar tudo no catálogo, no playbook do time
+- Treinamento final do time operacional
+
+## O case real: RD Station, 100 TB sem downtime
+
+[Migramos 100 TB da Oracle Cloud para GCP](/cases) sem um segundo de interrupção visível pra operação. Resumo dos números:
+
+- **Duração total**: ~12 meses
+- **Volume**: 100 TB de dado ativo
+- **Cluster reduzido**: de 35 para 18 servidores no destino
+- **Custo mensal**: -40% após migração
+- **Performance**: +25% no cluster pós-migração
+- **Downtime visível pra negócio**: **zero**
+
+O segredo não foi tecnologia mágica. Foi **ondas pequenas, dual-run obrigatório, rollback testado**. E reescrever pipelines em vez de levantar igual — aproveitar a migração pra modernizar o que estava ruim no on-prem.
+
+## Stack que recomendamos no destino (2026)
+
+Depende muito do que cliente já tem, mas o padrão moderno:
+
+- **Storage**: S3 (AWS) ou GCS (GCP). Iceberg como formato de tabela.
+- **Orquestração**: Apache Airflow (gerenciado: MWAA na AWS, Cloud Composer no GCP)
+- **Processamento**: Spark serverless (EMR Serverless, Dataproc Serverless) ou Databricks se já tinha
+- **Catálogo**: Glue (AWS), Polaris (open), Unity (Databricks)
+- **Query**: Athena, BigQuery, ou Trino/Starburst pra federado
+- **BI**: o que o cliente já usa (Power BI, Looker, Metabase)
+
+Cliente que vinha de Cloudera CDP costuma ir pra **EMR + Iceberg + Athena** (AWS) ou **Dataproc + Iceberg + BigQuery** (GCP).
+
+## Erros comuns que vemos clientes cometendo
+
+1. **Levantar igual ao on-prem** — perde a chance de modernizar. Migra HDFS pra S3 sem trocar Hive por Iceberg, sem trocar MapReduce por Spark recente.
+2. **Subestimar UDFs e jars customizados** — sempre tem 50 funções customizadas que ninguém documentou e que quebram quando migra.
+3. **Migrar tabelas zumbis** — 30-50% das tabelas não são consultadas. Migrar tudo é desperdício de tempo e dinheiro.
+4. **Não treinar o time** — cloud opera diferente de on-prem. Time treinado evita 50% dos incidentes pós-migração.
+5. **Cortar gente "porque é cloud"** — ainda precisa de gente. Perfil muda (vira platform engineer), número não cai pela metade no dia 1.
+
+## Quando faz sentido NÃO migrar agora
+
+- Cluster on-prem está estável, custo é baixo, time interno satisfeito
+- Compliance força on-prem (raro hoje, mas existe)
+- Workload é tão pesado que cloud sairia mais caro (existe — IoT volumoso, simulação científica)
+
+Migração não é dogma. É escolha técnica e financeira. Faz se faz sentido pra esses dois lados.
+
+---
+
+**Resumindo:**
+
+- Migração Hadoop on-prem → Cloud é projeto de 6-12 meses com 3 medos reais
+- Roteiro: assessment → fundação cloud → ondas → decomissionamento
+- Dual-run + rollback + ondas pequenas neutralizam os medos
+- Aproveitar pra modernizar arquitetura (Iceberg, Spark moderno, catálogo) vale mais que portar igual
+
+[Já fizemos 100TB sem downtime](/cases) — se você está pensando nesse projeto, [vamos conversar](/contato). 30 minutos pra mapear cenário e dizer o que é viável.
+
+Veja também:
+- [Hadoop em 2026: morreu? Não — mudou de papel](/blog/hadoop-em-2026)
+- [Data Lake em 2026: o que é, quando faz sentido, quanto custa](/blog/data-lake-em-2026)
+- [Custos de Big Data fora de controle?](/blog/custos-big-data-7-pontos)

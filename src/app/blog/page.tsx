@@ -8,9 +8,25 @@ import { getAllPosts } from "@/lib/posts";
 import { ArrowUpRight, Clock } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Blog — Engenharia de Dados, Lakehouse, IA e Big Data",
   description:
-    "Insights de engenharia de dados, IA em produção e o ecossistema Azuris. Posts sobre Hadoop.com.br, DSSBR, ETT, OWorkshop e Curso Pipelines + IA.",
+    "Conteúdo técnico-prático sobre Data Lake, Lakehouse, Hadoop, ClickHouse, Snowflake, BigQuery, custos de Big Data, migração de dados e IA aplicada. Sem buzzword, com números reais.",
+  keywords: [
+    "blog engenharia de dados",
+    "blog Big Data",
+    "blog ClickHouse",
+    "blog Hadoop",
+    "blog Data Lake",
+    "blog Lakehouse",
+    "tutorial Big Data Brasil",
+  ],
+  openGraph: {
+    title: "Blog Azuris — Engenharia de Dados, Lakehouse, IA",
+    description:
+      "Conteúdo técnico-prático sobre Data Lake, ClickHouse, migração de dados e IA aplicada.",
+    type: "website",
+  },
+  alternates: { canonical: "/blog" },
 };
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {

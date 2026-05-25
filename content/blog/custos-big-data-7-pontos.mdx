@@ -1,0 +1,161 @@
+---
+title: "Custos de Big Data fora de controle? 7 pontos que escapam dinheiro"
+excerpt: "A conta da cloud cresceu mais que o uso? Antes de trocar fornecedor ou cortar projeto, vale auditar esses 7 pontos — quase sempre tem 30-40% de gordura escondida."
+date: 2026-05-17
+tags: ["Custos", "Big Data", "FinOps", "Otimização"]
+property: "Azuris"
+cover: "/blog/snowflake.svg"
+coverMode: "logo"
+coverAccent: "#ef4444"
+author: "Alessandro Binhara"
+---
+
+A conta da cloud cresceu **acima do uso**. Você abre a fatura, ve que a área de dados consome mais que metade do orçamento de TI, e o time de engenharia não consegue explicar de onde veio.
+
+Antes de trocar fornecedor, demitir o squad ou cancelar projetos de IA, vale fazer um check: **quase sempre tem 30-40% de gordura escondida em pontos que ninguém olha**. Esse post lista os 7 mais comuns — com base em projetos reais.
+
+## Por que essa história é tão comum
+
+Plataforma de dados em cloud é cara por design. Você paga por:
+- **Cada gigabyte armazenado** (storage)
+- **Cada segundo de computação** (warehouse, cluster, função serverless)
+- **Cada byte escaneado em query** (Athena, BigQuery)
+- **Cada egress** (sair de uma região, sair pra internet)
+- **Cada lock de cluster ocioso** (Databricks, EMR)
+
+Pequenas decisões erradas multiplicam. Um time pode triplicar a conta em **30 dias** sem perceber — basta uma DAG do Airflow rodando hourly um job que deveria ser diário, em cluster que não desliga.
+
+Vamos aos 7 pontos.
+
+## 1. Clusters ociosos rodando 24/7
+
+**Sintoma**: cluster Spark, EMR ou Databricks ligado o tempo todo, com CPU < 10% em 80% das horas do dia.
+
+**Por que escapa**: alguém ligou pra um teste, esqueceu de desligar. Auto-termination está em 8h por default. Um cluster `m5.4xlarge` ligado por 30 dias = **R$ 5-8k jogados fora**.
+
+**Como atacar**:
+- Auto-termination agressivo (30-60 min de ociosidade)
+- Pools de cluster compartilhados em vez de cluster dedicado por job
+- Schedule explícito (cluster sobe pra job, desce no fim)
+- Alerta de "cluster ligado > 4h sem job rodando"
+
+**Quanto recupera**: 15-25% da conta de compute, fácil.
+
+## 2. Particionamento ruim em queries pagas por TB escaneado
+
+**Sintoma**: Athena, BigQuery ou Trino com queries que escaneiam terabytes pra responder uma pergunta de gigabytes.
+
+**Por que escapa**: ninguém particiona pelos campos que de fato filtram. Tabela com 5 anos de histórico, query precisa de 30 dias, mas como não tem partition por data, escaneia tudo.
+
+**Como atacar**:
+- Particionar por data (`year=2026/month=05/day=18`) — quase universal
+- Particionar por região/tenant quando faz sentido
+- Cluster keys no Snowflake / partition no BigQuery
+- Limite máximo de TB por query (BigQuery aceita)
+- Reescrever queries antigas em código (não em dashboard) com `WHERE partition_field`
+
+**Quanto recupera**: 30-60% da conta de query. É o ponto mais alto desta lista.
+
+## 3. Dados quentes em storage caro
+
+**Sintoma**: 5 TB de dado dos últimos 7 dias e 95 TB de dado de 3+ anos atrás, tudo no mesmo bucket S3 Standard.
+
+**Por que escapa**: ninguém mexe em política de lifecycle. Storage Standard custa ~US$ 23/TB/mês. Infrequent Access custa ~US$ 12. Glacier Instant ~US$ 4.
+
+**Como atacar**:
+- Lifecycle policy: dado > 30 dias → Infrequent Access. Dado > 90 dias → Glacier Instant.
+- Identificar tabelas que ninguém consulta há > 90 dias e arquivar
+- Comprimir formatos: Parquet com snappy/zstd, Iceberg/Delta padrão
+
+**Quanto recupera**: em 100 TB armazenados, ~R$ 4-6k/mês na fatura S3.
+
+## 4. Reprocessamento desnecessário todo dia
+
+**Sintoma**: pipeline Airflow que reprocessa **tudo** todo dia. Ingestão "incremental" que é full-table-scan disfarçado.
+
+**Por que escapa**: muito mais fácil escrever `SELECT *` que `WHERE updated_at > last_run_at`. Tabela cresce, conta cresce, time só percebe quando reclama o CFO.
+
+**Como atacar**:
+- Ingestão real CDC (Debezium, Fivetran, Airbyte com PK)
+- Watermark no Airflow / dbt (`incremental` models)
+- Delta/Iceberg MERGE INTO em vez de OVERWRITE
+- Logs de "linhas processadas vs linhas mudadas" pra catar reprocesso silencioso
+
+**Quanto recupera**: 20-40% do compute, dependendo do estrago.
+
+## 5. Falta de materialized views ou agregados pré-computados
+
+**Sintoma**: dashboard executivo que roda mesma query agregada toda hora, escaneando bilhões de linhas pra retornar um número.
+
+**Por que escapa**: time foca em ETL de Bronze→Silver→Gold e esquece que a camada Gold ainda é caríssima de consultar se a query roda 200 vezes ao dia.
+
+**Como atacar**:
+- Materialized views no Snowflake/BigQuery
+- Pre-aggregations em ClickHouse (`AggregatingMergeTree`)
+- Cache no BI (Looker tem, Power BI tem, Metabase tem)
+- Modelos dbt incrementais pra alimentar tabelas agregadas
+
+**Quanto recupera**: 30-50% da conta de query em workloads de BI.
+
+## 6. Múltiplas cópias do mesmo dado
+
+**Sintoma**: tabela existe no S3 (lake), no Snowflake (warehouse) e no ClickHouse (analytics). E em 3 dashboards diferentes com lógica diferente em cima.
+
+**Por que escapa**: cada time copia o que precisa, ninguém tem mapa do que existe. Catálogo só no nome.
+
+**Como atacar**:
+- Catálogo de verdade (Open Metadata, Unity Catalog, DataHub)
+- Engine federado (Trino/Starburst) pra consultar onde o dado vive
+- Rito de "uma tabela canônica por entidade de negócio"
+- Auditoria de uso (BigQuery tem, Snowflake tem) pra matar tabelas zumbis
+
+**Quanto recupera**: 10-20% só em storage + redução enorme em manutenção/incidente.
+
+## 7. Auto-scale subdimensionado ou superdimensionado
+
+**Sintoma**: Snowflake warehouse XL rodando 8h por dia pra um workload que rodaria igual em L. Ou warehouse M esgotando fila pra um burst que ninguém previu.
+
+**Por que escapa**: time escolhe tamanho "que aguente o pico" e deixa em pico o tempo todo. Ou ajusta uma vez e nunca mais revê.
+
+**Como atacar**:
+- Multi-cluster warehouse no Snowflake (sobe sob demanda)
+- Workload monitoring contínuo (Snowflake tem, Databricks tem)
+- Right-sizing trimestral em todos os clusters
+- Alerta de "warehouse % uso < 30% em 7 dias"
+
+**Quanto recupera**: 15-30% do compute.
+
+## Como descobrir o seu cenário
+
+Pra clientes novos, fazemos um **assessment técnico de 1-2 semanas** que produz:
+
+1. Mapa real de gasto por workload (não o que o time acha — o que a fatura mostra)
+2. Top 10 queries mais caras (em geral 20% das queries fazem 80% do custo)
+3. Recomendação priorizada com **estimativa de economia por ponto**
+4. Roadmap de 90 dias pra executar
+
+Já fizemos isso na **Unimed** — plano de otimização Snowflake/Databricks entregue ao time interno executar. Na **RD Station**, a migração de OCI pra GCP que reduziu **40% da conta mensal** começou exatamente com esse tipo de auditoria. [Cases completos aqui](/cases).
+
+## Quando vale parar antes do projeto inteiro de migração
+
+Cliente às vezes acha que precisa migrar pra outra cloud pra reduzir custo. Quase nunca é o caso. **Reduz custo no fornecedor atual primeiro** — se aí ainda não fechar conta, aí pensa em migrar.
+
+A diferença prática:
+- **Otimização in-place** custa R$ 30-60k em 2-3 meses e recupera 20-40% da conta mensal recorrentemente.
+- **Migração de cloud** custa R$ 300-800k em 6-12 meses e pode recuperar de 30 a 50% — mas só vale com o cluster já otimizado.
+
+A ordem certa é otimizar primeiro, migrar depois (se ainda precisar).
+
+---
+
+**Resumindo:**
+
+- A conta cresce em 7 pontos comuns; quase nunca é "a cloud é cara demais", é arquitetura desafinada
+- Os top-3 (clusters ociosos, particionamento, reprocessamento) somam 50-70% da economia possível
+- Antes de migrar, otimiza
+- Assessment com fato em mão antes de qualquer mudança grande
+
+Quer descobrir onde escapa dinheiro no seu cenário? [Vamos conversar](/contato) — 30 minutos pra entender e dizer se vale uma auditoria mais funda.
+
+Veja também:
+- [Data Lake em 2026: o que é, quando faz sentido, quanto custa](/blog/data-lake-em-2026)

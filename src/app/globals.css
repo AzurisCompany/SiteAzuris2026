@@ -113,7 +113,14 @@ body {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
 .marquee { animation: marquee 40s linear infinite; }
+.marquee-slow { animation: marquee 60s linear infinite; }
+.marquee-reverse { animation: marquee-reverse 50s linear infinite; }
+.marquee:hover, .marquee-slow:hover, .marquee-reverse:hover { animation-play-state: paused; }
 
 /* Subtle float */
 @keyframes float-slow {

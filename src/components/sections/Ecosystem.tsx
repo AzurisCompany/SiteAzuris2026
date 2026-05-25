@@ -49,11 +49,11 @@ const PRODUCTS: Product[] = [
     className: "md:col-span-2",
   },
   {
-    name: "Curso Pipelines + IA",
+    name: "Lakehouse: Pipeline na Prática",
     tagline:
-      "Do raw ao modelo em produção. Lançamento no Grupo de Estudos GU BigData.",
+      "5 semanas hands-on. MinIO + Iceberg + Spark + Airflow + Superset. Turma 1 começa 22/jun/2026.",
     href: "/produtos/curso-pipelines",
-    badge: "🔥 Lançamento",
+    badge: "🔥 Turma 1 aberta",
     className: "md:col-span-2",
     emoji: "🚀",
   },

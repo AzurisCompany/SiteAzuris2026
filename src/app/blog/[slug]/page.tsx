@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Cta } from "@/components/sections/Cta";
 import { BlogCover } from "@/components/BlogCover";
+import { JsonLd } from "@/components/JsonLd";
 import { getAllSlugs, getAllPosts, getPostBySlug } from "@/lib/posts";
 import { ArrowLeft, Clock } from "lucide-react";
 
@@ -61,8 +62,57 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
   const all = await getAllPosts();
   const related = all.filter((p) => p.slug !== slug).slice(0, 2);
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Person",
+      name: post.author ?? "Alessandro Binhara",
+      url: "https://linkedin.com/in/binhara/",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Azuris",
+      url: "https://azuris.com.br",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://azuris.com.br/azuris-logo.svg",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://azuris.com.br/blog/${post.slug}`,
+    },
+    image: post.cover
+      ? [`https://azuris.com.br${post.cover}`]
+      : undefined,
+    keywords: post.tags?.join(", "),
+    inLanguage: "pt-BR",
+    articleSection: post.tags?.[0],
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: "https://azuris.com.br" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: "https://azuris.com.br/blog" },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://azuris.com.br/blog/${post.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={[articleSchema, breadcrumbSchema]} />
       <Navbar />
       <main className="flex-1 pt-24">
         {/* Header */}

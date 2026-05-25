@@ -1,0 +1,154 @@
+---
+title: "Lakehouse em 2026: Delta Lake vs Apache Iceberg"
+excerpt: "Os dois formatos de tabela que dominam Lakehouse moderno. Comparação técnica honesta de governança, performance, ecossistema e lock-in — pra você não escolher pelo discurso do fornecedor."
+date: 2026-05-14
+tags: ["Lakehouse", "Delta Lake", "Apache Iceberg", "Arquitetura", "Comparativo"]
+property: "Azuris"
+cover: "/tech/iceberg.svg"
+coverMode: "logo"
+coverAccent: "#22c55e"
+author: "Alessandro Binhara"
+---
+
+Toda decisão de Lakehouse hoje passa por uma pergunta: **Delta Lake ou Apache Iceberg?**
+
+Os dois formatos resolvem o mesmo problema — dar disciplina ACID, schema evolution e time-travel pra tabelas que moram em S3, GCS ou MinIO. Mas eles nascem de mundos diferentes e o trade-off importa muito **5 anos depois da decisão**, quando você quer trocar de fornecedor.
+
+Esse post é o comparativo objetivo. Sem "esse é melhor" — com "esse cabe melhor em tal cenário".
+
+## O problema que os dois resolvem
+
+Antes deles, Data Lake era bagunçado:
+- Duas escritas concorrentes podiam corromper a tabela (sem ACID)
+- Mudar um campo (`VARCHAR(50)` → `VARCHAR(200)`) significava reescrever a tabela inteira
+- Não dava pra voltar 7 dias atrás pra investigar inconsistência (sem time-travel)
+- Particionamento estava preso no caminho do arquivo (`/year=2026/month=05/...`)
+
+Delta Lake (2019, Databricks) e Apache Iceberg (2018, Netflix) atacaram isso com a mesma ideia: **um metadado em JSON/Avro descreve quais arquivos pertencem à tabela em cada versão**. Você não escreve por cima, você escreve um novo arquivo e atualiza o metadado.
+
+A diferença está em **como esse metadado é estruturado e quem suporta**.
+
+## Origem importa
+
+**Delta Lake**:
+- Nascido dentro da **Databricks**, em 2019, open-sourced em 2022
+- Otimizado pra rodar com **Spark** (Databricks usa Spark)
+- Linux Foundation desde 2022, mas governança ainda muito influenciada pela Databricks
+- Versão "completa" (`Delta Lake 3.x`) tem features que só rodam dentro do Databricks Runtime
+
+**Apache Iceberg**:
+- Nascido na **Netflix**, em 2018, doado pra Apache em 2019
+- Otimizado pra ser **engine-agnóstico** desde o dia 1 (não depende de Spark)
+- Governança Apache Foundation — várias empresas votam (Apple, Netflix, Tabular, Snowflake, AWS, Cloudera)
+- Spec aberta, sem versão "premium"
+
+**Tradução**: Delta é "padrão Databricks". Iceberg é "padrão aberto que todos os fornecedores adotaram".
+
+## Matriz comparativa
+
+| Critério | Delta Lake | Apache Iceberg |
+|---|---|---|
+| **ACID** | Sim | Sim |
+| **Schema evolution** | Sim | Sim |
+| **Partition evolution** | Limitado | **Excelente** (muda particionamento sem reescrever) |
+| **Time-travel** | Sim | Sim |
+| **Branching / versioning** | Limitado | **Excelente** (branch nativo, igual git) |
+| **Engine principal** | Spark (Databricks) | Spark, Trino, Flink, Snowflake, BigQuery, ClickHouse |
+| **Suporte fora do Spark** | Médio | **Excelente** |
+| **Catálogo nativo** | Unity Catalog (Databricks) | Polaris, Nessie, REST (qualquer um) |
+| **Performance OLAP** | Boa | Boa-Excelente (depende engine) |
+| **Vendor lock-in** | **Médio-Alto** (Databricks-friendly) | **Baixo** |
+| **Documentação** | Excelente (curva Databricks) | Boa (curva Apache, mais técnica) |
+| **Estabilidade em prod** | Excelente | Excelente |
+
+## Quando Delta vence
+
+**Se você JÁ está em Databricks**:
+- Delta é o formato nativo, integração é nível serviço
+- Liquid Clustering, Photon engine, Delta Live Tables — features avançadas
+- Unity Catalog roda Delta lindamente
+- Equipe Databricks resolve qualquer problema rápido
+
+**Se Spark é seu único engine de processamento**:
+- Delta é simplesmente mais fácil de operar com Spark
+- Comunidade Spark-Delta é maior que Spark-Iceberg
+
+**Quando NÃO escolher Delta**:
+- Quer fugir de lock-in de fornecedor
+- Vai usar 3-4 engines diferentes em cima do mesmo lake (Trino + Flink + Snowflake)
+- Empresa tem política contra vendor-dependence
+
+## Quando Iceberg vence
+
+**Multi-engine real**:
+- Mesmo dado consultado por Spark (ETL), Trino (analytics federado), Flink (streaming), Snowflake (BI) e ClickHouse (dashboards) — tudo via Iceberg
+- Snowflake, BigQuery, Databricks, Cloudera, AWS Athena: todos suportam Iceberg nativo
+- Padrão Apache, sem amarra de fornecedor
+
+**Workloads de migração/portabilidade**:
+- Cliente que quer trocar de Snowflake pra ClickHouse sem migrar dado
+- Cliente em multi-cloud (AWS + Azure) que precisa de mesmo dado em ambos
+- Empresa governamental / regulada que exige "sem lock-in" no contrato
+
+**Features avançadas que Delta não tem (ainda)**:
+- **Partition evolution real**: mudar de `month` pra `day` sem reescrever histórico
+- **Branching / tagging tipo git**: criar branch experimental, fazer merge depois
+- **Hidden partitioning**: query não precisa filtrar por coluna de partição
+
+**Quando NÃO escolher Iceberg**:
+- Time muito pequeno sem alguém pra cuidar do catálogo
+- Operação 100% Databricks (Delta vai ser mais simples)
+- Necessidade urgente de features de Delta Live Tables ou Unity Catalog
+
+## O que aconteceu em 2024-2025 (importante)
+
+**Databricks comprou Tabular** (empresa fundada pelos criadores do Iceberg) por **US$ 1-2 bilhões** em junho/2024. Isso mudou o jogo:
+- Databricks anunciou que vai suportar Iceberg como **first-class citizen** dentro do Unity Catalog
+- Snowflake também anunciou suporte total a Iceberg via **Polaris** (catálogo aberto)
+- AWS, GCP, Azure: todos com integração Iceberg gerenciada
+
+**Sinal claro**: o mercado escolheu Iceberg como **padrão aberto interoperável**. Delta continua excelente, mas para casos que **vivem dentro do Databricks**.
+
+## Recomendação prática por cenário
+
+**Cliente já em Databricks, sem intenção de sair** → **Delta Lake**. Use o que está integrado.
+
+**Cliente novo, escolhendo stack do zero, em 2026** → **Apache Iceberg**. Padrão aberto, mais opções no futuro.
+
+**Cliente em Snowflake querendo entrar em Lakehouse** → **Iceberg via Polaris**. Snowflake suporta nativamente.
+
+**Cliente em multi-cloud (AWS + GCP)** → **Iceberg**. Cross-cloud é forte de Iceberg, fraco de Delta.
+
+**Cliente que vai usar 1 engine só (Spark) e quer simplicidade** → **Delta**.
+
+**Cliente regulado (governo, banco, saúde)** → **Iceberg**. Governança aberta facilita compliance.
+
+## Migração entre os dois
+
+Boa notícia: existe ferramenta de migração de Delta pra Iceberg (e vice-versa). Não é trivial, mas é factível:
+- **Delta → Iceberg**: `delta-iceberg-converter` (Apache project)
+- **Iceberg → Delta**: usa `CONVERT TO DELTA` no Databricks
+- Custo: 1-4 semanas de projeto pra um lake de tamanho médio (10-100 TB)
+
+Não é decisão pra vida toda. Mas é decisão que custa caro pra refazer — então vale escolher bem.
+
+## Onde isso entra no caso real
+
+Na [Logcomex](/cases/logcomex-lakehouse), o lakehouse atual usa **Delta Lake sobre S3** — formato que estava lá desde antes do projeto. No programa de capacitação, mostramos **Iceberg como alternativa moderna** pra cenários onde portabilidade importa (consulta federada via Trino, governança via Polaris).
+
+Não é "trocar Delta por Iceberg agora". É **entender o trade-off** pra decisão consciente daqui pra frente.
+
+## Conclusão prática
+
+- Tecnicamente os dois são excelentes em 2026
+- Iceberg ganha em **portabilidade** e **multi-engine**
+- Delta ganha em **integração Databricks** e **simplicidade Spark-only**
+- O mercado migrou pra Iceberg como **padrão de interoperabilidade** (Databricks inclusive comprou Tabular pra abraçar)
+- Cliente novo, decisão fresca: vai de **Iceberg**
+
+Se você está nessa decisão agora, [vamos conversar](/contato) — 30 minutos pra entender stack e contexto e dar recomendação concreta.
+
+Veja também:
+- [Como construir um Data Lake do zero — Medallion explicada](/blog/como-construir-data-lake-do-zero)
+- [ClickHouse vs Snowflake vs BigQuery: quando escolher cada](/blog/clickhouse-vs-snowflake-vs-bigquery)
+- [Data Lake em 2026: o que é, quando faz sentido, quanto custa](/blog/data-lake-em-2026)

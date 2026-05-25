@@ -5,7 +5,7 @@ import { Ecosystem } from "@/components/sections/Ecosystem";
 import { Cases } from "@/components/sections/Cases";
 import { Partners } from "@/components/sections/Partners";
 import { Stack } from "@/components/sections/Stack";
-import { Founder } from "@/components/sections/Founder";
+import { HowWeWork } from "@/components/sections/HowWeWork";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/Footer";
 
@@ -20,7 +20,7 @@ export default function HomePage() {
         <Cases />
         <Partners />
         <Stack />
-        <Founder />
+        <HowWeWork />
         <Cta />
       </main>
       <Footer />
