@@ -12,7 +12,7 @@ const STACK = ["MinIO", "Apache Iceberg", "Spark", "Airflow", "Superset"];
 
 export function CourseBanner() {
   return (
-    {/* id/aria sem a palavra "banner": adblocks escondem [id*="banner"] via filtro cosmético */}
+    // id/aria sem a palavra "banner": adblocks escondem [id*="banner"] via filtro cosmético
     <section aria-labelledby="curso-lakehouse-home" className="relative px-6 py-16">
       <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-cyan-brand/40 bg-slate/40 shadow-2xl shadow-cyan-brand/10">
         {/* Sheen + glows de marca */}
