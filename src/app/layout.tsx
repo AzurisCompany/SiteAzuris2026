@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
+import { CourseFloatingBanner } from "@/components/CourseFloatingBanner";
 import {
   JsonLd,
   organizationSchema,
@@ -115,6 +116,7 @@ gtag("config", "GT-NNZW5FW");`}
         <PostHogProvider>
           {children}
           <WhatsAppFab />
+          <CourseFloatingBanner />
         </PostHogProvider>
       </body>
     </html>
