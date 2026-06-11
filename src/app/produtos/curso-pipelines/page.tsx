@@ -266,7 +266,7 @@ const LOTES = [
       "Certificado de conclusão",
       "Acesso à comunidade DSSBR/GUBigData",
     ],
-    status: "Cartão em até 5x (1-2x sem juros) · Pix à vista com 5% off",
+    status: "Cartão em até 5x (1x à vista, 2-5x com juros) · Pix à vista com 5% off",
     destaque: true,
     cta: {
       label: "Garantir vaga no Lote 1",
@@ -283,7 +283,7 @@ const LOTES = [
       "Discord vitalício + cheat sheets",
       "Certificado de conclusão",
     ],
-    status: "Cartão em até 5x (1-2x sem juros) · Pix à vista com 5% off",
+    status: "Cartão em até 5x (1x à vista, 2-5x com juros) · Pix à vista com 5% off",
     destaque: false,
     cta: null,
   },
@@ -343,7 +343,7 @@ const FAQ = [
   },
   {
     q: "Posso parcelar?",
-    a: "Sim, em até 5x no cartão. 1x e 2x são sem juros; de 3x a 5x os juros do cartão ficam por sua conta. No Pix você paga à vista com 5% de desconto.",
+    a: "Sim, em até 5x no cartão. 1x é à vista sem juros; de 2x a 5x os juros do cartão ficam por sua conta. No Pix você paga à vista com 5% de desconto.",
   },
 ];
 

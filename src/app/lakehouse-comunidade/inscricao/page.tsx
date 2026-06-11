@@ -5,7 +5,7 @@ import InscricaoForm from './InscricaoForm'
 export const metadata: Metadata = {
   title: 'Inscrição — Lakehouse: Pipeline na Prática | Azuris',
   description:
-    'Garanta sua vaga no curso Lakehouse: Pipeline na Prática. Pagamento via PIX à vista (5% off) ou cartão em até 5x (1-2x sem juros).',
+    'Garanta sua vaga no curso Lakehouse: Pipeline na Prática. Pagamento via PIX à vista (5% off) ou cartão em até 5x (1x à vista, 2x-5x com juros).',
   robots: { index: false, follow: false }, // página de checkout, sem indexação
 }
 
@@ -61,7 +61,7 @@ export default async function InscricaoPage() {
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <span className="text-[var(--azuris-cyan)]">●</span>
               Pix à vista: <strong className="text-[var(--text-primary)]">R$ {precoPixReais.toFixed(2).replace('.', ',')}</strong>
-              {' '}(5% off) · Cartão: R$ {precoReais.toFixed(2).replace('.', ',')} em até 5x (1-2x sem juros)
+              {' '}(5% off) · Cartão: R$ {precoReais.toFixed(2).replace('.', ',')} em até 5x (1x à vista, 2x-5x com juros)
             </div>
           </div>
         </div>

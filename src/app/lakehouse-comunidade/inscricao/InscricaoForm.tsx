@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from 'react'
 import { gaEvent } from '@/lib/gtag'
+import { MAX_PARCELAS, valorParcela, totalComJuros } from '@/lib/parcelamento'
 
 interface Props {
   precoBaseReais: number
@@ -37,6 +38,7 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
+  const [installments, setInstallments] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -53,7 +55,13 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
     })
   }, [])
 
-  const valorCobradoReais = billingType === 'PIX' ? precoPixReais : precoBaseReais
+  // PIX é sempre à vista. Cartão: 1x sem juros; 2x–5x com juros embutidos.
+  const parcelasCartao = billingType === 'CREDIT_CARD' ? installments : 1
+  const valorParcelaReais = valorParcela(precoBaseReais, parcelasCartao)
+  const valorCobradoReais =
+    billingType === 'PIX'
+      ? precoPixReais
+      : totalComJuros(precoBaseReais, parcelasCartao)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -70,6 +78,7 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
           billing_type: billingType,
+          installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
         }),
       })
@@ -204,20 +213,40 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
             />
             <div className="flex items-center justify-between mb-1">
               <span className="font-bold">Cartão</span>
-              <span className="text-xs text-[var(--text-muted)]">até 5x</span>
+              <span className="text-xs text-[var(--text-muted)]">em até {MAX_PARCELAS}x</span>
             </div>
             <div className="text-2xl font-black">R$ {precoBaseReais.toFixed(2).replace('.', ',')}</div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">
-              1x e 2x sem juros · 3x a 5x com juros do cartão
+              1x à vista · 2x a {MAX_PARCELAS}x com juros do cartão
             </div>
           </label>
         </div>
 
         {billingType === 'CREDIT_CARD' && (
-          <p className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-xs text-[var(--text-muted)]">
-            Você escolhe o número de parcelas (até 5x) na tela segura do Asaas.
-            1x e 2x são sem juros; de 3x a 5x os juros do cartão ficam por sua conta.
-          </p>
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Parcelas</label>
+            <select
+              value={installments}
+              onChange={(e) => setInstallments(Number(e.target.value))}
+              className="w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm focus:border-[var(--azuris-cyan)] focus:outline-none"
+            >
+              {Array.from({ length: MAX_PARCELAS }, (_, idx) => idx + 1).map((n) => {
+                const parcela = valorParcela(precoBaseReais, n)
+                const total = totalComJuros(precoBaseReais, n)
+                return (
+                  <option key={n} value={n}>
+                    {n}x de R$ {parcela.toFixed(2).replace('.', ',')}
+                    {n === 1
+                      ? ' (à vista)'
+                      : ` — total R$ ${total.toFixed(2).replace('.', ',')} com juros`}
+                  </option>
+                )
+              })}
+            </select>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              1x à vista sem juros. De 2x a {MAX_PARCELAS}x os juros do cartão são por sua conta.
+            </p>
+          </div>
         )}
       </div>
 
@@ -236,7 +265,9 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
           ? 'Processando…'
           : billingType === 'PIX'
             ? `Gerar PIX de R$ ${valorCobradoReais.toFixed(2).replace('.', ',')}`
-            : `Pagar R$ ${valorCobradoReais.toFixed(2).replace('.', ',')} no cartão`}
+            : installments > 1
+              ? `Pagar ${installments}x de R$ ${valorParcelaReais.toFixed(2).replace('.', ',')} no cartão`
+              : `Pagar R$ ${precoBaseReais.toFixed(2).replace('.', ',')} no cartão`}
       </button>
 
       <p className="text-center text-xs text-[var(--text-muted)]">
