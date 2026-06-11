@@ -15,7 +15,6 @@ interface RequestBody {
   cpf_cnpj: string
   telefone?: string
   billing_type: BillingType
-  installments?: number
   utm?: {
     source?: string
     medium?: string
@@ -44,10 +43,6 @@ function validate(body: RequestBody): string | null {
 
   if (body.billing_type !== 'PIX' && body.billing_type !== 'CREDIT_CARD') return 'Forma de pagamento inválida'
 
-  if (body.billing_type === 'CREDIT_CARD') {
-    const n = body.installments ?? 1
-    if (!Number.isInteger(n) || n < 1 || n > 12) return 'Parcelamento inválido (1 a 12)'
-  }
   return null
 }
 
@@ -71,16 +66,16 @@ export async function POST(request: Request) {
     )
   }
 
-  // Calcula valor cobrado conforme forma de pagamento
-  // PIX: 5% off. Cartão: valor cheio, parcelado sem juros.
-  const installments = body.billing_type === 'CREDIT_CARD' ? body.installments ?? 1 : 1
+  // Calcula valor cobrado conforme forma de pagamento.
+  // PIX: 5% off, à vista. Cartão: valor cheio. O parcelamento (até 5x — 1-2x sem
+  // juros, 3-5x com juros repassados ao cliente) é escolhido pelo próprio cliente
+  // no checkout do Asaas, conforme a config de parcelamento da conta. Por isso NÃO
+  // pré-fixamos installmentCount aqui — senão o Asaas não consegue aplicar o juro.
   const valorCobradoCentavos =
     body.billing_type === 'PIX'
       ? Math.round(precoBaseCentavos * 0.95)
       : precoBaseCentavos
   const valorCobradoReais = valorCobradoCentavos / 100
-  const installmentValueReais =
-    installments > 1 ? Number((valorCobradoReais / installments).toFixed(2)) : valorCobradoReais
 
   // Cria/recupera customer no Asaas
   let customer
@@ -106,8 +101,6 @@ export async function POST(request: Request) {
       description: `Lakehouse: Pipeline na Prática — ${lote === 'lote1' ? 'Lote 1' : 'Lote 2'}`,
       externalReference: `lakehouse-comunidade:${lote}`,
       dueDate: todayPlusDays(3),
-      installmentCount: installments > 1 ? installments : undefined,
-      installmentValueReais: installments > 1 ? installmentValueReais : undefined,
     })
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'erro desconhecido'
@@ -125,7 +118,7 @@ export async function POST(request: Request) {
       telefone: body.telefone ? onlyDigits(body.telefone) : null,
       billing_type: body.billing_type,
       valor_centavos: valorCobradoCentavos,
-      installments,
+      installments: 1, // nº real de parcelas é escolhido no checkout do Asaas; webhook pode atualizar
       asaas_customer_id: customer.id,
       asaas_payment_id: payment.id,
       asaas_invoice_url: payment.invoiceUrl,

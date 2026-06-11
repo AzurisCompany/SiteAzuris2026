@@ -6,7 +6,6 @@ import { gaEvent } from '@/lib/gtag'
 interface Props {
   precoBaseReais: number
   precoPixReais: number
-  parcela12xReais: number
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -32,13 +31,12 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12xReais }: Props) {
+export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
-  const [installments, setInstallments] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -56,9 +54,6 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12
   }, [])
 
   const valorCobradoReais = billingType === 'PIX' ? precoPixReais : precoBaseReais
-  const valorParcelaReais = billingType === 'CREDIT_CARD' && installments > 1
-    ? Number((valorCobradoReais / installments).toFixed(2))
-    : valorCobradoReais
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -75,7 +70,6 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
           billing_type: billingType,
-          installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
         }),
       })
@@ -210,28 +204,20 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12
             />
             <div className="flex items-center justify-between mb-1">
               <span className="font-bold">Cartão</span>
-              <span className="text-xs text-[var(--text-muted)]">até 12x sem juros</span>
+              <span className="text-xs text-[var(--text-muted)]">até 5x</span>
             </div>
             <div className="text-2xl font-black">R$ {precoBaseReais.toFixed(2).replace('.', ',')}</div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">12x de R$ {parcela12xReais.toFixed(2).replace('.', ',')}</div>
+            <div className="mt-1 text-xs text-[var(--text-muted)]">
+              1x e 2x sem juros · 3x a 5x com juros do cartão
+            </div>
           </label>
         </div>
 
         {billingType === 'CREDIT_CARD' && (
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Parcelas</label>
-            <select
-              value={installments}
-              onChange={(e) => setInstallments(Number(e.target.value))}
-              className="w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm focus:border-[var(--azuris-cyan)] focus:outline-none"
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
-                <option key={n} value={n}>
-                  {n}x de R$ {(precoBaseReais / n).toFixed(2).replace('.', ',')} {n === 1 ? '' : 'sem juros'}
-                </option>
-              ))}
-            </select>
-          </div>
+          <p className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-xs text-[var(--text-muted)]">
+            Você escolhe o número de parcelas (até 5x) na tela segura do Asaas.
+            1x e 2x são sem juros; de 3x a 5x os juros do cartão ficam por sua conta.
+          </p>
         )}
       </div>
 
@@ -250,9 +236,7 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12
           ? 'Processando…'
           : billingType === 'PIX'
             ? `Gerar PIX de R$ ${valorCobradoReais.toFixed(2).replace('.', ',')}`
-            : installments > 1
-              ? `Pagar ${installments}x de R$ ${valorParcelaReais.toFixed(2).replace('.', ',')}`
-              : `Pagar R$ ${valorCobradoReais.toFixed(2).replace('.', ',')}`}
+            : `Pagar R$ ${valorCobradoReais.toFixed(2).replace('.', ',')} no cartão`}
       </button>
 
       <p className="text-center text-xs text-[var(--text-muted)]">

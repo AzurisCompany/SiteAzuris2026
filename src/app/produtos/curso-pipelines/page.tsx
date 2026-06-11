@@ -266,9 +266,12 @@ const LOTES = [
       "Certificado de conclusão",
       "Acesso à comunidade DSSBR/GUBigData",
     ],
-    status: "12x de R$ 46 sem juros · Pix com 5% off",
+    status: "Cartão em até 5x (1-2x sem juros) · Pix à vista com 5% off",
     destaque: true,
-    cta: { label: "Garantir vaga no Lote 1", href: "/contato?ref=lakehouse-t1-l1" },
+    cta: {
+      label: "Garantir vaga no Lote 1",
+      href: "/lakehouse-comunidade/inscricao?utm_source=produtos&utm_medium=cta&utm_campaign=lakehouse-t1-l1",
+    },
   },
   {
     badge: "Lote 2",
@@ -280,7 +283,7 @@ const LOTES = [
       "Discord vitalício + cheat sheets",
       "Certificado de conclusão",
     ],
-    status: "12x de R$ 63 sem juros · Pix com 5% off",
+    status: "Cartão em até 5x (1-2x sem juros) · Pix à vista com 5% off",
     destaque: false,
     cta: null,
   },
@@ -340,7 +343,7 @@ const FAQ = [
   },
   {
     q: "Posso parcelar?",
-    a: "Sim, até 12x no cartão sem juros. Pix tem 5% de desconto adicional.",
+    a: "Sim, em até 5x no cartão. 1x e 2x são sem juros; de 3x a 5x os juros do cartão ficam por sua conta. No Pix você paga à vista com 5% de desconto.",
   },
 ];
 
@@ -407,7 +410,7 @@ export default function CursoPage() {
                   Ementa detalhada
                 </a>
                 <Link
-                  href="/contato?ref=lakehouse-t1-l1"
+                  href="/lakehouse-comunidade/inscricao?utm_source=produtos&utm_medium=hero&utm_campaign=lakehouse-t1-l1"
                   className="inline-flex items-center gap-2 rounded-md border border-slate/80 bg-deep/40 backdrop-blur-sm px-6 py-3.5 text-base font-medium hover:border-cyan-brand/60 transition-all"
                 >
                   Quero garantir vaga
@@ -948,7 +951,7 @@ export default function CursoPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                href="/contato?ref=lakehouse-t1-l1"
+                href="/lakehouse-comunidade/inscricao?utm_source=produtos&utm_medium=cta-final&utm_campaign=lakehouse-t1-l1"
                 className="group inline-flex items-center gap-2 rounded-md bg-cyan-brand px-7 py-4 text-base font-medium text-ink hover:bg-mist transition-colors"
               >
                 Garantir minha vaga

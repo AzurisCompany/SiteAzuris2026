@@ -5,7 +5,7 @@ import InscricaoForm from './InscricaoForm'
 export const metadata: Metadata = {
   title: 'Inscrição — Lakehouse: Pipeline na Prática | Azuris',
   description:
-    'Garanta sua vaga no curso Lakehouse: Pipeline na Prática. Pagamento via PIX (5% off) ou cartão em até 12x sem juros.',
+    'Garanta sua vaga no curso Lakehouse: Pipeline na Prática. Pagamento via PIX à vista (5% off) ou cartão em até 5x (1-2x sem juros).',
   robots: { index: false, follow: false }, // página de checkout, sem indexação
 }
 
@@ -15,7 +15,6 @@ export default async function InscricaoPage() {
   const { lote, vagasRestantes, preco_centavos } = await determinarLoteAtivo()
   const precoReais = preco_centavos / 100
   const precoPixReais = Number((precoReais * 0.95).toFixed(2))
-  const parcela12x = Number((precoReais / 12).toFixed(2))
   const esgotado = vagasRestantes <= 0
 
   return (
@@ -61,8 +60,8 @@ export default async function InscricaoPage() {
             </div>
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <span className="text-[var(--azuris-cyan)]">●</span>
-              Pix: <strong className="text-[var(--text-primary)]">R$ {precoPixReais.toFixed(2).replace('.', ',')}</strong>
-              {' '}(5% off) · Cartão: 12x de R$ {parcela12x.toFixed(2).replace('.', ',')} sem juros
+              Pix à vista: <strong className="text-[var(--text-primary)]">R$ {precoPixReais.toFixed(2).replace('.', ',')}</strong>
+              {' '}(5% off) · Cartão: R$ {precoReais.toFixed(2).replace('.', ',')} em até 5x (1-2x sem juros)
             </div>
           </div>
         </div>
@@ -78,7 +77,6 @@ export default async function InscricaoPage() {
           <InscricaoForm
             precoBaseReais={precoReais}
             precoPixReais={precoPixReais}
-            parcela12xReais={parcela12x}
           />
         )}
 
