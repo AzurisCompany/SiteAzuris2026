@@ -17,9 +17,9 @@ export default function HomePage() {
       <AzurizBanner />
       <main className="flex-1">
         <Hero />
+        <CourseBanner />
         <Ecosystem />
         <Cases />
-        <CourseBanner />
         <Partners />
         <Stack />
         <HowWeWork />

@@ -12,7 +12,8 @@ const STACK = ["MinIO", "Apache Iceberg", "Spark", "Airflow", "Superset"];
 
 export function CourseBanner() {
   return (
-    <section aria-labelledby="course-banner-title" className="relative px-6 py-16">
+    {/* id/aria sem a palavra "banner": adblocks escondem [id*="banner"] via filtro cosmético */}
+    <section aria-labelledby="curso-lakehouse-home" className="relative px-6 py-16">
       <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border border-cyan-brand/40 bg-slate/40 shadow-2xl shadow-cyan-brand/10">
         {/* Sheen + glows de marca */}
         <div
@@ -36,7 +37,7 @@ export function CourseBanner() {
             </div>
 
             <h2
-              id="course-banner-title"
+              id="curso-lakehouse-home"
               className="mt-4 text-2xl font-semibold tracking-tight md:text-4xl"
             >
               Lakehouse: Pipeline na Prática
@@ -60,7 +61,7 @@ export function CourseBanner() {
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
-                href="/lakehouse-comunidade/inscricao?utm_source=home&utm_medium=banner&utm_campaign=lakehouse-t1-l1"
+                href="/lakehouse-comunidade/inscricao?utm_source=home&utm_medium=destaque&utm_campaign=lakehouse-t1-l1"
                 className="inline-flex items-center gap-2 rounded-xl bg-cyan-brand px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-mist"
               >
                 Garantir vaga <ArrowRight className="size-4" />
