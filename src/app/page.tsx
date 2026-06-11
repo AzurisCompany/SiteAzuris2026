@@ -19,10 +19,10 @@ export default function HomePage() {
         <Hero />
         <Ecosystem />
         <Cases />
+        <CourseBanner />
         <Partners />
         <Stack />
         <HowWeWork />
-        <CourseBanner />
         <Cta />
       </main>
       <Footer />
