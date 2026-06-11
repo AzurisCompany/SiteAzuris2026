@@ -7,6 +7,7 @@ import { Partners } from "@/components/sections/Partners";
 import { Stack } from "@/components/sections/Stack";
 import { HowWeWork } from "@/components/sections/HowWeWork";
 import { Cta } from "@/components/sections/Cta";
+import { CourseCallout } from "@/components/CourseCallout";
 import { Footer } from "@/components/Footer";
 
 export default function HomePage() {
@@ -21,6 +22,9 @@ export default function HomePage() {
         <Partners />
         <Stack />
         <HowWeWork />
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <CourseCallout />
+        </div>
         <Cta />
       </main>
       <Footer />

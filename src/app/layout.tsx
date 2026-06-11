@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
@@ -95,6 +96,19 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-foam">
+        {/* Google Tag (gtag.js) — GA4 via Google tag GT-NNZW5FW (propriedade da Azuris) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=GT-NNZW5FW"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("set", "linker", { "domains": ["azuris.com.br"] });
+gtag("config", "GT-NNZW5FW");`}
+        </Script>
+
         <JsonLd
           data={[organizationSchema, websiteSchema, professionalServiceSchema]}
         />

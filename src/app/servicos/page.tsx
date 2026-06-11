@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/PageHeader";
+import { CourseCallout } from "@/components/CourseCallout";
 import { Cta } from "@/components/sections/Cta";
 import {
   ArrowRight,
@@ -221,6 +222,10 @@ export default function ServicosPage() {
             </div>
           </section>
         </section>
+
+        <div className="mx-auto max-w-5xl px-6 pb-8">
+          <CourseCallout />
+        </div>
 
         <Cta />
       </main>

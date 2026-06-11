@@ -10,7 +10,11 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Cta } from "@/components/sections/Cta";
 import { BlogCover } from "@/components/BlogCover";
+import { CourseCallout } from "@/components/CourseCallout";
 import { JsonLd } from "@/components/JsonLd";
+
+/** Posts cujo tema casa com o curso Lakehouse — recebem o callout do curso. */
+const COURSE_TOPIC = /(lake|hadoop|clickhouse|migrar|custos-big|iceberg|spark|airflow)/i;
 import { getAllSlugs, getAllPosts, getPostBySlug } from "@/lib/posts";
 import { ArrowLeft, Clock } from "lucide-react";
 
@@ -233,6 +237,9 @@ export default async function BlogPostPage(props: PageProps<"/blog/[slug]">) {
                 ))}
               </div>
             ) : null}
+
+            {/* Callout do curso — só em posts de tema data/lakehouse */}
+            {COURSE_TOPIC.test(slug) ? <CourseCallout className="mt-12" /> : null}
           </div>
         </article>
 

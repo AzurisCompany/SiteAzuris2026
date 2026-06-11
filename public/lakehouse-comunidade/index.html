@@ -2,6 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<!-- Google tag (gtag.js) — GA4 GT-NNZW5FW (propriedade Azuris) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-NNZW5FW"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('set','linker',{'domains':['azuris.com.br']});
+gtag('config','GT-NNZW5FW');
+</script>
+<!-- End gtag -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lakehouse: Pipeline na Prática · Curso Online · Azuris</title>
 <meta name="description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Curso online ao vivo com MinIO, Iceberg, Spark, Airflow e Superset. Próxima turma 22/06/2026.">
@@ -20,7 +30,7 @@
 <meta property="og:url" content="https://azuris.com.br/lakehouse-comunidade/">
 <meta property="og:title" content="Lakehouse: Pipeline na Prática · Curso Online · Azuris">
 <meta property="og:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Turma 1: 22/06/2026.">
-<meta property="og:image" content="https://azuris.com.br/lakehouse-comunidade/assets/og-image.png">
+<meta property="og:image" content="https://azuris.com.br/lakehouse-og">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="pt_BR">
@@ -30,7 +40,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lakehouse: Pipeline na Prática">
 <meta name="twitter:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo. Curso online ao vivo. Turma 1: 22/06/2026.">
-<meta name="twitter:image" content="https://azuris.com.br/lakehouse-comunidade/assets/og-image.png">
+<meta name="twitter:image" content="https://azuris.com.br/lakehouse-og">
 
 <style>
 /* Geist — font da marca Azuris (Vercel open-source) */
@@ -1135,7 +1145,6 @@ footer .copy { margin-top: 16px; }
 </style>
 </head>
 <body>
-
 <!-- Background canvas (rede de partículas cyan) -->
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
@@ -1930,6 +1939,75 @@ footer .copy { margin-top: 16px; }
     });
   });
 })();
+</script>
+
+<!-- JSON-LD: Course (rich result de curso no Google) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "Lakehouse: Pipeline na Prática",
+  "description": "Curso online ao vivo de Engenharia de Dados: em 5 semanas você constrói um Pipeline Lakehouse completo, do zero ao dashboard, com MinIO, Apache Iceberg, Apache Spark, Apache Airflow e Apache Superset.",
+  "url": "https://azuris.com.br/lakehouse-comunidade/",
+  "inLanguage": "pt-BR",
+  "provider": {
+    "@type": "Organization",
+    "name": "Azuris",
+    "url": "https://azuris.com.br"
+  },
+  "teaches": ["Arquitetura Lakehouse", "MinIO", "Apache Iceberg", "Apache Spark", "Apache Airflow", "Apache Superset", "Pipelines de dados", "Engenharia de Dados"],
+  "offers": {
+    "@type": "Offer",
+    "category": "Paid",
+    "price": "550.00",
+    "priceCurrency": "BRL",
+    "availability": "https://schema.org/LimitedAvailability",
+    "url": "https://azuris.com.br/lakehouse-comunidade/inscricao"
+  },
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "courseWorkload": "PT20H",
+    "startDate": "2026-06-22",
+    "endDate": "2026-07-27",
+    "inLanguage": "pt-BR",
+    "location": {
+      "@type": "VirtualLocation",
+      "url": "https://azuris.com.br/lakehouse-comunidade/"
+    },
+    "instructor": {
+      "@type": "Person",
+      "name": "Alessandro Binhara",
+      "url": "https://azuris.com.br/sobre"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "550.00",
+      "priceCurrency": "BRL",
+      "url": "https://azuris.com.br/lakehouse-comunidade/inscricao"
+    }
+  }
+}
+</script>
+
+<!-- JSON-LD: FAQPage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Preciso saber Spark ou Airflow antes?", "acceptedAnswer": { "@type": "Answer", "text": "Não. O curso ensina os dois do zero. Assumimos só Python intermediário e SQL básico." } },
+    { "@type": "Question", "name": "Funciona em Mac, Linux e Windows?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Toda a stack roda em Docker — testado nos três sistemas operacionais." } },
+    { "@type": "Question", "name": "E se eu perder uma aula ao vivo?", "acceptedAnswer": { "@type": "Answer", "text": "As aulas ficam gravadas. Mas você perde o hands-on em grupo, que é o melhor do curso — recomendamos não perder." } },
+    { "@type": "Question", "name": "É curso oficial Apache, MEC ou tem pós-graduação?", "acceptedAnswer": { "@type": "Answer", "text": "Não. É curso livre comercial, foco 100% em prática profissional. Você sai com portfólio público, não com certificado de pós." } },
+    { "@type": "Question", "name": "O curso garante uma vaga depois?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Garantimos que você sai com um pipeline funcional no GitHub — recrutadores podem validar sozinhos. O resto é com você, mas a evidência prática vale ouro em entrevista." } },
+    { "@type": "Question", "name": "Quantos alunos por turma?", "acceptedAnswer": { "@type": "Answer", "text": "Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter hands-on individualizado." } },
+    { "@type": "Question", "name": "Por que a Turma 1 tem preço de comunidade?", "acceptedAnswer": { "@type": "Answer", "text": "Os primeiros 40 alunos vêm da base do DSSBR e do GUBigData — pessoas que já participam dos eventos e do grupo de usuários. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497)." } },
+    { "@type": "Question", "name": "O bônus DSSBR vale pra todas as turmas?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Só Turma 1. A partir de setembro/2026 (Turma 2), as inscrições não incluem o ingresso DSSBR — é benefício exclusivo de quem entrar agora, na turma de lançamento." } },
+    { "@type": "Question", "name": "Como funciona a entrega?", "acceptedAnswer": { "@type": "Answer", "text": "Aulas ao vivo via Zoom, comunidade no Discord, gravações no portal do aluno. Após a compra você recebe acesso por e-mail em até 24h." } },
+    { "@type": "Question", "name": "Posso parcelar?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, até 12x no cartão sem juros. Pix tem 5% de desconto adicional." } }
+  ]
+}
 </script>
 </body>
 </html>

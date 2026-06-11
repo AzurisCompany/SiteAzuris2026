@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type FormEvent } from 'react'
+import { gaEvent } from '@/lib/gtag'
 
 interface Props {
   precoBaseReais: number
@@ -88,6 +89,19 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais, parcela12
 
       // Redireciona pro checkout do Asaas
       if (data.invoiceUrl) {
+        gaEvent('begin_checkout', {
+          currency: 'BRL',
+          value: valorCobradoReais,
+          payment_type: billingType,
+          items: [
+            {
+              item_id: 'lakehouse-pipeline',
+              item_name: 'Lakehouse: Pipeline na Prática',
+              price: valorCobradoReais,
+              quantity: 1,
+            },
+          ],
+        })
         window.location.href = data.invoiceUrl
       } else {
         setErro('Resposta inesperada do servidor.')

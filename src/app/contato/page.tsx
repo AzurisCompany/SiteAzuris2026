@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/PageHeader";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/BrandIcons";
+import { LeadLink } from "@/components/LeadLink";
 import cv from "@/lib/cv.json";
 
 export const metadata: Metadata = {
@@ -50,8 +51,9 @@ export default function ContatoPage() {
 
         <section className="mx-auto max-w-4xl px-6 py-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a
+            <LeadLink
               href={`mailto:${cv.email}`}
+              method="email"
               className="group rounded-2xl border border-slate/60 bg-deep p-6 hover:border-cyan-brand/60 transition-colors"
             >
               <Mail className="size-6 text-cyan-brand mb-3" />
@@ -61,9 +63,10 @@ export default function ContatoPage() {
               <div className="text-lg font-medium group-hover:text-cyan-brand">
                 {cv.email}
               </div>
-            </a>
-            <a
+            </LeadLink>
+            <LeadLink
               href={`tel:${cv.phone.replace(/\D/g, "")}`}
+              method="phone"
               className="group rounded-2xl border border-slate/60 bg-deep p-6 hover:border-cyan-brand/60 transition-colors"
             >
               <Phone className="size-6 text-cyan-brand mb-3" />
@@ -73,7 +76,7 @@ export default function ContatoPage() {
               <div className="text-lg font-medium font-mono group-hover:text-cyan-brand">
                 {cv.phone}
               </div>
-            </a>
+            </LeadLink>
             <a
               href={cv.linkedin}
               target="_blank"
