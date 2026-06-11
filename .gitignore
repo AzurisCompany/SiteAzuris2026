@@ -46,3 +46,4 @@ public/cloud-bg.mp4
 
 # Secrets — Asaas webhook shared token (kept only in Vercel env)
 .webhook-token.txt
+.vercel.sandbox-backup/
