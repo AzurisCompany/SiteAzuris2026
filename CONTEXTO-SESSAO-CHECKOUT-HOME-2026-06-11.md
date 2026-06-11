@@ -83,10 +83,11 @@ a36b109 fix: comentário JSX inválido
 
 ## 🎯 Próxima sessão
 
-1. **Testar cartão parcelado em prod** (4x/5x, valor real, estornar depois).
+1. ~~Testar cartão parcelado~~ ✅ FEITO na parte 2 (staging sandbox, ver seção 4
+   abaixo — inclusive com teste real do Binhara no browser, 3x, paid via webhook).
 2. Pendências de sempre: `purchase` via Measurement Protocol no webhook,
    cases Sicredi/Unimed (material em `/mnt/d/2026/siteAzuris2026/cases/`),
-   GitHub auto-deploy, PostHog key, Bing Webmaster.
+   GitHub auto-deploy, PostHog key, Bing Webmaster, marcar Eventos-chave no GA4.
 
 Última revisão: **2026-06-11**.
 
