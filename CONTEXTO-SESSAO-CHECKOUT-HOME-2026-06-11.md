@@ -89,3 +89,43 @@ a36b109 fix: comentário JSX inválido
    GitHub auto-deploy, PostHog key, Bing Webmaster.
 
 Última revisão: **2026-06-11**.
+
+---
+
+## 4. Staging sandbox criado e E2E validado (parte 2 da sessão)
+
+**Projeto Vercel separado `azuris-sandbox`** → https://azuris-sandbox.vercel.app
+(produção intocada).
+
+- **Banco Neon NOVO isolado** (via `vercel integration add neon` no projeto
+  staging) + schema `inscricoes`/`v_vagas_por_lote` aplicado. Testes não
+  consomem vagas reais.
+- Envs no projeto staging: `ASAAS_BASE_URL` sandbox, `ASAAS_WEBHOOK_TOKEN`
+  (mesmo token), `ASAAS_API_KEY` sandbox **NOVA** — a de 22/05 tinha expirado
+  (Asaas expira sandbox keys por inatividade; 401). Nova chave também salva em
+  `.env.development.local`.
+- **Webhook sandbox repontado via API** (PUT /v3/webhooks/632c466a...) pra
+  `https://azuris-sandbox.vercel.app/api/webhook/asaas`. Webhook de produção
+  intocado.
+- `.env.local` agora aponta pro banco do STAGING (pull do projeto sandbox) —
+  bom pra dev local.
+
+### E2E validado (banco do staging)
+
+| id | teste | parcelas | valor | status |
+|---|---|---|---|---|
+| 1 | PIX (Claude) | — | R$ 522,50 | pending (não pago) |
+| 2 | Cartão 5x (Claude, pago via API c/ cartão teste) | 5 | R$ 600,30 | **paid** |
+| 3 | Cartão 3x (**Binhara, fluxo real no browser**) | 3 | R$ 583,20 | **paid** |
+
+Valores batem com a tabela Price (2,99% a.m.) de `src/lib/parcelamento.ts`.
+Webhook → status `paid` automático nos dois pagos. Guard 7x rejeitado.
+**Modelo 1-5x com juros do cliente 100% validado — produção já roda esse código.**
+
+### Como operar o staging depois
+
+- Cartão de teste sandbox: `5162 3062 1937 8829`, validade futura (ex. 05/2028), CVV qualquer.
+- Deploy no staging: `rm -rf .vercel && cp -r .vercel.sandbox-backup .vercel && vercel --prod`
+  e DEPOIS restaurar: `.vercel/project.json` de produção =
+  `{"projectId":"prj_Jitz3rgm66NsPdW3WgvRV7TEjF47","orgId":"team_zKeJA7pJoxEF32yViWYEQmQk","projectName":"site-azuris-2026"}`.
+- `.vercel` atual do repo → produção (verificado com `vercel ls`).
