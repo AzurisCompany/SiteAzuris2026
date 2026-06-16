@@ -11,6 +11,7 @@ import {
   type ResumoProduto,
 } from '@/lib/admin-queries'
 import type { InscricaoRow } from '@/lib/db'
+import Filtros from './Filtros'
 
 export const dynamic = 'force-dynamic'
 
@@ -121,30 +122,8 @@ export default async function VendasPage({
         })}
       </div>
 
-      {/* Filtros (form GET) — produto vai no campo oculto (controlado pelas abas) */}
-      <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
-        <input type="hidden" name="curso" value={curso} />
-        <select name="status" defaultValue={status} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
-          <option value="">Todos os status</option>
-          {Object.entries(STATUS_LABEL).map(([s, label]) => (
-            <option key={s} value={s}>{label}</option>
-          ))}
-        </select>
-        <select name="billing" defaultValue={billing} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
-          <option value="">PIX e cartão</option>
-          <option value="PIX">PIX</option>
-          <option value="CREDIT_CARD">Cartão</option>
-        </select>
-        <input
-          name="busca"
-          defaultValue={busca}
-          placeholder="nome, email ou CPF"
-          className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm placeholder:text-[var(--text-muted)]"
-        />
-        <button type="submit" className="rounded-lg bg-[var(--azuris-cyan)] px-4 py-2 text-sm font-bold text-[var(--azuris-ink)] hover:brightness-110">
-          Filtrar
-        </button>
-      </form>
+      {/* Filtros — aplicam sozinhos (selects na hora, busca com debounce) */}
+      <Filtros curso={curso} status={status} billing={billing} busca={busca} />
 
       {erro && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>
