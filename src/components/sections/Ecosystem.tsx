@@ -18,12 +18,12 @@ const PRODUCTS: Product[] = [
   {
     name: "DSSBR 2026",
     tagline:
-      "Data Science Summit Brasil — uma das maiores conferências de Dados & IA do país. Fundada e curada pela Azuris.",
-    href: "https://dssbr.com.br",
-    external: true,
+      "Data Science Summit Brasil — uma das maiores conferências de Dados & IA do país. Fundada e curada pela Azuris. 27 a 29 de outubro, Curitiba.",
+    href: "/dssbr-2026",
+    badge: "🎟️ Pré-venda aberta",
     className: "md:col-span-2 md:row-span-2",
     emoji: "🇧🇷",
-    image: "/products/cloud.webp",
+    image: "https://dssbr.com.br/assets/photos/dss2025-012.jpg",
   },
   {
     name: "English Talk Time",

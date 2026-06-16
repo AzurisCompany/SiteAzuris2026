@@ -33,7 +33,7 @@ export const sql = new Proxy(((..._args: unknown[]) => {}) as unknown as NeonQue
 
 export type BillingType = 'PIX' | 'CREDIT_CARD'
 export type InscricaoStatus = 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
-export type Lote = 'lote1' | 'lote2'
+export type Lote = 'lote1' | 'lote2' | 'unico'
 
 export interface InscricaoRow {
   id: number
@@ -62,7 +62,7 @@ export interface InscricaoRow {
 
 // --- Capacidade de lote ---
 
-export const LOTE_CAPACIDADE: Record<Lote, number> = {
+export const LOTE_CAPACIDADE: Record<'lote1' | 'lote2', number> = {
   lote1: 15,
   lote2: 20,
 }

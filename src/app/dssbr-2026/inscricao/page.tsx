@@ -1,0 +1,83 @@
+import type { Metadata } from 'next'
+import { getProduto } from '@/lib/produtos'
+import InscricaoForm from './InscricaoForm'
+
+const PRODUTO = getProduto('dss-2026')
+
+export const metadata: Metadata = {
+  title: 'Inscrição — Data Science Summit Brasil 2026',
+  description:
+    'Garanta sua vaga na pré-venda do DSS 2026. PIX à vista ou cartão em até 3x (1x à vista, 2x-3x com juros).',
+  robots: { index: false, follow: false }, // página de checkout, sem indexação
+}
+
+export const dynamic = 'force-dynamic'
+
+export default function InscricaoPage() {
+  const precoCheioReais = PRODUTO.precoCentavos / 100
+  const precoPixReais = Number((precoCheioReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
+  const precoCartaoBaseReais = Number((precoCheioReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+
+  return (
+    <main className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        <a
+          href={PRODUTO.voltarUrl}
+          className="text-sm text-[var(--text-secondary)] hover:text-[var(--azuris-cyan)] transition-colors"
+        >
+          {PRODUTO.voltarLabel}
+        </a>
+
+        <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">
+          Sua inscrição no <span className="text-[var(--azuris-cyan)]">Data Science Summit Brasil 2026</span>
+        </h1>
+
+        {/* Resumo do ingresso */}
+        <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+                Pré-venda · Lote 1
+              </div>
+              <div className="mt-1 text-3xl font-black">
+                R$ {precoPixReais.toFixed(2).replace('.', ',')}
+                <span className="ml-2 text-base font-semibold text-[var(--text-muted)]">no PIX</span>
+              </div>
+            </div>
+            <span className="inline-flex items-center rounded-full bg-[var(--accent-emerald)]/15 px-3 py-1 text-xs font-semibold text-[var(--accent-emerald)]">
+              {PRODUTO.descricao}
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <span className="text-[var(--azuris-cyan)]">●</span>
+              3 dias de evento · 120 palestras · 98 palestrantes · 14 workshops · 9 mesas-redondas
+            </div>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <span className="text-[var(--azuris-cyan)]">●</span>
+              Networking, rodadas de negócio, pitches de startups e festa de encerramento
+            </div>
+            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <span className="text-[var(--azuris-cyan)]">●</span>
+              PIX à vista: <strong className="text-[var(--text-primary)]">R$ {precoPixReais.toFixed(2).replace('.', ',')}</strong>
+              {' '}(10% off) · Cartão: R$ {precoCartaoBaseReais.toFixed(2).replace('.', ',')} em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros)
+            </div>
+          </div>
+        </div>
+
+        <InscricaoForm
+          precoCheioReais={precoCheioReais}
+          precoPixReais={precoPixReais}
+          precoCartaoBaseReais={precoCartaoBaseReais}
+          maxParcelas={PRODUTO.maxParcelas}
+          pixDescontoPct={PRODUTO.pixDescontoPct}
+        />
+
+        <p className="mt-8 text-xs text-[var(--text-muted)] text-center">
+          Pagamento processado pelo Asaas com segurança. Seus dados são usados apenas pra emissão da cobrança e contato sobre o evento.
+        </p>
+      </div>
+    </main>
+  )
+}
