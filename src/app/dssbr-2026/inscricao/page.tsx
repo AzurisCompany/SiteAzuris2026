@@ -14,9 +14,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default function InscricaoPage() {
-  const precoCheioReais = PRODUTO.precoCentavos / 100
-  const precoPixReais = Number((precoCheioReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
-  const precoCartaoBaseReais = Number((precoCheioReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+  const precoBaseReais = PRODUTO.precoCentavos / 100
+  const precoDeVendaReais = PRODUTO.precoDeVendaCentavos / 100
+  const precoPixReais = Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
+  const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
 
   return (
     <main className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
@@ -39,7 +40,10 @@ export default function InscricaoPage() {
               <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
                 Pré-venda · Lote 1
               </div>
-              <div className="mt-1 text-3xl font-black">
+              <div className="mt-1 text-sm text-[var(--text-muted)] line-through">
+                R$ {precoDeVendaReais.toFixed(2).replace('.', ',')} no lote final
+              </div>
+              <div className="text-3xl font-black">
                 R$ {precoPixReais.toFixed(2).replace('.', ',')}
                 <span className="ml-2 text-base font-semibold text-[var(--text-muted)]">no PIX</span>
               </div>
@@ -61,17 +65,16 @@ export default function InscricaoPage() {
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <span className="text-[var(--azuris-cyan)]">●</span>
               PIX à vista: <strong className="text-[var(--text-primary)]">R$ {precoPixReais.toFixed(2).replace('.', ',')}</strong>
-              {' '}(10% off) · Cartão: R$ {precoCartaoBaseReais.toFixed(2).replace('.', ',')} em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros)
+              {' '}· Cartão: R$ {precoCartaoBaseReais.toFixed(2).replace('.', ',')} em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros)
             </div>
           </div>
         </div>
 
         <InscricaoForm
-          precoCheioReais={precoCheioReais}
+          precoDeVendaReais={precoDeVendaReais}
           precoPixReais={precoPixReais}
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={PRODUTO.maxParcelas}
-          pixDescontoPct={PRODUTO.pixDescontoPct}
         />
 
         <p className="mt-8 text-xs text-[var(--text-muted)] text-center">

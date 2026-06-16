@@ -7,9 +7,11 @@ const PRODUTO = getProduto('dss-2026')
 const DSS = 'https://dssbr.com.br'
 const CHECKOUT = '/dssbr-2026/inscricao?utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
 
-const precoCheio = PRODUTO.precoCentavos / 100
-const precoPix = Number((precoCheio * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
-const precoCartao = Number((precoCheio * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+const precoBase = PRODUTO.precoCentavos / 100
+const precoDeVenda = PRODUTO.precoDeVendaCentavos / 100
+const precoPix = Number((precoBase * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
+const precoCartao = Number((precoBase * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+const descontoPct = Math.round((1 - precoPix / precoDeVenda) * 100)
 const brl = (v: number) => v.toFixed(2).replace('.', ',')
 
 export const metadata: Metadata = {
@@ -150,7 +152,7 @@ export default function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            Pré-venda · Lote 1 · R$ {brl(precoPix)} no PIX (10% off) · cartão R$ {brl(precoCartao)} em até {PRODUTO.maxParcelas}x.
+            Pré-venda · de <span className="line-through">R$ {brl(precoDeVenda)}</span> por R$ {brl(precoPix)} no PIX · cartão em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros).
           </p>
         </div>
       </section>
@@ -293,12 +295,12 @@ export default function DssbrLandingPage() {
 
           <div className="mt-8 rounded-2xl border border-slate/60 bg-gradient-to-br from-deep to-ink p-8">
             <div className="text-xs uppercase tracking-widest text-foam/40">Pré-venda · Lote 1 · FullPass 3 dias</div>
-            <div className="mt-2 text-sm text-foam/40 line-through">R$ {brl(precoCheio)}</div>
+            <div className="mt-2 text-sm text-foam/40 line-through">R$ {brl(precoDeVenda)} no lote final</div>
             <div className="mt-1 text-5xl font-black">
               R$ {brl(precoPix)} <span className="text-xl font-semibold text-foam/50">no PIX</span>
             </div>
             <div className="mt-2 text-sm text-foam/60">
-              10% de desconto no PIX · ou cartão R$ {brl(precoCartao)} em até {PRODUTO.maxParcelas}x
+              {descontoPct}% mais barato que o lote final · ou cartão R$ {brl(precoCartao)} em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros)
             </div>
             <ul className="mt-6 space-y-2 text-sm text-foam/70 text-left max-w-sm mx-auto">
               <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Acesso aos 3 dias de evento</li>

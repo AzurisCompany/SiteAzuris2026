@@ -68,16 +68,16 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error }, { status: 400 })
 
   // Preço SEMPRE do registry (nunca confiar no client).
-  // PIX: preço cheio com desconto. Cartão: preço cheio + acréscimo (base do cartão),
-  // 1x à vista ou 2x–maxParcelas com juros embutidos sobre essa base — ver [[parcelamento]].
-  const precoCheioReais = PRODUTO.precoCentavos / 100
-  const precoCartaoBaseReais = Number((precoCheioReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+  // Base = preço de pré-venda. PIX: base − descontoPct (hoje 0). Cartão: base + acréscimoPct
+  // (hoje 0) = base do cartão; 1x à vista ou 2x–maxParcelas com juros sobre essa base — ver [[parcelamento]].
+  const precoBaseReais = PRODUTO.precoCentavos / 100
+  const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
   const installments =
     body.billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), PRODUTO.maxParcelas) : 1
   const installmentValueReais = valorParcela(precoCartaoBaseReais, installments)
   const valorCobradoReais =
     body.billing_type === 'PIX'
-      ? Number((precoCheioReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
+      ? Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
       : totalComJuros(precoCartaoBaseReais, installments)
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
 

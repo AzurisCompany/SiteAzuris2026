@@ -5,14 +5,13 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 
 interface Props {
-  /** preço cheio de referência (ex.: R$ 470) */
-  precoCheioReais: number
-  /** preço no PIX, já com desconto (ex.: R$ 423) */
+  /** preço cheio de venda (lote final / no dia) — âncora "de" riscada (ex.: R$ 820) */
+  precoDeVendaReais: number
+  /** preço no PIX à vista (ex.: R$ 470) */
   precoPixReais: number
-  /** preço-base do cartão à vista, já com acréscimo (ex.: R$ 517) */
+  /** preço-base do cartão à vista; 2x+ com juros sobre essa base (ex.: R$ 470) */
   precoCartaoBaseReais: number
   maxParcelas: number
-  pixDescontoPct: number
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -38,7 +37,7 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoForm({ precoCheioReais, precoPixReais, precoCartaoBaseReais, maxParcelas, pixDescontoPct }: Props) {
+export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoCartaoBaseReais, maxParcelas }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [cpfCnpj, setCpfCnpj] = useState('')
@@ -50,7 +49,10 @@ export default function InscricaoForm({ precoCheioReais, precoPixReais, precoCar
 
   const [utm, setUtm] = useState<{ source?: string; medium?: string; campaign?: string; content?: string; term?: string }>({})
 
-  const temDescontoPix = pixDescontoPct > 0
+  // Pré-venda: ambos os pagamentos partem do preço de pré-venda; mostramos o
+  // preço cheio de venda riscado como âncora (o que vai custar no lote final).
+  const temAncora = precoDeVendaReais > precoPixReais
+  const descontoPct = temAncora ? Math.round((1 - precoPixReais / precoDeVendaReais) * 100) : 0
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -200,18 +202,18 @@ export default function InscricaoForm({ precoCheioReais, precoPixReais, precoCar
             />
             <div className="flex items-center justify-between mb-1">
               <span className="font-bold">PIX</span>
-              {temDescontoPix && (
+              {temAncora && (
                 <span className="text-xs font-bold text-[var(--accent-emerald)]">
-                  -{Math.round(pixDescontoPct * 100)}%
+                  -{descontoPct}%
                 </span>
               )}
             </div>
-            {temDescontoPix && (
-              <div className="text-xs text-[var(--text-muted)] line-through">R$ {precoCheioReais.toFixed(2).replace('.', ',')}</div>
+            {temAncora && (
+              <div className="text-xs text-[var(--text-muted)] line-through">R$ {precoDeVendaReais.toFixed(2).replace('.', ',')}</div>
             )}
             <div className="text-2xl font-black">R$ {precoPixReais.toFixed(2).replace('.', ',')}</div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">
-              {temDescontoPix ? `À vista, com ${Math.round(pixDescontoPct * 100)}% de desconto` : 'À vista, aprovação na hora'}
+              À vista, aprovação na hora
             </div>
           </label>
 
@@ -232,6 +234,9 @@ export default function InscricaoForm({ precoCheioReais, precoPixReais, precoCar
               <span className="font-bold">Cartão</span>
               <span className="text-xs text-[var(--text-muted)]">em até {maxParcelas}x</span>
             </div>
+            {temAncora && (
+              <div className="text-xs text-[var(--text-muted)] line-through">R$ {precoDeVendaReais.toFixed(2).replace('.', ',')}</div>
+            )}
             <div className="text-2xl font-black">R$ {precoCartaoBaseReais.toFixed(2).replace('.', ',')}</div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">
               1x à vista · 2x a {maxParcelas}x com juros do cartão
