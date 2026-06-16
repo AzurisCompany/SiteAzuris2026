@@ -1,6 +1,7 @@
 "use client";
 
 import posthog from "posthog-js";
+import { usePathname } from "next/navigation";
 import { gaEvent } from "@/lib/gtag";
 
 const PHONE = "5541998003687"; // +55 (41) 99800-3687
@@ -8,6 +9,9 @@ const PREFILL = "Oi Binhara, vim pelo site da Azuris e quero conversar sobre ";
 const HREF = `https://wa.me/${PHONE}?text=${encodeURIComponent(PREFILL)}`;
 
 export function WhatsAppFab() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
+
   const onClick = () => {
     gaEvent("generate_lead", { method: "whatsapp", source: window.location.pathname });
     try {

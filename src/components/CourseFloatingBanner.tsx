@@ -15,7 +15,7 @@ import { gaEvent } from "@/lib/gtag";
  */
 
 const KEY = "course_floating_dismissed";
-const HIDE_PREFIXES = ["/lakehouse-comunidade", "/produtos/curso-pipelines", "/azuriz"];
+const HIDE_PREFIXES = ["/lakehouse-comunidade", "/produtos/curso-pipelines", "/azuriz", "/admin"];
 
 export function CourseFloatingBanner() {
   const pathname = usePathname();

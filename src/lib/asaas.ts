@@ -123,6 +123,41 @@ export async function createPayment(input: CreatePaymentInput): Promise<AsaasPay
   return payment as AsaasPayment
 }
 
+/** Detalhe de uma cobrança (GET /payments/{id}). */
+export interface AsaasPaymentDetail extends AsaasPayment {
+  dueDate: string
+  paymentDate?: string | null
+  clientPaymentDate?: string | null
+  confirmedDate?: string | null
+}
+
+export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail> {
+  const p = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' })
+  return p as AsaasPaymentDetail
+}
+
+/** Mapeia o status cru do Asaas pro nosso status normalizado. */
+export function mapAsaasStatus(status: string): 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded' {
+  switch (status) {
+    case 'RECEIVED':
+    case 'CONFIRMED':
+    case 'RECEIVED_IN_CASH':
+      return 'paid'
+    case 'OVERDUE':
+      return 'overdue'
+    case 'REFUNDED':
+    case 'REFUND_REQUESTED':
+    case 'CHARGEBACK_REQUESTED':
+    case 'CHARGEBACK_DISPUTE':
+    case 'AWAITING_CHARGEBACK_REVERSAL':
+      return 'refunded'
+    case 'DELETED':
+      return 'cancelled'
+    default:
+      return 'pending'
+  }
+}
+
 // --- Webhook event types ---
 
 export type AsaasEvent =

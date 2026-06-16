@@ -7,7 +7,7 @@
 // Token: valor de ASAAS_WEBHOOK_TOKEN (header asaas-access-token)
 
 import { NextResponse } from 'next/server'
-import { atualizarStatusPorAsaasId, type InscricaoStatus } from '@/lib/db'
+import { atualizarStatusPorAsaasId, registrarEvento, type InscricaoStatus } from '@/lib/db'
 import type { AsaasEvent, AsaasWebhookPayload } from '@/lib/asaas'
 
 export const runtime = 'nodejs'
@@ -47,6 +47,13 @@ export async function POST(request: Request) {
 
   if (!event || !paymentId) {
     return NextResponse.json({ error: 'payload incompleto' }, { status: 400 })
+  }
+
+  // Auditoria: grava todo evento cru (não bloqueia o fluxo se falhar)
+  try {
+    await registrarEvento(paymentId, event, payload.payment)
+  } catch (e) {
+    console.error('Falha ao registrar evento Asaas:', e)
   }
 
   const newStatus = EVENT_TO_STATUS[event]

@@ -1,0 +1,175 @@
+import Link from 'next/link'
+import {
+  listarVendas,
+  labelProduto,
+  brl,
+  PRODUTO_LABEL,
+  STATUS_LABEL,
+  STATUS_COR,
+} from '@/lib/admin-queries'
+import type { InscricaoRow } from '@/lib/db'
+
+export const dynamic = 'force-dynamic'
+
+const PAGE_SIZE = 50
+
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COR[status] ?? ''}`}>
+      {STATUS_LABEL[status] ?? status}
+    </span>
+  )
+}
+
+function fmtData(iso: string): string {
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+}
+
+export default async function VendasPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>
+}) {
+  const sp = await searchParams
+  const curso = sp.curso || ''
+  const status = sp.status || ''
+  const billing = sp.billing || ''
+  const busca = sp.busca || ''
+  const page = Math.max(Number(sp.page ?? '1') || 1, 1)
+
+  let rows: InscricaoRow[] = []
+  let total = 0
+  let erro: string | null = null
+  try {
+    const res = await listarVendas({
+      curso,
+      status,
+      billing,
+      busca,
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    })
+    rows = res.rows
+    total = res.total
+  } catch (e) {
+    erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
+  }
+
+  const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
+  const qs = (p: number) => {
+    const u = new URLSearchParams()
+    if (curso) u.set('curso', curso)
+    if (status) u.set('status', status)
+    if (billing) u.set('billing', billing)
+    if (busca) u.set('busca', busca)
+    u.set('page', String(p))
+    return `?${u.toString()}`
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-end justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Vendas</h1>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">{total} registro(s)</p>
+        </div>
+      </div>
+
+      {/* Filtros (form GET) */}
+      <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
+        <select name="curso" defaultValue={curso} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
+          <option value="">Todos os produtos</option>
+          {Object.entries(PRODUTO_LABEL).map(([slug, label]) => (
+            <option key={slug} value={slug}>{label}</option>
+          ))}
+        </select>
+        <select name="status" defaultValue={status} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
+          <option value="">Todos os status</option>
+          {Object.entries(STATUS_LABEL).map(([s, label]) => (
+            <option key={s} value={s}>{label}</option>
+          ))}
+        </select>
+        <select name="billing" defaultValue={billing} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
+          <option value="">PIX e cartão</option>
+          <option value="PIX">PIX</option>
+          <option value="CREDIT_CARD">Cartão</option>
+        </select>
+        <input
+          name="busca"
+          defaultValue={busca}
+          placeholder="nome, email ou CPF"
+          className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm placeholder:text-[var(--text-muted)]"
+        />
+        <button type="submit" className="rounded-lg bg-[var(--azuris-cyan)] px-4 py-2 text-sm font-bold text-[var(--azuris-ink)] hover:brightness-110">
+          Filtrar
+        </button>
+      </form>
+
+      {erro && (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>
+      )}
+
+      {/* Tabela */}
+      <div className="overflow-x-auto rounded-xl border border-[var(--azuris-surface)]">
+        <table className="w-full text-sm">
+          <thead className="bg-[var(--azuris-deep)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
+            <tr>
+              <th className="px-4 py-3">Cliente</th>
+              <th className="px-4 py-3">Produto</th>
+              <th className="px-4 py-3">Valor</th>
+              <th className="px-4 py-3">Pgto</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Data</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--azuris-surface)]">
+            {rows.map((r) => (
+              <tr key={r.id} className="hover:bg-[var(--azuris-deep)]/50">
+                <td className="px-4 py-3">
+                  <Link href={`/admin/vendas/${r.id}`} className="font-medium hover:text-[var(--azuris-cyan)]">
+                    {r.nome}
+                  </Link>
+                  <div className="text-xs text-[var(--text-muted)]">{r.email}</div>
+                </td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">{labelProduto(r.curso_slug)}</td>
+                <td className="px-4 py-3">
+                  {brl(r.valor_centavos)}
+                  {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}
+                </td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">{r.billing_type === 'PIX' ? 'PIX' : 'Cartão'}</td>
+                <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+                <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
+              </tr>
+            ))}
+            {rows.length === 0 && !erro && (
+              <tr>
+                <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                  Nenhuma venda encontrada com esses filtros.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-[var(--text-muted)]">Página {page} de {totalPages}</span>
+          <div className="flex gap-2">
+            {page > 1 && (
+              <Link href={qs(page - 1)} className="rounded-lg border border-[var(--azuris-surface)] px-3 py-1.5 hover:border-[var(--azuris-cyan)]/40">
+                ← Anterior
+              </Link>
+            )}
+            {page < totalPages && (
+              <Link href={qs(page + 1)} className="rounded-lg border border-[var(--azuris-surface)] px-3 py-1.5 hover:border-[var(--azuris-cyan)]/40">
+                Próxima →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

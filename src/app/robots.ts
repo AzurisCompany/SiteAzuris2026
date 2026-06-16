@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/azuriz"],
+        disallow: ["/api/", "/_next/", "/azuriz", "/admin"],
       },
     ],
     sitemap: "https://azuris.com.br/sitemap.xml",

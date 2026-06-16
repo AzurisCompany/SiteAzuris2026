@@ -58,6 +58,22 @@ export interface InscricaoRow {
   created_at: string
   updated_at: string
   paid_at: string | null
+  // --- dados extras do cliente (capturados no checkout) ---
+  empresa: string | null
+  cargo: string | null
+  pessoa_tipo: 'PF' | 'PJ' | null
+  razao_social: string | null
+  nf_endereco: Record<string, string> | null
+  como_conheceu: string | null
+  consentimento_lgpd: boolean
+  consentimento_em: string | null
+  // --- consolidação financeira (Asaas) ---
+  valor_liquido_centavos: number | null
+  taxa_centavos: number | null
+  due_date: string | null
+  asaas_status: string | null
+  pago_em: string | null
+  last_synced_at: string | null
 }
 
 // --- Capacidade de lote ---
@@ -147,6 +163,50 @@ export async function atualizarStatusPorAsaasId(
     UPDATE inscricoes
        SET status = ${status},
            paid_at = ${paid_at},
+           updated_at = NOW()
+     WHERE asaas_payment_id = ${asaas_payment_id}
+    RETURNING *
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/** Grava um evento de webhook do Asaas, cru, pra auditoria/histórico. */
+export async function registrarEvento(
+  asaas_payment_id: string | null,
+  event: string,
+  payload: unknown
+): Promise<void> {
+  await sql`
+    INSERT INTO asaas_eventos (asaas_payment_id, event, payload)
+    VALUES (${asaas_payment_id}, ${event}, ${JSON.stringify(payload)}::jsonb)
+  `
+}
+
+/** Consolida os dados financeiros vindos do Asaas (sincronização ou webhook). */
+export interface ConsolidacaoAsaas {
+  status: InscricaoStatus
+  asaas_status: string
+  valor_liquido_centavos: number | null
+  taxa_centavos: number | null
+  due_date: string | null
+  pago_em: string | null
+  paid_at: string | null
+}
+
+export async function consolidarAsaas(
+  asaas_payment_id: string,
+  c: ConsolidacaoAsaas
+): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET status = ${c.status},
+           asaas_status = ${c.asaas_status},
+           valor_liquido_centavos = ${c.valor_liquido_centavos},
+           taxa_centavos = ${c.taxa_centavos},
+           due_date = ${c.due_date},
+           pago_em = ${c.pago_em},
+           paid_at = COALESCE(${c.paid_at}, paid_at),
+           last_synced_at = NOW(),
            updated_at = NOW()
      WHERE asaas_payment_id = ${asaas_payment_id}
     RETURNING *
