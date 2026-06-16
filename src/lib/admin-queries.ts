@@ -9,6 +9,15 @@ export function labelProduto(slug: string): string {
   return PRODUTO_LABEL[slug] ?? slug
 }
 
+/** Rótulo curto pras abas da lista de vendas. */
+export const PRODUTO_TAB: Record<string, string> = {
+  'dss-2026': 'Ingressos DSS',
+  'lakehouse-comunidade': 'Curso',
+}
+export function tabProduto(slug: string): string {
+  return PRODUTO_TAB[slug] ?? slug
+}
+
 export const STATUS_LABEL: Record<string, string> = {
   pending: 'Pendente',
   paid: 'Pago',

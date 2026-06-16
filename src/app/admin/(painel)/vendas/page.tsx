@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import {
   listarVendas,
+  resumoFinanceiro,
   labelProduto,
+  tabProduto,
   brl,
   PRODUTO_LABEL,
   STATUS_LABEL,
   STATUS_COR,
+  type ResumoProduto,
 } from '@/lib/admin-queries'
 import type { InscricaoRow } from '@/lib/db'
 
@@ -40,20 +43,40 @@ export default async function VendasPage({
   let rows: InscricaoRow[] = []
   let total = 0
   let erro: string | null = null
+  let resumo: ResumoProduto[] = []
   try {
-    const res = await listarVendas({
-      curso,
-      status,
-      billing,
-      busca,
-      limit: PAGE_SIZE,
-      offset: (page - 1) * PAGE_SIZE,
-    })
+    const [res, r] = await Promise.all([
+      listarVendas({ curso, status, billing, busca, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+      resumoFinanceiro(),
+    ])
     rows = res.rows
     total = res.total
+    resumo = r
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
+
+  // Contagem por produto pras abas
+  const countPorCurso: Record<string, number> = {}
+  let countTodos = 0
+  for (const r of resumo) {
+    countPorCurso[r.curso_slug] = r.criadas
+    countTodos += r.criadas
+  }
+  // Link de aba preservando os outros filtros (status/billing/busca), resetando página
+  const tabHref = (slug: string) => {
+    const u = new URLSearchParams()
+    if (slug) u.set('curso', slug)
+    if (status) u.set('status', status)
+    if (billing) u.set('billing', billing)
+    if (busca) u.set('busca', busca)
+    const s = u.toString()
+    return s ? `?${s}` : '/admin/vendas'
+  }
+  const abas = [
+    { slug: '', label: 'Todos', count: countTodos },
+    ...Object.keys(PRODUTO_LABEL).map((slug) => ({ slug, label: tabProduto(slug), count: countPorCurso[slug] ?? 0 })),
+  ]
 
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
   const qs = (p: number) => {
@@ -75,14 +98,32 @@ export default async function VendasPage({
         </div>
       </div>
 
-      {/* Filtros (form GET) */}
-      <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
-        <select name="curso" defaultValue={curso} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
-          <option value="">Todos os produtos</option>
-          {Object.entries(PRODUTO_LABEL).map(([slug, label]) => (
-            <option key={slug} value={slug}>{label}</option>
-          ))}
-        </select>
+      {/* Abas por produto */}
+      <div className="flex flex-wrap gap-1 border-b border-[var(--azuris-surface)]">
+        {abas.map((aba) => {
+          const ativa = curso === aba.slug
+          return (
+            <Link
+              key={aba.slug || 'todos'}
+              href={tabHref(aba.slug)}
+              className={`-mb-px rounded-t-lg border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                ativa
+                  ? 'border-[var(--azuris-cyan)] text-[var(--azuris-cyan)]'
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {aba.label}
+              <span className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${ativa ? 'bg-[var(--azuris-cyan)]/15' : 'bg-[var(--azuris-surface)]'}`}>
+                {aba.count}
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Filtros (form GET) — produto vai no campo oculto (controlado pelas abas) */}
+      <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
+        <input type="hidden" name="curso" value={curso} />
         <select name="status" defaultValue={status} className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm">
           <option value="">Todos os status</option>
           {Object.entries(STATUS_LABEL).map(([s, label]) => (
