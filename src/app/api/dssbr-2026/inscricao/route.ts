@@ -4,17 +4,18 @@
 // O webhook /api/webhook/asaas (compartilhado, agnóstico de produto) confirma o pagamento.
 
 import { NextResponse } from 'next/server'
-import { criarInscricao, type BillingType } from '@/lib/db'
+import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, type BillingType } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import { getProduto } from '@/lib/produtos'
+import { normalizarExtras, type ExtrasInput } from '@/lib/checkout-extras'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const PRODUTO = getProduto('dss-2026')
 
-interface RequestBody {
+interface RequestBody extends ExtrasInput {
   nome: string
   email: string
   cpf_cnpj: string
@@ -53,6 +54,8 @@ function validate(body: RequestBody): string | null {
     const n = body.installments ?? 1
     if (!Number.isInteger(n) || n < 1 || n > PRODUTO.maxParcelas) return `Parcelamento inválido (1 a ${PRODUTO.maxParcelas})`
   }
+
+  if (body.consentimento !== true) return 'É necessário aceitar os termos de uso dos dados (LGPD)'
   return null
 }
 
@@ -80,9 +83,39 @@ export async function POST(request: Request) {
       ? Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
       : totalComJuros(precoCartaoBaseReais, installments)
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
+  const extras = normalizarExtras(body)
 
-  // Cria/recupera customer no Asaas
+  // 1. Grava a inscrição como 'pending' ANTES do Asaas — lead garantido mesmo se o Asaas falhar.
+  let inscricaoId: number
+  try {
+    const insc = await criarInscricaoPendente({
+      curso_slug: PRODUTO.slug,
+      lote: 'unico',
+      nome: body.nome.trim(),
+      email: body.email.trim().toLowerCase(),
+      cpf_cnpj: onlyDigits(body.cpf_cnpj),
+      telefone: body.telefone ? onlyDigits(body.telefone) : null,
+      billing_type: body.billing_type,
+      valor_centavos: valorCobradoCentavos,
+      installments,
+      utm_source: body.utm?.source ?? null,
+      utm_medium: body.utm?.medium ?? null,
+      utm_campaign: body.utm?.campaign ?? null,
+      utm_content: body.utm?.content ?? null,
+      utm_term: body.utm?.term ?? null,
+      ...extras,
+      consentimento_lgpd: true,
+      consentimento_em: new Date().toISOString(),
+    })
+    inscricaoId = insc.id
+  } catch (e) {
+    console.error('Falha ao registrar inscrição DSS no DB:', e)
+    return NextResponse.json({ error: 'Falha ao registrar inscrição. Tenta de novo.' }, { status: 500 })
+  }
+
+  // 2+3. Cliente + cobrança no Asaas
   let customer
+  let payment
   try {
     customer = await findOrCreateCustomer({
       name: body.nome.trim(),
@@ -90,14 +123,6 @@ export async function POST(request: Request) {
       cpfCnpj: onlyDigits(body.cpf_cnpj),
       mobilePhone: body.telefone ? onlyDigits(body.telefone) : null,
     })
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'erro desconhecido'
-    return NextResponse.json({ error: `Falha ao criar cliente: ${msg}` }, { status: 502 })
-  }
-
-  // Cria cobrança no Asaas
-  let payment
-  try {
     payment = await createPayment({
       customerId: customer.id,
       billingType: body.billing_type,
@@ -109,34 +134,27 @@ export async function POST(request: Request) {
       installmentValueReais: installments > 1 ? installmentValueReais : undefined,
     })
   } catch (e) {
+    // Cobrança não saiu — cancela a inscrição pendente (mantém o lead, libera vaga).
+    await cancelarInscricao(inscricaoId).catch(() => {})
     const msg = e instanceof Error ? e.message : 'erro desconhecido'
     return NextResponse.json({ error: `Falha ao criar cobrança: ${msg}` }, { status: 502 })
   }
 
-  // Salva inscrição no DB (status 'pending' default)
+  // 4. Vincula os dados do Asaas (líquido/taxa/vencimento já na criação).
   try {
-    await criarInscricao({
-      curso_slug: PRODUTO.slug,
-      lote: 'unico',
-      nome: body.nome.trim(),
-      email: body.email.trim().toLowerCase(),
-      cpf_cnpj: onlyDigits(body.cpf_cnpj),
-      telefone: body.telefone ? onlyDigits(body.telefone) : null,
-      billing_type: body.billing_type,
-      valor_centavos: valorCobradoCentavos,
-      installments,
+    const bruto = typeof payment.value === 'number' ? Math.round(payment.value * 100) : null
+    const liquido = typeof payment.netValue === 'number' ? Math.round(payment.netValue * 100) : null
+    await vincularAsaas(inscricaoId, {
       asaas_customer_id: customer.id,
       asaas_payment_id: payment.id,
       asaas_invoice_url: payment.invoiceUrl,
-      utm_source: body.utm?.source ?? null,
-      utm_medium: body.utm?.medium ?? null,
-      utm_campaign: body.utm?.campaign ?? null,
-      utm_content: body.utm?.content ?? null,
-      utm_term: body.utm?.term ?? null,
+      valor_liquido_centavos: liquido,
+      taxa_centavos: bruto != null && liquido != null ? bruto - liquido : null,
+      due_date: payment.dueDate ?? null,
+      asaas_status: payment.status ?? null,
     })
   } catch (e) {
-    // Asaas já criou — não desfazemos. Webhook ainda vai atualizar quando pagar.
-    console.error('Falha ao salvar inscrição DSS no DB (cobrança Asaas criada):', e)
+    console.error('Cobrança criada mas falha ao vincular Asaas (webhook/sync corrige):', e)
   }
 
   return NextResponse.json({

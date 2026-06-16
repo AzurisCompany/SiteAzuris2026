@@ -116,7 +116,7 @@ export async function determinarLoteAtivo(): Promise<{
 
 // --- CRUD ---
 
-export interface NovaInscricao {
+export interface NovaInscricaoPendente {
   curso_slug: string
   lote: Lote
   nome: string
@@ -126,32 +126,77 @@ export interface NovaInscricao {
   billing_type: BillingType
   valor_centavos: number
   installments: number
-  asaas_customer_id: string | null
-  asaas_payment_id: string | null
-  asaas_invoice_url: string | null
   utm_source: string | null
   utm_medium: string | null
   utm_campaign: string | null
   utm_content: string | null
   utm_term: string | null
+  // dados extras
+  empresa: string | null
+  cargo: string | null
+  pessoa_tipo: 'PF' | 'PJ' | null
+  razao_social: string | null
+  nf_endereco: Record<string, string> | null
+  como_conheceu: string | null
+  consentimento_lgpd: boolean
+  consentimento_em: string | null
 }
 
-export async function criarInscricao(input: NovaInscricao): Promise<InscricaoRow> {
+/**
+ * Grava a inscrição como 'pending' ANTES de chamar o Asaas, com todos os dados do
+ * cliente. Garante que o lead nunca se perde mesmo se o Asaas falhar depois.
+ * Os campos asaas_* ficam nulos até vincularAsaas().
+ */
+export async function criarInscricaoPendente(i: NovaInscricaoPendente): Promise<InscricaoRow> {
   const rows = (await sql`
     INSERT INTO inscricoes (
       curso_slug, lote, nome, email, cpf_cnpj, telefone,
       billing_type, valor_centavos, installments,
-      asaas_customer_id, asaas_payment_id, asaas_invoice_url,
-      utm_source, utm_medium, utm_campaign, utm_content, utm_term
+      utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+      empresa, cargo, pessoa_tipo, razao_social, nf_endereco, como_conheceu,
+      consentimento_lgpd, consentimento_em
     ) VALUES (
-      ${input.curso_slug}, ${input.lote}, ${input.nome}, ${input.email}, ${input.cpf_cnpj}, ${input.telefone},
-      ${input.billing_type}, ${input.valor_centavos}, ${input.installments},
-      ${input.asaas_customer_id}, ${input.asaas_payment_id}, ${input.asaas_invoice_url},
-      ${input.utm_source}, ${input.utm_medium}, ${input.utm_campaign}, ${input.utm_content}, ${input.utm_term}
+      ${i.curso_slug}, ${i.lote}, ${i.nome}, ${i.email}, ${i.cpf_cnpj}, ${i.telefone},
+      ${i.billing_type}, ${i.valor_centavos}, ${i.installments},
+      ${i.utm_source}, ${i.utm_medium}, ${i.utm_campaign}, ${i.utm_content}, ${i.utm_term},
+      ${i.empresa}, ${i.cargo}, ${i.pessoa_tipo}, ${i.razao_social},
+      ${i.nf_endereco ? JSON.stringify(i.nf_endereco) : null}::jsonb, ${i.como_conheceu},
+      ${i.consentimento_lgpd}, ${i.consentimento_em}
     )
     RETURNING *
   `) as InscricaoRow[]
   return rows[0]
+}
+
+/** Vincula os dados do Asaas à inscrição depois que a cobrança foi criada. */
+export interface VinculoAsaas {
+  asaas_customer_id: string | null
+  asaas_payment_id: string | null
+  asaas_invoice_url: string | null
+  valor_liquido_centavos: number | null
+  taxa_centavos: number | null
+  due_date: string | null
+  asaas_status: string | null
+}
+
+export async function vincularAsaas(id: number, v: VinculoAsaas): Promise<void> {
+  await sql`
+    UPDATE inscricoes
+       SET asaas_customer_id = ${v.asaas_customer_id},
+           asaas_payment_id = ${v.asaas_payment_id},
+           asaas_invoice_url = ${v.asaas_invoice_url},
+           valor_liquido_centavos = ${v.valor_liquido_centavos},
+           taxa_centavos = ${v.taxa_centavos},
+           due_date = ${v.due_date},
+           asaas_status = ${v.asaas_status},
+           updated_at = NOW()
+     WHERE id = ${id}
+  `
+}
+
+/** Marca uma inscrição pendente como cancelada (ex.: cobrança no Asaas falhou). */
+export async function cancelarInscricao(id: number): Promise<void> {
+  await sql`UPDATE inscricoes SET status = 'cancelled', updated_at = NOW() WHERE id = ${id}`
 }
 
 export async function atualizarStatusPorAsaasId(

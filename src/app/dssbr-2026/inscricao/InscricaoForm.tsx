@@ -3,6 +3,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
+import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 
 interface Props {
   /** preço cheio de venda (lote final / no dia) — âncora "de" riscada (ex.: R$ 820) */
@@ -44,6 +45,7 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
   const [installments, setInstallments] = useState(1)
+  const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -90,6 +92,7 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
+          ...extrasParaPayload(extras),
         }),
       })
 
@@ -271,6 +274,8 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
           </div>
         )}
       </div>
+
+      <CamposExtras value={extras} onChange={setExtras} />
 
       {erro && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
