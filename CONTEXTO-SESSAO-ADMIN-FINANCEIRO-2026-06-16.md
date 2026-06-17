@@ -77,6 +77,28 @@ A key sandbox do Asaas não está no ambiente (expira por inatividade — está 
 
 Como renovar a key sandbox: gerar API key no painel sandbox do Asaas → salvar em `.env.development.local` (`ASAAS_API_KEY`). Cartão teste: `5162 3062 1937 8829`, validade futura, CVV qualquer.
 
+## 7. Aba Tráfego via GA4 Data API (commit `4a45381`)
+
+Painel **`/admin/trafego`**: usuários, sessões, pageviews, engajamento + origem por canal/fonte + páginas mais acessadas, com seletor 7/28/90 dias. Lê a **GA4 Data API** (`runReport`) server-side.
+
+- `src/lib/ga4.ts` — auth via service account com **JWT RS256 feito na mão** (`node:crypto`), sem `googleapis`. Token cacheado em memória.
+- Link "Tráfego" na nav do painel. Estado de "GA4 não conectado" se as envs faltarem.
+
+**Envs (setadas em prod + `.env.local`):**
+- `GA4_PROPERTY_ID=421271387`
+- `GA_SERVICE_ACCOUNT_JSON` — service account `mysiteazuris@my-project-websiteazuris.iam.gserviceaccount.com` (projeto `my-project-websiteazuris`, nº `670444873738`). Credencial em Vercel (encriptada) + `.env.local` (gitignored). **Não commitada.**
+
+### ⚠️ Painel Tráfego BLOQUEADO — 2 pendências de acesso
+
+A org Azuris tem policy que **bloqueia criar chave de service account** (`iam.disableServiceAccountKeyCreation`) → o SA foi criado num **projeto pessoal** (fora da org) como workaround. A chave funciona, mas faltam:
+
+1. **Habilitar a Analytics Data API no projeto `670444873738`** (Binhara faz):
+   https://console.developers.google.com/apis/api/analyticsdata.googleapis.com/overview?project=670444873738
+   (o 403 atual é "API has not been used in project 670444873738").
+2. **Dar Leitor pro SA na propriedade GA4 `421271387`** — Binhara **não é admin da conta** GA4 (só tem acesso de leitura), então um admin da conta precisa adicionar `mysiteazuris@my-project-websiteazuris.iam.gserviceaccount.com` como **Leitor**.
+
+Com os dois feitos, o painel acende sem mexer em código/env. Fallback se travar de vez: trocar pra **OAuth com a conta do Binhara** (ele já enxerga os dados) — mais setup, não implementado.
+
 ---
 
 ## Estado da sincronização em prod
@@ -85,10 +107,11 @@ Como renovar a key sandbox: gerar API key no painel sandbox do Asaas → salvar 
 
 ## Pendências
 
-1. **1 PIX real em prod** pra validar o happy path do checkout reordenado.
-2. **Limpar IDs 1-6** (teste) da `inscricoes` de prod.
-3. Renovar key sandbox do Asaas (pra testes E2E futuros).
-4. De sempre: GitHub auto-deploy, PostHog key, Bing Webmaster, marcar eventos-chave no GA4, cases Sicredi/Unimed.
+1. **Aba Tráfego (GA4):** habilitar a Data API no projeto `670444873738` (Binhara) + admin da conta GA4 dar Leitor pro SA na propriedade `421271387`. Ver seção 7.
+2. **1 PIX real em prod** pra validar o happy path do checkout reordenado.
+3. **Limpar IDs 1-6** (teste) da `inscricoes` de prod.
+4. Renovar key sandbox do Asaas (pra testes E2E futuros).
+5. De sempre: GitHub auto-deploy, PostHog key, Bing Webmaster, marcar eventos-chave no GA4, cases Sicredi/Unimed.
 
 ## Operação
 
