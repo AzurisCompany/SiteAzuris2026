@@ -74,6 +74,8 @@ export interface InscricaoRow {
   asaas_status: string | null
   pago_em: string | null
   last_synced_at: string | null
+  // --- marcação manual ---
+  is_teste: boolean // registro de teste/sandbox: some da lista e dos KPIs por padrão
 }
 
 // --- Capacidade de lote ---
@@ -210,6 +212,18 @@ export async function atualizarStatusPorAsaasId(
            paid_at = ${paid_at},
            updated_at = NOW()
      WHERE asaas_payment_id = ${asaas_payment_id}
+    RETURNING *
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/** Marca/desmarca uma inscrição como registro de teste (esconde da lista e dos KPIs). */
+export async function marcarTeste(id: number, teste: boolean): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET is_teste = ${teste},
+           updated_at = NOW()
+     WHERE id = ${id}
     RETURNING *
   `) as InscricaoRow[]
   return rows[0] ?? null

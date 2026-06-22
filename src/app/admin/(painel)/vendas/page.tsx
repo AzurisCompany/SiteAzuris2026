@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {
   listarVendas,
   resumoFinanceiro,
+  contarTestes,
   labelProduto,
   tabProduto,
   brl,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/admin-queries'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
+import TesteButton from './TesteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,20 +41,24 @@ export default async function VendasPage({
   const status = sp.status || ''
   const billing = sp.billing || ''
   const busca = sp.busca || ''
+  const mostrarTeste = sp.teste === '1'
   const page = Math.max(Number(sp.page ?? '1') || 1, 1)
 
   let rows: InscricaoRow[] = []
   let total = 0
   let erro: string | null = null
   let resumo: ResumoProduto[] = []
+  let qtdeTestes = 0
   try {
-    const [res, r] = await Promise.all([
-      listarVendas({ curso, status, billing, busca, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    const [res, r, qt] = await Promise.all([
+      listarVendas({ curso, status, billing, busca, mostrarTeste, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
       resumoFinanceiro(),
+      contarTestes(),
     ])
     rows = res.rows
     total = res.total
     resumo = r
+    qtdeTestes = qt
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -71,6 +77,7 @@ export default async function VendasPage({
     if (status) u.set('status', status)
     if (billing) u.set('billing', billing)
     if (busca) u.set('busca', busca)
+    if (mostrarTeste) u.set('teste', '1')
     const s = u.toString()
     return s ? `?${s}` : '/admin/vendas'
   }
@@ -86,9 +93,22 @@ export default async function VendasPage({
     if (status) u.set('status', status)
     if (billing) u.set('billing', billing)
     if (busca) u.set('busca', busca)
+    if (mostrarTeste) u.set('teste', '1')
     u.set('page', String(p))
     return `?${u.toString()}`
   }
+
+  // Link do toggle "ver testes" preservando os filtros atuais
+  const toggleTesteHref = (() => {
+    const u = new URLSearchParams()
+    if (curso) u.set('curso', curso)
+    if (status) u.set('status', status)
+    if (billing) u.set('billing', billing)
+    if (busca) u.set('busca', busca)
+    if (!mostrarTeste) u.set('teste', '1')
+    const s = u.toString()
+    return s ? `?${s}` : '/admin/vendas'
+  })()
 
   return (
     <div className="space-y-6">
@@ -97,6 +117,16 @@ export default async function VendasPage({
           <h1 className="text-2xl font-bold">Vendas</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">{total} registro(s)</p>
         </div>
+        <Link
+          href={toggleTesteHref}
+          className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+            mostrarTeste
+              ? 'border-amber-400/40 bg-amber-400/10 text-amber-300'
+              : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:border-amber-400/40 hover:text-amber-300'
+          }`}
+        >
+          {mostrarTeste ? '← esconder testes' : `ver testes (${qtdeTestes})`}
+        </Link>
       </div>
 
       {/* Abas por produto */}
@@ -140,6 +170,7 @@ export default async function VendasPage({
               <th className="px-4 py-3">Pgto</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Data</th>
+              <th className="px-4 py-3 text-right">Ação</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--azuris-surface)]">
@@ -149,6 +180,11 @@ export default async function VendasPage({
                   <Link href={`/admin/vendas/${r.id}`} className="font-medium hover:text-[var(--azuris-cyan)]">
                     {r.nome}
                   </Link>
+                  {r.is_teste && (
+                    <span className="ml-2 inline-flex rounded-full bg-amber-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                      teste
+                    </span>
+                  )}
                   <div className="text-xs text-[var(--text-muted)]">{r.email}</div>
                 </td>
                 <td className="px-4 py-3 text-[var(--text-secondary)]">{labelProduto(r.curso_slug)}</td>
@@ -159,11 +195,14 @@ export default async function VendasPage({
                 <td className="px-4 py-3 text-[var(--text-secondary)]">{r.billing_type === 'PIX' ? 'PIX' : 'Cartão'}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
+                <td className="px-4 py-3 text-right">
+                  <TesteButton id={r.id} isTeste={r.is_teste} />
+                </td>
               </tr>
             ))}
             {rows.length === 0 && !erro && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                <td colSpan={7} className="px-4 py-10 text-center text-[var(--text-muted)]">
                   Nenhuma venda encontrada com esses filtros.
                 </td>
               </tr>

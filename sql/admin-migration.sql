@@ -33,3 +33,8 @@ CREATE INDEX IF NOT EXISTS idx_asaas_eventos_received ON asaas_eventos(received_
 
 -- Índice pra dashboard (filtra por produto + status o tempo todo)
 CREATE INDEX IF NOT EXISTS idx_inscricoes_curso_status ON inscricoes(curso_slug, status);
+
+-- === Marcação manual de teste ===
+-- Esconde registros de teste/sandbox da lista de vendas e dos KPIs (sem apagar).
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS is_teste BOOLEAN NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_inscricoes_is_teste ON inscricoes(is_teste);

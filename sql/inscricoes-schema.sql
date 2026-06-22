@@ -49,4 +49,5 @@ SELECT
   COUNT(*) FILTER (WHERE status IN ('paid','pending')) AS reservadas
 FROM inscricoes
 WHERE curso_slug = 'lakehouse-comunidade'
+  AND NOT is_teste
 GROUP BY lote;

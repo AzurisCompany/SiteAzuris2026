@@ -36,6 +36,17 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_asaas_eventos_payment ON asaas_eventos(asaas_payment_id)`,
   `CREATE INDEX IF NOT EXISTS idx_asaas_eventos_received ON asaas_eventos(received_at)`,
   `CREATE INDEX IF NOT EXISTS idx_inscricoes_curso_status ON inscricoes(curso_slug, status)`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS is_teste BOOLEAN NOT NULL DEFAULT false`,
+  `CREATE INDEX IF NOT EXISTS idx_inscricoes_is_teste ON inscricoes(is_teste)`,
+  // Recria a view de vagas excluindo registros de teste (não devem consumir vaga real).
+  `CREATE OR REPLACE VIEW v_vagas_por_lote AS
+     SELECT lote,
+            COUNT(*) FILTER (WHERE status = 'paid')               AS pagas,
+            COUNT(*) FILTER (WHERE status = 'pending')            AS pendentes,
+            COUNT(*) FILTER (WHERE status IN ('paid','pending'))  AS reservadas
+     FROM inscricoes
+     WHERE curso_slug = 'lakehouse-comunidade' AND NOT is_teste
+     GROUP BY lote`,
 ]
 
 export async function POST() {

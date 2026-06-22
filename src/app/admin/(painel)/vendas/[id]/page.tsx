@@ -9,6 +9,7 @@ import {
   STATUS_COR,
 } from '@/lib/admin-queries'
 import SyncButton from './SyncButton'
+import TesteButton from '../TesteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,12 +63,22 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
             {labelProduto(insc.curso_slug)} · #{insc.id}
           </p>
         </div>
-        <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${STATUS_COR[insc.status] ?? ''}`}>
-          {STATUS_LABEL[insc.status] ?? insc.status}
-        </span>
+        <div className="flex items-center gap-2">
+          {insc.is_teste && (
+            <span className="inline-flex rounded-full bg-amber-400/12 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300">
+              teste
+            </span>
+          )}
+          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${STATUS_COR[insc.status] ?? ''}`}>
+            {STATUS_LABEL[insc.status] ?? insc.status}
+          </span>
+        </div>
       </div>
 
-      <SyncButton id={insc.id} />
+      <div className="flex flex-wrap items-center gap-3">
+        <SyncButton id={insc.id} />
+        <TesteButton id={insc.id} isTeste={insc.is_teste} />
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Bloco titulo="Cliente">

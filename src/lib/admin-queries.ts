@@ -68,6 +68,7 @@ export async function resumoFinanceiro(): Promise<ResumoProduto[]> {
       COALESCE(SUM(taxa_centavos)          FILTER (WHERE status = 'paid'), 0)    AS taxa_pago_centavos,
       COALESCE(SUM(valor_centavos)         FILTER (WHERE status = 'pending'), 0) AS pendente_centavos
     FROM inscricoes
+    WHERE NOT is_teste
     GROUP BY curso_slug
     ORDER BY curso_slug
   `) as Array<Record<string, string | number>>
@@ -93,6 +94,7 @@ export interface FiltrosVendas {
   status?: string
   billing?: string
   busca?: string
+  mostrarTeste?: boolean // quando false (padrão), esconde os registros marcados como teste
   limit?: number
   offset?: number
 }
@@ -100,6 +102,9 @@ export interface FiltrosVendas {
 export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoRow[]; total: number }> {
   const cond: string[] = []
   const params: unknown[] = []
+  if (!f.mostrarTeste) {
+    cond.push(`NOT is_teste`)
+  }
   if (f.curso) {
     params.push(f.curso)
     cond.push(`curso_slug = $${params.length}`)
@@ -135,6 +140,12 @@ export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoR
     c: string
   }>
   return { rows, total: Number(totalRows[0]?.c ?? 0) }
+}
+
+/** Quantos registros estão marcados como teste (pra rótulo do toggle "ver testes"). */
+export async function contarTestes(): Promise<number> {
+  const rows = (await sql`SELECT COUNT(*) AS c FROM inscricoes WHERE is_teste`) as Array<{ c: string }>
+  return Number(rows[0]?.c ?? 0)
 }
 
 // --- Detalhe ---
