@@ -887,7 +887,7 @@ export default function CursoPage() {
               <ul className="space-y-3">
                 {[
                   "40 vagas no total, distribuídas em 3 lotes (Founder · L1 · L2)",
-                  "Encontros ao vivo às terças e quintas, das 19h às 21h",
+                  "Encontros ao vivo às terças, das 19h às 21h",
                   "5 semanas de duração total",
                   "Material de apoio liberado no dia 0",
                   "Bônus desta turma: ingresso DSSBR 2026 incluso",
