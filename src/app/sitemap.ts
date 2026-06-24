@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE}/produtos/curso-pipelines`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE}/lakehouse-comunidade/`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${SITE}/lakehouse-comunidade/ementa.html`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE}/comunidade`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${SITE}/sobre`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE}/contato`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },

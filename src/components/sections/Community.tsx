@@ -1,4 +1,5 @@
-import { ArrowUpRight, Heart } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Heart } from "lucide-react";
 
 type Initiative = {
   name: string;
@@ -53,6 +54,13 @@ export function Community() {
             Conteúdo aberto, encontros gratuitos e um grupo de usuários que segue
             de pé.
           </p>
+          <Link
+            href="/comunidade"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-accent hover:gap-2.5 transition-all"
+          >
+            Ver a página da comunidade
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
