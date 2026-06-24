@@ -6,6 +6,7 @@ import { Cases } from "@/components/sections/Cases";
 import { Partners } from "@/components/sections/Partners";
 import { Stack } from "@/components/sections/Stack";
 import { HowWeWork } from "@/components/sections/HowWeWork";
+import { Community } from "@/components/sections/Community";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/Footer";
 
@@ -52,6 +53,7 @@ export default function HomePage() {
         <Partners />
         <Stack />
         <HowWeWork />
+        <Community />
         <Cta />
       </main>
       <Footer />

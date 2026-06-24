@@ -40,13 +40,22 @@ const PRODUCTS: Product[] = [
     emoji: "🛠️",
   },
   {
-    name: "Hadoop.com.br",
+    name: "TTSpeak",
     tagline:
-      "Portal de conteúdo Hadoop em PT-BR — criado e mantido pela Azuris.",
-    href: "https://hadoop.com.br",
+      "Videochamada com superpoderes de facilitação: breakout inteligente, transcrição por locutor e white-label. Entra por link, sem instalar app.",
+    href: "https://ttspeak.com.br",
     external: true,
-    emoji: "🐘",
-    className: "md:col-span-2",
+    badge: "✨ Novo",
+    emoji: "🎥",
+  },
+  {
+    name: "PolenAI",
+    tagline:
+      "Marketing AI-first. Descreve a campanha em português; a IA monta e-mail, landing, social e automação — multi-canal, com a sua voz de marca.",
+    href: "https://polenai.com.br",
+    external: true,
+    badge: "✨ Novo",
+    emoji: "🐝",
   },
   {
     name: "Lakehouse: Pipeline na Prática",
@@ -58,18 +67,14 @@ const PRODUCTS: Product[] = [
     emoji: "🚀",
   },
   {
-    name: "GU BigData",
-    tagline: "Comunidade parceira. Apoiamos a organização do grupo.",
-    href: "https://gubigdata.com.br",
+    name: "PipeZeroOne",
+    tagline:
+      "CRM AI-first. Enriquece o lead, escreve a proposta e prioriza o pipeline. A IA faz o trabalho pesado — você fecha o negócio.",
+    href: "https://pipezeroone.com.br",
     external: true,
-    emoji: "👥",
-  },
-  {
-    name: "Grupo de Estudos",
-    tagline: "Toda semana, gratuito. Engenharia de dados na prática.",
-    href: "https://gubigdata.com.br/grupo-de-estudos/",
-    external: true,
-    emoji: "📚",
+    badge: "✨ Novo",
+    className: "md:col-span-2",
+    emoji: "⚡",
   },
 ];
 
@@ -87,8 +92,9 @@ export function Ecosystem() {
             <br /> vive de dados.
           </h2>
           <p className="mt-4 text-foam/60 text-lg">
-            Conferência, treinamentos, portal de conteúdo, comunidade, produtos.
-            Tudo conectado pelo mesmo padrão: dados em produção, não em PDF.
+            Conferência, treinamentos e produtos de software — dados, vídeo, IA
+            para marketing e vendas. Tudo conectado pelo mesmo padrão: software
+            em produção, não em PDF.
           </p>
         </div>
 
