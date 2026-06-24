@@ -28,23 +28,20 @@ const PRODUCTS: Product[] = [
   {
     name: "English Talk Time",
     tagline: "Inglês com IA — feito por quem ama dados e detesta sotaque ruim.",
-    href: "https://englishtalktime.com.br",
-    external: true,
+    href: "/produtos/english-talk-time",
     emoji: "🗣️",
   },
   {
     name: "OWorkshop",
     tagline: "Workshops práticos. Sem firula, sem PowerPoint.",
-    href: "https://oworkshop.com.br",
-    external: true,
+    href: "/produtos/oworkshop",
     emoji: "🛠️",
   },
   {
     name: "TTSpeak",
     tagline:
       "Videochamada com superpoderes de facilitação: breakout inteligente, transcrição por locutor e white-label. Entra por link, sem instalar app.",
-    href: "https://ttspeak.com.br",
-    external: true,
+    href: "/produtos/ttspeak",
     badge: "✨ Novo",
     emoji: "🎥",
   },
@@ -52,8 +49,7 @@ const PRODUCTS: Product[] = [
     name: "PolenAI",
     tagline:
       "Marketing AI-first. Descreve a campanha em português; a IA monta e-mail, landing, social e automação — multi-canal, com a sua voz de marca.",
-    href: "https://polenai.com.br",
-    external: true,
+    href: "/produtos/polenai",
     badge: "✨ Novo",
     emoji: "🐝",
   },
@@ -70,8 +66,7 @@ const PRODUCTS: Product[] = [
     name: "PipeZeroOne",
     tagline:
       "CRM AI-first. Enriquece o lead, escreve a proposta e prioriza o pipeline. A IA faz o trabalho pesado — você fecha o negócio.",
-    href: "https://pipezeroone.com.br",
-    external: true,
+    href: "/produtos/pipezeroone",
     badge: "✨ Novo",
     className: "md:col-span-2",
     emoji: "⚡",

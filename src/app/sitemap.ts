@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/posts";
 import { getAllCaseSlugs } from "@/lib/cases";
+import { getAllProdutoSlugs } from "@/lib/produtos-catalogo";
 
 const SITE = "https://azuris.com.br";
 
@@ -36,6 +37,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Sub-páginas de produto (resumo + link pro site)
+  const produtoRoutes: MetadataRoute.Sitemap = getAllProdutoSlugs().map(
+    (slug) => ({
+      url: `${SITE}/produtos/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }),
+  );
+
   // Cases com detalhe
   const caseSlugs = getAllCaseSlugs();
   const caseRoutes: MetadataRoute.Sitemap = caseSlugs.map((slug) => ({
@@ -45,5 +56,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...blogRoutes, ...caseRoutes];
+  return [...staticRoutes, ...produtoRoutes, ...blogRoutes, ...caseRoutes];
 }
