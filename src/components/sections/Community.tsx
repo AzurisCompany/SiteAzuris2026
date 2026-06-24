@@ -45,14 +45,13 @@ export function Community() {
             <Heart className="size-3.5" /> Comunidade
           </div>
           <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
-            Antes de vender,
-            <br /> a gente devolve.
+            Onde a comunidade
+            <br /> de dados se encontra.
           </h2>
           <p className="mt-4 text-foam/60 text-lg">
-            Estas não são iniciativas comerciais. É o esforço da Azuris para
-            apoiar a comunidade de software brasileira — a mesma que nos formou.
-            Conteúdo aberto, encontros gratuitos e um grupo de usuários que segue
-            de pé.
+            Conteúdo aberto, encontros gratuitos toda semana e um grupo de
+            usuários que segue forte. A Azuris ajuda a organizar e a manter os
+            espaços onde a comunidade de dados brasileira aprende e cresce junto.
           </p>
           <Link
             href="/comunidade"

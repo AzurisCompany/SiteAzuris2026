@@ -94,17 +94,17 @@ export default function ComunidadePage() {
           size="md"
           title={
             <>
-              Antes de vender,
+              Onde a comunidade
               <br />
-              <span className="text-brand-gradient">a gente devolve.</span>
+              <span className="text-brand-gradient">de dados se encontra.</span>
             </>
           }
           intro={
             <p>
-              Estas não são iniciativas comerciais. É o esforço da Azuris para
-              apoiar a comunidade de software brasileira — a mesma que nos
-              formou. Conteúdo aberto, encontros gratuitos e um grupo de usuários
-              que segue de pé.
+              Conteúdo aberto, encontros gratuitos toda semana e um grupo de
+              usuários que segue forte. A Azuris ajuda a organizar e a manter os
+              espaços onde a comunidade de dados brasileira aprende, troca e
+              cresce junto.
             </p>
           }
         />
@@ -151,14 +151,15 @@ export default function ComunidadePage() {
           <div className="mt-16 rounded-2xl border border-slate/60 bg-gradient-to-br from-deep to-ink p-8 md:p-10">
             <div className="max-w-3xl">
               <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                Por que a gente mantém isso?
+                Comunidade que se constrói junta.
               </h2>
               <p className="mt-4 text-foam/70 text-lg leading-relaxed">
-                Porque a Azuris nasceu lendo tutorial de gente que escreveu de
-                graça. A comunidade de dados no Brasil foi construída por quem
-                compartilhou conhecimento sem cobrar — e a gente acha justo
-                continuar pagando essa conta. Conteúdo aberto, encontro gratuito,
-                grupo de pé. Sem captura de lead, sem funil.
+                A comunidade de dados no Brasil foi construída por quem
+                compartilhou conhecimento de graça — tutorial, palestra, encontro
+                aberto. A Azuris cresceu nesse caldo e faz questão de manter o
+                espírito vivo: conteúdo aberto, encontro toda semana e um grupo
+                de usuários forte, pra quem está começando e pra quem já vive de
+                dados.
               </p>
             </div>
           </div>
