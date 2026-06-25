@@ -186,6 +186,9 @@ export default async function VendasPage({
                     </span>
                   )}
                   <div className="text-xs text-[var(--text-muted)]">{r.email}</div>
+                  {r.telefone && (
+                    <div className="text-xs text-[var(--text-muted)]">{r.telefone}</div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-[var(--text-secondary)]">{labelProduto(r.curso_slug)}</td>
                 <td className="px-4 py-3">
