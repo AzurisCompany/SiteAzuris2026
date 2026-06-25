@@ -48,6 +48,9 @@ function validate(body: RequestBody): string | null {
   const cpf = onlyDigits(body.cpf_cnpj ?? '')
   if (cpf.length !== 11 && cpf.length !== 14) return 'CPF/CNPJ inválido (precisa 11 ou 14 dígitos)'
 
+  const tel = onlyDigits(body.telefone ?? '')
+  if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
+
   if (body.billing_type !== 'PIX' && body.billing_type !== 'CREDIT_CARD') return 'Forma de pagamento inválida'
 
   if (body.billing_type === 'CREDIT_CARD') {

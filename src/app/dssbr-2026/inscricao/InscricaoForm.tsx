@@ -163,6 +163,8 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Telefone (WhatsApp)</label>
             <input
               type="tel"
+              required
+              minLength={14}
               value={telefone}
               onChange={(e) => setTelefone(maskPhone(e.target.value))}
               placeholder="(41) 99999-9999"

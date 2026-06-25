@@ -18,6 +18,16 @@ export function tabProduto(slug: string): string {
   return PRODUTO_TAB[slug] ?? slug
 }
 
+/** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).
+ *  Prefixa 55 (Brasil) se vier com 10/11 dígitos. Null se não der pra montar. */
+export function whatsappUrl(telefone: string | null): string | null {
+  if (!telefone) return null
+  const d = telefone.replace(/\D/g, '')
+  if (d.length < 10) return null
+  const comDDI = d.length === 10 || d.length === 11 ? `55${d}` : d
+  return `https://wa.me/${comDDI}`
+}
+
 export const STATUS_LABEL: Record<string, string> = {
   pending: 'Pendente',
   paid: 'Pago',
