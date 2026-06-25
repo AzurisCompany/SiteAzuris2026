@@ -13,7 +13,6 @@ import {
   ExternalLink,
   FileText,
   Calendar,
-  Shield,
   Check,
   Star,
   Play,
@@ -22,7 +21,7 @@ import {
 export const metadata: Metadata = {
   title: "Lakehouse: Pipeline na Prática — Curso 5 semanas · Azuris",
   description:
-    "Curso online ao vivo, 100% hands-on. 5 semanas construindo um pipeline Lakehouse completo: MinIO + Iceberg + Spark + Airflow + Superset. Turma 1 Comunidade DSSBR começa 22/jun/2026.",
+    "Curso online ao vivo, 100% prática. 5 semanas construindo um pipeline Lakehouse completo: MinIO + Iceberg + Spark + Airflow + Superset. Turma 1 Comunidade DSSBR começa 22/jun/2026.",
   keywords: [
     "curso lakehouse",
     "curso engenharia de dados",
@@ -37,7 +36,7 @@ export const metadata: Metadata = {
     "GUBigData",
   ],
   openGraph: {
-    title: "Lakehouse: Pipeline na Prática — 5 semanas hands-on",
+    title: "Lakehouse: Pipeline na Prática — 5 semanas de prática",
     description:
       "MinIO + Iceberg + Spark + Airflow + Superset. Turma 1 Comunidade começa 22/jun/2026 — bônus DSSBR exclusivo.",
     type: "website",
@@ -189,8 +188,8 @@ const TOOL_LOGOS: Record<string, string> = {
 const DIFERENCIAIS = [
   {
     n: "01",
-    title: "Você não assiste — você coda.",
-    text: "O professor compartilha tela e digita ao vivo. Você digita junto. Quem trava, todo mundo espera. Seu cérebro percorre o caminho inteiro, não só o olho.",
+    title: "Metodologia ativa — demonstração ao vivo.",
+    text: "O professor compartilha tela e constrói o pipeline ao vivo, passo a passo, enquanto você acompanha no seu próprio ambiente. Não é vídeo passivo: você tem pré-aula, desafios práticos e entregável toda semana. Seu cérebro percorre o caminho inteiro, não só o olho.",
   },
   {
     n: "02",
@@ -315,7 +314,7 @@ const FAQ = [
   },
   {
     q: "E se eu perder uma aula ao vivo?",
-    a: "As aulas ficam gravadas. Mas você perde o hands-on em grupo, que é o melhor do curso — recomendamos não perder.",
+    a: "As aulas ficam gravadas. Mas você perde a demonstração ao vivo e a dinâmica em grupo, que é o melhor do curso — recomendamos não perder.",
   },
   {
     q: "É curso oficial Apache, MEC ou tem pós-graduação?",
@@ -327,7 +326,7 @@ const FAQ = [
   },
   {
     q: "Quantos alunos por turma?",
-    a: "Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter hands-on individualizado.",
+    a: "Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter o acompanhamento individualizado.",
   },
   {
     q: "Por que a Turma 1 tem preço de comunidade?",
@@ -372,9 +371,10 @@ export default function CursoPage() {
               <p>
                 Em 5 semanas, você constrói um pipeline Lakehouse completo —
                 do zero ao dashboard. Curso online ao vivo,{" "}
-                <strong className="text-foam">100% hands-on</strong>. Você não
-                assiste — coda junto com o professor, com a stack que o
-                mercado contrata em 2026.
+                <strong className="text-foam">100% prática</strong>. Sessões ao
+                vivo com demonstração e metodologia ativa: você acompanha o
+                professor construir o pipeline e aplica no seu ambiente, com a
+                stack que o mercado contrata em 2026.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 {HERO_TOOLS.map((t) => (
@@ -848,31 +848,6 @@ export default function CursoPage() {
           </div>
         </section>
 
-        {/* GARANTIA */}
-        <section className="py-24 md:py-32 border-b border-slate/30">
-          <div className="mx-auto max-w-3xl px-6 text-center">
-            <Shield className="size-12 text-cyan-brand mx-auto mb-6" />
-            <div className="text-xs uppercase tracking-[0.18em] text-cyan-brand mb-3">
-              Risco zero
-            </div>
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6">
-              7 dias de garantia incondicional.
-            </h2>
-            <p className="text-lg text-foam/80 leading-relaxed mb-8">
-              Participe da primeira semana inteira. Se achar que não é pra
-              você, devolvemos{" "}
-              <strong className="text-foam">
-                100% do seu investimento
-              </strong>
-              . Sem pergunta, sem fricção, sem ressentimento.
-            </p>
-            <blockquote className="text-xl text-cyan-brand italic">
-              &ldquo;A gente só fica com seu dinheiro se você ficar com o
-              conhecimento.&rdquo;
-            </blockquote>
-          </div>
-        </section>
-
         {/* PRÓXIMA TURMA */}
         <section className="py-24 md:py-32 border-b border-slate/30">
           <div className="mx-auto max-w-4xl px-6">
@@ -947,7 +922,7 @@ export default function CursoPage() {
             </h2>
             <p className="text-lg text-foam/70 max-w-2xl mx-auto mb-10">
               Turma 1 (Comunidade): 22 de junho de 2026 · Lote 1 com 15
-              vagas · Bônus DSSBR exclusivo · 7 dias de garantia.
+              vagas · Bônus DSSBR exclusivo.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Link
