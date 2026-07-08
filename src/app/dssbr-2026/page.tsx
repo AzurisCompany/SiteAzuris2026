@@ -159,6 +159,25 @@ export default function DssbrLandingPage() {
           <p className="mt-3 text-sm text-foam/50">
             Pré-venda · de <span className="line-through">R$ {brl(precoDeVenda)}</span> por R$ {brl(precoPix)} no PIX · cartão em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros).
           </p>
+
+          {/* GRUPOS & CORPORATIVO */}
+          <div className="mt-8 flex max-w-2xl flex-col gap-3 rounded-xl border border-emerald-accent/30 bg-emerald-accent/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Users className="mt-0.5 size-5 shrink-0 text-emerald-accent" />
+              <p className="text-sm text-foam/70">
+                <strong className="text-foam">Compra para grupo ou empresa?</strong>{' '}
+                Temos pacotes com desconto por volume e benefícios extras — fale com a gente.
+              </p>
+            </div>
+            <a
+              href={WA_CORP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+            >
+              Falar no WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
@@ -315,25 +334,6 @@ export default function DssbrLandingPage() {
             </ul>
             <CtaButton className="mt-8 w-full sm:w-auto">Garantir minha vaga</CtaButton>
             <p className="mt-3 text-xs text-foam/45">Checkout seguro via Asaas · PIX ou cartão · inscrição individual.</p>
-          </div>
-
-          {/* GRUPOS & CORPORATIVO */}
-          <div className="mt-6 flex flex-col gap-3 rounded-xl border border-emerald-accent/30 bg-emerald-accent/5 p-4 text-left sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <Users className="mt-0.5 size-5 shrink-0 text-emerald-accent" />
-              <p className="text-sm text-foam/70">
-                <strong className="text-foam">Compra para grupo ou empresa?</strong>{' '}
-                Temos pacotes com desconto por volume e benefícios extras — fale com a gente.
-              </p>
-            </div>
-            <a
-              href={WA_CORP}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5"
-            >
-              Falar no WhatsApp
-            </a>
           </div>
 
           <p className="mt-10 text-sm text-foam/50">
