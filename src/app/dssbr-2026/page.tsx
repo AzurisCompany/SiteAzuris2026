@@ -1,11 +1,16 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import { ArrowRight, MapPin, CalendarDays, Check } from 'lucide-react'
+import { ArrowRight, MapPin, CalendarDays, Check, Users, MessageCircle } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 
 const PRODUTO = getProduto('dss-2026')
 const DSS = 'https://dssbr.com.br'
 const CHECKOUT = '/dssbr-2026/inscricao?utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
+
+const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
+const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
+  'Oi! Vim pela página do DSSBR 2026 e quero saber sobre os pacotes especiais para grupos / compras corporativas.',
+)}`
 
 const precoBase = PRODUTO.precoCentavos / 100
 const precoDeVenda = PRODUTO.precoDeVendaCentavos / 100
@@ -309,7 +314,36 @@ export default function DssbrLandingPage() {
               <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Reembolso até 45 dias antes do evento</li>
             </ul>
             <CtaButton className="mt-8 w-full sm:w-auto">Garantir minha vaga</CtaButton>
-            <p className="mt-3 text-xs text-foam/45">Checkout seguro via Asaas · PIX ou cartão.</p>
+            <p className="mt-3 text-xs text-foam/45">Checkout seguro via Asaas · PIX ou cartão · inscrição individual.</p>
+          </div>
+
+          {/* GRUPOS & CORPORATIVO */}
+          <div className="mt-6 rounded-2xl border border-emerald-accent/30 bg-emerald-accent/5 p-8 text-left">
+            <div className="flex items-center gap-2 text-emerald-accent">
+              <Users className="size-5" />
+              <span className="text-xs font-semibold uppercase tracking-widest">Grupos &amp; empresas</span>
+            </div>
+            <h3 className="mt-3 text-2xl font-bold text-foam">
+              Vai levar o time? Temos pacotes especiais.
+            </h3>
+            <p className="mt-3 text-foam/70 leading-relaxed">
+              Para <strong className="text-foam">compras em grupo e corporativas</strong> temos condições
+              exclusivas: descontos progressivos por volume, faturamento via nota fiscal / empenho,
+              nominação flexível dos participantes e benefícios extras no evento. Fale com a gente pelo
+              WhatsApp e montamos a proposta sob medida.
+            </p>
+            <a
+              href={WA_CORP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
+            >
+              <MessageCircle className="size-5" />
+              Falar sobre pacotes para grupos
+            </a>
+            <p className="mt-3 text-xs text-foam/45">
+              Atendimento pelo WhatsApp (41) 99800-3687.
+            </p>
           </div>
 
           <p className="mt-10 text-sm text-foam/50">

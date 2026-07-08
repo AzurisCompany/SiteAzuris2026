@@ -1,8 +1,14 @@
 import type { Metadata } from 'next'
+import { Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import InscricaoForm from './InscricaoForm'
 
 const PRODUTO = getProduto('dss-2026')
+
+const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
+const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
+  'Oi! Estava no checkout do DSSBR 2026 e quero saber sobre os pacotes para grupos / compras corporativas.',
+)}`
 
 export const metadata: Metadata = {
   title: 'Inscrição — Data Science Summit Brasil 2026',
@@ -32,6 +38,29 @@ export default function InscricaoPage() {
         <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">
           Sua inscrição no <span className="text-[var(--azuris-cyan)]">Data Science Summit Brasil 2026</span>
         </h1>
+
+        <p className="mt-3 text-sm text-[var(--text-secondary)]">
+          Esta página é para <strong className="text-[var(--text-primary)]">inscrição individual</strong>.
+        </p>
+
+        {/* Compras corporativas / em grupo */}
+        <div className="mt-6 flex flex-col gap-3 rounded-xl border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <Users className="mt-0.5 size-5 shrink-0 text-[var(--accent-emerald)]" />
+            <p className="text-sm text-[var(--text-secondary)]">
+              <strong className="text-[var(--text-primary)]">Compra para grupo ou empresa?</strong>{' '}
+              Temos pacotes com desconto por volume, nota fiscal e benefícios extras — fale com a gente.
+            </p>
+          </div>
+          <a
+            href={WA_CORP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5"
+          >
+            Falar no WhatsApp
+          </a>
+        </div>
 
         {/* Resumo do ingresso */}
         <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
