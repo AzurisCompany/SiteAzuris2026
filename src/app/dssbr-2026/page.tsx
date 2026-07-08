@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import { ArrowRight, MapPin, CalendarDays, Check, Users, MessageCircle } from 'lucide-react'
+import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 
 const PRODUTO = getProduto('dss-2026')
@@ -318,32 +318,22 @@ export default function DssbrLandingPage() {
           </div>
 
           {/* GRUPOS & CORPORATIVO */}
-          <div className="mt-6 rounded-2xl border border-emerald-accent/30 bg-emerald-accent/5 p-8 text-left">
-            <div className="flex items-center gap-2 text-emerald-accent">
-              <Users className="size-5" />
-              <span className="text-xs font-semibold uppercase tracking-widest">Grupos &amp; empresas</span>
+          <div className="mt-6 flex flex-col gap-3 rounded-xl border border-emerald-accent/30 bg-emerald-accent/5 p-4 text-left sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Users className="mt-0.5 size-5 shrink-0 text-emerald-accent" />
+              <p className="text-sm text-foam/70">
+                <strong className="text-foam">Compra para grupo ou empresa?</strong>{' '}
+                Temos pacotes com desconto por volume e benefícios extras — fale com a gente.
+              </p>
             </div>
-            <h3 className="mt-3 text-2xl font-bold text-foam">
-              Vai levar o time? Temos pacotes especiais.
-            </h3>
-            <p className="mt-3 text-foam/70 leading-relaxed">
-              Para <strong className="text-foam">compras em grupo e corporativas</strong> temos condições
-              exclusivas: descontos progressivos por volume, faturamento via nota fiscal / empenho,
-              nominação flexível dos participantes e benefícios extras no evento. Fale com a gente pelo
-              WhatsApp e montamos a proposta sob medida.
-            </p>
             <a
               href={WA_CORP}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5"
             >
-              <MessageCircle className="size-5" />
-              Falar sobre pacotes para grupos
+              Falar no WhatsApp
             </a>
-            <p className="mt-3 text-xs text-foam/45">
-              Atendimento pelo WhatsApp (41) 99800-3687.
-            </p>
           </div>
 
           <p className="mt-10 text-sm text-foam/50">

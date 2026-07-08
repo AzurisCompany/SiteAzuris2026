@@ -49,7 +49,7 @@ export default function InscricaoPage() {
             <Users className="mt-0.5 size-5 shrink-0 text-[var(--accent-emerald)]" />
             <p className="text-sm text-[var(--text-secondary)]">
               <strong className="text-[var(--text-primary)]">Compra para grupo ou empresa?</strong>{' '}
-              Temos pacotes com desconto por volume, nota fiscal e benefícios extras — fale com a gente.
+              Temos pacotes com desconto por volume e benefícios extras — fale com a gente.
             </p>
           </div>
           <a
