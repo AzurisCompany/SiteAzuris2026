@@ -14,7 +14,7 @@ gtag('config','GT-NNZW5FW');
 <!-- End gtag -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ementa Completa · Lakehouse: Pipeline na Prática · Azuris</title>
-<meta name="description" content="Ementa detalhada do curso Lakehouse: Pipeline na Prática — 5 módulos, 20h de prática. Módulo a módulo, com pré-aula, ao vivo, desafios e entregáveis.">
+<meta name="description" content="Ementa detalhada do curso Lakehouse: Pipeline na Prática — 5 módulos, 20h de prática. Curso em andamento e autoguiado: pré-aula, demonstrações gravadas, encontros ao vivo, mentorias 1:1, desafios e entregáveis. Entre quando quiser.">
 <link rel="canonical" href="https://azuris.com.br/lakehouse-comunidade/ementa.html">
 
 <!-- Favicon -->
@@ -670,6 +670,50 @@ h2 {
 .leitura-list em { color: var(--text-muted); font-style: normal; font-size: 13.5px; }
 
 /* CTA Final */
+.cond-eleg {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(245, 158, 11, 0.05));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px; padding: 20px 24px;
+  text-align: left; font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary); max-width: 720px;
+  margin: 0 auto 16px; display: flex; gap: 14px; align-items: flex-start;
+}
+.cond-eleg .cond-ico { font-size: 20px; line-height: 1.4; flex: none; }
+.cond-eleg strong { color: #fbbf24; }
+.cond-eleg a { color: #fbbf24; font-weight: 600; text-decoration: underline; }
+.cond-corp {
+  background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.06));
+  border: 1px solid rgba(20, 183, 222, 0.25);
+  border-radius: 12px; padding: 20px 24px;
+  text-align: left; font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary); max-width: 720px;
+  margin: 0 auto 32px; display: flex; gap: 14px; align-items: flex-start;
+}
+.cond-corp .cond-ico { font-size: 20px; line-height: 1.4; flex: none; }
+.cond-corp strong { color: var(--text-primary); }
+.cond-corp a { color: var(--accent-cyan); font-weight: 600; text-decoration: underline; }
+
+.wa-fab {
+  position: fixed; right: 20px; bottom: 20px; z-index: 999;
+  display: grid; place-items: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #25D366; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  transition: transform 0.2s ease;
+}
+.wa-fab:hover { transform: scale(1.06); }
+.wa-fab:active { transform: scale(0.95); }
+.wa-fab svg { width: 30px; height: 30px; fill: #fff; position: relative; z-index: 1; }
+.wa-fab .wa-ping {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: #25D366; opacity: 0.4;
+  animation: wa-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes wa-ping { 75%, 100% { transform: scale(1.8); opacity: 0; } }
+@media (min-width: 768px) {
+  .wa-fab { width: 64px; height: 64px; right: 24px; bottom: 24px; }
+  .wa-fab svg { width: 34px; height: 34px; }
+}
+
 .cta-final {
   background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.10));
   text-align: center;
@@ -793,14 +837,14 @@ footer .copy { margin-top: 16px; }
 <!-- HERO -->
 <section class="hero-ementa">
   <div class="container">
-    <span class="eyebrow">Ementa Completa · 20 horas · 5 semanas</span>
+    <span class="eyebrow">Ementa Completa · 20 horas · 5 módulos · autoguiado</span>
     <h1>Tudo que você vai construir no <span class="accent">Lakehouse: Pipeline na Prática</span></h1>
-    <p>Módulo a módulo: os slides e vídeos da pré-aula, o que o professor demonstra ao vivo nos encontros práticos, o desafio assíncrono e o entregável da semana. Metodologia ativa do começo ao fim — sem mistério, sem letra miúda.</p>
+    <p>Módulo a módulo: os slides e vídeos da pré-aula, a demonstração gravada em que o professor constrói o pipeline passo a passo, o desafio assíncrono e o entregável de cada módulo. Você entra quando quiser e segue no seu ritmo, com encontros temáticos ao vivo e mentorias 1:1 pra destravar. Metodologia ativa do começo ao fim — sem mistério, sem letra miúda.</p>
     <div class="hero-ementa-stats">
       <span><strong>20h</strong> totais</span>
       <span><strong>5</strong> módulos</span>
-      <span><strong>15h</strong> ao vivo</span>
-      <span><strong>5h</strong> pré-aula + desafios</span>
+      <span><strong>Gravadas</strong> + ao vivo</span>
+      <span><strong>1:1</strong> mentorias</span>
     </div>
   </div>
 </section>
@@ -834,12 +878,12 @@ footer .copy { margin-top: 16px; }
     <h2>Os dados do curso</h2>
     <table class="id-table">
       <tr><td>Curso</td><td>Lakehouse — Pipeline na Prática</td></tr>
-      <tr><td>Modalidade</td><td>Curso livre, online (live + gravado)</td></tr>
+      <tr><td>Modalidade</td><td>Curso livre, online, em andamento (autoguiado + encontros ao vivo)</td></tr>
       <tr><td>Carga horária</td><td>20 horas</td></tr>
-      <tr><td>Duração</td><td>5 semanas (4h/semana)</td></tr>
+      <tr><td>Duração</td><td>Autoguiado · ~5 semanas no seu ritmo · entre quando quiser</td></tr>
       <tr><td>Público-alvo</td><td>Profissionais de TI já atuando com dados — analistas, devs backend, engenheiros juniors, DBAs em migração</td></tr>
       <tr><td>Pré-requisitos</td><td>Python intermediário · SQL básico-intermediário · linha de comando Linux · Docker Desktop instalado · máquina com 16GB de RAM e 50GB livres</td></tr>
-      <tr><td>Formato das aulas</td><td>Pré-aula gravada (~15min) + demonstração ao vivo (~3h) + desafio assíncrono (~30min)</td></tr>
+      <tr><td>Formato das aulas</td><td>Pré-aula gravada (~15min) + demonstração gravada passo a passo (~3h) + desafio assíncrono (~30min) · encontros temáticos ao vivo e mentorias 1:1 agendáveis</td></tr>
       <tr><td>Entrega final</td><td>Pipeline Lakehouse end-to-end rodando + repositório GitHub público</td></tr>
     </table>
   </div>
@@ -915,7 +959,7 @@ footer .copy { margin-top: 16px; }
       <div class="modulo-detalhe-header">
         <div class="modulo-detalhe-num">1</div>
         <div class="modulo-detalhe-titulo">
-          <div class="meta">Semana 1 · 4 horas</div>
+          <div class="meta">Módulo 1</div>
           <h3>Setup + Fundamentos do Lakehouse</h3>
         </div>
         <div class="modulo-detalhe-tools">
@@ -928,7 +972,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-promessa">
-        Ao final desta semana, você terá a stack inteira de 5 ferramentas rodando na sua máquina e entendendo onde cada uma se encaixa na arquitetura Medallion — pronto pra começar a ingerir dados reais na próxima aula.
+        Ao final deste módulo, você terá a stack inteira de 5 ferramentas rodando na sua máquina e entendendo onde cada uma se encaixa na arquitetura Medallion — pronto pra começar a ingerir dados reais na próxima aula.
       </div>
 
       <div class="modulo-secao">
@@ -937,13 +981,13 @@ footer .copy { margin-top: 16px; }
           <li>Por que <strong>"Lakehouse"</strong> e não Data Warehouse ou Data Lake puro: limitações de cada um</li>
           <li>A <strong>Medallion Architecture</strong> explicada em 3 caixas: Bronze (cru), Silver (limpo), Gold (analítico)</li>
           <li>O que cada ferramenta da stack faz em uma linha</li>
-          <li>Diagrama final que você vai construir nas próximas 5 semanas</li>
+          <li>Diagrama final que você vai construir ao longo dos 5 módulos</li>
           <li>Pré-requisitos da máquina: Docker Desktop, RAM, disco</li>
         </ul>
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Demonstração <span class="modulo-secao-tempo">~3h</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada <span class="modulo-secao-tempo">~3h</span></div>
         <ol>
           <li><strong>Setup do projeto</strong> — clonar o repositório base com <code>docker-compose.yml</code> da turma, estrutura de pastas, <code>.env</code> template</li>
           <li><strong>Subir MinIO</strong> — <code>docker compose up minio</code>, acessar console em <code>localhost:9001</code>, criar buckets <code>bronze</code>, <code>silver</code>, <code>gold</code></li>
@@ -966,7 +1010,7 @@ footer .copy { margin-top: 16px; }
 
       <div class="modulo-entregavel-block">
         <div>
-          <span class="ev-label">Entregável da semana</span>
+          <span class="ev-label">Entregável do módulo</span>
           <span class="ev-text">Screenshot dos 4 UIs abertos lado a lado (MinIO, Spark UI, Airflow, Superset) + saída do comando <code>docker compose ps</code> colada no canal da turma. Marco zero do portfólio — comprova ambiente pronto.</span>
         </div>
       </div>
@@ -984,7 +1028,7 @@ footer .copy { margin-top: 16px; }
       <div class="modulo-detalhe-header">
         <div class="modulo-detalhe-num">2</div>
         <div class="modulo-detalhe-titulo">
-          <div class="meta">Semana 2 · 4 horas</div>
+          <div class="meta">Módulo 2</div>
           <h3>Bronze — Ingestão no MinIO + Iceberg</h3>
         </div>
         <div class="modulo-detalhe-tools">
@@ -994,7 +1038,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-promessa">
-        Ao final desta semana, os 9 CSVs do Olakehouse estarão no MinIO como tabelas Iceberg Bronze versionadas — e você terá visto na prática o que é ACID e time travel num Data Lake.
+        Ao final deste módulo, os 9 CSVs do Olakehouse estarão no MinIO como tabelas Iceberg Bronze versionadas — e você terá visto na prática o que é ACID e time travel num Data Lake.
       </div>
 
       <div class="modulo-secao">
@@ -1008,7 +1052,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Demonstração <span class="modulo-secao-tempo">~3h</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada <span class="modulo-secao-tempo">~3h</span></div>
         <ol>
           <li><strong>Baixar o dataset Olakehouse</strong> — script que pega os 9 CSVs e coloca em <code>data/raw/</code></li>
           <li><strong>Subir os CSVs pro MinIO</strong> — usando <code>mc</code> (MinIO client) ou <code>boto3</code>, copiar pra bucket <code>bronze/_raw/olakehouse/</code></li>
@@ -1032,7 +1076,7 @@ footer .copy { margin-top: 16px; }
 
       <div class="modulo-entregavel-block">
         <div>
-          <span class="ev-label">Entregável da semana</span>
+          <span class="ev-label">Entregável do módulo</span>
           <span class="ev-text">Print do MinIO console mostrando o bucket <code>bronze</code> com as 9 tabelas + saída do comando <code>SHOW TABLES IN olakehouse.bronze</code> listando as 9. Vai pro repo do aluno num arquivo <code>entregas/semana-02.md</code>.</span>
         </div>
       </div>
@@ -1050,7 +1094,7 @@ footer .copy { margin-top: 16px; }
       <div class="modulo-detalhe-header">
         <div class="modulo-detalhe-num">3</div>
         <div class="modulo-detalhe-titulo">
-          <div class="meta">Semana 3 · 4 horas</div>
+          <div class="meta">Módulo 3</div>
           <h3>Silver + Gold — Transformações com Spark</h3>
         </div>
         <div class="modulo-detalhe-tools">
@@ -1060,7 +1104,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-promessa">
-        Ao final desta semana, você terá o modelo dimensional pronto na camada Gold — uma tabela fato de vendas e 4 dimensões — usando PySpark e Iceberg. É a partir daqui que análise de negócio vira viável.
+        Ao final deste módulo, você terá o modelo dimensional pronto na camada Gold — uma tabela fato de vendas e 4 dimensões — usando PySpark e Iceberg. É a partir daqui que análise de negócio vira viável.
       </div>
 
       <div class="modulo-secao">
@@ -1074,7 +1118,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Demonstração — Camada Silver <span class="modulo-secao-tempo">~1h30</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada — Camada Silver <span class="modulo-secao-tempo">~1h30</span></div>
         <ol>
           <li><strong>Limpar <code>orders</code></strong> — tipos corretos (datas como timestamp), filtrar status válidos, remover duplicatas</li>
           <li><strong>Limpar <code>customers</code></strong> — normalizar UF e cidade (uppercase, sem acentos)</li>
@@ -1086,7 +1130,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Demonstração — Camada Gold (modelo estrela) <span class="modulo-secao-tempo">~1h30</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada — Camada Gold (modelo estrela) <span class="modulo-secao-tempo">~1h30</span></div>
         <ol>
           <li><strong><code>fato_vendas</code></strong> — granularidade item de pedido. Colunas: <code>order_id</code>, <code>item_id</code>, <code>customer_key</code>, <code>product_key</code>, <code>tempo_key</code>, <code>geo_key</code>, <code>valor</code>, <code>frete</code>, <code>dias_entrega</code>, <code>nota_review</code></li>
           <li><strong><code>dim_cliente</code></strong> — 1 linha por <code>customer_unique_id</code>, com UF e cidade</li>
@@ -1108,7 +1152,7 @@ footer .copy { margin-top: 16px; }
 
       <div class="modulo-entregavel-block">
         <div>
-          <span class="ev-label">Entregável da semana</span>
+          <span class="ev-label">Entregável do módulo</span>
           <span class="ev-text">Notebook PySpark (ou script <code>.py</code>) com toda a transformação Bronze→Silver→Gold + saída de <code>DESCRIBE</code> das 5 tabelas Gold. Commitado no repo do aluno em <code>transformacoes/</code>.</span>
         </div>
       </div>
@@ -1126,7 +1170,7 @@ footer .copy { margin-top: 16px; }
       <div class="modulo-detalhe-header">
         <div class="modulo-detalhe-num">4</div>
         <div class="modulo-detalhe-titulo">
-          <div class="meta">Semana 4 · 4 horas</div>
+          <div class="meta">Módulo 4</div>
           <h3>Airflow — Orquestração end-to-end</h3>
         </div>
         <div class="modulo-detalhe-tools">
@@ -1136,7 +1180,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-promessa">
-        Ao final desta semana, todo o pipeline Bronze→Silver→Gold roda sozinho, agendado, com retry automático em caso de falha. Você sai daqui sabendo escrever uma DAG de verdade — não DAG de tutorial.
+        Ao final deste módulo, todo o pipeline Bronze→Silver→Gold roda sozinho, agendado, com retry automático em caso de falha. Você sai daqui sabendo escrever uma DAG de verdade — não DAG de tutorial.
       </div>
 
       <div class="modulo-secao">
@@ -1150,7 +1194,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Demonstração <span class="modulo-secao-tempo">~3h</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada <span class="modulo-secao-tempo">~3h</span></div>
         <ol>
           <li><strong>Estrutura do diretório</strong> — <code>dags/</code>, <code>dags/scripts/</code>, <code>dags/sql/</code>. Mostrar como o Airflow lê DAGs do filesystem</li>
           <li><strong>DAG esqueleto</strong> — <code>olakehouse_daily.py</code> com schedule <code>@daily</code>, sem tasks ainda; ver no Airflow UI</li>
@@ -1177,7 +1221,7 @@ footer .copy { margin-top: 16px; }
 
       <div class="modulo-entregavel-block">
         <div>
-          <span class="ev-label">Entregável da semana</span>
+          <span class="ev-label">Entregável do módulo</span>
           <span class="ev-text">Print do Airflow UI mostrando a DAG <code>olakehouse_daily</code> verde, com 5 tasks executadas, em pelo menos 2 execuções históricas. Arquivo <code>dags/olakehouse_daily.py</code> commitado no repo.</span>
         </div>
       </div>
@@ -1195,7 +1239,7 @@ footer .copy { margin-top: 16px; }
       <div class="modulo-detalhe-header">
         <div class="modulo-detalhe-num">5</div>
         <div class="modulo-detalhe-titulo">
-          <div class="meta">Semana 5 · 4 horas</div>
+          <div class="meta">Módulo 5</div>
           <h3>Superset — Dashboard + Apresentação Final</h3>
         </div>
         <div class="modulo-detalhe-tools">
@@ -1206,7 +1250,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-promessa">
-        Última semana. Você conecta o Superset diretamente nas suas tabelas Iceberg, monta um dashboard de negócio publicável e apresenta o pipeline inteiro funcionando. Sai do curso com portfólio público e tudo no GitHub.
+        Módulo final. Você conecta o Superset diretamente nas suas tabelas Iceberg, monta um dashboard de negócio publicável e apresenta o pipeline inteiro funcionando. Sai do curso com portfólio público e tudo no GitHub.
       </div>
 
       <div class="modulo-secao">
@@ -1220,7 +1264,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Parte 1 — Conectar Superset ao Lakehouse <span class="modulo-secao-tempo">~45min</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada · Parte 1 — Conectar Superset ao Lakehouse <span class="modulo-secao-tempo">~45min</span></div>
         <ol>
           <li><strong>Subir o Spark Thrift Server</strong> — <code>start-thriftserver.sh</code> no container Spark, expondo porta 10000</li>
           <li><strong>Configurar database no Superset</strong> — driver <code>pyhive</code> ou <code>sqlalchemy-trino</code>, URL <code>hive://spark:10000/olakehouse</code></li>
@@ -1230,7 +1274,7 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Parte 2 — Dashboard "Visão de Vendas Olakehouse" <span class="modulo-secao-tempo">~1h30</span></div>
+        <div class="modulo-secao-titulo">Demonstração gravada · Parte 2 — Dashboard "Visão de Vendas Olakehouse" <span class="modulo-secao-tempo">~1h30</span></div>
         <ol>
           <li><strong>Chart 1 — Big Number</strong> — receita total</li>
           <li><strong>Chart 2 — Time series</strong> — receita diária ao longo de 2017–2018</li>
@@ -1243,16 +1287,16 @@ footer .copy { margin-top: 16px; }
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Ao vivo · Parte 3 — Apresentação final <span class="modulo-secao-tempo">~30min, rotativa</span></div>
+        <div class="modulo-secao-titulo">Encontro ao vivo · Apresentação final <span class="modulo-secao-tempo">~30min, agendada</span></div>
         <ol>
-          <li>Cada aluno tem <strong>3min</strong> pra: subir o <code>docker compose up</code>, rodar a DAG, mostrar o dashboard, apontar uma insight de negócio que descobriu nos dados</li>
-          <li>Feedback rápido da turma + professor</li>
+          <li>Você tem <strong>3min</strong> pra: subir o <code>docker compose up</code>, rodar a DAG, mostrar o dashboard, apontar uma insight de negócio que descobriu nos dados</li>
+          <li>Feedback rápido dos colegas + professor</li>
           <li>Entrega oficial dos certificados de conclusão</li>
         </ol>
       </div>
 
       <div class="modulo-secao">
-        <div class="modulo-secao-titulo">Não há desafio assíncrono — semana final</div>
+        <div class="modulo-secao-titulo">Não há desafio assíncrono — módulo final</div>
         <p style="color: var(--text-secondary); font-size: 15px; line-height: 1.6;">
           Em vez de desafio, a tarefa é <strong style="color: var(--text-primary)">finalizar o repo GitHub</strong> durante a semana:
         </p>
@@ -1283,24 +1327,28 @@ footer .copy { margin-top: 16px; }
 
     <div class="metodologia-grid">
       <div class="metodologia-card">
-        <h4>Sessão de abertura · Q&amp;A</h4>
-        <p><strong>Ao vivo · antes da semana 1.</strong> Encontro de boas-vindas: alinha o setup do Docker, pré-requisitos e o que esperar do curso. Você começa a aula 1 com tudo rodando.</p>
+        <h4>Onboarding · entre quando quiser</h4>
+        <p><strong>Assim que você entra.</strong> Recebe os materiais na sequência de estudo e um guia de setup do Docker e pré-requisitos. Curso em andamento, sala invertida: começa pelo Módulo 1 com tudo rodando.</p>
       </div>
       <div class="metodologia-card">
         <h4>Pré-aula gravada</h4>
-        <p><strong>~15min · assíncrono.</strong> Contexto e conceitos-chave antes da live. Acessível dias antes do encontro ao vivo.</p>
+        <p><strong>~15min · assíncrono.</strong> Contexto e conceitos-chave antes da demonstração de cada módulo.</p>
       </div>
       <div class="metodologia-card">
-        <h4>Demonstração ao vivo</h4>
-        <p><strong>~3h · síncrono.</strong> Professor compartilha tela e constrói o código ao vivo, passo a passo. Você acompanha no seu Docker em paralelo.</p>
+        <h4>Demonstração gravada</h4>
+        <p><strong>~3h · no seu ritmo.</strong> Professor constrói o código passo a passo em vídeo. Você acompanha no seu Docker e revê quantas vezes quiser.</p>
       </div>
       <div class="metodologia-card">
-        <h4>Q&amp;A + desafio</h4>
-        <p><strong>~30min · final da live.</strong> Dúvidas resolvidas em grupo + apresentação do desafio assíncrono da semana.</p>
+        <h4>Encontros temáticos ao vivo</h4>
+        <p><strong>Recorrentes · agenda na comunidade.</strong> Sessões pra aprofundar temas e resolver dúvidas em grupo. Ficam gravadas.</p>
+      </div>
+      <div class="metodologia-card">
+        <h4>Mentorias 1:1</h4>
+        <p><strong>Agendáveis.</strong> Sessões individuais com o professor pra destravar seu pipeline e tirar dúvidas específicas.</p>
       </div>
       <div class="metodologia-card">
         <h4>Desafio assíncrono</h4>
-        <p><strong>~30min · ao longo da semana.</strong> Tarefa individual para fixar e adaptar o conteúdo da live ao seu próprio repo.</p>
+        <p><strong>~30min · no seu ritmo.</strong> Tarefa individual para fixar e adaptar o conteúdo do módulo ao seu próprio repo.</p>
       </div>
     </div>
 
@@ -1315,7 +1363,7 @@ footer .copy { margin-top: 16px; }
         </div>
         <div class="metodologia-card">
           <h4>Baseada em Projetos</h4>
-          <p><em>Project-Based Learning.</em> Nas 5 semanas você constrói um projeto completo: a arquitetura Lakehouse ponta a ponta, que vira seu portfólio.</p>
+          <p><em>Project-Based Learning.</em> Ao longo dos 5 módulos você constrói um projeto completo: a arquitetura Lakehouse ponta a ponta, que vira seu portfólio.</p>
         </div>
         <div class="metodologia-card">
           <h4>Sala de Aula Invertida</h4>
@@ -1332,11 +1380,11 @@ footer .copy { margin-top: 16px; }
       <div class="metodologia-grid">
         <div class="metodologia-card">
           <h4>Demonstração guiada · como funciona</h4>
-          <p>Professor constrói o código ao vivo e explica cada passo; você acompanha no seu Docker. <strong>Check-in a cada ~20min</strong> — quem tiver dúvida levanta a mão e ninguém fica pra trás.</p>
+          <p>Professor constrói o código passo a passo em vídeo e explica cada etapa; você acompanha no seu Docker e pausa/revê quando precisar. Nada de ficar pra trás — você vai no seu ritmo.</p>
         </div>
         <div class="metodologia-card">
-          <h4>Suporte fora da live</h4>
-          <p>Canal <strong>Discord</strong> — perguntas escritas, resposta em até 24h úteis. <strong>1 monitoria opcional</strong> por semana (1h), só pra dúvida.</p>
+          <h4>Suporte contínuo</h4>
+          <p>Canal <strong>Discord</strong> — perguntas escritas, resposta em até 24h úteis. Mais <strong>mentorias 1:1 agendáveis</strong> e encontros temáticos ao vivo pra dúvidas.</p>
         </div>
       </div>
     </div>
@@ -1349,7 +1397,7 @@ footer .copy { margin-top: 16px; }
     <div class="section-eyebrow">05 · Avaliação</div>
     <h2>Critérios da entrega final</h2>
     <p style="text-align: center; max-width: 720px; margin: 0 auto 36px; color: var(--text-secondary); font-size: 16px;">
-      Avaliação é <strong style="color: var(--text-primary)">prática e única</strong>: você entrega na semana 5 o pipeline rodando. Não há prova, não há nota mínima — é um curso livre. O que você leva é o <strong style="color: var(--text-primary)">certificado de conclusão</strong> e o <strong style="color: var(--text-primary)">portfólio público</strong>.
+      Avaliação é <strong style="color: var(--text-primary)">prática e única</strong>: no Módulo 5 você entrega o pipeline rodando. Não há prova, não há nota mínima — é um curso livre. O que você leva é o <strong style="color: var(--text-primary)">certificado de conclusão</strong> e o <strong style="color: var(--text-primary)">portfólio público</strong>.
     </p>
 
     <div class="avaliacao-grid">
@@ -1381,14 +1429,15 @@ footer .copy { margin-top: 16px; }
 <section id="cronograma">
   <div class="container">
     <div class="section-eyebrow">06 · Cronograma</div>
-    <h2>20 horas distribuídas em 5 semanas</h2>
+    <h2>20 horas distribuídas em 5 módulos</h2>
+    <p style="text-align: center; max-width: 720px; margin: 0 auto 24px; color: var(--text-secondary); font-size: 15px;">Ritmo sugerido de ~5 semanas — mas o curso é autoguiado: você entra quando quiser e avança módulo a módulo, no seu tempo.</p>
     <table class="cronograma-table">
       <thead>
         <tr>
-          <th>Semana</th>
+          <th>Ordem</th>
           <th>Módulo</th>
           <th>Tema</th>
-          <th>Ao vivo</th>
+          <th>Gravadas</th>
           <th>Entregável</th>
         </tr>
       </thead>
@@ -1424,7 +1473,7 @@ footer .copy { margin-top: 16px; }
           <td>Dashboard publicado + apresentação</td>
         </tr>
         <tr class="total">
-          <td colspan="3">Total ao vivo</td>
+          <td colspan="3">Total de aulas gravadas</td>
           <td>15h</td>
           <td></td>
         </tr>
@@ -1478,7 +1527,17 @@ footer .copy { margin-top: 16px; }
 <section class="cta-final">
   <div class="container">
     <h2>Convencido? <span class="accent">Hora de garantir sua vaga.</span></h2>
-    <p>Turma 1 começa em <strong>22 de junho de 2026</strong>. Lote 1 com 15 vagas a R$ 550, com ingresso DSSBR 2026 incluso.</p>
+    <p>Curso <strong>em andamento</strong> — entre quando quiser e comece pelo Módulo 1. Membros do GU BigData IA / ex-DSSBR: <strong>R$ 550</strong>; não-membros: <strong>R$ 750</strong> — sempre com ingresso DSSBR 2026 incluso.</p>
+
+    <div class="cond-eleg">
+      <span class="cond-ico" aria-hidden="true">★</span>
+      <div><strong>Preço de comunidade (R$ 550):</strong> exclusivo para <strong>membros do GU BigData IA</strong> e <strong>ex-participantes do DSSBR</strong>. Não é membro? O investimento é <strong>R$ 750</strong>.</div>
+    </div>
+    <div class="cond-corp">
+      <span class="cond-ico" aria-hidden="true">🏢</span>
+      <div><strong>Empresas e times de dados:</strong> consulte condições especiais para <strong>grupos de desenvolvedores, turmas fechadas e venda corporativa</strong>. Montamos turma dedicada com nota fiscal e ementa ajustada ao seu stack. <a href="https://wa.me/5541998003687?text=Oi%20Binhara!%20Quero%20consultar%20condi%C3%A7%C3%B5es%20para%20turma%20corporativa%20%2F%20grupo%20de%20desenvolvedores%20da%20minha%20empresa%20no%20curso%20Lakehouse." target="_blank" rel="noopener">Falar com a Azuris no WhatsApp →</a></div>
+    </div>
+
     <a href="index.html#investimento" class="btn-primary">Garantir minha vaga →</a>
     <a href="index.html" class="btn-secondary">← Voltar à página inicial</a>
   </div>
@@ -1634,5 +1693,10 @@ footer .copy { margin-top: 16px; }
 })();
 </script>
 
+<!-- WhatsApp flutuante -->
+<a class="wa-fab" href="https://wa.me/5541998003687?text=Oi%20Binhara%2C%20vim%20pela%20ementa%20do%20curso%20Lakehouse%20Comunidade%20e%20quero%20tirar%20uma%20d%C3%BAvida%20sobre%20" target="_blank" rel="noopener noreferrer" aria-label="Falar pelo WhatsApp">
+  <span class="wa-ping" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+</a>
 </body>
 </html>

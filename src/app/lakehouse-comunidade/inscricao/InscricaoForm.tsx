@@ -5,12 +5,25 @@ import { gaEvent } from '@/lib/gtag'
 import { MAX_PARCELAS, valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 
+type Perfil = 'membro' | 'nao-membro'
+
+interface PrecoPerfil {
+  base: number
+  pix: number
+  vagas: number
+}
+
 interface Props {
-  precoBaseReais: number
-  precoPixReais: number
+  perfilInicial: Perfil
+  precos: Record<Perfil, PrecoPerfil>
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
+
+const PERFIL_LABEL: Record<Perfil, string> = {
+  membro: 'Membro do GU BigData IA ou ex-participante do DSSBR',
+  'nao-membro': 'Não sou membro',
+}
 
 function maskCpfCnpj(v: string): string {
   const d = v.replace(/\D/g, '').slice(0, 14)
@@ -33,7 +46,8 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) {
+export default function InscricaoForm({ perfilInicial, precos }: Props) {
+  const [perfil, setPerfil] = useState<Perfil>(perfilInicial)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [cpfCnpj, setCpfCnpj] = useState('')
@@ -57,6 +71,10 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
     })
   }, [])
 
+  const precoBaseReais = precos[perfil].base
+  const precoPixReais = precos[perfil].pix
+  const esgotado = precos[perfil].vagas <= 0
+
   // PIX é sempre à vista. Cartão: 1x sem juros; 2x–5x com juros embutidos.
   const parcelasCartao = billingType === 'CREDIT_CARD' ? installments : 1
   const valorParcelaReais = valorParcela(precoBaseReais, parcelasCartao)
@@ -79,6 +97,7 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
           email: email.trim().toLowerCase(),
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
+          perfil,
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
@@ -121,6 +140,61 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+      {/* Perfil / preço */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-bold">Seu perfil</h2>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            O preço de R$ 550 é exclusivo para membros do GU BigData IA e ex-participantes do DSSBR. Não é membro? O investimento é R$ 750.
+          </p>
+        </div>
+
+        <div className="grid gap-3">
+          {(['membro', 'nao-membro'] as Perfil[]).map((p) => {
+            const ativo = perfil === p
+            return (
+              <label
+                key={p}
+                className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                  ativo
+                    ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/5'
+                    : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="perfil"
+                  value={p}
+                  checked={ativo}
+                  onChange={() => setPerfil(p)}
+                  className="sr-only"
+                />
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold">{PERFIL_LABEL[p]}</span>
+                  <span className="text-xl font-black whitespace-nowrap">
+                    R$ {precos[p].base.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+                {p === 'membro' && (
+                  <div className="mt-1 text-xs text-[var(--accent-emerald)]">Preço de comunidade</div>
+                )}
+              </label>
+            )
+          })}
+        </div>
+      </div>
+
+      {esgotado ? (
+        <div className="rounded-2xl border border-[var(--accent-amber)]/30 bg-[var(--accent-amber)]/10 p-6 text-center">
+          <p className="text-lg font-semibold">Vagas esgotadas neste perfil</p>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Escolha o outro perfil (se aplicável) ou mande um email pra{' '}
+            <a href="mailto:binhara@azuris.com.br" className="underline">binhara@azuris.com.br</a>{' '}
+            pra entrar na fila de espera.
+          </p>
+        </div>
+      ) : (
+        <>
       {/* Dados pessoais */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold">Seus dados</h2>
@@ -280,6 +354,8 @@ export default function InscricaoForm({ precoBaseReais, precoPixReais }: Props) 
       <p className="text-center text-xs text-[var(--text-muted)]">
         Vai abrir o checkout seguro do Asaas pra você finalizar.
       </p>
+        </>
+      )}
     </form>
   )
 }

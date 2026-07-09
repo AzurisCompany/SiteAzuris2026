@@ -14,7 +14,7 @@ gtag('config','GT-NNZW5FW');
 <!-- End gtag -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lakehouse: Pipeline na Prática · Curso Online · Azuris</title>
-<meta name="description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Curso online ao vivo com MinIO, Iceberg, Spark, Airflow e Superset. Próxima turma 22/06/2026.">
+<meta name="description" content="Construa um Pipeline Lakehouse completo do zero ao dashboard, no seu ritmo. Curso online em andamento com MinIO, Iceberg, Spark, Airflow e Superset. Aulas gravadas + encontros ao vivo + mentorias 1:1. Entre quando quiser.">
 <link rel="canonical" href="https://azuris.com.br/lakehouse-comunidade/">
 
 <!-- Favicon -->
@@ -29,7 +29,7 @@ gtag('config','GT-NNZW5FW');
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://azuris.com.br/lakehouse-comunidade/">
 <meta property="og:title" content="Lakehouse: Pipeline na Prática · Curso Online · Azuris">
-<meta property="og:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo do zero ao dashboard. Turma 1: 22/06/2026.">
+<meta property="og:description" content="Construa um Pipeline Lakehouse completo, do zero ao dashboard, no seu ritmo. Curso em andamento — entre quando quiser. Aulas gravadas + encontros ao vivo + mentorias 1:1.">
 <meta property="og:image" content="https://azuris.com.br/lakehouse-og">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -39,7 +39,7 @@ gtag('config','GT-NNZW5FW');
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lakehouse: Pipeline na Prática">
-<meta name="twitter:description" content="Em 5 semanas, construa um Pipeline Lakehouse completo. Curso online ao vivo. Turma 1: 22/06/2026.">
+<meta name="twitter:description" content="Construa um Pipeline Lakehouse completo, do zero ao dashboard. Curso online em andamento — entre quando quiser e siga módulo a módulo.">
 <meta name="twitter:image" content="https://azuris.com.br/lakehouse-og">
 
 <style>
@@ -937,9 +937,6 @@ h2 {
   color: var(--text-secondary);
   margin-bottom: 18px; align-self: flex-start;
 }
-.lote-card.lote-destaque .lote-badge {
-  background: var(--gradient); color: #fff;
-}
 .lote-preco {
   font-size: 44px; font-weight: 800; line-height: 1;
   letter-spacing: -0.02em; margin-bottom: 6px;
@@ -1026,6 +1023,53 @@ h2 {
   margin: 0 auto;
 }
 .lotes-bonus-explain strong { color: var(--text-primary); }
+
+/* Condição de elegibilidade do preço de comunidade */
+.cond-eleg {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(245, 158, 11, 0.05));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px; padding: 20px 24px;
+  text-align: left; font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary); max-width: 800px;
+  margin: 0 auto 16px; display: flex; gap: 14px; align-items: flex-start;
+}
+.cond-eleg .cond-ico { font-size: 20px; line-height: 1.4; flex: none; }
+.cond-eleg strong { color: #fbbf24; }
+.cond-eleg a { color: #fbbf24; font-weight: 600; text-decoration: underline; }
+/* Venda corporativa / turma fechada */
+.cond-corp {
+  background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.06));
+  border: 1px solid rgba(20, 183, 222, 0.25);
+  border-radius: 12px; padding: 20px 24px;
+  text-align: left; font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary); max-width: 800px;
+  margin: 0 auto; display: flex; gap: 14px; align-items: flex-start;
+}
+.cond-corp .cond-ico { font-size: 20px; line-height: 1.4; flex: none; }
+.cond-corp strong { color: var(--text-primary); }
+.cond-corp a { color: var(--accent-cyan); font-weight: 600; text-decoration: underline; }
+
+/* WhatsApp flutuante */
+.wa-fab {
+  position: fixed; right: 20px; bottom: 20px; z-index: 999;
+  display: grid; place-items: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #25D366; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  transition: transform 0.2s ease;
+}
+.wa-fab:hover { transform: scale(1.06); }
+.wa-fab:active { transform: scale(0.95); }
+.wa-fab svg { width: 30px; height: 30px; fill: #fff; position: relative; z-index: 1; }
+.wa-fab .wa-ping {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: #25D366; opacity: 0.4;
+  animation: wa-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes wa-ping { 75%, 100% { transform: scale(1.8); opacity: 0; } }
+@media (min-width: 768px) {
+  .wa-fab { width: 64px; height: 64px; right: 24px; bottom: 24px; }
+  .wa-fab svg { width: 34px; height: 34px; }
+}
 
 /* PRÓXIMA TURMA */
 .turma-info { max-width: 600px; margin: 0 auto; text-align: center; }
@@ -1183,9 +1227,9 @@ footer .copy { margin-top: 16px; }
     </svg>
   </div>
   <div class="container">
-    <span class="eyebrow">Turma 1 · Comunidade DSSBR + GUBigData · Início 22/06/2026</span>
-    <h1>Em 5 semanas, construa um <span class="accent">Pipeline Lakehouse completo</span> — do zero ao dashboard.</h1>
-    <p>Curso online ao vivo, <strong>100% prática</strong>. Sessões ao vivo com demonstração e metodologia ativa — você acompanha o professor construir o pipeline e aplica no seu ambiente, semana após semana, com a stack que o mercado contrata em 2026:</p>
+    <span class="eyebrow">Turma Comunidade DSSBR + GUBigData · Curso em andamento · Entre quando quiser</span>
+    <h1>Construa um <span class="accent">Pipeline Lakehouse completo</span> — do zero ao dashboard, módulo a módulo.</h1>
+    <p>Curso online <strong>100% prática</strong>, com metodologia ativa (sala invertida). <strong>Aulas gravadas</strong> que você segue módulo a módulo, no seu ritmo — mais <strong>encontros temáticos ao vivo</strong> e <strong>mentorias 1:1 agendáveis</strong> pra destravar dúvidas. Como usamos sala invertida, você <strong>entra a qualquer momento</strong>: começa recebendo os materiais na sequência de estudo e acompanha o curso módulo a módulo, com a stack que o mercado contrata em 2026:</p>
 
     <div class="hero-stack-strip" aria-label="Stack do curso">
       <div class="hero-tool" data-tool="minio" title="MinIO"><img src="/lakehouse-comunidade/assets/stack/_oficial/minio.svg" alt="MinIO"></div>
@@ -1248,7 +1292,7 @@ footer .copy { margin-top: 16px; }
     </div>
 
     <div class="diagnostico-punchline">
-      <strong>Marcou 2 ou mais?</strong> Esse curso foi feito <span class="accent">pra você</span>. Vamos resolver isso em 5 semanas.
+      <strong>Marcou 2 ou mais?</strong> Esse curso foi feito <span class="accent">pra você</span>. Vamos resolver isso módulo a módulo, no seu ritmo.
     </div>
   </div>
 </section>
@@ -1275,7 +1319,7 @@ footer .copy { margin-top: 16px; }
         </div>
         <div class="cenario-stat">
           <div class="cenario-stat-value">5</div>
-          <div class="cenario-stat-label">Semanas, mesmo cenário</div>
+          <div class="cenario-stat-label">Módulos, mesmo cenário</div>
         </div>
       </div>
 
@@ -1353,7 +1397,7 @@ footer .copy { margin-top: 16px; }
 <section id="conteudo">
   <div class="container">
     <div class="section-eyebrow">Como o curso se desenrola</div>
-    <h2>Da matrícula ao dashboard, <span class="accent">5 semanas estruturadas</span></h2>
+    <h2>Da matrícula ao dashboard, <span class="accent">5 módulos estruturados</span></h2>
 
     <div class="roadmap">
 
@@ -1372,7 +1416,7 @@ footer .copy { margin-top: 16px; }
         <div class="roadmap-card">
           <div class="roadmap-header">
             <div>
-              <div class="roadmap-meta">Semana 1 · 4h ao vivo</div>
+              <div class="roadmap-meta">Módulo 1</div>
               <h3 class="roadmap-title">Sobe a stack</h3>
             </div>
             <div class="roadmap-tools">
@@ -1394,7 +1438,7 @@ footer .copy { margin-top: 16px; }
         <div class="roadmap-card">
           <div class="roadmap-header">
             <div>
-              <div class="roadmap-meta">Semana 2 · 4h ao vivo</div>
+              <div class="roadmap-meta">Módulo 2</div>
               <h3 class="roadmap-title">Carrega os dados</h3>
             </div>
             <div class="roadmap-tools">
@@ -1402,7 +1446,7 @@ footer .copy { margin-top: 16px; }
               <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/iceberg.png" alt="Iceberg"></div>
             </div>
           </div>
-          <p class="roadmap-desc">9 CSVs viram tabelas Iceberg versionadas no MinIO. Demo de <strong>ACID</strong> e <strong>time travel</strong> ao vivo.</p>
+          <p class="roadmap-desc">9 CSVs viram tabelas Iceberg versionadas no MinIO. Demo de <strong>ACID</strong> e <strong>time travel</strong> passo a passo.</p>
           <div class="roadmap-entregavel">9 tabelas Bronze consultáveis</div>
         </div>
       </div>
@@ -1413,7 +1457,7 @@ footer .copy { margin-top: 16px; }
         <div class="roadmap-card">
           <div class="roadmap-header">
             <div>
-              <div class="roadmap-meta">Semana 3 · 4h ao vivo</div>
+              <div class="roadmap-meta">Módulo 3</div>
               <h3 class="roadmap-title">Modela com Spark</h3>
             </div>
             <div class="roadmap-tools">
@@ -1431,7 +1475,7 @@ footer .copy { margin-top: 16px; }
         <div class="roadmap-card">
           <div class="roadmap-header">
             <div>
-              <div class="roadmap-meta">Semana 4 · 4h ao vivo</div>
+              <div class="roadmap-meta">Módulo 4</div>
               <h3 class="roadmap-title">Automatiza no Airflow</h3>
             </div>
             <div class="roadmap-tools">
@@ -1449,14 +1493,14 @@ footer .copy { margin-top: 16px; }
         <div class="roadmap-card">
           <div class="roadmap-header">
             <div>
-              <div class="roadmap-meta">Semana 5 · 4h ao vivo</div>
+              <div class="roadmap-meta">Módulo 5</div>
               <h3 class="roadmap-title">Publica o dashboard</h3>
             </div>
             <div class="roadmap-tools">
               <div class="tool-badge"><img src="/lakehouse-comunidade/assets/stack/_oficial/superset.svg" alt="Superset"></div>
             </div>
           </div>
-          <p class="roadmap-desc">Superset conecta nas tabelas Iceberg via Spark Thrift. Dashboard de negócio publicado e apresentação ao vivo.</p>
+          <p class="roadmap-desc">Superset conecta nas tabelas Iceberg via Spark Thrift. Dashboard de negócio publicado e apresentado num encontro temático ao vivo.</p>
           <div class="roadmap-entregavel">Dashboard + repo GitHub público</div>
         </div>
       </div>
@@ -1466,7 +1510,7 @@ footer .copy { margin-top: 16px; }
         <div class="marker-icon">★</div>
         <div class="marker-text">
           <strong>Você termina com</strong>
-          Pipeline público no GitHub · Dashboard ao vivo · Certificado de conclusão
+          Pipeline público no GitHub · Dashboard publicado · Certificado de conclusão
         </div>
       </div>
 
@@ -1482,8 +1526,8 @@ footer .copy { margin-top: 16px; }
     <div class="diferenciais-grid">
       <div class="diferencial">
         <span class="diferencial-num">01</span>
-        <h3>Metodologia ativa — demonstração ao vivo.</h3>
-        <p>O professor compartilha tela e constrói o pipeline ao vivo, passo a passo, enquanto você acompanha no seu próprio ambiente. Não é vídeo passivo: você tem pré-aula, desafios práticos e entregável toda semana. Seu cérebro percorre o caminho inteiro, não só o olho.</p>
+        <h3>Metodologia ativa — sala invertida.</h3>
+        <p>Você recebe os materiais na sequência de estudo e constrói o pipeline no seu ambiente, módulo a módulo. Aulas gravadas pra rever quantas vezes quiser, <strong>encontros temáticos ao vivo</strong> pra aprofundar e <strong>mentorias 1:1 agendáveis</strong> pra destravar dúvidas. Não é vídeo passivo: tem pré-aula, desafios práticos e entregável em cada módulo. Seu cérebro percorre o caminho inteiro, não só o olho.</p>
       </div>
       <div class="diferencial">
         <span class="diferencial-num">02</span>
@@ -1524,7 +1568,7 @@ footer .copy { margin-top: 16px; }
         <ul>
           <li>Nunca programou em Python (exigimos intermediário)</li>
           <li>Nunca usou Docker (precisa estar instalado e funcionando)</li>
-          <li>Quer curso 100% gravado pra ver no celular no trânsito</li>
+          <li>Quer só assistir vídeo passivamente, sem pôr a mão na massa (aqui tem entregável por módulo)</li>
           <li>Busca certificação acadêmica ou validação MEC</li>
         </ul>
       </div>
@@ -1543,7 +1587,7 @@ footer .copy { margin-top: 16px; }
       <li><strong>Linha de comando Linux</strong> — navegar, editar arquivo, rodar comando</li>
       <li><strong>Docker Desktop</strong> instalado e rodando</li>
       <li>Máquina com <strong>16GB de RAM</strong> e <strong>50GB livres</strong> em disco</li>
-      <li><strong>~5h por semana</strong> de dedicação durante as 5 semanas</li>
+      <li><strong>~5h por semana</strong> de dedicação (no ritmo que você definir)</li>
     </ul>
   </div>
 </section>
@@ -1555,6 +1599,8 @@ footer .copy { margin-top: 16px; }
     <h2>Além do curso, você leva:</h2>
     <div class="bonus-grid">
       <div class="bonus-card"><h4>★ Acesso vitalício</h4><p>Às aulas gravadas. Revise quantas vezes quiser.</p></div>
+      <div class="bonus-card"><h4>★ Encontros ao vivo</h4><p>Sessões temáticas pra aprofundar e tirar dúvidas em grupo.</p></div>
+      <div class="bonus-card"><h4>★ Mentorias 1:1</h4><p>Agende sessões individuais com o professor pra destravar.</p></div>
       <div class="bonus-card"><h4>★ Discord da turma</h4><p>Comunidade exclusiva — você, colegas e professor.</p></div>
       <div class="bonus-card"><h4>★ Cheat sheets</h4><p>PySpark, SQL Iceberg e operators do Airflow.</p></div>
       <div class="bonus-card"><h4>★ Docker templates</h4><p>Pra acelerar setups futuros no seu trabalho.</p></div>
@@ -1568,7 +1614,6 @@ footer .copy { margin-top: 16px; }
   <div class="container">
     <div class="section-eyebrow">O investimento — Turma 1 Comunidade</div>
     <h2>Preço de comunidade · <span class="accent">3 lotes</span> + referência de mercado</h2>
-    <p class="solucao-text" style="margin-bottom: 36px;">A Turma 1 é oferecida em primeira mão pra base do <strong>DSSBR</strong> e do <strong>GUBigData</strong>. A partir da Turma 2 (set/2026), o curso volta ao preço de mercado.</p>
 
     <div class="lotes-grid">
       <div class="lote-card lote-founder">
@@ -1584,10 +1629,10 @@ footer .copy { margin-top: 16px; }
         <div class="lote-status">Apenas por convite</div>
       </div>
 
-      <div class="lote-card lote-1 lote-destaque">
-        <div class="lote-badge">Lote 1 · Aberto</div>
+      <div class="lote-card lote-1">
+        <div class="lote-badge">Membros GU / DSSBR</div>
         <div class="lote-preco"><span class="moeda">R$</span>550</div>
-        <div class="lote-vagas">15 vagas · esgotando</div>
+        <div class="lote-vagas">Restam 7 vagas</div>
         <ul class="lote-features">
           <li>Curso completo (20h)</li>
           <li><strong>Ingresso DSSBR 2026 (R$ 520)</strong></li>
@@ -1595,20 +1640,21 @@ footer .copy { margin-top: 16px; }
           <li>Certificado de conclusão</li>
           <li>Acesso à comunidade DSSBR/GUBigData</li>
         </ul>
-        <a href="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary" style="font-size: 16px; padding: 14px 24px;">Garantir vaga no Lote 1 →</a>
+        <a href="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1&amp;perfil=membro" class="btn-primary" style="font-size: 16px; padding: 14px 24px;">Garantir vaga (membro) →</a>
         <div class="lote-status">Cartão em até 5x (1x à vista, 2-5x com juros) · Pix à vista com 5% off</div>
       </div>
 
-      <div class="lote-card lote-2">
-        <div class="lote-badge">Lote 2</div>
+      <div class="lote-card lote-2 lote-destaque">
+        <div class="lote-badge">Não-membros</div>
         <div class="lote-preco"><span class="moeda">R$</span>750</div>
-        <div class="lote-vagas">20 vagas · abre após Lote 1 esgotar</div>
+        <div class="lote-vagas">Não-membros · 20 vagas</div>
         <ul class="lote-features">
           <li>Curso completo (20h)</li>
-          <li>Ingresso DSSBR 2026 (R$ 520)</li>
+          <li><strong>Ingresso DSSBR 2026 (R$ 520)</strong></li>
           <li>Discord vitalício + cheat sheets</li>
           <li>Certificado de conclusão</li>
         </ul>
+        <a href="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l2&amp;perfil=nao-membro" class="btn-primary" style="font-size: 16px; padding: 14px 24px;">Garantir minha vaga →</a>
         <div class="lote-status">Cartão em até 5x (1x à vista, 2-5x com juros) · Pix à vista com 5% off</div>
       </div>
 
@@ -1626,24 +1672,35 @@ footer .copy { margin-top: 16px; }
       </div>
     </div>
 
+    <div class="cond-eleg" style="margin-top: 24px;">
+      <span class="cond-ico" aria-hidden="true">★</span>
+      <div><strong>Preço de comunidade (R$ 550):</strong> exclusivo para <strong>membros do GU BigData IA</strong> e <strong>ex-participantes do DSSBR</strong>. Não é membro? O investimento é <strong>R$ 750</strong>.</div>
+    </div>
+
     <p class="lotes-bonus-explain">
       ★ <strong>Bônus exclusivo da Turma 1:</strong> todo aluno recebe ingresso completo pro <strong>Data Science Summit Brasil 2026</strong> (27-29 out, IEP Curitiba) — valor pré-venda <strong>R$ 520</strong>. Este bônus não existe nas próximas turmas.
     </p>
+
+    <div class="cond-corp" style="margin-top: 16px;">
+      <span class="cond-ico" aria-hidden="true">🏢</span>
+      <div><strong>Empresas e times de dados:</strong> consulte condições especiais para <strong>grupos de desenvolvedores, turmas fechadas e venda corporativa</strong>. Montamos turma dedicada com nota fiscal e ementa ajustada ao seu stack. <a href="https://wa.me/5541998003687?text=Oi%20Binhara!%20Quero%20consultar%20condi%C3%A7%C3%B5es%20para%20turma%20corporativa%20%2F%20grupo%20de%20desenvolvedores%20da%20minha%20empresa%20no%20curso%20Lakehouse." target="_blank" rel="noopener">Falar com a Azuris no WhatsApp →</a></div>
+    </div>
   </div>
 </section>
 
 <!-- PRÓXIMA TURMA -->
 <section>
   <div class="container">
-    <div class="section-eyebrow">Calendário</div>
-    <h2>Turma 1 começa em <span class="accent">22 de junho de 2026</span></h2>
+    <div class="section-eyebrow">Formato &amp; acesso</div>
+    <h2>Curso <span class="accent">em andamento</span> — entre quando quiser</h2>
     <div class="turma-info">
       <ul>
-        <li><strong>40 vagas no total</strong>, distribuídas em 3 lotes (Founder · L1 · L2)</li>
-        <li>Encontros ao vivo <strong>às terças</strong>, das 19h às 21h</li>
-        <li><strong>5 semanas</strong> de duração total</li>
-        <li>Material de apoio liberado no <strong>dia 0</strong></li>
-        <li><strong>Bônus desta turma:</strong> ingresso DSSBR 2026 incluso</li>
+        <li><strong>Entre a qualquer momento:</strong> você começa recebendo os materiais na sequência de estudo e avança módulo a módulo, no seu ritmo</li>
+        <li><strong>Aulas 100% gravadas</strong> — reveja quantas vezes precisar, quando precisar</li>
+        <li><strong>Encontros temáticos ao vivo</strong> pra aprofundar (agenda divulgada na comunidade)</li>
+        <li><strong>Mentorias 1:1 agendáveis</strong> pra tirar dúvidas direto com o professor</li>
+        <li><strong>Metodologia ativa (sala invertida):</strong> pré-aula, prática e entregável em cada módulo</li>
+        <li><strong>Bônus:</strong> ingresso DSSBR 2026 incluso</li>
       </ul>
     </div>
   </div>
@@ -1664,8 +1721,12 @@ footer .copy { margin-top: 16px; }
         <div class="faq-item-answer">Sim. Toda a stack roda em Docker — testado nos três sistemas operacionais.</div>
       </details>
       <details class="faq-item">
-        <summary>E se eu perder uma aula ao vivo?</summary>
-        <div class="faq-item-answer">As aulas ficam gravadas. Mas você perde a demonstração ao vivo e a dinâmica em grupo, que é o melhor do curso — recomendamos não perder.</div>
+        <summary>O curso já começou — ainda dá pra entrar?</summary>
+        <div class="faq-item-answer">Dá sim. O curso é em andamento e usa sala invertida: você entra a qualquer momento, começa a receber os materiais na sequência de estudo e acompanha módulo a módulo, no seu ritmo.</div>
+      </details>
+      <details class="faq-item">
+        <summary>As aulas são ao vivo ou gravadas?</summary>
+        <div class="faq-item-answer">As aulas são gravadas e você segue no seu ritmo, módulo a módulo. Além delas, há encontros temáticos ao vivo pra aprofundar e mentorias 1:1 que você agenda pra tirar dúvidas direto com o professor.</div>
       </details>
       <details class="faq-item">
         <summary>É curso oficial Apache, MEC ou tem pós-graduação?</summary>
@@ -1680,8 +1741,8 @@ footer .copy { margin-top: 16px; }
         <div class="faq-item-answer">Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter o acompanhamento individualizado.</div>
       </details>
       <details class="faq-item">
-        <summary>Por que a Turma 1 tem preço de comunidade?</summary>
-        <div class="faq-item-answer">Os primeiros 40 alunos vêm da base do DSSBR e do GUBigData — pessoas que já participam dos eventos e do grupo de usuários. Estamos retribuindo a comunidade que sustenta nosso trabalho. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497).</div>
+        <summary>Quem tem direito ao preço de comunidade (R$ 550)?</summary>
+        <div class="faq-item-answer">O preço de R$ 550 é <strong>exclusivo para membros do GU BigData IA e ex-participantes do DSSBR</strong> — pessoas que já participam dos eventos e do grupo de usuários. Estamos retribuindo a comunidade que sustenta nosso trabalho. <strong>Não é membro? O investimento é R$ 750</strong>, com o mesmo conteúdo e o mesmo bônus DSSBR. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497).</div>
       </details>
       <details class="faq-item">
         <summary>O bônus DSSBR vale pra todas as turmas?</summary>
@@ -1689,7 +1750,7 @@ footer .copy { margin-top: 16px; }
       </details>
       <details class="faq-item">
         <summary>Como funciona a entrega?</summary>
-        <div class="faq-item-answer">Aulas ao vivo via Zoom, comunidade no Discord, gravações no portal do aluno. Após a compra você recebe acesso por e-mail em até 24h.</div>
+        <div class="faq-item-answer">Aulas gravadas no portal do aluno, comunidade no Discord, encontros temáticos ao vivo e mentorias 1:1 via Zoom (agendadas). Após a compra você recebe acesso por e-mail em até 24h e já começa pelo Módulo 1.</div>
       </details>
       <details class="faq-item">
         <summary>Posso parcelar?</summary>
@@ -1704,7 +1765,7 @@ footer .copy { margin-top: 16px; }
   <div class="container">
     <h2>Pronto pra parar de só falar de Lakehouse — <br>e começar a construir um?</h2>
     <a href="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary">Garantir minha vaga no Lote 1 →</a>
-    <div class="cta-final-meta">Turma 1 (Comunidade): 22 de junho de 2026 · Lote 1 com 15 vagas · Bônus DSSBR exclusivo</div>
+    <div class="cta-final-meta">Curso em andamento · entre quando quiser · Bônus DSSBR exclusivo</div>
   </div>
 </section>
 
@@ -1913,7 +1974,7 @@ footer .copy { margin-top: 16px; }
   "@context": "https://schema.org",
   "@type": "Course",
   "name": "Lakehouse: Pipeline na Prática",
-  "description": "Curso online ao vivo de Engenharia de Dados: em 5 semanas você constrói um Pipeline Lakehouse completo, do zero ao dashboard, com MinIO, Apache Iceberg, Apache Spark, Apache Airflow e Apache Superset.",
+  "description": "Curso online de Engenharia de Dados, em andamento e autoguiado: você constrói um Pipeline Lakehouse completo, do zero ao dashboard, módulo a módulo, com MinIO, Apache Iceberg, Apache Spark, Apache Airflow e Apache Superset. Aulas gravadas, encontros temáticos ao vivo e mentorias 1:1. Entre quando quiser.",
   "url": "https://azuris.com.br/lakehouse-comunidade/",
   "inLanguage": "pt-BR",
   "provider": {
@@ -1934,8 +1995,6 @@ footer .copy { margin-top: 16px; }
     "@type": "CourseInstance",
     "courseMode": "online",
     "courseWorkload": "PT20H",
-    "startDate": "2026-06-22",
-    "endDate": "2026-07-27",
     "inLanguage": "pt-BR",
     "location": {
       "@type": "VirtualLocation",
@@ -1964,16 +2023,23 @@ footer .copy { margin-top: 16px; }
   "mainEntity": [
     { "@type": "Question", "name": "Preciso saber Spark ou Airflow antes?", "acceptedAnswer": { "@type": "Answer", "text": "Não. O curso ensina os dois do zero. Assumimos só Python intermediário e SQL básico." } },
     { "@type": "Question", "name": "Funciona em Mac, Linux e Windows?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Toda a stack roda em Docker — testado nos três sistemas operacionais." } },
-    { "@type": "Question", "name": "E se eu perder uma aula ao vivo?", "acceptedAnswer": { "@type": "Answer", "text": "As aulas ficam gravadas. Mas você perde a demonstração ao vivo e a dinâmica em grupo, que é o melhor do curso — recomendamos não perder." } },
+    { "@type": "Question", "name": "O curso já começou — ainda dá pra entrar?", "acceptedAnswer": { "@type": "Answer", "text": "Dá sim. O curso é em andamento e usa sala invertida: você entra a qualquer momento, começa a receber os materiais na sequência de estudo e acompanha módulo a módulo, no seu ritmo." } },
+    { "@type": "Question", "name": "As aulas são ao vivo ou gravadas?", "acceptedAnswer": { "@type": "Answer", "text": "As aulas são gravadas e você segue no seu ritmo, módulo a módulo. Além delas, há encontros temáticos ao vivo pra aprofundar e mentorias 1:1 que você agenda pra tirar dúvidas direto com o professor." } },
     { "@type": "Question", "name": "É curso oficial Apache, MEC ou tem pós-graduação?", "acceptedAnswer": { "@type": "Answer", "text": "Não. É curso livre comercial, foco 100% em prática profissional. Você sai com portfólio público, não com certificado de pós." } },
     { "@type": "Question", "name": "O curso garante uma vaga depois?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Garantimos que você sai com um pipeline funcional no GitHub — recrutadores podem validar sozinhos. O resto é com você, mas a evidência prática vale ouro em entrevista." } },
     { "@type": "Question", "name": "Quantos alunos por turma?", "acceptedAnswer": { "@type": "Answer", "text": "Máximo 40 na Turma 1 (Comunidade). A partir da Turma 2 (Mercado), reduzimos pra 30 alunos por turma — limite real pra manter o acompanhamento individualizado." } },
-    { "@type": "Question", "name": "Por que a Turma 1 tem preço de comunidade?", "acceptedAnswer": { "@type": "Answer", "text": "Os primeiros 40 alunos vêm da base do DSSBR e do GUBigData — pessoas que já participam dos eventos e do grupo de usuários. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497)." } },
+    { "@type": "Question", "name": "Quem tem direito ao preço de comunidade (R$ 550)?", "acceptedAnswer": { "@type": "Answer", "text": "O preço de R$ 550 é exclusivo para membros do GU BigData IA e ex-participantes do DSSBR — pessoas que já participam dos eventos e do grupo de usuários. Não é membro? O investimento é R$ 750, com o mesmo conteúdo e o mesmo bônus DSSBR. A partir da Turma 2, o preço sobe pro valor de mercado (R$ 1.197 e depois R$ 1.497)." } },
     { "@type": "Question", "name": "O bônus DSSBR vale pra todas as turmas?", "acceptedAnswer": { "@type": "Answer", "text": "Não. Só Turma 1. A partir de setembro/2026 (Turma 2), as inscrições não incluem o ingresso DSSBR — é benefício exclusivo de quem entrar agora, na turma de lançamento." } },
-    { "@type": "Question", "name": "Como funciona a entrega?", "acceptedAnswer": { "@type": "Answer", "text": "Aulas ao vivo via Zoom, comunidade no Discord, gravações no portal do aluno. Após a compra você recebe acesso por e-mail em até 24h." } },
+    { "@type": "Question", "name": "Como funciona a entrega?", "acceptedAnswer": { "@type": "Answer", "text": "Aulas gravadas no portal do aluno, comunidade no Discord, encontros temáticos ao vivo e mentorias 1:1 via Zoom (agendadas). Após a compra você recebe acesso por e-mail em até 24h e já começa pelo Módulo 1." } },
     { "@type": "Question", "name": "Posso parcelar?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, em até 5x no cartão. 1x é à vista sem juros; de 2x a 5x os juros do cartão ficam por sua conta. No Pix você paga à vista com 5% de desconto." } }
   ]
 }
 </script>
+
+<!-- WhatsApp flutuante -->
+<a class="wa-fab" href="https://wa.me/5541998003687?text=Oi%20Binhara%2C%20vim%20pela%20p%C3%A1gina%20do%20curso%20Lakehouse%20Comunidade%20e%20quero%20tirar%20uma%20d%C3%BAvida%20sobre%20" target="_blank" rel="noopener noreferrer" aria-label="Falar pelo WhatsApp">
+  <span class="wa-ping" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+</a>
 </body>
 </html>
