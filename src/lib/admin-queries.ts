@@ -4,6 +4,7 @@ import { sql, type InscricaoRow } from '@/lib/db'
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
+  proposta: 'Proposta customizada',
 }
 export function labelProduto(slug: string): string {
   return PRODUTO_LABEL[slug] ?? slug
@@ -13,6 +14,7 @@ export function labelProduto(slug: string): string {
 export const PRODUTO_TAB: Record<string, string> = {
   'dss-2026': 'Ingressos DSS',
   'lakehouse-comunidade': 'Curso',
+  proposta: 'Propostas',
 }
 export function tabProduto(slug: string): string {
   return PRODUTO_TAB[slug] ?? slug
@@ -97,12 +99,78 @@ export async function resumoFinanceiro(): Promise<ResumoProduto[]> {
   }))
 }
 
+// --- Breakdown por tipo de ingresso (variante do produto) ---
+
+export interface ResumoTipo {
+  curso_slug: string
+  tipo_ingresso: string | null
+  criadas: number
+  pagas: number
+  bruto_pago_centavos: number
+  liquido_pago_centavos: number
+}
+
+/** Rótulos amigáveis pra tipos conhecidos (o resto cai no fallback capitalizado). */
+const TIPO_LABEL: Record<string, string> = {
+  membro: 'Membro (GU/DSSBR)',
+  'nao-membro': 'Não-membro',
+}
+/** Rótulo de exibição de um tipo de ingresso. NULL vira "— sem tipo". */
+export function labelTipo(tipo: string | null): string {
+  if (!tipo) return '— sem tipo'
+  if (TIPO_LABEL[tipo]) return TIPO_LABEL[tipo]
+  return tipo.charAt(0).toUpperCase() + tipo.slice(1)
+}
+
+/** Vendas agrupadas por produto + tipo de ingresso, pra abrir os cards do dashboard. */
+export async function resumoPorTipo(): Promise<ResumoTipo[]> {
+  const rows = (await sql`
+    SELECT
+      curso_slug,
+      tipo_ingresso,
+      COUNT(*)                                                                   AS criadas,
+      COUNT(*) FILTER (WHERE status = 'paid')                                    AS pagas,
+      COALESCE(SUM(valor_centavos)         FILTER (WHERE status = 'paid'), 0)     AS bruto_pago_centavos,
+      COALESCE(SUM(valor_liquido_centavos) FILTER (WHERE status = 'paid'), 0)     AS liquido_pago_centavos
+    FROM inscricoes
+    WHERE NOT is_teste
+    GROUP BY curso_slug, tipo_ingresso
+    ORDER BY curso_slug, tipo_ingresso NULLS FIRST
+  `) as Array<Record<string, string | number | null>>
+
+  return rows.map((r) => ({
+    curso_slug: String(r.curso_slug),
+    tipo_ingresso: r.tipo_ingresso == null ? null : String(r.tipo_ingresso),
+    criadas: Number(r.criadas),
+    pagas: Number(r.pagas),
+    bruto_pago_centavos: Number(r.bruto_pago_centavos),
+    liquido_pago_centavos: Number(r.liquido_pago_centavos),
+  }))
+}
+
+/** Valores distintos pra popular os selects de filtro (tipos + origens de tráfego). */
+export async function opcoesFiltro(): Promise<{ tipos: string[]; origens: string[] }> {
+  const [tiposRows, origensRows] = await Promise.all([
+    sql`SELECT DISTINCT tipo_ingresso FROM inscricoes WHERE tipo_ingresso IS NOT NULL ORDER BY tipo_ingresso`,
+    sql`SELECT DISTINCT utm_source FROM inscricoes WHERE utm_source IS NOT NULL AND utm_source <> '' ORDER BY utm_source`,
+  ])
+  return {
+    tipos: (tiposRows as Array<{ tipo_ingresso: string }>).map((r) => r.tipo_ingresso),
+    origens: (origensRows as Array<{ utm_source: string }>).map((r) => r.utm_source),
+  }
+}
+
 // --- Lista de vendas (com filtros) ---
 
 export interface FiltrosVendas {
   curso?: string
   status?: string
   billing?: string
+  tipo?: string
+  pessoa?: string // 'PF' | 'PJ'
+  origem?: string // utm_source
+  de?: string // data inicial (YYYY-MM-DD), inclusive
+  ate?: string // data final (YYYY-MM-DD), inclusive
   busca?: string
   mostrarTeste?: boolean // quando false (padrão), esconde os registros marcados como teste
   limit?: number
@@ -126,6 +194,27 @@ export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoR
   if (f.billing) {
     params.push(f.billing)
     cond.push(`billing_type = $${params.length}`)
+  }
+  if (f.tipo) {
+    params.push(f.tipo)
+    cond.push(`tipo_ingresso = $${params.length}`)
+  }
+  if (f.pessoa) {
+    params.push(f.pessoa)
+    cond.push(`pessoa_tipo = $${params.length}`)
+  }
+  if (f.origem) {
+    params.push(f.origem)
+    cond.push(`utm_source = $${params.length}`)
+  }
+  if (f.de) {
+    params.push(f.de)
+    cond.push(`created_at >= $${params.length}::date`)
+  }
+  if (f.ate) {
+    params.push(f.ate)
+    // inclusive: até o fim do dia informado
+    cond.push(`created_at < ($${params.length}::date + INTERVAL '1 day')`)
   }
   if (f.busca && f.busca.trim()) {
     params.push(`%${f.busca.trim()}%`)

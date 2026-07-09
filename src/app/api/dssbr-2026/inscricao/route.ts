@@ -6,8 +6,9 @@
 import { NextResponse } from 'next/server'
 import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, type BillingType } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
-import { valorParcela, totalComJuros } from '@/lib/parcelamento'
+import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { getProduto } from '@/lib/produtos'
+import { getTipo, valorCobradoDoTipo } from '@/lib/tipos-ingresso'
 import { normalizarExtras, type ExtrasInput } from '@/lib/checkout-extras'
 
 export const runtime = 'nodejs'
@@ -20,6 +21,7 @@ interface RequestBody extends ExtrasInput {
   email: string
   cpf_cnpj: string
   telefone?: string
+  tipo?: string // tipo de ingresso cadastrado (opcional; sem ele, usa o preço único)
   billing_type: BillingType
   installments?: number
   utm?: {
@@ -55,7 +57,8 @@ function validate(body: RequestBody): string | null {
 
   if (body.billing_type === 'CREDIT_CARD') {
     const n = body.installments ?? 1
-    if (!Number.isInteger(n) || n < 1 || n > PRODUTO.maxParcelas) return `Parcelamento inválido (1 a ${PRODUTO.maxParcelas})`
+    // Máximo efetivo depende do tipo — validação fina é feita no cálculo (clamp server-side).
+    if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS) return `Parcelamento inválido (1 a ${MAX_PARCELAS})`
   }
 
   if (body.consentimento !== true) return 'É necessário aceitar os termos de uso dos dados (LGPD)'
@@ -73,18 +76,39 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
-  // Preço SEMPRE do registry (nunca confiar no client).
-  // Base = preço de pré-venda. PIX: base − descontoPct (hoje 0). Cartão: base + acréscimoPct
-  // (hoje 0) = base do cartão; 1x à vista ou 2x–maxParcelas com juros sobre essa base — ver [[parcelamento]].
-  const precoBaseReais = PRODUTO.precoCentavos / 100
-  const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
-  const installments =
-    body.billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), PRODUTO.maxParcelas) : 1
-  const installmentValueReais = valorParcela(precoCartaoBaseReais, installments)
-  const valorCobradoReais =
-    body.billing_type === 'PIX'
-      ? Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
-      : totalComJuros(precoCartaoBaseReais, installments)
+  // Preço SEMPRE derivado no servidor (nunca confiar no client).
+  // Se veio um tipo de ingresso cadastrado, o preço/parcelas vêm dele; senão, usa o
+  // preço único do registry (lib/produtos.ts). Regra de PIX/cartão idêntica — ver [[parcelamento]].
+  let tipoIngresso: string | null = null
+  let descricaoAsaas = PRODUTO.asaasDescricao
+  let externalRef = PRODUTO.slug
+  let installments: number
+  let installmentValueReais: number
+  let valorCobradoReais: number
+
+  if (body.tipo) {
+    const tipo = await getTipo(PRODUTO.slug, body.tipo)
+    if (!tipo || !tipo.ativo) {
+      return NextResponse.json({ error: 'Tipo de ingresso indisponível' }, { status: 400 })
+    }
+    const cobrado = valorCobradoDoTipo(tipo, body.billing_type, body.installments ?? 1)
+    installments = cobrado.installments
+    installmentValueReais = cobrado.installmentValueReais
+    valorCobradoReais = cobrado.valorReais
+    tipoIngresso = tipo.tipo_id
+    descricaoAsaas = `${PRODUTO.asaasDescricao} — ${tipo.nome}`
+    externalRef = `${PRODUTO.slug}:${tipo.tipo_id}`
+  } else {
+    const precoBaseReais = PRODUTO.precoCentavos / 100
+    const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+    installments =
+      body.billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), PRODUTO.maxParcelas) : 1
+    installmentValueReais = valorParcela(precoCartaoBaseReais, installments)
+    valorCobradoReais =
+      body.billing_type === 'PIX'
+        ? Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
+        : totalComJuros(precoCartaoBaseReais, installments)
+  }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const extras = normalizarExtras(body)
 
@@ -94,6 +118,7 @@ export async function POST(request: Request) {
     const insc = await criarInscricaoPendente({
       curso_slug: PRODUTO.slug,
       lote: 'unico',
+      tipo_ingresso: tipoIngresso,
       nome: body.nome.trim(),
       email: body.email.trim().toLowerCase(),
       cpf_cnpj: onlyDigits(body.cpf_cnpj),
@@ -130,8 +155,8 @@ export async function POST(request: Request) {
       customerId: customer.id,
       billingType: body.billing_type,
       valueReais: valorCobradoReais,
-      description: PRODUTO.asaasDescricao,
-      externalReference: PRODUTO.slug,
+      description: descricaoAsaas,
+      externalReference: externalRef,
       dueDate: todayPlusDays(3),
       installmentCount: installments > 1 ? installments : undefined,
       installmentValueReais: installments > 1 ? installmentValueReais : undefined,

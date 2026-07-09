@@ -38,3 +38,30 @@ CREATE INDEX IF NOT EXISTS idx_inscricoes_curso_status ON inscricoes(curso_slug,
 -- Esconde registros de teste/sandbox da lista de vendas e dos KPIs (sem apagar).
 ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS is_teste BOOLEAN NOT NULL DEFAULT false;
 CREATE INDEX IF NOT EXISTS idx_inscricoes_is_teste ON inscricoes(is_teste);
+
+-- === Tipo de ingresso (variante do produto) ===
+-- Ex.: DSSBR terá Estudante/Profissional/VIP/Corporativo. NULL = produto sem variantes.
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS tipo_ingresso TEXT;
+CREATE INDEX IF NOT EXISTS idx_inscricoes_tipo ON inscricoes(curso_slug, tipo_ingresso);
+
+-- === Catálogo de tipos de ingresso (cadastrável pelo admin) ===
+-- Fonte da verdade do preço por tipo. O checkout lê os tipos ATIVOS de um produto;
+-- se não houver nenhum, cai no preço único de lib/produtos.ts. Percentuais em % (10 = 10%).
+CREATE TABLE IF NOT EXISTS tipos_ingresso (
+  id                   BIGSERIAL PRIMARY KEY,
+  produto_slug         TEXT NOT NULL,           -- ex.: 'dss-2026'
+  tipo_id              TEXT NOT NULL,           -- slug do tipo, gravado em inscricoes.tipo_ingresso (ex.: 'estudante')
+  nome                 TEXT NOT NULL,           -- rótulo exibido (ex.: 'Estudante')
+  descricao            TEXT,                    -- linha curta opcional
+  preco_centavos       INTEGER NOT NULL,        -- preço cobrado (base)
+  preco_de_centavos    INTEGER NOT NULL DEFAULT 0,   -- âncora "de" riscada (0 = sem âncora)
+  pix_desconto_pct     NUMERIC NOT NULL DEFAULT 0,   -- % off no PIX (10 = 10%)
+  cartao_acrescimo_pct NUMERIC NOT NULL DEFAULT 0,   -- % a mais no cartão (base)
+  max_parcelas         INTEGER NOT NULL DEFAULT 1,   -- 1x à vista; 2x+ com juros
+  ativo                BOOLEAN NOT NULL DEFAULT true,
+  ordem                INTEGER NOT NULL DEFAULT 0,    -- ordem de exibição
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tipos_ingresso_uq ON tipos_ingresso(produto_slug, tipo_id);
+CREATE INDEX IF NOT EXISTS idx_tipos_ingresso_ativo ON tipos_ingresso(produto_slug, ativo, ordem);

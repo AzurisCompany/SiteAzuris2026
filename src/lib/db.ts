@@ -39,6 +39,7 @@ export interface InscricaoRow {
   id: number
   curso_slug: string
   lote: Lote
+  tipo_ingresso: string | null
   nome: string
   email: string
   cpf_cnpj: string
@@ -116,11 +117,56 @@ export async function determinarLoteAtivo(): Promise<{
   }
 }
 
+/**
+ * Modelo por AUDIENCIA (não por esgotamento):
+ * - membro do GU BigData IA / ex-participante do DSSBR → lote1, R$ 550
+ * - não-membro → lote2, R$ 750
+ */
+export type PerfilLakehouse = 'membro' | 'nao-membro'
+
+export const PRECO_POR_PERFIL: Record<
+  PerfilLakehouse,
+  { lote: 'lote1' | 'lote2'; preco_centavos: number }
+> = {
+  membro: { lote: 'lote1', preco_centavos: 55000 }, // R$ 550,00
+  'nao-membro': { lote: 'lote2', preco_centavos: 75000 }, // R$ 750,00
+}
+
+export function normalizarPerfil(v: unknown): PerfilLakehouse {
+  return v === 'nao-membro' ? 'nao-membro' : 'membro'
+}
+
+/** Retorna lote/preço/vagas pro perfil escolhido (self-declared no checkout). */
+export async function determinarLotePorPerfil(perfil: PerfilLakehouse): Promise<{
+  lote: Lote
+  vagasRestantes: number
+  preco_centavos: number
+}> {
+  const { lote, preco_centavos } = PRECO_POR_PERFIL[perfil]
+
+  const rows = (await sql`
+    SELECT lote, reservadas
+    FROM v_vagas_por_lote
+  `) as Array<{ lote: Lote; reservadas: number }>
+
+  const reservadasMap: Record<string, number> = {}
+  for (const r of rows) reservadasMap[r.lote] = Number(r.reservadas)
+
+  const reservadas = reservadasMap[lote] ?? 0
+  const capacidade = LOTE_CAPACIDADE[lote as 'lote1' | 'lote2']
+  return {
+    lote,
+    vagasRestantes: Math.max(0, capacidade - reservadas),
+    preco_centavos,
+  }
+}
+
 // --- CRUD ---
 
 export interface NovaInscricaoPendente {
   curso_slug: string
   lote: Lote
+  tipo_ingresso?: string | null
   nome: string
   email: string
   cpf_cnpj: string
@@ -152,13 +198,13 @@ export interface NovaInscricaoPendente {
 export async function criarInscricaoPendente(i: NovaInscricaoPendente): Promise<InscricaoRow> {
   const rows = (await sql`
     INSERT INTO inscricoes (
-      curso_slug, lote, nome, email, cpf_cnpj, telefone,
+      curso_slug, lote, tipo_ingresso, nome, email, cpf_cnpj, telefone,
       billing_type, valor_centavos, installments,
       utm_source, utm_medium, utm_campaign, utm_content, utm_term,
       empresa, cargo, pessoa_tipo, razao_social, nf_endereco, como_conheceu,
       consentimento_lgpd, consentimento_em
     ) VALUES (
-      ${i.curso_slug}, ${i.lote}, ${i.nome}, ${i.email}, ${i.cpf_cnpj}, ${i.telefone},
+      ${i.curso_slug}, ${i.lote}, ${i.tipo_ingresso ?? null}, ${i.nome}, ${i.email}, ${i.cpf_cnpj}, ${i.telefone},
       ${i.billing_type}, ${i.valor_centavos}, ${i.installments},
       ${i.utm_source}, ${i.utm_medium}, ${i.utm_campaign}, ${i.utm_content}, ${i.utm_term},
       ${i.empresa}, ${i.cargo}, ${i.pessoa_tipo}, ${i.razao_social},

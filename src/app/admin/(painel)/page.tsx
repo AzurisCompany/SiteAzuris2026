@@ -1,5 +1,13 @@
 import Link from 'next/link'
-import { resumoFinanceiro, labelProduto, brl, type ResumoProduto } from '@/lib/admin-queries'
+import {
+  resumoFinanceiro,
+  resumoPorTipo,
+  labelProduto,
+  labelTipo,
+  brl,
+  type ResumoProduto,
+  type ResumoTipo,
+} from '@/lib/admin-queries'
 import SyncAllButton from './SyncAllButton'
 
 export const dynamic = 'force-dynamic'
@@ -16,11 +24,20 @@ function Kpi({ rotulo, valor, sub }: { rotulo: string; valor: string; sub?: stri
 
 export default async function DashboardPage() {
   let resumo: ResumoProduto[] = []
+  let tipos: ResumoTipo[] = []
   let erro: string | null = null
   try {
-    resumo = await resumoFinanceiro()
+    ;[resumo, tipos] = await Promise.all([resumoFinanceiro(), resumoPorTipo()])
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
+  }
+
+  // Agrupa o breakdown por produto pra abrir dentro de cada card.
+  const tiposPorCurso = new Map<string, ResumoTipo[]>()
+  for (const t of tipos) {
+    const arr = tiposPorCurso.get(t.curso_slug) ?? []
+    arr.push(t)
+    tiposPorCurso.set(t.curso_slug, arr)
   }
 
   const tot = resumo.reduce(
@@ -70,34 +87,65 @@ export default async function DashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           {resumo.map((r) => {
             const ticket = r.pagas > 0 ? r.bruto_pago_centavos / r.pagas : 0
+            const breakdown = tiposPorCurso.get(r.curso_slug) ?? []
+            // Só vale mostrar a abertura quando há mais de uma linha OU um tipo nomeado.
+            const mostrarBreakdown = breakdown.length > 1 || breakdown.some((t) => t.tipo_ingresso != null)
             return (
-              <Link
+              <div
                 key={r.curso_slug}
-                href={`/admin/vendas?curso=${encodeURIComponent(r.curso_slug)}`}
-                className="block rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-5 hover:border-[var(--azuris-cyan)]/40 transition-colors"
+                className="rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-5"
               >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold">{labelProduto(r.curso_slug)}</h3>
-                  <span className="text-xs text-[var(--text-muted)]">{r.criadas} inscrições</span>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <div className="text-xs text-[var(--text-muted)]">Líquido recebido</div>
-                    <div className="text-lg font-black text-[var(--accent-emerald)]">{brl(r.liquido_pago_centavos)}</div>
+                <Link href={`/admin/vendas?curso=${encodeURIComponent(r.curso_slug)}`} className="block hover:opacity-90">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold">{labelProduto(r.curso_slug)}</h3>
+                    <span className="text-xs text-[var(--text-muted)]">{r.criadas} inscrições</span>
                   </div>
-                  <div>
-                    <div className="text-xs text-[var(--text-muted)]">Bruto</div>
-                    <div className="text-lg font-bold">{brl(r.bruto_pago_centavos)}</div>
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <div className="text-xs text-[var(--text-muted)]">Líquido recebido</div>
+                      <div className="text-lg font-black text-[var(--accent-emerald)]">{brl(r.liquido_pago_centavos)}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-[var(--text-muted)]">Bruto</div>
+                      <div className="text-lg font-bold">{brl(r.bruto_pago_centavos)}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
-                  <span>✅ {r.pagas} pagas</span>
-                  <span>⏳ {r.pendentes} pendentes</span>
-                  <span>⚠️ {r.vencidas} vencidas</span>
-                  <span>✖️ {r.encerradas} encerradas</span>
-                  <span>🎟️ ticket {brl(ticket)}</span>
-                </div>
-              </Link>
+                  <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
+                    <span>✅ {r.pagas} pagas</span>
+                    <span>⏳ {r.pendentes} pendentes</span>
+                    <span>⚠️ {r.vencidas} vencidas</span>
+                    <span>✖️ {r.encerradas} encerradas</span>
+                    <span>🎟️ ticket {brl(ticket)}</span>
+                  </div>
+                </Link>
+
+                {mostrarBreakdown && (
+                  <div className="mt-4 border-t border-[var(--azuris-surface)] pt-3">
+                    <div className="mb-2 text-xs uppercase tracking-widest text-[var(--text-muted)]">Por tipo</div>
+                    <div className="space-y-1.5">
+                      {breakdown.map((t) => {
+                        const tTicket = t.pagas > 0 ? t.bruto_pago_centavos / t.pagas : 0
+                        return (
+                          <Link
+                            key={`${t.curso_slug}:${t.tipo_ingresso ?? '_'}`}
+                            href={`/admin/vendas?curso=${encodeURIComponent(t.curso_slug)}${
+                              t.tipo_ingresso ? `&tipo=${encodeURIComponent(t.tipo_ingresso)}` : ''
+                            }`}
+                            className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-[var(--azuris-surface)]/40"
+                          >
+                            <span className="min-w-0 flex-1 truncate font-medium">{labelTipo(t.tipo_ingresso)}</span>
+                            <span className="text-xs text-[var(--text-muted)]">{t.pagas} pagas</span>
+                            <span className="text-xs text-[var(--text-muted)]">ticket {brl(tTicket)}</span>
+                            <span className="w-24 text-right font-bold text-[var(--accent-emerald)]">
+                              {brl(t.liquido_pago_centavos)}
+                            </span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>

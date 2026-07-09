@@ -3,6 +3,7 @@ import {
   listarVendas,
   resumoFinanceiro,
   contarTestes,
+  opcoesFiltro,
   labelProduto,
   tabProduto,
   brl,
@@ -41,6 +42,11 @@ export default async function VendasPage({
   const curso = sp.curso || ''
   const status = sp.status || ''
   const billing = sp.billing || ''
+  const tipo = sp.tipo || ''
+  const pessoa = sp.pessoa || ''
+  const origem = sp.origem || ''
+  const de = sp.de || ''
+  const ate = sp.ate || ''
   const busca = sp.busca || ''
   const mostrarTeste = sp.teste === '1'
   const page = Math.max(Number(sp.page ?? '1') || 1, 1)
@@ -50,16 +56,32 @@ export default async function VendasPage({
   let erro: string | null = null
   let resumo: ResumoProduto[] = []
   let qtdeTestes = 0
+  let opcoes: { tipos: string[]; origens: string[] } = { tipos: [], origens: [] }
   try {
-    const [res, r, qt] = await Promise.all([
-      listarVendas({ curso, status, billing, busca, mostrarTeste, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    const [res, r, qt, op] = await Promise.all([
+      listarVendas({
+        curso,
+        status,
+        billing,
+        tipo,
+        pessoa,
+        origem,
+        de,
+        ate,
+        busca,
+        mostrarTeste,
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+      }),
       resumoFinanceiro(),
       contarTestes(),
+      opcoesFiltro(),
     ])
     rows = res.rows
     total = res.total
     resumo = r
     qtdeTestes = qt
+    opcoes = op
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -71,13 +93,24 @@ export default async function VendasPage({
     countPorCurso[r.curso_slug] = r.criadas
     countTodos += r.criadas
   }
-  // Link de aba preservando os outros filtros (status/billing/busca), resetando página
-  const tabHref = (slug: string) => {
+  // Base com todos os filtros ativos (sem curso/teste/page — esses variam por link).
+  const baseParams = () => {
     const u = new URLSearchParams()
-    if (slug) u.set('curso', slug)
     if (status) u.set('status', status)
     if (billing) u.set('billing', billing)
+    if (tipo) u.set('tipo', tipo)
+    if (pessoa) u.set('pessoa', pessoa)
+    if (origem) u.set('origem', origem)
+    if (de) u.set('de', de)
+    if (ate) u.set('ate', ate)
     if (busca) u.set('busca', busca)
+    return u
+  }
+
+  // Link de aba preservando os outros filtros, resetando página
+  const tabHref = (slug: string) => {
+    const u = baseParams()
+    if (slug) u.set('curso', slug)
     if (mostrarTeste) u.set('teste', '1')
     const s = u.toString()
     return s ? `?${s}` : '/admin/vendas'
@@ -89,11 +122,8 @@ export default async function VendasPage({
 
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
   const qs = (p: number) => {
-    const u = new URLSearchParams()
+    const u = baseParams()
     if (curso) u.set('curso', curso)
-    if (status) u.set('status', status)
-    if (billing) u.set('billing', billing)
-    if (busca) u.set('busca', busca)
     if (mostrarTeste) u.set('teste', '1')
     u.set('page', String(p))
     return `?${u.toString()}`
@@ -101,11 +131,8 @@ export default async function VendasPage({
 
   // Link do toggle "ver testes" preservando os filtros atuais
   const toggleTesteHref = (() => {
-    const u = new URLSearchParams()
+    const u = baseParams()
     if (curso) u.set('curso', curso)
-    if (status) u.set('status', status)
-    if (billing) u.set('billing', billing)
-    if (busca) u.set('busca', busca)
     if (!mostrarTeste) u.set('teste', '1')
     const s = u.toString()
     return s ? `?${s}` : '/admin/vendas'
@@ -154,7 +181,19 @@ export default async function VendasPage({
       </div>
 
       {/* Filtros — aplicam sozinhos (selects na hora, busca com debounce) */}
-      <Filtros curso={curso} status={status} billing={billing} busca={busca} />
+      <Filtros
+        curso={curso}
+        status={status}
+        billing={billing}
+        tipo={tipo}
+        pessoa={pessoa}
+        origem={origem}
+        de={de}
+        ate={ate}
+        busca={busca}
+        tipos={opcoes.tipos}
+        origens={opcoes.origens}
+      />
 
       {erro && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>
@@ -201,7 +240,10 @@ export default async function VendasPage({
                     </a>
                   )}
                 </td>
-                <td className="px-4 py-3 text-[var(--text-secondary)]">{labelProduto(r.curso_slug)}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">
+                  {labelProduto(r.curso_slug)}
+                  {r.tipo_ingresso && <div className="text-xs text-[var(--text-muted)]">{r.tipo_ingresso}</div>}
+                </td>
                 <td className="px-4 py-3">
                   {brl(r.valor_centavos)}
                   {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}

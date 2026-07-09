@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
-import InscricaoForm from './InscricaoForm'
+import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
+import InscricaoForm, { type TipoOption } from './InscricaoForm'
 
 const PRODUTO = getProduto('dss-2026')
 
@@ -19,11 +20,33 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic'
 
-export default function InscricaoPage() {
+export default async function InscricaoPage() {
   const precoBaseReais = PRODUTO.precoCentavos / 100
   const precoDeVendaReais = PRODUTO.precoDeVendaCentavos / 100
   const precoPixReais = Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
   const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
+
+  // Tipos de ingresso cadastrados no admin (se houver, o checkout mostra o seletor).
+  let tipoOptions: TipoOption[] = []
+  try {
+    const tipos = await listarTiposAtivos(PRODUTO.slug)
+    tipoOptions = tipos.map((t) => {
+      const p = precosDoTipo(t)
+      return {
+        tipo_id: t.tipo_id,
+        nome: t.nome,
+        descricao: t.descricao,
+        precoPixReais: p.precoPixReais,
+        precoCartaoBaseReais: p.precoCartaoBaseReais,
+        precoDeVendaReais: p.precoDeVendaReais,
+        maxParcelas: p.maxParcelas,
+      }
+    })
+  } catch {
+    // Banco sem a tabela (migration não rodou) → cai no preço único, sem quebrar o checkout.
+    tipoOptions = []
+  }
+  const temTipos = tipoOptions.length > 0
 
   return (
     <main className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
@@ -62,7 +85,8 @@ export default function InscricaoPage() {
           </a>
         </div>
 
-        {/* Resumo do ingresso */}
+        {/* Resumo do ingresso — só no modo preço único. Com tipos cadastrados, o seletor do form mostra os preços. */}
+        {!temTipos && (
         <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
@@ -98,12 +122,34 @@ export default function InscricaoPage() {
             </div>
           </div>
         </div>
+        )}
+
+        {temTipos && (
+          <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+            <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">Pré-venda · {PRODUTO.descricao}</div>
+            <div className="mt-2 space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                <span className="text-[var(--azuris-cyan)]">●</span>
+                3 dias de evento · 120 palestras · 98 palestrantes · 14 workshops · 9 mesas-redondas
+              </div>
+              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                <span className="text-[var(--azuris-cyan)]">●</span>
+                Networking, rodadas de negócio, pitches de startups e festa de encerramento
+              </div>
+              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                <span className="text-[var(--accent-emerald)]">●</span>
+                Escolha seu tipo de ingresso abaixo.
+              </div>
+            </div>
+          </div>
+        )}
 
         <InscricaoForm
           precoDeVendaReais={precoDeVendaReais}
           precoPixReais={precoPixReais}
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={PRODUTO.maxParcelas}
+          tipos={tipoOptions}
         />
 
         <p className="mt-8 text-xs text-[var(--text-muted)] text-center">

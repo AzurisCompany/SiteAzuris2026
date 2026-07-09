@@ -20,6 +20,12 @@ export default async function PainelLayout({ children }: { children: React.React
             <Link href="/admin/vendas" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
               Vendas
             </Link>
+            <Link href="/admin/cobranca" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+              Cobrança
+            </Link>
+            <Link href="/admin/ingressos" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+              Ingressos
+            </Link>
             <Link href="/admin/trafego" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
               Tráfego
             </Link>

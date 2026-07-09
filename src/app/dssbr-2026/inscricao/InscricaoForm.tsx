@@ -5,6 +5,17 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 
+/** Opção de tipo de ingresso vinda do catálogo (admin). */
+export interface TipoOption {
+  tipo_id: string
+  nome: string
+  descricao: string | null
+  precoPixReais: number
+  precoCartaoBaseReais: number
+  precoDeVendaReais: number
+  maxParcelas: number
+}
+
 interface Props {
   /** preço cheio de venda (lote final / no dia) — âncora "de" riscada (ex.: R$ 820) */
   precoDeVendaReais: number
@@ -13,6 +24,8 @@ interface Props {
   /** preço-base do cartão à vista; 2x+ com juros sobre essa base (ex.: R$ 470) */
   precoCartaoBaseReais: number
   maxParcelas: number
+  /** tipos de ingresso cadastrados; se não-vazio, mostra o seletor e ignora os preços únicos acima */
+  tipos?: TipoOption[]
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -38,18 +51,38 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoCartaoBaseReais, maxParcelas }: Props) {
+export default function InscricaoForm({
+  precoDeVendaReais: baseDeVenda,
+  precoPixReais: basePix,
+  precoCartaoBaseReais: baseCartao,
+  maxParcelas: baseMax,
+  tipos,
+}: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
   const [installments, setInstallments] = useState(1)
+  const [tipoIdx, setTipoIdx] = useState(0)
   const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
   const [utm, setUtm] = useState<{ source?: string; medium?: string; campaign?: string; content?: string; term?: string }>({})
+
+  // Preços efetivos: do tipo selecionado (se houver catálogo) ou o preço único.
+  const temTipos = !!tipos && tipos.length > 0
+  const sel = temTipos ? tipos![Math.min(tipoIdx, tipos!.length - 1)] : null
+  const precoDeVendaReais = sel ? sel.precoDeVendaReais : baseDeVenda
+  const precoPixReais = sel ? sel.precoPixReais : basePix
+  const precoCartaoBaseReais = sel ? sel.precoCartaoBaseReais : baseCartao
+  const maxParcelas = sel ? sel.maxParcelas : baseMax
+
+  // Se trocar de tipo pra um com menos parcelas, corrige a seleção.
+  useEffect(() => {
+    if (installments > maxParcelas) setInstallments(maxParcelas)
+  }, [maxParcelas, installments])
 
   // Pré-venda: ambos os pagamentos partem do preço de pré-venda; mostramos o
   // preço cheio de venda riscado como âncora (o que vai custar no lote final).
@@ -89,6 +122,7 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
           email: email.trim().toLowerCase(),
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
+          tipo: sel?.tipo_id,
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
@@ -113,6 +147,7 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
             {
               item_id: 'dss-2026',
               item_name: 'Data Science Summit Brasil 2026',
+              item_variant: sel?.tipo_id,
               price: valorCobradoReais,
               quantity: 1,
             },
@@ -131,6 +166,53 @@ export default function InscricaoForm({ precoDeVendaReais, precoPixReais, precoC
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+      {/* Tipo de ingresso (só quando há catálogo cadastrado) */}
+      {temTipos && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold">Tipo de ingresso</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {tipos!.map((t, i) => {
+              const ativo = i === Math.min(tipoIdx, tipos!.length - 1)
+              const temAnc = t.precoDeVendaReais > t.precoPixReais
+              return (
+                <label
+                  key={t.tipo_id}
+                  className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
+                    ativo
+                      ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/5'
+                      : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="tipo"
+                    checked={ativo}
+                    onChange={() => setTipoIdx(i)}
+                    className="sr-only"
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold">{t.nome}</span>
+                    {temAnc && (
+                      <span className="text-xs font-bold text-[var(--accent-emerald)]">
+                        -{Math.round((1 - t.precoPixReais / t.precoDeVendaReais) * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {t.descricao && <div className="mt-0.5 text-xs text-[var(--text-muted)]">{t.descricao}</div>}
+                  {temAnc && (
+                    <div className="mt-1 text-xs text-[var(--text-muted)] line-through">
+                      R$ {t.precoDeVendaReais.toFixed(2).replace('.', ',')}
+                    </div>
+                  )}
+                  <div className="text-2xl font-black">R$ {t.precoPixReais.toFixed(2).replace('.', ',')}</div>
+                  <div className="mt-0.5 text-xs text-[var(--text-muted)]">no PIX · cartão até {t.maxParcelas}x</div>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Dados pessoais */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold">Seus dados</h2>

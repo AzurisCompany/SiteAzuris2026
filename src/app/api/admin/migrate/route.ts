@@ -38,6 +38,26 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_inscricoes_curso_status ON inscricoes(curso_slug, status)`,
   `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS is_teste BOOLEAN NOT NULL DEFAULT false`,
   `CREATE INDEX IF NOT EXISTS idx_inscricoes_is_teste ON inscricoes(is_teste)`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS tipo_ingresso TEXT`,
+  `CREATE INDEX IF NOT EXISTS idx_inscricoes_tipo ON inscricoes(curso_slug, tipo_ingresso)`,
+  `CREATE TABLE IF NOT EXISTS tipos_ingresso (
+     id                   BIGSERIAL PRIMARY KEY,
+     produto_slug         TEXT NOT NULL,
+     tipo_id              TEXT NOT NULL,
+     nome                 TEXT NOT NULL,
+     descricao            TEXT,
+     preco_centavos       INTEGER NOT NULL,
+     preco_de_centavos    INTEGER NOT NULL DEFAULT 0,
+     pix_desconto_pct     NUMERIC NOT NULL DEFAULT 0,
+     cartao_acrescimo_pct NUMERIC NOT NULL DEFAULT 0,
+     max_parcelas         INTEGER NOT NULL DEFAULT 1,
+     ativo                BOOLEAN NOT NULL DEFAULT true,
+     ordem                INTEGER NOT NULL DEFAULT 0,
+     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_tipos_ingresso_uq ON tipos_ingresso(produto_slug, tipo_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_tipos_ingresso_ativo ON tipos_ingresso(produto_slug, ativo, ordem)`,
   // Recria a view de vagas excluindo registros de teste (não devem consumir vaga real).
   `CREATE OR REPLACE VIEW v_vagas_por_lote AS
      SELECT lote,
@@ -63,5 +83,55 @@ export async function POST() {
     }
   }
   const okCount = resultados.filter((r) => r.ok).length
-  return NextResponse.json({ ok: okCount === STATEMENTS.length, okCount, total: STATEMENTS.length, resultados })
+  const integridade = await snapshotIntegridade()
+  return NextResponse.json({
+    ok: okCount === STATEMENTS.length,
+    okCount,
+    total: STATEMENTS.length,
+    resultados,
+    integridade,
+  })
+}
+
+/**
+ * Snapshot de integridade (só leitura) — pra comparar ANTES e DEPOIS da migração e
+ * provar que nenhuma linha se perdeu. Como a migração é 100% aditiva (ADD COLUMN /
+ * CREATE TABLE / CREATE INDEX IF NOT EXISTS + CREATE OR REPLACE VIEW), a contagem de
+ * `inscricoes` tem que ser idêntica antes e depois.
+ */
+async function snapshotIntegridade() {
+  const contar = async (tabela: string): Promise<number | null> => {
+    try {
+      const r = (await sql.query(`SELECT COUNT(*)::int AS c FROM ${tabela}`)) as Array<{ c: number }>
+      return r[0]?.c ?? 0
+    } catch {
+      return null // tabela ainda não existe (ex.: pré-migração)
+    }
+  }
+  const colunasInscricoes = (await sql.query(
+    `SELECT column_name FROM information_schema.columns WHERE table_name = 'inscricoes' ORDER BY column_name`
+  )) as Array<{ column_name: string }>
+  const cols = colunasInscricoes.map((r) => r.column_name)
+
+  const [inscricoes, asaas_eventos, tipos_ingresso] = await Promise.all([
+    contar('inscricoes'),
+    contar('asaas_eventos'),
+    contar('tipos_ingresso'),
+  ])
+
+  return {
+    inscricoes, // ← tem que ser igual antes/depois
+    asaas_eventos,
+    tipos_ingresso, // null antes da migração; número (0+) depois
+    tem_coluna_tipo_ingresso: cols.includes('tipo_ingresso'),
+    total_colunas_inscricoes: cols.length,
+  }
+}
+
+/** GET — só o snapshot de integridade, sem rodar nada. Use pra baseline antes da migração. */
+export async function GET() {
+  if (!(await estaLogado())) {
+    return NextResponse.json({ error: 'não autorizado' }, { status: 401 })
+  }
+  return NextResponse.json({ ok: true, integridade: await snapshotIntegridade() })
 }

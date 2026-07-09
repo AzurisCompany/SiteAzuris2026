@@ -7,7 +7,8 @@ import {
   criarInscricaoPendente,
   vincularAsaas,
   cancelarInscricao,
-  determinarLoteAtivo,
+  determinarLotePorPerfil,
+  normalizarPerfil,
   type BillingType,
 } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
@@ -22,6 +23,7 @@ interface RequestBody extends ExtrasInput {
   email: string
   cpf_cnpj: string
   telefone?: string
+  perfil?: string
   billing_type: BillingType
   installments?: number
   utm?: {
@@ -75,11 +77,13 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
-  // Descobre lote ativo + preço base
-  const { lote, vagasRestantes, preco_centavos: precoBaseCentavos } = await determinarLoteAtivo()
+  // Preço por perfil auto-declarado (membro GU/DSSBR → R$550 / não-membro → R$750).
+  // Derivado 100% no servidor — o cliente só informa qual perfil, nunca o valor.
+  const perfil = normalizarPerfil(body.perfil)
+  const { lote, vagasRestantes, preco_centavos: precoBaseCentavos } = await determinarLotePorPerfil(perfil)
   if (vagasRestantes <= 0) {
     return NextResponse.json(
-      { error: 'Não há mais vagas neste momento. Entre em contato pra fila de espera.' },
+      { error: 'Não há mais vagas neste perfil no momento. Entre em contato pra fila de espera.' },
       { status: 409 }
     )
   }
@@ -106,6 +110,7 @@ export async function POST(request: Request) {
     const insc = await criarInscricaoPendente({
       curso_slug: 'lakehouse-comunidade',
       lote,
+      tipo_ingresso: perfil, // 'membro' | 'nao-membro' — abre o breakdown por tipo no admin
       nome: body.nome.trim(),
       email: body.email.trim().toLowerCase(),
       cpf_cnpj: onlyDigits(body.cpf_cnpj),
