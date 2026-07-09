@@ -4,8 +4,9 @@
 // O webhook /api/webhook/asaas (compartilhado, agnóstico de produto) confirma o pagamento.
 
 import { NextResponse } from 'next/server'
-import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, type BillingType } from '@/lib/db'
+import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, buscarCobrancaDuplicada, type BillingType } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
+import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { getProduto } from '@/lib/produtos'
 import { getTipo, valorCobradoDoTipo } from '@/lib/tipos-ingresso'
@@ -48,7 +49,7 @@ function validate(body: RequestBody): string | null {
   if (!body.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) return 'E-mail inválido'
 
   const cpf = onlyDigits(body.cpf_cnpj ?? '')
-  if (cpf.length !== 11 && cpf.length !== 14) return 'CPF/CNPJ inválido (precisa 11 ou 14 dígitos)'
+  if (!cpfCnpjValido(cpf)) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
   const tel = onlyDigits(body.telefone ?? '')
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
@@ -76,6 +77,10 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
+  // O checkout DSSBR só aceita PIX/cartão (validate garante). Estreita o tipo pro
+  // resto do fluxo — boleto/UNDEFINED existem só na cobrança avulsa do admin.
+  const billing: 'PIX' | 'CREDIT_CARD' = body.billing_type === 'CREDIT_CARD' ? 'CREDIT_CARD' : 'PIX'
+
   // Preço SEMPRE derivado no servidor (nunca confiar no client).
   // Se veio um tipo de ingresso cadastrado, o preço/parcelas vêm dele; senão, usa o
   // preço único do registry (lib/produtos.ts). Regra de PIX/cartão idêntica — ver [[parcelamento]].
@@ -91,7 +96,7 @@ export async function POST(request: Request) {
     if (!tipo || !tipo.ativo) {
       return NextResponse.json({ error: 'Tipo de ingresso indisponível' }, { status: 400 })
     }
-    const cobrado = valorCobradoDoTipo(tipo, body.billing_type, body.installments ?? 1)
+    const cobrado = valorCobradoDoTipo(tipo, billing, body.installments ?? 1)
     installments = cobrado.installments
     installmentValueReais = cobrado.installmentValueReais
     valorCobradoReais = cobrado.valorReais
@@ -111,6 +116,23 @@ export async function POST(request: Request) {
   }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const extras = normalizarExtras(body)
+
+  // Anti-duplicação: se já há fatura idêntica recente (mesmo doc/valor/tipo), devolve ela.
+  const duplicada = await buscarCobrancaDuplicada({
+    curso_slug: PRODUTO.slug,
+    cpf_cnpj: onlyDigits(body.cpf_cnpj),
+    valor_centavos: valorCobradoCentavos,
+    tipo_ingresso: tipoIngresso,
+  })
+  if (duplicada?.asaas_invoice_url) {
+    return NextResponse.json({
+      ok: true,
+      invoiceUrl: duplicada.asaas_invoice_url,
+      paymentId: duplicada.asaas_payment_id,
+      valor: duplicada.valor_centavos / 100,
+      duplicada: true,
+    })
+  }
 
   // 1. Grava a inscrição como 'pending' ANTES do Asaas — lead garantido mesmo se o Asaas falhar.
   let inscricaoId: number

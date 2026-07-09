@@ -5,9 +5,10 @@
 // A inscrição fica com curso_slug='proposta' pra virar um balde próprio no admin.
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
-import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, type BillingType } from '@/lib/db'
+import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, buscarCobrancaDuplicada, type BillingType } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
+import { cpfCnpjValido } from '@/lib/validacao-doc'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,7 @@ function validate(b: RequestBody): string | null {
   if (!b.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) return 'E-mail inválido'
 
   const cpf = onlyDigits(b.cpf_cnpj ?? '')
-  if (cpf.length !== 11 && cpf.length !== 14) return 'CPF/CNPJ inválido (precisa 11 ou 14 dígitos)'
+  if (!cpfCnpjValido(cpf)) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
   const tel = onlyDigits(b.telefone ?? '')
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
@@ -54,7 +55,8 @@ function validate(b: RequestBody): string | null {
   if (typeof b.valor_reais !== 'number' || !Number.isFinite(b.valor_reais)) return 'Valor inválido'
   if (b.valor_reais < VALOR_MINIMO_REAIS) return `Valor mínimo é R$ ${VALOR_MINIMO_REAIS},00`
 
-  if (b.billing_type !== 'PIX' && b.billing_type !== 'CREDIT_CARD') return 'Forma de pagamento inválida'
+  const METODOS: BillingType[] = ['PIX', 'CREDIT_CARD', 'BOLETO', 'UNDEFINED']
+  if (!b.billing_type || !METODOS.includes(b.billing_type)) return 'Forma de pagamento inválida'
   if (b.billing_type === 'CREDIT_CARD') {
     const n = b.installments ?? 1
     if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS) return `Parcelamento inválido (1 a ${MAX_PARCELAS})`
@@ -86,12 +88,37 @@ export async function POST(request: Request) {
   const valorBaseReais = Number(body.valor_reais!.toFixed(2))
   const installments =
     billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), MAX_PARCELAS) : 1
-  // PIX / 1x = valor cheio; 2x+ = juros repassados (mesma regra do site).
+  // Juros só no cartão parcelado (2x+). PIX/Boleto/UNDEFINED = valor cheio à vista.
+  // Em UNDEFINED o cliente escolhe o meio na fatura, então não dá pra pré-fixar
+  // parcela com juros — se pagar no cartão, o parcelamento segue a conta Asaas.
   const installmentValueReais = valorParcela(valorBaseReais, installments)
-  const valorCobradoReais = billing_type === 'PIX' ? valorBaseReais : totalComJuros(valorBaseReais, installments)
+  const valorCobradoReais = billing_type === 'CREDIT_CARD' ? totalComJuros(valorBaseReais, installments) : valorBaseReais
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const descricao = body.descricao!.trim()
   const dueDays = body.dias_vencimento ?? 3
+
+  // Anti-duplicação: se já há fatura idêntica recente pro mesmo cliente/valor, devolve ela.
+  const duplicada = await buscarCobrancaDuplicada({
+    curso_slug: PROPOSTA_SLUG,
+    cpf_cnpj: onlyDigits(body.cpf_cnpj!),
+    valor_centavos: valorCobradoCentavos,
+  })
+  if (duplicada?.asaas_invoice_url) {
+    return NextResponse.json({
+      ok: true,
+      id: duplicada.id,
+      invoiceUrl: duplicada.asaas_invoice_url,
+      paymentId: duplicada.asaas_payment_id,
+      valor: duplicada.valor_centavos / 100,
+      installments: duplicada.installments,
+      installmentValue:
+        duplicada.installments > 1
+          ? Number((duplicada.valor_centavos / 100 / duplicada.installments).toFixed(2))
+          : duplicada.valor_centavos / 100,
+      billing_type: duplicada.billing_type,
+      duplicada: true,
+    })
+  }
 
   // 1. Inscrição 'pending' antes do Asaas — lead garantido mesmo se a cobrança falhar.
   let inscricaoId: number

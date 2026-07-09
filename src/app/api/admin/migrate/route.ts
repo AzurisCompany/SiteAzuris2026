@@ -58,6 +58,36 @@ const STATEMENTS: string[] = [
    )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_tipos_ingresso_uq ON tipos_ingresso(produto_slug, tipo_id)`,
   `CREATE INDEX IF NOT EXISTS idx_tipos_ingresso_ativo ON tipos_ingresso(produto_slug, ativo, ordem)`,
+  // Config financeira editável no admin (meta mensal, alíquota de imposto).
+  `CREATE TABLE IF NOT EXISTS config_financeiro (
+     chave      TEXT PRIMARY KEY,
+     valor      TEXT NOT NULL,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   )`,
+  // Assinaturas (cobrança recorrente). Cada ciclo cobrado vira uma linha em inscricoes.
+  `CREATE TABLE IF NOT EXISTS assinaturas (
+     id                     BIGSERIAL PRIMARY KEY,
+     asaas_subscription_id  TEXT UNIQUE,
+     asaas_customer_id      TEXT,
+     nome                   TEXT NOT NULL,
+     email                  TEXT NOT NULL,
+     cpf_cnpj               TEXT NOT NULL,
+     telefone               TEXT,
+     billing_type           TEXT NOT NULL,
+     valor_centavos         INTEGER NOT NULL,
+     cycle                  TEXT NOT NULL,
+     descricao              TEXT,
+     status                 TEXT NOT NULL DEFAULT 'active',
+     is_teste               BOOLEAN NOT NULL DEFAULT false,
+     created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   )`,
+  // Nota Fiscal (NFS-e emitida via Asaas) vinculada à inscrição.
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_id TEXT`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_status TEXT`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_numero TEXT`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_pdf_url TEXT`,
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_xml_url TEXT`,
   // Recria a view de vagas excluindo registros de teste (não devem consumir vaga real).
   `CREATE OR REPLACE VIEW v_vagas_por_lote AS
      SELECT lote,

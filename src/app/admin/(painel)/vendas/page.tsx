@@ -13,6 +13,7 @@ import {
   STATUS_COR,
   type ResumoProduto,
 } from '@/lib/admin-queries'
+import { labelBilling } from '@/lib/billing'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
@@ -248,7 +249,7 @@ export default async function VendasPage({
                   {brl(r.valor_centavos)}
                   {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}
                 </td>
-                <td className="px-4 py-3 text-[var(--text-secondary)]">{r.billing_type === 'PIX' ? 'PIX' : 'Cartão'}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">{labelBilling(r.billing_type)}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
                 <td className="px-4 py-3 text-right">

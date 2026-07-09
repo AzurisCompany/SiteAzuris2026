@@ -92,6 +92,7 @@ export interface AsaasPayment {
   bankSlipUrl?: string
   description?: string
   externalReference?: string
+  subscription?: string // preenchido quando o pagamento faz parte de uma assinatura
 }
 
 export async function createPayment(input: CreatePaymentInput): Promise<AsaasPayment> {
@@ -118,6 +119,25 @@ export async function createPayment(input: CreatePaymentInput): Promise<AsaasPay
 
   const payment = await asaasFetch('/payments', {
     method: 'POST',
+    body: JSON.stringify(body),
+  })
+  return payment as AsaasPayment
+}
+
+/** Edita uma cobrança existente (PUT /payments/{id}). Só faz sentido pra não-paga. */
+export interface UpdatePaymentInput {
+  valueReais?: number
+  dueDate?: string // YYYY-MM-DD
+  description?: string
+}
+
+export async function updatePayment(paymentId: string, input: UpdatePaymentInput): Promise<AsaasPayment> {
+  const body: Record<string, unknown> = {}
+  if (typeof input.valueReais === 'number') body.value = input.valueReais
+  if (input.dueDate) body.dueDate = input.dueDate
+  if (input.description) body.description = input.description
+  const payment = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, {
+    method: 'PUT',
     body: JSON.stringify(body),
   })
   return payment as AsaasPayment
@@ -156,6 +176,119 @@ export function mapAsaasStatus(status: string): 'pending' | 'paid' | 'overdue' |
     default:
       return 'pending'
   }
+}
+
+// --- Assinaturas (cobrança recorrente) ---
+
+export type AsaasCycle = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'SEMIANNUALLY' | 'YEARLY'
+
+export interface AsaasSubscription {
+  id: string
+  customer: string
+  value: number
+  cycle: AsaasCycle
+  status: string
+  billingType: AsaasBillingType
+  nextDueDate?: string
+  description?: string
+}
+
+export interface CreateSubscriptionInput {
+  customerId: string
+  billingType: AsaasBillingType
+  valueReais: number
+  cycle: AsaasCycle
+  nextDueDate: string // YYYY-MM-DD
+  description?: string
+  externalReference?: string
+}
+
+export async function createSubscription(input: CreateSubscriptionInput): Promise<AsaasSubscription> {
+  const body: Record<string, unknown> = {
+    customer: input.customerId,
+    billingType: input.billingType,
+    value: input.valueReais,
+    cycle: input.cycle,
+    nextDueDate: input.nextDueDate,
+  }
+  if (input.description) body.description = input.description
+  if (input.externalReference) body.externalReference = input.externalReference
+  const sub = await asaasFetch('/subscriptions', { method: 'POST', body: JSON.stringify(body) })
+  return sub as AsaasSubscription
+}
+
+export async function getSubscription(subscriptionId: string): Promise<AsaasSubscription> {
+  return (await asaasFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'GET' })) as AsaasSubscription
+}
+
+/** Cancela (deleta) uma assinatura no Asaas — para de gerar novos ciclos. */
+export async function cancelSubscription(subscriptionId: string): Promise<{ deleted: boolean }> {
+  return (await asaasFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'DELETE' })) as {
+    deleted: boolean
+  }
+}
+
+// --- Nota Fiscal (NFS-e) ---
+
+export interface AsaasInvoice {
+  id: string
+  status: string // SCHEDULED | SYNCHRONIZED | AUTHORIZED | PROCESSING_CANCELLATION | CANCELED | CANCELLATION_DENIED | ERROR
+  number?: string | null
+  pdfUrl?: string | null
+  xmlUrl?: string | null
+  rpsNumber?: string | null
+  value?: number
+  payment?: string
+  serviceDescription?: string
+  effectiveDate?: string
+}
+
+export interface CreateInvoiceInput {
+  paymentId: string
+  valueReais: number
+  serviceDescription: string
+  observations?: string
+  municipalServiceCode?: string
+  municipalServiceName?: string
+  effectiveDate?: string // YYYY-MM-DD
+  taxes?: { iss?: number; retainIss?: boolean; cofins?: number; csll?: number; inss?: number; ir?: number; pis?: number }
+}
+
+/**
+ * Agenda a emissão de uma NFS-e vinculada a um pagamento (POST /invoices).
+ * Exige que a conta Asaas tenha as configurações fiscais preenchidas (inscrição
+ * municipal, serviço, regime) — senão o Asaas devolve erro, que propagamos cru.
+ */
+export async function createInvoice(input: CreateInvoiceInput): Promise<AsaasInvoice> {
+  const body: Record<string, unknown> = {
+    payment: input.paymentId,
+    value: input.valueReais,
+    serviceDescription: input.serviceDescription,
+    updatePayment: false,
+    taxes: input.taxes ?? { iss: 0, retainIss: false, cofins: 0, csll: 0, inss: 0, ir: 0, pis: 0 },
+  }
+  if (input.observations) body.observations = input.observations
+  if (input.effectiveDate) body.effectiveDate = input.effectiveDate
+  if (input.municipalServiceCode) body.municipalServiceCode = input.municipalServiceCode
+  if (input.municipalServiceName) body.municipalServiceName = input.municipalServiceName
+
+  const inv = await asaasFetch('/invoices', { method: 'POST', body: JSON.stringify(body) })
+  return inv as AsaasInvoice
+}
+
+/** Lista as NFS-e vinculadas a um pagamento. */
+export async function getInvoicesByPayment(paymentId: string): Promise<AsaasInvoice[]> {
+  const res = await asaasFetch(`/invoices?payment=${encodeURIComponent(paymentId)}`, { method: 'GET' })
+  return Array.isArray(res?.data) ? (res.data as AsaasInvoice[]) : []
+}
+
+export async function getInvoice(invoiceId: string): Promise<AsaasInvoice> {
+  return (await asaasFetch(`/invoices/${encodeURIComponent(invoiceId)}`, { method: 'GET' })) as AsaasInvoice
+}
+
+/** Cancela uma NFS-e emitida/agendada. */
+export async function cancelInvoice(invoiceId: string): Promise<AsaasInvoice> {
+  return (await asaasFetch(`/invoices/${encodeURIComponent(invoiceId)}/cancel`, { method: 'POST' })) as AsaasInvoice
 }
 
 // --- Webhook event types ---

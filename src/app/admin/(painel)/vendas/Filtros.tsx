@@ -13,9 +13,11 @@ const STATUS: ReadonlyArray<readonly [string, string]> = [
   ['refunded', 'Estornado'],
 ]
 const BILLING: ReadonlyArray<readonly [string, string]> = [
-  ['', 'PIX e cartão'],
+  ['', 'Todos os meios'],
   ['PIX', 'PIX'],
   ['CREDIT_CARD', 'Cartão'],
+  ['BOLETO', 'Boleto'],
+  ['UNDEFINED', 'Cliente escolhe'],
 ]
 const PESSOA: ReadonlyArray<readonly [string, string]> = [
   ['', 'PF e PJ'],

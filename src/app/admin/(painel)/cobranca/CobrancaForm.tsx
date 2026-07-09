@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { labelBilling } from '@/lib/billing'
 
 // Espelho da regra de parcelamento do servidor (lib/parcelamento) — só pra PREVIEW.
 // O valor cobrado é sempre recalculado no servidor; aqui é ajuda visual.
@@ -39,17 +41,18 @@ interface Resultado {
   valor: number
   installments: number
   installmentValue: number
-  billing_type: 'PIX' | 'CREDIT_CARD'
+  billing_type: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 }
 
 export default function CobrancaForm() {
+  const router = useRouter()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [cpf, setCpf] = useState('')
   const [telefone, setTelefone] = useState('')
   const [descricao, setDescricao] = useState('')
   const [valorRaw, setValorRaw] = useState('')
-  const [billing, setBilling] = useState<'PIX' | 'CREDIT_CARD'>('PIX')
+  const [metodos, setMetodos] = useState({ pix: true, boleto: false, cartao: false })
   const [parcelas, setParcelas] = useState(1)
   const [diasVenc, setDiasVenc] = useState(3)
 
@@ -60,17 +63,31 @@ export default function CobrancaForm() {
 
   const valorReais = useMemo(() => parseValor(valorRaw), [valorRaw])
 
-  // Preview do parcelamento (cartão).
+  // 1 meio marcado = método fixo; 2+ = UNDEFINED (cliente escolhe na fatura Asaas).
+  const marcados = [
+    metodos.pix && 'PIX',
+    metodos.boleto && 'BOLETO',
+    metodos.cartao && 'CREDIT_CARD',
+  ].filter(Boolean) as Array<'PIX' | 'BOLETO' | 'CREDIT_CARD'>
+  const billingType: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED' | null =
+    marcados.length === 0 ? null : marcados.length === 1 ? marcados[0] : 'UNDEFINED'
+  const soCartao = billingType === 'CREDIT_CARD'
+
+  // Preview do parcelamento — só quando cartão é o ÚNICO meio (aí pré-fixamos os juros).
   const previewParcela = useMemo(() => {
-    if (billing !== 'CREDIT_CARD' || valorReais <= 0) return null
+    if (!soCartao || valorReais <= 0) return null
     const vp = valorParcela(valorReais, parcelas)
     return { total: Number((vp * parcelas).toFixed(2)), parcela: vp }
-  }, [billing, valorReais, parcelas])
+  }, [soCartao, valorReais, parcelas])
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault()
     setErro(null)
     setResultado(null)
+    if (!billingType) {
+      setErro('Marque ao menos um meio de pagamento.')
+      return
+    }
     setEnviando(true)
     try {
       const res = await fetch('/api/admin/cobranca', {
@@ -83,8 +100,8 @@ export default function CobrancaForm() {
           telefone,
           descricao,
           valor_reais: valorReais,
-          billing_type: billing,
-          installments: billing === 'CREDIT_CARD' ? parcelas : 1,
+          billing_type: billingType,
+          installments: soCartao ? parcelas : 1,
           dias_vencimento: diasVenc,
         }),
       })
@@ -94,6 +111,7 @@ export default function CobrancaForm() {
         return
       }
       setResultado(data)
+      router.refresh() // atualiza a lista de cobranças abaixo do form
     } catch {
       setErro('Erro de rede. Tenta de novo.')
     } finally {
@@ -109,9 +127,14 @@ export default function CobrancaForm() {
       resultado.billing_type === 'CREDIT_CARD' && resultado.installments > 1
         ? `\nParcelável em até ${resultado.installments}x de ${brl(resultado.installmentValue)}.`
         : ''
+    const metodoNota =
+      resultado.billing_type === 'UNDEFINED' ? ' (PIX, boleto ou cartão)'
+        : resultado.billing_type === 'PIX' ? ' (PIX)'
+        : resultado.billing_type === 'BOLETO' ? ' (boleto)'
+        : ''
     return (
       `Olá${primeiroNome ? ', ' + primeiroNome : ''}! Segue o link pra pagamento — ${descricao.trim()}.\n` +
-      `Valor: ${brl(resultado.valor)}${resultado.billing_type === 'PIX' ? ' (PIX)' : ''}.${linhaParc}\n\n` +
+      `Valor: ${brl(resultado.valor)}${metodoNota}.${linhaParc}\n\n` +
       `${resultado.invoiceUrl}\n\nQualquer dúvida, é só chamar. — Azuris`
     )
   }, [resultado, nome, descricao])
@@ -142,7 +165,7 @@ export default function CobrancaForm() {
     setCpf('')
     setTelefone('')
     setParcelas(1)
-    setBilling('PIX')
+    setMetodos({ pix: true, boleto: false, cartao: false })
     setDiasVenc(3)
   }
 
@@ -157,7 +180,8 @@ export default function CobrancaForm() {
           <h2 className="text-lg font-bold">Cobrança criada · {brl(resultado.valor)}</h2>
         </div>
         <p className="text-sm text-[var(--text-muted)]">
-          {descricao.trim()} · venda #{resultado.id} · {resultado.billing_type === 'PIX' ? 'PIX' : `Cartão ${resultado.installments}x`}
+          {descricao.trim()} · venda #{resultado.id} ·{' '}
+          {resultado.billing_type === 'CREDIT_CARD' ? `Cartão ${resultado.installments}x` : labelBilling(resultado.billing_type)}
         </p>
 
         <div>
@@ -271,31 +295,32 @@ export default function CobrancaForm() {
       </div>
 
       <div>
-        <label className={rotulo}>Forma de pagamento</label>
+        <label className={rotulo}>Formas de pagamento</label>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setBilling('PIX')}
-            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
-              billing === 'PIX'
-                ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
-                : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            PIX
-          </button>
-          <button
-            type="button"
-            onClick={() => setBilling('CREDIT_CARD')}
-            className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
-              billing === 'CREDIT_CARD'
-                ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
-                : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            Cartão
-          </button>
-          {billing === 'CREDIT_CARD' && (
+          {([
+            ['pix', 'PIX'],
+            ['boleto', 'Boleto'],
+            ['cartao', 'Cartão'],
+          ] as const).map(([key, label]) => {
+            const ativo = metodos[key]
+            return (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={ativo}
+                onClick={() => setMetodos((m) => ({ ...m, [key]: !m[key] }))}
+                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
+                  ativo
+                    ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
+                    : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <span className="mr-1.5">{ativo ? '✓' : '+'}</span>
+                {label}
+              </button>
+            )
+          })}
+          {soCartao && (
             <select value={parcelas} onChange={(e) => setParcelas(Number(e.target.value))} className={`${campo} w-auto`}>
               {Array.from({ length: MAX_PARCELAS }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
@@ -305,6 +330,15 @@ export default function CobrancaForm() {
             </select>
           )}
         </div>
+        {billingType === null && (
+          <p className="mt-2 text-xs text-amber-300">Marque ao menos um meio de pagamento.</p>
+        )}
+        {billingType === 'UNDEFINED' && (
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
+            Cliente escolhe o meio na fatura. Atenção: o Asaas exibe <strong>todos os meios ativos na sua conta</strong>, não só
+            os marcados. Sem juros pré-fixados — se pagar no cartão, o parcelamento segue as regras da conta Asaas.
+          </p>
+        )}
         {previewParcela && (
           <p className="mt-2 text-xs text-[var(--text-muted)]">
             {parcelas === 1
@@ -318,7 +352,7 @@ export default function CobrancaForm() {
 
       <button
         type="submit"
-        disabled={enviando}
+        disabled={enviando || billingType === null}
         className="rounded-lg bg-[var(--azuris-cyan)] px-5 py-2.5 text-sm font-bold text-black hover:opacity-90 disabled:opacity-50"
       >
         {enviando ? 'gerando…' : 'Gerar link de pagamento'}

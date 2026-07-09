@@ -9,11 +9,13 @@ import {
   cancelarInscricao,
   determinarLotePorPerfil,
   normalizarPerfil,
+  buscarCobrancaDuplicada,
   type BillingType,
 } from '@/lib/db'
 import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
 import { MAX_PARCELAS, valorParcela, totalComJuros } from '@/lib/parcelamento'
 import { normalizarExtras, type ExtrasInput } from '@/lib/checkout-extras'
+import { cpfCnpjValido } from '@/lib/validacao-doc'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,7 +52,7 @@ function validate(body: RequestBody): string | null {
   if (!body.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) return 'E-mail inválido'
 
   const cpf = onlyDigits(body.cpf_cnpj ?? '')
-  if (cpf.length !== 11 && cpf.length !== 14) return 'CPF/CNPJ inválido (precisa 11 ou 14 dígitos)'
+  if (!cpfCnpjValido(cpf)) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
   const tel = onlyDigits(body.telefone ?? '')
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
@@ -103,6 +105,25 @@ export async function POST(request: Request) {
       : totalComJuros(precoBaseReais, installments)
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const extras = normalizarExtras(body)
+
+  // Anti-duplicação: se já há fatura idêntica recente (mesmo doc/valor/perfil), devolve ela
+  // — evita 2ª cobrança E 2ª reserva de vaga no submit duplicado.
+  const duplicada = await buscarCobrancaDuplicada({
+    curso_slug: 'lakehouse-comunidade',
+    cpf_cnpj: onlyDigits(body.cpf_cnpj),
+    valor_centavos: valorCobradoCentavos,
+    tipo_ingresso: perfil,
+  })
+  if (duplicada?.asaas_invoice_url) {
+    return NextResponse.json({
+      ok: true,
+      invoiceUrl: duplicada.asaas_invoice_url,
+      paymentId: duplicada.asaas_payment_id,
+      valor: duplicada.valor_centavos / 100,
+      lote,
+      duplicada: true,
+    })
+  }
 
   // 1. Grava a inscrição como 'pending' ANTES do Asaas (reserva a vaga + lead garantido).
   let inscricaoId: number

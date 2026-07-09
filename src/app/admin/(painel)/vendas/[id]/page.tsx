@@ -9,8 +9,11 @@ import {
   STATUS_LABEL,
   STATUS_COR,
 } from '@/lib/admin-queries'
+import { labelBilling } from '@/lib/billing'
 import SyncButton from './SyncButton'
 import TesteButton from '../TesteButton'
+import AcoesCobranca from './AcoesCobranca'
+import NotaFiscal from './NotaFiscal'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,6 +48,8 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
   const insc = await getInscricao(numId)
   if (!insc) notFound()
   const eventos = await getEventos(insc.asaas_payment_id)
+
+  const editavel = !!insc.asaas_payment_id && (insc.status === 'pending' || insc.status === 'overdue')
 
   const end = insc.nf_endereco
   const endStr = end
@@ -114,7 +119,7 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
         </Bloco>
 
         <Bloco titulo="Pagamento">
-          <Linha rotulo="Forma">{insc.billing_type === 'PIX' ? 'PIX' : 'Cartão'}</Linha>
+          <Linha rotulo="Forma">{labelBilling(insc.billing_type)}</Linha>
           <Linha rotulo="Parcelas">{insc.installments}x</Linha>
           <Linha rotulo="Valor cobrado (bruto)">{brl(insc.valor_centavos)}</Linha>
           <Linha rotulo="Valor líquido">{insc.valor_liquido_centavos != null ? brl(insc.valor_liquido_centavos) : '—'}</Linha>
@@ -133,6 +138,34 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
           )}
         </Bloco>
       </div>
+
+      {editavel && insc.asaas_invoice_url && (
+        <Bloco titulo="Ações da cobrança">
+          <AcoesCobranca
+            id={insc.id}
+            invoiceUrl={insc.asaas_invoice_url}
+            telefone={insc.telefone}
+            nome={insc.nome}
+            descricao={labelProduto(insc.curso_slug)}
+            valorReais={insc.valor_centavos / 100}
+            dueDate={insc.due_date}
+            installments={insc.installments}
+          />
+        </Bloco>
+      )}
+
+      {(insc.status === 'paid' || insc.nf_id) && insc.asaas_payment_id && (
+        <Bloco titulo="Nota Fiscal">
+          <NotaFiscal
+            id={insc.id}
+            nfId={insc.nf_id}
+            nfStatus={insc.nf_status}
+            nfNumero={insc.nf_numero}
+            nfPdfUrl={insc.nf_pdf_url}
+            nfXmlUrl={insc.nf_xml_url}
+          />
+        </Bloco>
+      )}
 
       {(insc.utm_source || insc.utm_medium || insc.utm_campaign) && (
         <Bloco titulo="Origem (UTM)">

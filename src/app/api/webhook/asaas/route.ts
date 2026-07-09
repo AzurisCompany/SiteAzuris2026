@@ -7,7 +7,7 @@
 // Token: valor de ASAAS_WEBHOOK_TOKEN (header asaas-access-token)
 
 import { NextResponse } from 'next/server'
-import { atualizarStatusPorAsaasId, registrarEvento, type InscricaoStatus } from '@/lib/db'
+import { atualizarStatusPorAsaasId, registrarEvento, materializarCicloAssinatura, type InscricaoStatus } from '@/lib/db'
 import type { AsaasEvent, AsaasWebhookPayload } from '@/lib/asaas'
 
 export const runtime = 'nodejs'
@@ -54,6 +54,16 @@ export async function POST(request: Request) {
     await registrarEvento(paymentId, event, payload.payment)
   } catch (e) {
     console.error('Falha ao registrar evento Asaas:', e)
+  }
+
+  // Assinatura: se o pagamento é de um ciclo recorrente e ainda não existe
+  // inscrição pra ele, materializa (idempotente) — assim o mês cobrado aparece.
+  if (payload.payment?.subscription) {
+    try {
+      await materializarCicloAssinatura(payload.payment)
+    } catch (e) {
+      console.error('Falha ao materializar ciclo de assinatura:', e)
+    }
   }
 
   const newStatus = EVENT_TO_STATUS[event]

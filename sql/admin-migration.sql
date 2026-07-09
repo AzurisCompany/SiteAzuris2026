@@ -65,3 +65,36 @@ CREATE TABLE IF NOT EXISTS tipos_ingresso (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tipos_ingresso_uq ON tipos_ingresso(produto_slug, tipo_id);
 CREATE INDEX IF NOT EXISTS idx_tipos_ingresso_ativo ON tipos_ingresso(produto_slug, ativo, ordem);
+
+-- Config financeira editável no admin (meta de faturamento mensal, alíquota de imposto).
+CREATE TABLE IF NOT EXISTS config_financeiro (
+  chave      TEXT PRIMARY KEY,
+  valor      TEXT NOT NULL,           -- guardado como texto; parse no app (ex.: meta_mensal_centavos, aliquota_imposto_pct)
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Nota Fiscal (NFS-e emitida via Asaas) vinculada à inscrição.
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_id      TEXT;   -- id da invoice no Asaas
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_status  TEXT;   -- SCHEDULED | AUTHORIZED | CANCELED | ERROR...
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_numero  TEXT;
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_pdf_url TEXT;
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_xml_url TEXT;
+
+-- Assinaturas (cobrança recorrente). Cada ciclo cobrado é materializado como uma linha em inscricoes (curso_slug='assinatura').
+CREATE TABLE IF NOT EXISTS assinaturas (
+  id                     BIGSERIAL PRIMARY KEY,
+  asaas_subscription_id  TEXT UNIQUE,
+  asaas_customer_id      TEXT,
+  nome                   TEXT NOT NULL,
+  email                  TEXT NOT NULL,
+  cpf_cnpj               TEXT NOT NULL,
+  telefone               TEXT,
+  billing_type           TEXT NOT NULL,
+  valor_centavos         INTEGER NOT NULL,
+  cycle                  TEXT NOT NULL,           -- MONTHLY | QUARTERLY | SEMIANNUALLY | YEARLY...
+  descricao              TEXT,
+  status                 TEXT NOT NULL DEFAULT 'active',  -- active | cancelled
+  is_teste               BOOLEAN NOT NULL DEFAULT false,
+  created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
