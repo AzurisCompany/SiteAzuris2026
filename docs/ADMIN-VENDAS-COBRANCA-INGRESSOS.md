@@ -1,5 +1,8 @@
 # Admin — Cobrança avulsa, Tipos de ingresso e Dashboard por tipo
 
+> **Continua em** [ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./ADMIN-FINANCEIRO-ONDAS-2026-07-09.md) —
+> boleto/multi-meio, conciliação/saúde, editar cobrança, página financeiro (recebíveis/DRE), NF via Asaas e assinaturas.
+
 Documenta a leva de features da área `/admin` entregue em 2026-07-09, em 3 ondas.
 Complementa [CHECKOUT-ASAAS-REPRODUCAO.md](./CHECKOUT-ASAAS-REPRODUCAO.md) (pipeline base do checkout) —
 tudo aqui **reusa** aquele pipeline (customer → payment → inscrição pending → vínculo Asaas → webhook).
