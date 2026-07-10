@@ -1,13 +1,33 @@
 # Handoff — Boleto/multi-meio + upgrade financeiro em 4 ondas (2026-07-09)
 
-Sessão grande. **Tudo commitado em `main`, NÃO pushado/deployado.** Working tree limpo. 2 commits.
+Sessão grande. **Pushado e DEPLOYADO em produção** (azuris.com.br). Working tree limpo. Commits até `bbf2fd7`.
 
 ```
+bbf2fd7 fix(financeiro): fronteiras de dia em BRT (off-by-one UTC)
+711115e docs: resultado da revisão + follow-ups
+8e4e097 test: Vitest + 40 testes unitários
+b9d2ecf refactor(financeiro): correções P0/P1 da revisão de arquitetura
+66e2147 docs: upgrade financeiro
 43255a7 feat(admin): upgrade financeiro — boleto/multi-meio, confiabilidade, financeiro, NF e assinaturas
 791d9cc content(lakehouse): modelo evergreen (autoguiado, sem turma com data fixa)
 ```
 
 Doc técnico completo: [docs/ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./docs/ADMIN-FINANCEIRO-ONDAS-2026-07-09.md).
+
+## Estado do deploy (fim da sessão)
+
+- **Deploy prod OK** (Vercel CLI, `site-azuris-2026`, aliased `azuris.com.br`).
+- **CRON_SECRET** setado na Vercel + redeploy. Cron `/api/cron/reconciliar` **verificado end-to-end**: 200, sincronizou **9 de 15** cobranças não-finais.
+- Revisão de arquitetura (azuris-arquiteto) aplicada: P0.1/P0.2, refactor P1.1/P1.2, P1.4 (datas BRT) + **40 testes** (`pnpm test`).
+
+## ⏭️ AMANHÃ (2026-07-10) — pendências
+
+1. **Investigar os 6 erros de conciliação.** O cron reportou `sincronizadas:9, erros:6` de 15. Hipótese: linhas de teste/sandbox com `asaas_payment_id` que não existe mais na conta Asaas de produção (bate com "banco local ≠ prod"). Rodar `/admin/saude` e/ou o cron autenticado, listar as inscrições que falham no `getPayment`, e decidir: marcar como teste (`is_teste`) ou limpar. Comando de teste do cron (com o secret salvo na Vercel):
+   `curl -H "Authorization: Bearer <CRON_SECRET>" https://azuris.com.br/api/cron/reconciliar`
+2. **Rodar a migração** (`POST /api/admin/migrate` logado no /admin) — ainda NÃO rodou. Sem ela, `/admin/assinaturas` e config de NF dão banner de erro.
+3. **Setar** meta/alíquota/descrição-NF em `/admin/financeiro`.
+4. **Config fiscal na conta Asaas** (inscrição municipal/serviço/regime) pra NF emitir.
+5. **Testar em sandbox**: emitir 1 NF, criar 1 assinatura de teste e ver o ciclo materializar.
 
 ---
 
@@ -32,14 +52,14 @@ O `791d9cc` era trabalho que já estava **pendente no working tree desde 06/07**
 
 ---
 
-## FALTA (passos manuais, na ordem) — nada disso foi feito
+## FEITO nesta sessão
 
-1. **`git push` / deploy** Vercel.
-2. **`POST /api/admin/migrate`** em prod → cria `config_financeiro`, `assinaturas`, colunas `nf_*`.
-3. **`CRON_SECRET`** nas env vars da Vercel (senão o cron responde 500).
-4. `/admin/financeiro`: setar meta, alíquota, descrição do serviço da NF.
-5. Conta **Asaas**: dados fiscais (inscrição municipal, serviço, regime) pra NF emitir.
-6. **Testar em sandbox** (checklist no doc técnico).
+- ✅ `git push` (origin/main) + **deploy prod** (Vercel).
+- ✅ `CRON_SECRET` setado + cron verificado.
+
+## FALTA (ver "AMANHÃ" acima)
+
+- Investigar os 6 erros de conciliação · rodar `migrate` · setar config financeiro · config fiscal Asaas · testar NF/assinatura em sandbox.
 
 ---
 
