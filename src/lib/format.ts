@@ -9,9 +9,21 @@ export function onlyDigits(s: string | null | undefined): string {
   return (s ?? '').replace(/\D/g, '')
 }
 
-/** Data YYYY-MM-DD daqui a N dias (UTC). Usado pra vencimento de cobrança. */
+/** Fuso de referência do negócio — tudo que é "dia" (vencimento, buckets, meta). */
+export const TZ_BR = 'America/Sao_Paulo'
+
+/** Hoje em BRT como YYYY-MM-DD (en-CA já entrega nesse formato). */
+export function hojeBRT(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: TZ_BR }).format(new Date())
+}
+
+/**
+ * Data YYYY-MM-DD daqui a N dias, ancorada em BRT (não UTC) — à noite no BRT o UTC
+ * já virou o dia seguinte, o que fazia o vencimento pular um dia. Ancorar ao meio-dia
+ * UTC do dia BRT evita cruzar a fronteira do dia.
+ */
 export function todayPlusDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
+  const base = new Date(`${hojeBRT()}T12:00:00Z`)
+  base.setUTCDate(base.getUTCDate() + days)
+  return base.toISOString().slice(0, 10)
 }

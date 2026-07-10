@@ -161,14 +161,15 @@ export interface RecebivelBucket {
 
 /** Recebíveis (pendentes/vencidos) agrupados por janela de vencimento. Forward-looking. */
 export async function recebiveisPorVencimento(): Promise<RecebivelBucket[]> {
+  // Fronteiras de dia em BRT (a sessão do Neon é UTC; CURRENT_DATE erraria à noite).
   const rows = (await sql`
     SELECT
       CASE
-        WHEN due_date IS NULL              THEN 'sem_venc'
-        WHEN due_date < CURRENT_DATE       THEN 'vencido'
-        WHEN due_date = CURRENT_DATE       THEN 'hoje'
-        WHEN due_date <= CURRENT_DATE + 7  THEN '7d'
-        WHEN due_date <= CURRENT_DATE + 30 THEN '30d'
+        WHEN due_date IS NULL                                              THEN 'sem_venc'
+        WHEN due_date <  (NOW() AT TIME ZONE 'America/Sao_Paulo')::date     THEN 'vencido'
+        WHEN due_date =  (NOW() AT TIME ZONE 'America/Sao_Paulo')::date     THEN 'hoje'
+        WHEN due_date <= (NOW() AT TIME ZONE 'America/Sao_Paulo')::date + 7  THEN '7d'
+        WHEN due_date <= (NOW() AT TIME ZONE 'America/Sao_Paulo')::date + 30 THEN '30d'
         ELSE 'depois'
       END AS bucket,
       COUNT(*)                                                       AS qtde,
@@ -194,8 +195,9 @@ export interface VendaDia {
 
 /** Vendas PAGAS por dia (por data de pagamento) nos últimos N dias. Série pro gráfico. */
 export async function vendasPorDia(dias = 30): Promise<VendaDia[]> {
+  // Trunca o dia em BRT pra casar com a série densa montada na página (também BRT).
   const rows = (await sql`
-    SELECT to_char(date_trunc('day', COALESCE(pago_em, paid_at)), 'YYYY-MM-DD') AS dia,
+    SELECT to_char(date_trunc('day', COALESCE(pago_em, paid_at) AT TIME ZONE 'America/Sao_Paulo'), 'YYYY-MM-DD') AS dia,
            COUNT(*)                          AS qtde,
            COALESCE(SUM(valor_centavos), 0)  AS bruto
       FROM inscricoes
@@ -218,7 +220,7 @@ export interface FaturamentoMes {
 /** Faturamento PAGO por mês de competência (data de pagamento), últimos N meses. */
 export async function faturamentoMensal(meses = 12): Promise<FaturamentoMes[]> {
   const rows = (await sql`
-    SELECT to_char(date_trunc('month', COALESCE(pago_em, paid_at)), 'YYYY-MM') AS mes,
+    SELECT to_char(date_trunc('month', COALESCE(pago_em, paid_at) AT TIME ZONE 'America/Sao_Paulo'), 'YYYY-MM') AS mes,
            COUNT(*)                                                            AS qtde,
            COALESCE(SUM(valor_centavos), 0)                                    AS bruto,
            COALESCE(SUM(COALESCE(valor_liquido_centavos, valor_centavos)), 0)  AS liquido,
@@ -395,7 +397,7 @@ export async function diagnosticoSaude(): Promise<DiagnosticoSaude> {
   const [venc, semCob, antigos, dups, orfaos, ult] = await Promise.all([
     sql`SELECT *, COUNT(*) OVER() AS _total FROM inscricoes
          WHERE status = 'pending' AND asaas_payment_id IS NOT NULL
-           AND due_date IS NOT NULL AND due_date < CURRENT_DATE AND NOT is_teste
+           AND due_date IS NOT NULL AND due_date < (NOW() AT TIME ZONE 'America/Sao_Paulo')::date AND NOT is_teste
          ORDER BY due_date ASC LIMIT 50`,
     sql`SELECT *, COUNT(*) OVER() AS _total FROM inscricoes
          WHERE status <> 'cancelled' AND asaas_payment_id IS NULL AND NOT is_teste

@@ -7,6 +7,7 @@ import {
   type FaturamentoMes,
 } from '@/lib/admin-queries'
 import { getConfigsFinanceiro } from '@/lib/db'
+import { hojeBRT } from '@/lib/format'
 import GraficoVendas from './GraficoVendas'
 import ConfigNumero from './ConfigNumero'
 import ConfigTexto from './ConfigTexto'
@@ -52,20 +53,21 @@ export default async function FinanceiroPage() {
   const recMap = new Map(recebiveis.map((r) => [r.bucket, r]))
   const totalReceber = recebiveis.reduce((a, r) => a + r.bruto, 0)
 
-  // Série densa dos últimos 30 dias (preenche zeros).
+  // Série densa dos últimos 30 dias (preenche zeros), ancorada em BRT — casa com o
+  // date_trunc AT TIME ZONE 'America/Sao_Paulo' de vendasPorDia.
   const porDia = new Map(serie.map((p) => [p.dia, p]))
-  const hoje = new Date()
+  const baseBRT = new Date(`${hojeBRT()}T12:00:00Z`)
   const denso: { dia: string; bruto: number; qtde: number }[] = []
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(hoje)
-    d.setDate(hoje.getDate() - i)
+    const d = new Date(baseBRT)
+    d.setUTCDate(baseBRT.getUTCDate() - i)
     const iso = d.toISOString().slice(0, 10)
     const p = porDia.get(iso)
     denso.push({ dia: iso, bruto: p?.bruto ?? 0, qtde: p?.qtde ?? 0 })
   }
 
-  // Meta do mês corrente.
-  const mesAtual = hoje.toISOString().slice(0, 7)
+  // Meta do mês corrente (BRT).
+  const mesAtual = hojeBRT().slice(0, 7)
   const fatAtual = meses.find((m) => m.mes === mesAtual)
   const brutoMes = fatAtual?.bruto ?? 0
   const progresso = metaCentavos > 0 ? Math.min(100, Math.round((brutoMes / metaCentavos) * 100)) : 0

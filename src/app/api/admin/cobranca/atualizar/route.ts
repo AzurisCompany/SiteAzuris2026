@@ -6,7 +6,7 @@ import { estaLogado } from '@/lib/admin-auth'
 import { getInscricao } from '@/lib/admin-queries'
 import { atualizarCobrancaEditada } from '@/lib/db'
 import { updatePayment } from '@/lib/asaas'
-import { VALOR_MINIMO_REAIS } from '@/lib/format'
+import { VALOR_MINIMO_REAIS, hojeBRT } from '@/lib/format'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -54,8 +54,7 @@ export async function POST(request: Request) {
   // Validações dos campos enviados.
   if (body.due_date != null) {
     if (!dataValida(body.due_date)) return NextResponse.json({ error: 'Vencimento inválido' }, { status: 400 })
-    const hoje = new Date().toISOString().slice(0, 10)
-    if (body.due_date < hoje) return NextResponse.json({ error: 'Vencimento não pode ser no passado' }, { status: 400 })
+    if (body.due_date < hojeBRT()) return NextResponse.json({ error: 'Vencimento não pode ser no passado' }, { status: 400 })
   }
 
   let valorReais: number | undefined
