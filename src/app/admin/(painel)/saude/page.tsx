@@ -232,6 +232,12 @@ export default async function SaudePage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/admin/conciliacao"
+            className="rounded-lg border border-[var(--azuris-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)] transition-colors hover:border-amber-400/40 hover:text-amber-300"
+          >
+            🔎 Falhas de conciliação
+          </Link>
+          <Link
             href="/admin/importar"
             className="rounded-lg border border-[var(--azuris-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
           >

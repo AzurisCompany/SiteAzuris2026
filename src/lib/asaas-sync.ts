@@ -34,6 +34,74 @@ export async function sincronizarInscricao(row: { asaas_payment_id: string | nul
   }
 }
 
+export interface FalhaConciliacao {
+  id: number
+  nome: string
+  email: string
+  status: string
+  valor_centavos: number
+  asaas_payment_id: string
+  is_teste: boolean
+  created_at: string
+  erro: string
+  tipo: 'nao_existe_no_asaas' | 'outro'
+}
+
+/**
+ * DIAGNÓSTICO (dry-run, NÃO escreve): pra cada cobrança não-final com
+ * asaas_payment_id, tenta getPayment e reporta as que falham + o motivo. É o
+ * "porquê" por trás do `erros: N` do cron. `nao_existe_no_asaas` (404) = quase
+ * sempre linha de teste/sandbox cujo pagamento não existe na conta de produção.
+ */
+export async function diagnosticarConciliacao(): Promise<{
+  total: number
+  ok: number
+  falhas: FalhaConciliacao[]
+}> {
+  const rows = (await sql.query(
+    `SELECT id, nome, email, status, valor_centavos, asaas_payment_id, is_teste, created_at
+       FROM inscricoes
+      WHERE asaas_payment_id IS NOT NULL
+        AND (status IN ('pending','overdue') OR (status = 'paid' AND taxa_centavos IS NULL))
+      ORDER BY created_at DESC`,
+  )) as Array<{
+    id: number
+    nome: string
+    email: string
+    status: string
+    valor_centavos: number
+    asaas_payment_id: string
+    is_teste: boolean
+    created_at: string
+  }>
+
+  let ok = 0
+  const falhas: FalhaConciliacao[] = []
+  for (const r of rows) {
+    try {
+      await getPayment(r.asaas_payment_id)
+      ok++
+    } catch (e) {
+      const erro = e instanceof Error ? e.message : 'erro desconhecido'
+      const tipo: FalhaConciliacao['tipo'] =
+        /\b40[04]\b|not found|invalid object|não encontrad/i.test(erro) ? 'nao_existe_no_asaas' : 'outro'
+      falhas.push({
+        id: r.id,
+        nome: r.nome,
+        email: r.email,
+        status: r.status,
+        valor_centavos: r.valor_centavos,
+        asaas_payment_id: r.asaas_payment_id,
+        is_teste: r.is_teste,
+        created_at: r.created_at,
+        erro,
+        tipo,
+      })
+    }
+  }
+  return { total: rows.length, ok, falhas }
+}
+
 export async function sincronizarTodas(
   somenteNaoFinais = false
 ): Promise<{ total: number; sincronizadas: number; erros: number }> {
