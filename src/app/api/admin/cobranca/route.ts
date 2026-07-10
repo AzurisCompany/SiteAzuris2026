@@ -1,22 +1,20 @@
 // POST /api/admin/cobranca  (protegido)
 // Gera uma cobrança AVULSA no Asaas a partir de uma proposta fechada — valor e
-// descrição livres. Reusa o mesmo pipeline do checkout (customer → payment →
-// inscrição pending → vínculo Asaas). O webhook compartilhado fecha o status.
-// A inscrição fica com curso_slug='proposta' pra virar um balde próprio no admin.
+// descrição livres. Reusa o pipeline comum (criarCobranca). A inscrição fica com
+// curso_slug='proposta' pra virar um balde próprio no admin. Webhook fecha o status.
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
-import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, buscarCobrancaDuplicada, type BillingType } from '@/lib/db'
-import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
+import { type BillingType } from '@/lib/db'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
+import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
+import { criarCobranca } from '@/lib/cobranca-pipeline'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /** Slug interno das cobranças avulsas (aparece como "Proposta customizada" no admin). */
 export const PROPOSTA_SLUG = 'proposta'
-/** Piso de valor (R$) — evita cobrança quebrada e respeita mínimos do Asaas. */
-const VALOR_MINIMO_REAIS = 5
 
 interface RequestBody {
   nome?: string
@@ -30,24 +28,13 @@ interface RequestBody {
   dias_vencimento?: number
 }
 
-function onlyDigits(s: string): string {
-  return s.replace(/\D/g, '')
-}
-
-function todayPlusDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
 function validate(b: RequestBody): string | null {
   if (!b.nome || b.nome.trim().length < 3) return 'Nome inválido'
   if (!b.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) return 'E-mail inválido'
 
-  const cpf = onlyDigits(b.cpf_cnpj ?? '')
-  if (!cpfCnpjValido(cpf)) return 'CPF/CNPJ inválido (dígito verificador não confere)'
+  if (!cpfCnpjValido(onlyDigits(b.cpf_cnpj))) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
-  const tel = onlyDigits(b.telefone ?? '')
+  const tel = onlyDigits(b.telefone)
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
 
   if (!b.descricao || b.descricao.trim().length < 3) return 'Descrição inválida (o que está sendo cobrado)'
@@ -89,47 +76,26 @@ export async function POST(request: Request) {
   const installments =
     billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), MAX_PARCELAS) : 1
   // Juros só no cartão parcelado (2x+). PIX/Boleto/UNDEFINED = valor cheio à vista.
-  // Em UNDEFINED o cliente escolhe o meio na fatura, então não dá pra pré-fixar
-  // parcela com juros — se pagar no cartão, o parcelamento segue a conta Asaas.
   const installmentValueReais = valorParcela(valorBaseReais, installments)
   const valorCobradoReais = billing_type === 'CREDIT_CARD' ? totalComJuros(valorBaseReais, installments) : valorBaseReais
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const descricao = body.descricao!.trim()
   const dueDays = body.dias_vencimento ?? 3
 
-  // Anti-duplicação: se já há fatura idêntica recente pro mesmo cliente/valor, devolve ela.
-  const duplicada = await buscarCobrancaDuplicada({
-    curso_slug: PROPOSTA_SLUG,
-    cpf_cnpj: onlyDigits(body.cpf_cnpj!),
-    valor_centavos: valorCobradoCentavos,
-  })
-  if (duplicada?.asaas_invoice_url) {
-    return NextResponse.json({
-      ok: true,
-      id: duplicada.id,
-      invoiceUrl: duplicada.asaas_invoice_url,
-      paymentId: duplicada.asaas_payment_id,
-      valor: duplicada.valor_centavos / 100,
-      installments: duplicada.installments,
-      installmentValue:
-        duplicada.installments > 1
-          ? Number((duplicada.valor_centavos / 100 / duplicada.installments).toFixed(2))
-          : duplicada.valor_centavos / 100,
-      billing_type: duplicada.billing_type,
-      duplicada: true,
-    })
-  }
+  const cpf = onlyDigits(body.cpf_cnpj)
+  const nome = body.nome!.trim()
+  const email = body.email!.trim().toLowerCase()
+  const telefone = onlyDigits(body.telefone)
 
-  // 1. Inscrição 'pending' antes do Asaas — lead garantido mesmo se a cobrança falhar.
-  let inscricaoId: number
-  try {
-    const insc = await criarInscricaoPendente({
+  const resultado = await criarCobranca({
+    dedupe: { curso_slug: PROPOSTA_SLUG, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos },
+    inscricao: {
       curso_slug: PROPOSTA_SLUG,
       lote: 'unico',
-      nome: body.nome!.trim(),
-      email: body.email!.trim().toLowerCase(),
-      cpf_cnpj: onlyDigits(body.cpf_cnpj!),
-      telefone: onlyDigits(body.telefone!),
+      nome,
+      email,
+      cpf_cnpj: cpf,
+      telefone,
       billing_type,
       valor_centavos: valorCobradoCentavos,
       installments,
@@ -140,68 +106,53 @@ export async function POST(request: Request) {
       utm_term: null,
       empresa: null,
       cargo: null,
-      pessoa_tipo: onlyDigits(body.cpf_cnpj!).length === 14 ? 'PJ' : 'PF',
+      pessoa_tipo: cpf.length === 14 ? 'PJ' : 'PF',
       razao_social: null,
       nf_endereco: null,
-      // guarda a descrição da proposta aqui — some campo dedicado (visível no detalhe).
+      // guarda a descrição da proposta aqui — sem campo dedicado (visível no detalhe).
       como_conheceu: `Proposta customizada: ${descricao}`,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
-    })
-    inscricaoId = insc.id
-  } catch (e) {
-    console.error('Falha ao registrar cobrança avulsa no DB:', e)
-    return NextResponse.json({ error: 'Falha ao registrar a cobrança. Tenta de novo.' }, { status: 500 })
-  }
-
-  // 2+3. Cliente + cobrança no Asaas.
-  let customer
-  let payment
-  try {
-    customer = await findOrCreateCustomer({
-      name: body.nome!.trim(),
-      email: body.email!.trim().toLowerCase(),
-      cpfCnpj: onlyDigits(body.cpf_cnpj!),
-      mobilePhone: onlyDigits(body.telefone!),
-    })
-    payment = await createPayment({
-      customerId: customer.id,
+    },
+    customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
+    asaas: {
       billingType: billing_type,
       valueReais: valorCobradoReais,
       description: descricao,
-      externalReference: `${PROPOSTA_SLUG}:${inscricaoId}`,
+      externalReference: (id) => `${PROPOSTA_SLUG}:${id}`,
       dueDate: todayPlusDays(dueDays),
       installmentCount: installments > 1 ? installments : undefined,
       installmentValueReais: installments > 1 ? installmentValueReais : undefined,
-    })
-  } catch (e) {
-    await cancelarInscricao(inscricaoId).catch(() => {})
-    const msg = e instanceof Error ? e.message : 'erro desconhecido'
-    return NextResponse.json({ error: `Falha ao criar cobrança: ${msg}` }, { status: 502 })
-  }
+    },
+  })
 
-  // 4. Vincula os dados do Asaas (líquido/taxa/vencimento).
-  try {
-    const bruto = typeof payment.value === 'number' ? Math.round(payment.value * 100) : null
-    const liquido = typeof payment.netValue === 'number' ? Math.round(payment.netValue * 100) : null
-    await vincularAsaas(inscricaoId, {
-      asaas_customer_id: customer.id,
-      asaas_payment_id: payment.id,
-      asaas_invoice_url: payment.invoiceUrl,
-      valor_liquido_centavos: liquido,
-      taxa_centavos: bruto != null && liquido != null ? bruto - liquido : null,
-      due_date: payment.dueDate ?? null,
-      asaas_status: payment.status ?? null,
+  if (resultado.tipo === 'duplicada') {
+    const d = resultado.inscricao
+    return NextResponse.json({
+      ok: true,
+      id: d.id,
+      invoiceUrl: d.asaas_invoice_url,
+      paymentId: d.asaas_payment_id,
+      valor: d.valor_centavos / 100,
+      installments: d.installments,
+      installmentValue:
+        d.installments > 1 ? Number((d.valor_centavos / 100 / d.installments).toFixed(2)) : d.valor_centavos / 100,
+      billing_type: d.billing_type,
+      duplicada: true,
     })
-  } catch (e) {
-    console.error('Cobrança criada mas falha ao vincular Asaas (webhook/sync corrige):', e)
+  }
+  if (resultado.tipo === 'erro_db') {
+    return NextResponse.json({ error: 'Falha ao registrar a cobrança. Tenta de novo.' }, { status: 500 })
+  }
+  if (resultado.tipo === 'erro_asaas') {
+    return NextResponse.json({ error: `Falha ao criar cobrança: ${resultado.mensagem}` }, { status: 502 })
   }
 
   return NextResponse.json({
     ok: true,
-    id: inscricaoId,
-    invoiceUrl: payment.invoiceUrl,
-    paymentId: payment.id,
+    id: resultado.inscricaoId,
+    invoiceUrl: resultado.payment.invoiceUrl,
+    paymentId: resultado.payment.id,
     valor: valorCobradoReais,
     installments,
     installmentValue: installments > 1 ? installmentValueReais : valorCobradoReais,

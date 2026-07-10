@@ -37,8 +37,11 @@ export async function sincronizarInscricao(row: { asaas_payment_id: string | nul
 export async function sincronizarTodas(
   somenteNaoFinais = false
 ): Promise<{ total: number; sincronizadas: number; erros: number }> {
+  // Não-finais = pending/overdue. Inclui também pagas SEM taxa consolidada
+  // (ex.: ciclos de assinatura materializados antes do netValue existir) pra
+  // auto-curar o financeiro/DRE. [[project_admin_roadmap]]
   const where = somenteNaoFinais
-    ? `WHERE asaas_payment_id IS NOT NULL AND status IN ('pending','overdue')`
+    ? `WHERE asaas_payment_id IS NOT NULL AND (status IN ('pending','overdue') OR (status = 'paid' AND taxa_centavos IS NULL))`
     : `WHERE asaas_payment_id IS NOT NULL`
   const rows = (await sql.query(`SELECT asaas_payment_id FROM inscricoes ${where}`)) as Array<{
     asaas_payment_id: string

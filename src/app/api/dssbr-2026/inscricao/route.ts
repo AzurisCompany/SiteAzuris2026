@@ -1,12 +1,13 @@
 // POST /api/dssbr-2026/inscricao
 // Checkout da pré-venda DSS 2026. Preço fixo (sem lote/vagas) — ver [[produtos]].
-// Valida → cria customer + payment no Asaas → grava no DB → retorna { invoiceUrl }.
-// O webhook /api/webhook/asaas (compartilhado, agnóstico de produto) confirma o pagamento.
+// Valida → deriva preço no servidor → criarCobranca (pipeline comum) → { invoiceUrl }.
+// O webhook /api/webhook/asaas (compartilhado) confirma o pagamento.
 
 import { NextResponse } from 'next/server'
-import { criarInscricaoPendente, vincularAsaas, cancelarInscricao, buscarCobrancaDuplicada, type BillingType } from '@/lib/db'
-import { createPayment, findOrCreateCustomer } from '@/lib/asaas'
+import { type BillingType } from '@/lib/db'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
+import { onlyDigits, todayPlusDays } from '@/lib/format'
+import { criarCobranca } from '@/lib/cobranca-pipeline'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { getProduto } from '@/lib/produtos'
 import { getTipo, valorCobradoDoTipo } from '@/lib/tipos-ingresso'
@@ -34,31 +35,18 @@ interface RequestBody extends ExtrasInput {
   }
 }
 
-function onlyDigits(s: string): string {
-  return s.replace(/\D/g, '')
-}
-
-function todayPlusDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
 function validate(body: RequestBody): string | null {
   if (!body.nome || body.nome.trim().length < 3) return 'Nome inválido'
   if (!body.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) return 'E-mail inválido'
 
-  const cpf = onlyDigits(body.cpf_cnpj ?? '')
-  if (!cpfCnpjValido(cpf)) return 'CPF/CNPJ inválido (dígito verificador não confere)'
+  if (!cpfCnpjValido(onlyDigits(body.cpf_cnpj))) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
-  const tel = onlyDigits(body.telefone ?? '')
+  const tel = onlyDigits(body.telefone)
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
 
   if (body.billing_type !== 'PIX' && body.billing_type !== 'CREDIT_CARD') return 'Forma de pagamento inválida'
-
   if (body.billing_type === 'CREDIT_CARD') {
     const n = body.installments ?? 1
-    // Máximo efetivo depende do tipo — validação fina é feita no cálculo (clamp server-side).
     if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS) return `Parcelamento inválido (1 a ${MAX_PARCELAS})`
   }
 
@@ -77,13 +65,11 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
-  // O checkout DSSBR só aceita PIX/cartão (validate garante). Estreita o tipo pro
-  // resto do fluxo — boleto/UNDEFINED existem só na cobrança avulsa do admin.
+  // O checkout DSSBR só aceita PIX/cartão (validate garante). Estreita pro cálculo.
   const billing: 'PIX' | 'CREDIT_CARD' = body.billing_type === 'CREDIT_CARD' ? 'CREDIT_CARD' : 'PIX'
 
-  // Preço SEMPRE derivado no servidor (nunca confiar no client).
-  // Se veio um tipo de ingresso cadastrado, o preço/parcelas vêm dele; senão, usa o
-  // preço único do registry (lib/produtos.ts). Regra de PIX/cartão idêntica — ver [[parcelamento]].
+  // Preço SEMPRE derivado no servidor. Com tipo de ingresso cadastrado → preço/parcelas
+  // vêm dele; senão, preço único do registry. Regra PIX/cartão idêntica — ver [[parcelamento]].
   let tipoIngresso: string | null = null
   let descricaoAsaas = PRODUTO.asaasDescricao
   let externalRef = PRODUTO.slug
@@ -115,36 +101,22 @@ export async function POST(request: Request) {
         : totalComJuros(precoCartaoBaseReais, installments)
   }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
-  const extras = normalizarExtras(body)
 
-  // Anti-duplicação: se já há fatura idêntica recente (mesmo doc/valor/tipo), devolve ela.
-  const duplicada = await buscarCobrancaDuplicada({
-    curso_slug: PRODUTO.slug,
-    cpf_cnpj: onlyDigits(body.cpf_cnpj),
-    valor_centavos: valorCobradoCentavos,
-    tipo_ingresso: tipoIngresso,
-  })
-  if (duplicada?.asaas_invoice_url) {
-    return NextResponse.json({
-      ok: true,
-      invoiceUrl: duplicada.asaas_invoice_url,
-      paymentId: duplicada.asaas_payment_id,
-      valor: duplicada.valor_centavos / 100,
-      duplicada: true,
-    })
-  }
+  const cpf = onlyDigits(body.cpf_cnpj)
+  const nome = body.nome.trim()
+  const email = body.email.trim().toLowerCase()
+  const telefone = body.telefone ? onlyDigits(body.telefone) : null
 
-  // 1. Grava a inscrição como 'pending' ANTES do Asaas — lead garantido mesmo se o Asaas falhar.
-  let inscricaoId: number
-  try {
-    const insc = await criarInscricaoPendente({
+  const resultado = await criarCobranca({
+    dedupe: { curso_slug: PRODUTO.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos, tipo_ingresso: tipoIngresso },
+    inscricao: {
       curso_slug: PRODUTO.slug,
       lote: 'unico',
       tipo_ingresso: tipoIngresso,
-      nome: body.nome.trim(),
-      email: body.email.trim().toLowerCase(),
-      cpf_cnpj: onlyDigits(body.cpf_cnpj),
-      telefone: body.telefone ? onlyDigits(body.telefone) : null,
+      nome,
+      email,
+      cpf_cnpj: cpf,
+      telefone,
       billing_type: body.billing_type,
       valor_centavos: valorCobradoCentavos,
       installments,
@@ -153,28 +125,12 @@ export async function POST(request: Request) {
       utm_campaign: body.utm?.campaign ?? null,
       utm_content: body.utm?.content ?? null,
       utm_term: body.utm?.term ?? null,
-      ...extras,
+      ...normalizarExtras(body),
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
-    })
-    inscricaoId = insc.id
-  } catch (e) {
-    console.error('Falha ao registrar inscrição DSS no DB:', e)
-    return NextResponse.json({ error: 'Falha ao registrar inscrição. Tenta de novo.' }, { status: 500 })
-  }
-
-  // 2+3. Cliente + cobrança no Asaas
-  let customer
-  let payment
-  try {
-    customer = await findOrCreateCustomer({
-      name: body.nome.trim(),
-      email: body.email.trim().toLowerCase(),
-      cpfCnpj: onlyDigits(body.cpf_cnpj),
-      mobilePhone: body.telefone ? onlyDigits(body.telefone) : null,
-    })
-    payment = await createPayment({
-      customerId: customer.id,
+    },
+    customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
+    asaas: {
       billingType: body.billing_type,
       valueReais: valorCobradoReais,
       description: descricaoAsaas,
@@ -182,35 +138,19 @@ export async function POST(request: Request) {
       dueDate: todayPlusDays(3),
       installmentCount: installments > 1 ? installments : undefined,
       installmentValueReais: installments > 1 ? installmentValueReais : undefined,
-    })
-  } catch (e) {
-    // Cobrança não saiu — cancela a inscrição pendente (mantém o lead, libera vaga).
-    await cancelarInscricao(inscricaoId).catch(() => {})
-    const msg = e instanceof Error ? e.message : 'erro desconhecido'
-    return NextResponse.json({ error: `Falha ao criar cobrança: ${msg}` }, { status: 502 })
-  }
-
-  // 4. Vincula os dados do Asaas (líquido/taxa/vencimento já na criação).
-  try {
-    const bruto = typeof payment.value === 'number' ? Math.round(payment.value * 100) : null
-    const liquido = typeof payment.netValue === 'number' ? Math.round(payment.netValue * 100) : null
-    await vincularAsaas(inscricaoId, {
-      asaas_customer_id: customer.id,
-      asaas_payment_id: payment.id,
-      asaas_invoice_url: payment.invoiceUrl,
-      valor_liquido_centavos: liquido,
-      taxa_centavos: bruto != null && liquido != null ? bruto - liquido : null,
-      due_date: payment.dueDate ?? null,
-      asaas_status: payment.status ?? null,
-    })
-  } catch (e) {
-    console.error('Cobrança criada mas falha ao vincular Asaas (webhook/sync corrige):', e)
-  }
-
-  return NextResponse.json({
-    ok: true,
-    invoiceUrl: payment.invoiceUrl,
-    paymentId: payment.id,
-    valor: valorCobradoReais,
+    },
   })
+
+  if (resultado.tipo === 'duplicada') {
+    const d = resultado.inscricao
+    return NextResponse.json({ ok: true, invoiceUrl: d.asaas_invoice_url, paymentId: d.asaas_payment_id, valor: d.valor_centavos / 100, duplicada: true })
+  }
+  if (resultado.tipo === 'erro_db') {
+    return NextResponse.json({ error: 'Falha ao registrar inscrição. Tenta de novo.' }, { status: 500 })
+  }
+  if (resultado.tipo === 'erro_asaas') {
+    return NextResponse.json({ error: `Falha ao criar cobrança: ${resultado.mensagem}` }, { status: 502 })
+  }
+
+  return NextResponse.json({ ok: true, invoiceUrl: resultado.payment.invoiceUrl, paymentId: resultado.payment.id, valor: valorCobradoReais })
 }

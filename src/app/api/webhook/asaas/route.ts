@@ -7,7 +7,13 @@
 // Token: valor de ASAAS_WEBHOOK_TOKEN (header asaas-access-token)
 
 import { NextResponse } from 'next/server'
-import { atualizarStatusPorAsaasId, registrarEvento, materializarCicloAssinatura, type InscricaoStatus } from '@/lib/db'
+import {
+  atualizarStatusPorAsaasId,
+  atualizarFinanceiroPorAsaasId,
+  registrarEvento,
+  materializarCicloAssinatura,
+  type InscricaoStatus,
+} from '@/lib/db'
 import type { AsaasEvent, AsaasWebhookPayload } from '@/lib/asaas'
 
 export const runtime = 'nodejs'
@@ -76,6 +82,22 @@ export async function POST(request: Request) {
 
   const paidAt = newStatus === 'paid' ? new Date().toISOString() : null
   const row = await atualizarStatusPorAsaasId(paymentId, newStatus, paidAt)
+
+  // Consolida líquido/taxa a partir do payload (essencial pros ciclos de assinatura,
+  // que não passam por vincularAsaas na criação). COALESCE preserva se vier sem netValue.
+  const p = payload.payment
+  const bruto = typeof p.value === 'number' ? Math.round(p.value * 100) : null
+  const liquido = typeof p.netValue === 'number' ? Math.round(p.netValue * 100) : null
+  try {
+    await atualizarFinanceiroPorAsaasId(paymentId, {
+      valor_liquido_centavos: liquido,
+      taxa_centavos: bruto != null && liquido != null ? bruto - liquido : null,
+      due_date: p.dueDate ?? null,
+      asaas_status: p.status ?? null,
+    })
+  } catch (e) {
+    console.error('Falha ao consolidar financeiro no webhook:', e)
+  }
 
   if (!row) {
     // Pode acontecer se o webhook chegar antes da inserção da inscrição no DB

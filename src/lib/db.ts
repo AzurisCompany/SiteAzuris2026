@@ -354,12 +354,35 @@ export async function atualizarStatusPorAsaasId(
   const rows = (await sql`
     UPDATE inscricoes
        SET status = ${status},
-           paid_at = ${paid_at},
+           paid_at = COALESCE(${paid_at}, paid_at),
            updated_at = NOW()
      WHERE asaas_payment_id = ${asaas_payment_id}
     RETURNING *
   `) as InscricaoRow[]
   return rows[0] ?? null
+}
+
+/**
+ * Consolida SÓ os valores financeiros (líquido/taxa/vencimento) a partir do objeto
+ * de pagamento do webhook. COALESCE preserva o que já existe quando o Asaas manda
+ * um evento sem netValue. Necessário pros ciclos de assinatura, que são criados
+ * pelo Asaas (nunca passam por vincularAsaas) — sem isso a taxa fica nula e o DRE
+ * superestima a receita recorrente. [[project_admin_roadmap]]
+ */
+export async function atualizarFinanceiroPorAsaasId(
+  asaas_payment_id: string,
+  v: { valor_liquido_centavos: number | null; taxa_centavos: number | null; due_date: string | null; asaas_status: string | null }
+): Promise<void> {
+  await sql`
+    UPDATE inscricoes
+       SET valor_liquido_centavos = COALESCE(${v.valor_liquido_centavos}, valor_liquido_centavos),
+           taxa_centavos = COALESCE(${v.taxa_centavos}, taxa_centavos),
+           due_date = COALESCE(${v.due_date}, due_date),
+           asaas_status = COALESCE(${v.asaas_status}, asaas_status),
+           last_synced_at = NOW(),
+           updated_at = NOW()
+     WHERE asaas_payment_id = ${asaas_payment_id}
+  `
 }
 
 /** Marca/desmarca uma inscrição como registro de teste (esconde da lista e dos KPIs). */

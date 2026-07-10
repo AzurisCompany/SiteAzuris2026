@@ -6,11 +6,10 @@ import { estaLogado } from '@/lib/admin-auth'
 import { getInscricao } from '@/lib/admin-queries'
 import { atualizarCobrancaEditada } from '@/lib/db'
 import { updatePayment } from '@/lib/asaas'
+import { VALOR_MINIMO_REAIS } from '@/lib/format'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-const VALOR_MINIMO_REAIS = 5
 
 interface Body {
   id?: number

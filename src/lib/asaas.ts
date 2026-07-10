@@ -5,12 +5,20 @@ const BASE_URL = process.env.ASAAS_BASE_URL ?? 'https://sandbox.asaas.com/api/v3
 const API_KEY = process.env.ASAAS_API_KEY
 
 if (!API_KEY) {
-  // Não jogamos throw aqui pra não quebrar o build — as route handlers checam em runtime.
+  // Sem chave, asaasFetch manda token vazio e o Asaas devolve 401 — o erro sobe
+  // pras route handlers (try/catch → 502). Aviso pra facilitar o diagnóstico.
   console.warn('ASAAS_API_KEY não configurada. Configure via Vercel env vars.')
 }
 
-async function asaasFetch(path: string, init: RequestInit = {}): Promise<any> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+// Seam de injeção: por padrão o fetch global; testes trocam por um fake via
+// __setAsaasFetch (sem tocar nas rotas). Ver DIP na revisão de arquitetura.
+let _fetch: typeof fetch = (input, init) => fetch(input, init)
+export function __setAsaasFetch(f: typeof fetch): void {
+  _fetch = f
+}
+
+async function asaasFetch(path: string, init: RequestInit = {}): Promise<unknown> {
+  const res = await _fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -24,6 +32,25 @@ async function asaasFetch(path: string, init: RequestInit = {}): Promise<any> {
     throw new Error(`Asaas ${res.status} ${path}: ${text}`)
   }
   return text ? JSON.parse(text) : {}
+}
+
+// --- Validação de boundary ---
+// O Asaas é um serviço externo: não confiamos no shape do retorno. Estes guards
+// FALHAM ALTO (lançam) em vez de deixar `undefined` virar vínculo gravado no banco.
+
+function reqStr(raw: unknown, field: string, ctx: string): string {
+  const v = (raw as Record<string, unknown> | null | undefined)?.[field]
+  if (typeof v !== 'string' || v.length === 0) {
+    throw new Error(`Asaas: resposta inválida em ${ctx} — campo "${field}" ausente`)
+  }
+  return v
+}
+
+/** Garante que um pagamento tem id + invoiceUrl antes de persistir o vínculo. */
+export function parsePayment(raw: unknown, ctx: string): AsaasPayment {
+  reqStr(raw, 'id', ctx)
+  reqStr(raw, 'invoiceUrl', ctx)
+  return raw as AsaasPayment
 }
 
 // --- Customer ---
@@ -45,9 +72,9 @@ export interface AsaasCustomer {
 
 export async function findOrCreateCustomer(input: CreateCustomerInput): Promise<AsaasCustomer> {
   // Procura por CPF/CNPJ primeiro
-  const search = await asaasFetch(`/customers?cpfCnpj=${encodeURIComponent(input.cpfCnpj)}`, {
+  const search = (await asaasFetch(`/customers?cpfCnpj=${encodeURIComponent(input.cpfCnpj)}`, {
     method: 'GET',
-  })
+  })) as { data?: AsaasCustomer[] }
   if (Array.isArray(search?.data) && search.data.length > 0) {
     return search.data[0] as AsaasCustomer
   }
@@ -121,7 +148,7 @@ export async function createPayment(input: CreatePaymentInput): Promise<AsaasPay
     method: 'POST',
     body: JSON.stringify(body),
   })
-  return payment as AsaasPayment
+  return parsePayment(payment, 'createPayment')
 }
 
 /** Edita uma cobrança existente (PUT /payments/{id}). Só faz sentido pra não-paga. */
@@ -140,7 +167,7 @@ export async function updatePayment(paymentId: string, input: UpdatePaymentInput
     method: 'PUT',
     body: JSON.stringify(body),
   })
-  return payment as AsaasPayment
+  return parsePayment(payment, 'updatePayment')
 }
 
 /** Detalhe de uma cobrança (GET /payments/{id}). */
@@ -153,6 +180,7 @@ export interface AsaasPaymentDetail extends AsaasPayment {
 
 export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail> {
   const p = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' })
+  reqStr(p, 'id', 'getPayment')
   return p as AsaasPaymentDetail
 }
 
@@ -214,6 +242,7 @@ export async function createSubscription(input: CreateSubscriptionInput): Promis
   if (input.description) body.description = input.description
   if (input.externalReference) body.externalReference = input.externalReference
   const sub = await asaasFetch('/subscriptions', { method: 'POST', body: JSON.stringify(body) })
+  reqStr(sub, 'id', 'createSubscription')
   return sub as AsaasSubscription
 }
 
@@ -273,12 +302,15 @@ export async function createInvoice(input: CreateInvoiceInput): Promise<AsaasInv
   if (input.municipalServiceName) body.municipalServiceName = input.municipalServiceName
 
   const inv = await asaasFetch('/invoices', { method: 'POST', body: JSON.stringify(body) })
+  reqStr(inv, 'id', 'createInvoice')
   return inv as AsaasInvoice
 }
 
 /** Lista as NFS-e vinculadas a um pagamento. */
 export async function getInvoicesByPayment(paymentId: string): Promise<AsaasInvoice[]> {
-  const res = await asaasFetch(`/invoices?payment=${encodeURIComponent(paymentId)}`, { method: 'GET' })
+  const res = (await asaasFetch(`/invoices?payment=${encodeURIComponent(paymentId)}`, { method: 'GET' })) as {
+    data?: AsaasInvoice[]
+  }
   return Array.isArray(res?.data) ? (res.data as AsaasInvoice[]) : []
 }
 

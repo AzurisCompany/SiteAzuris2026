@@ -14,23 +14,14 @@ import {
 } from '@/lib/db'
 import { findOrCreateCustomer, createSubscription, cancelSubscription, type AsaasCycle } from '@/lib/asaas'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
+import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const VALOR_MINIMO_REAIS = 5
 const CICLOS = new Set<AsaasCycle>(['WEEKLY', 'BIWEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMIANNUALLY', 'YEARLY'])
 // Recorrência sem cartão tokenizado: PIX, boleto ou cliente escolhe.
 const MEIOS = new Set<BillingType>(['PIX', 'BOLETO', 'UNDEFINED'])
-
-function onlyDigits(s: string): string {
-  return (s ?? '').replace(/\D/g, '')
-}
-function todayPlusDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
 
 interface CriarBody {
   action?: string
