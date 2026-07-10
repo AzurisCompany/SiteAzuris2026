@@ -120,6 +120,7 @@ export interface AsaasPayment {
   description?: string
   externalReference?: string
   subscription?: string // preenchido quando o pagamento faz parte de uma assinatura
+  installment?: string // preenchido quando é uma parcela de um parcelamento (id do parcelamento)
 }
 
 export async function createPayment(input: CreatePaymentInput): Promise<AsaasPayment> {
@@ -182,6 +183,26 @@ export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail>
   const p = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' })
   reqStr(p, 'id', 'getPayment')
   return p as AsaasPaymentDetail
+}
+
+/** Remove uma cobrança não paga (DELETE /payments/{id}). Só serve pra pending/overdue. */
+export async function deletePayment(paymentId: string): Promise<{ deleted: boolean; id: string }> {
+  const r = (await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, { method: 'DELETE' })) as {
+    deleted?: boolean
+    id?: string
+  }
+  return { deleted: r.deleted === true, id: r.id ?? paymentId }
+}
+
+/** Remove um parcelamento inteiro e todas as suas parcelas (DELETE /installments/{id}).
+ *  Uma cobrança parcelada no cartão vira N pagamentos agrupados por um `installment`;
+ *  pra cancelar tudo, apaga-se o parcelamento, não parcela por parcela. */
+export async function deleteInstallment(installmentId: string): Promise<{ deleted: boolean; id: string }> {
+  const r = (await asaasFetch(`/installments/${encodeURIComponent(installmentId)}`, { method: 'DELETE' })) as {
+    deleted?: boolean
+    id?: string
+  }
+  return { deleted: r.deleted === true, id: r.id ?? installmentId }
 }
 
 /** Mapeia o status cru do Asaas pro nosso status normalizado. */

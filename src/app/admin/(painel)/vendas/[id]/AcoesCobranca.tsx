@@ -2,8 +2,16 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+const MEIOS: ReadonlyArray<readonly [string, string]> = [
+  ['PIX', 'PIX'],
+  ['CREDIT_CARD', 'Cartão'],
+  ['BOLETO', 'Boleto'],
+  ['UNDEFINED', 'Cliente escolhe'],
+]
 
 function parseValor(raw: string): number {
   let s = raw.replace(/[^\d.,]/g, '')
@@ -29,9 +37,10 @@ interface Props {
   valorReais: number
   dueDate: string | null
   installments: number
+  billingType: string
 }
 
-export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descricao, valorReais, dueDate, installments }: Props) {
+export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descricao, valorReais, dueDate, installments, billingType }: Props) {
   const router = useRouter()
   const hoje = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const parcelada = installments > 1
@@ -42,6 +51,23 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
   const [erro, setErro] = useState<string | null>(null)
   const [ok, setOk] = useState(false)
   const [copiado, setCopiado] = useState<'link' | 'msg' | null>(null)
+
+  // --- Trocar meio de pagamento (cancela + regera) ---
+  const [novoMeio, setNovoMeio] = useState(billingType)
+  const [novasParcelas, setNovasParcelas] = useState(installments)
+  const [baseRaw, setBaseRaw] = useState(valorReais.toFixed(2).replace('.', ','))
+  const [trocando, setTrocando] = useState(false)
+  const [erroTroca, setErroTroca] = useState<string | null>(null)
+  const [novoLink, setNovoLink] = useState<string | null>(null)
+  const [copiadoTroca, setCopiadoTroca] = useState(false)
+
+  const baseNum = useMemo(() => parseValor(baseRaw), [baseRaw])
+  const meioCartao = novoMeio === 'CREDIT_CARD'
+  const parcelasEfetivas = meioCartao ? Math.min(Math.max(novasParcelas, 1), MAX_PARCELAS) : 1
+  const previaCobrado = meioCartao ? totalComJuros(baseNum, parcelasEfetivas) : baseNum
+  const previaParcela = meioCartao ? valorParcela(baseNum, parcelasEfetivas) : baseNum
+  const semMudanca =
+    novoMeio === billingType && parcelasEfetivas === installments && Math.round(previaCobrado * 100) === Math.round(valorReais * 100)
 
   const novoValor = useMemo(() => parseValor(valorRaw), [valorRaw])
 
@@ -74,6 +100,41 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
       setErro('Erro de rede. Tenta de novo.')
     } finally {
       setSalvando(false)
+    }
+  }
+
+  async function trocarMeio(e: React.FormEvent) {
+    e.preventDefault()
+    setErroTroca(null)
+    setNovoLink(null)
+    if (semMudanca) {
+      setErroTroca('Nada mudou — escolha outro meio, parcelas ou valor.')
+      return
+    }
+    if (!window.confirm('Isso CANCELA a cobrança atual no Asaas e gera uma nova (link novo). Continuar?')) return
+    setTrocando(true)
+    try {
+      const res = await fetch('/api/admin/cobranca/trocar-meio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          billing_type: novoMeio,
+          installments: meioCartao ? parcelasEfetivas : undefined,
+          valor_reais: baseNum,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setErroTroca(data.error || 'Falha ao trocar o meio.')
+        return
+      }
+      setNovoLink(data.invoiceUrl ?? null)
+      router.refresh()
+    } catch {
+      setErroTroca('Erro de rede. Tenta de novo.')
+    } finally {
+      setTrocando(false)
     }
   }
 
@@ -168,6 +229,89 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
           </button>
         </div>
         {!waUrl && <p className="mt-2 text-xs text-amber-300">Telefone sem WhatsApp válido — use copiar link/mensagem.</p>}
+      </div>
+
+      {/* Trocar meio de pagamento (cancela a atual + gera nova) */}
+      <div className="border-t border-[var(--azuris-surface)] pt-4">
+        <span className={rotulo}>Trocar meio de pagamento</span>
+        <p className="mb-3 text-xs text-[var(--text-muted)]">
+          Cancela a cobrança atual no Asaas e gera uma nova com o meio escolhido. Gera um link novo. Use quando o cliente
+          quer trocar (ex.: PIX → cartão parcelado).
+        </p>
+        <form onSubmit={trocarMeio} className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label className={rotulo}>Meio</label>
+              <select value={novoMeio} onChange={(e) => setNovoMeio(e.target.value)} className={campo}>
+                {MEIOS.map(([v, l]) => (
+                  <option key={v} value={v}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={rotulo}>Parcelas</label>
+              <select
+                value={parcelasEfetivas}
+                onChange={(e) => setNovasParcelas(Number(e.target.value))}
+                disabled={!meioCartao}
+                className={`${campo} disabled:opacity-50`}
+              >
+                {Array.from({ length: MAX_PARCELAS }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {n}x
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={rotulo}>Valor base (R$)</label>
+              <input value={baseRaw} onChange={(e) => setBaseRaw(e.target.value)} inputMode="decimal" className={campo} />
+            </div>
+          </div>
+
+          <p className="text-xs text-[var(--text-muted)]">
+            Será cobrado <span className="font-semibold text-[var(--text-secondary)]">{brl(previaCobrado)}</span>
+            {meioCartao && parcelasEfetivas > 1 ? ` · ${parcelasEfetivas}x de ${brl(previaParcela)} (juros no cartão)` : ''}
+            {meioCartao && parcelasEfetivas === 1 ? ' · à vista no cartão' : ''}
+          </p>
+
+          {erroTroca && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">{erroTroca}</div>}
+          {novoLink && (
+            <div className="space-y-2 rounded-lg border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/10 px-3 py-2 text-sm text-[var(--accent-emerald)]">
+              <p>Cobrança regerada ✓ — novo link:</p>
+              <div className="flex flex-wrap gap-2">
+                <a href={novoLink} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[var(--accent-emerald)]/40 px-3 py-1.5 text-xs font-semibold hover:opacity-90">
+                  abrir fatura ↗
+                </a>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(novoLink)
+                      setCopiadoTroca(true)
+                      setTimeout(() => setCopiadoTroca(false), 1800)
+                    } catch {
+                      /* clipboard indisponível */
+                    }
+                  }}
+                  className="rounded-lg border border-[var(--accent-emerald)]/40 px-3 py-1.5 text-xs font-semibold hover:opacity-90"
+                >
+                  {copiadoTroca ? 'copiado ✓' : 'copiar link novo'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={trocando || semMudanca}
+            className="rounded-lg border border-[var(--azuris-cyan)]/60 px-4 py-2 text-sm font-bold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/10 disabled:opacity-40"
+          >
+            {trocando ? 'regerando…' : 'Cancelar atual e regerar'}
+          </button>
+        </form>
       </div>
     </div>
   )

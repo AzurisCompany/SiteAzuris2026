@@ -150,6 +150,7 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
             valorReais={insc.valor_centavos / 100}
             dueDate={insc.due_date}
             installments={insc.installments}
+            billingType={insc.billing_type}
           />
         </Bloco>
       )}

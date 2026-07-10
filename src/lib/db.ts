@@ -322,6 +322,44 @@ export async function atualizarCobrancaEditada(
   return rows[0] ?? null
 }
 
+/** Re-vincula uma inscrição a uma cobrança recém-criada (troca de meio de pagamento).
+ *  Atualiza forma/parcelas/valor + os campos financeiros do Asaas e volta o status pra
+ *  'pending', mantendo o mesmo lead (não cria linha nova). */
+export async function trocarMeioCobranca(
+  id: number,
+  v: {
+    billing_type: BillingType
+    installments: number
+    valor_centavos: number
+    asaas_customer_id: string | null
+    asaas_payment_id: string
+    asaas_invoice_url: string | null
+    valor_liquido_centavos: number | null
+    taxa_centavos: number | null
+    due_date: string | null
+    asaas_status: string | null
+  }
+): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET billing_type = ${v.billing_type},
+           installments = ${v.installments},
+           valor_centavos = ${v.valor_centavos},
+           asaas_customer_id = ${v.asaas_customer_id},
+           asaas_payment_id = ${v.asaas_payment_id},
+           asaas_invoice_url = ${v.asaas_invoice_url},
+           valor_liquido_centavos = ${v.valor_liquido_centavos},
+           taxa_centavos = ${v.taxa_centavos},
+           due_date = ${v.due_date},
+           asaas_status = ${v.asaas_status},
+           status = 'pending',
+           updated_at = NOW()
+     WHERE id = ${id}
+    RETURNING *
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
 /** Grava/atualiza os dados da NFS-e (Asaas) na inscrição. */
 export async function atualizarNf(
   id: number,
