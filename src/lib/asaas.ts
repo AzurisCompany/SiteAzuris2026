@@ -227,6 +227,51 @@ export function mapAsaasStatus(status: string): 'pending' | 'paid' | 'overdue' |
   }
 }
 
+// --- Finanças da conta (saldo + extrato) ---
+// Usado pela reconciliação em /admin/saude: bate o saldo REAL da conta contra o
+// "líquido recebido" que o banco acumula. Divergem por natureza (saque, antecipação,
+// taxa não entram no banco) — o extrato explica a diferença item a item.
+
+/** Saldo disponível pra saque na conta Asaas (GET /finance/balance). Em reais. */
+export async function getBalance(): Promise<{ balanceReais: number }> {
+  const r = (await asaasFetch('/finance/balance', { method: 'GET' })) as { balance?: number }
+  if (typeof r.balance !== 'number') {
+    throw new Error('Asaas: /finance/balance sem campo "balance" numérico')
+  }
+  return { balanceReais: r.balance }
+}
+
+export interface AsaasFinanceTransaction {
+  date: string // YYYY-MM-DD
+  value: number // sinalizado: crédito > 0, débito < 0. Em reais.
+  balance: number // saldo corrente após a transação. Em reais.
+  type: string // PAYMENT_RECEIVED, TRANSFER, CREDIT_CARD_ANTICIPATION, *_FEE, REFUND…
+  description: string | null
+}
+
+/** Extrato financeiro (GET /financialTransactions), mais recentes primeiro.
+ *  `value` já vem sinalizado pelo Asaas (crédito positivo, débito negativo). */
+export async function getFinanceTransactions(
+  limit = 50,
+  offset = 0,
+): Promise<{ transactions: AsaasFinanceTransaction[]; totalCount: number; hasMore: boolean }> {
+  const r = (await asaasFetch(
+    `/financialTransactions?limit=${limit}&offset=${offset}&order=desc`,
+    { method: 'GET' },
+  )) as { data?: unknown[]; totalCount?: number; hasMore?: boolean }
+  const transactions = (r.data ?? []).map((raw) => {
+    const t = raw as Record<string, unknown>
+    return {
+      date: typeof t.date === 'string' ? t.date : '',
+      value: typeof t.value === 'number' ? t.value : 0,
+      balance: typeof t.balance === 'number' ? t.balance : 0,
+      type: typeof t.type === 'string' ? t.type : 'UNKNOWN',
+      description: typeof t.description === 'string' ? t.description : null,
+    }
+  })
+  return { transactions, totalCount: r.totalCount ?? transactions.length, hasMore: r.hasMore ?? false }
+}
+
 // --- Assinaturas (cobrança recorrente) ---
 
 export type AsaasCycle = 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'SEMIANNUALLY' | 'YEARLY'

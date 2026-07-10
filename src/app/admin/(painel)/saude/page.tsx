@@ -1,10 +1,18 @@
 import Link from 'next/link'
 import { diagnosticoSaude, labelProduto, brl, type DiagnosticoSaude } from '@/lib/admin-queries'
+import { reconciliacaoCaixa, labelGrupo, type Reconciliacao } from '@/lib/reconciliacao'
 import type { InscricaoRow } from '@/lib/db'
 import SyncRowButton from '../cobranca/SyncRowButton'
 import SyncAllButton from '../SyncAllButton'
 
 export const dynamic = 'force-dynamic'
+
+/** 'YYYY-MM-DD' → 'DD/MM/AA' sem escorregar de dia por fuso. */
+function fmtYmd(ymd: string): string {
+  const [y, m, d] = ymd.split('-')
+  if (!y || !m || !d) return ymd || '—'
+  return `${d}/${m}/${y.slice(2)}`
+}
 
 function fmtData(iso: string | null): string {
   if (!iso) return '—'
@@ -70,6 +78,122 @@ function LinhaInscricao({ r, comSync }: { r: InscricaoRow; comSync?: boolean }) 
   )
 }
 
+/** Um KPI do bloco de reconciliação. */
+function KpiRec({ rotulo, valor, sub, destaque }: { rotulo: string; valor: string; sub?: string; destaque?: 'cyan' | 'muted' }) {
+  return (
+    <div className="rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-surface)]/30 p-4">
+      <div className="text-xs text-[var(--text-muted)]">{rotulo}</div>
+      <div className={`mt-1 text-xl font-bold ${destaque === 'cyan' ? 'text-[var(--azuris-cyan)]' : ''}`}>{valor}</div>
+      {sub && <div className="mt-0.5 text-xs text-[var(--text-muted)]">{sub}</div>}
+    </div>
+  )
+}
+
+/** Reconciliação de caixa: saldo REAL do Asaas × líquido recebido do banco.
+ *  Chamada externa isolada — se o Asaas falhar, só este bloco mostra erro. */
+async function ReconciliacaoBloco() {
+  let rec: Reconciliacao | null = null
+  let erro: string | null = null
+  try {
+    rec = await reconciliacaoCaixa(60)
+  } catch (e) {
+    erro = e instanceof Error ? e.message : 'erro ao consultar o Asaas'
+  }
+
+  if (erro) {
+    return (
+      <section className="rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-5">
+        <h2 className="font-bold">Reconciliação de caixa</h2>
+        <p className="mt-2 text-sm text-orange-300">
+          Não consegui puxar o saldo/extrato do Asaas: {erro}
+        </p>
+      </section>
+    )
+  }
+  if (!rec) return null
+
+  const dif = rec.diferencaCentavos
+  const explicacao =
+    dif > 0
+      ? 'O Asaas tem mais caixa que a receita reconhecida no banco — típico de antecipação de parcelas futuras de cartão e/ou pagamentos cujo webhook não fechou (ver anomalias abaixo).'
+      : dif < 0
+        ? 'A receita reconhecida no banco supera o caixa — cartão confirmado ainda não liberado (compensa D+30) e/ou saques já feitos.'
+        : 'Saldo e líquido batem exatamente.'
+
+  return (
+    <section className="rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-bold">Reconciliação de caixa</h2>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            Saldo real da conta Asaas × &quot;Líquido recebido&quot; do banco. São métricas diferentes — o extrato abaixo explica a diferença.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <KpiRec rotulo="Saldo disponível no Asaas" valor={brl(rec.saldoAsaasCentavos)} sub="caixa pra saque agora" destaque="cyan" />
+        <KpiRec rotulo="Líquido recebido (banco)" valor={brl(rec.liquidoBancoCentavos)} sub={`${rec.pagasBanco} vendas pagas`} />
+        <KpiRec
+          rotulo="Diferença (saldo − líquido)"
+          valor={`${dif >= 0 ? '+' : ''}${brl(dif)}`}
+          sub="esperada ≠ 0"
+          destaque="muted"
+        />
+      </div>
+
+      <p className="mt-3 text-xs text-[var(--text-muted)]">{explicacao}</p>
+
+      {rec.gruposExtrato.length > 0 && (
+        <div className="mt-5">
+          <div className="text-xs font-semibold text-[var(--text-muted)]">
+            Extrato das últimas {Math.min(rec.janela, rec.totalTransacoes)} movimentações
+            {rec.totalTransacoes > rec.janela && ` (de ${rec.totalTransacoes})`}, por tipo
+          </div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {rec.gruposExtrato.map((g) => (
+              <div
+                key={g.grupo}
+                className="flex items-center justify-between rounded-lg border border-[var(--azuris-surface)] px-3 py-2 text-sm"
+              >
+                <span>
+                  {labelGrupo(g.grupo)}{' '}
+                  <span className="text-xs text-[var(--text-muted)]">({g.qtde})</span>
+                </span>
+                <span className={`font-semibold ${g.totalCentavos < 0 ? 'text-orange-300' : 'text-[var(--accent-emerald)]'}`}>
+                  {g.totalCentavos >= 0 ? '+' : ''}
+                  {brl(g.totalCentavos)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <details className="mt-3">
+            <summary className="cursor-pointer text-xs text-[var(--azuris-cyan)]">
+              Ver movimentações individuais
+            </summary>
+            <div className="mt-2 space-y-1">
+              {rec.transacoes.slice(0, 25).map((t, i) => (
+                <div
+                  key={`${t.date}-${i}`}
+                  className="flex items-center justify-between gap-3 rounded px-2 py-1.5 text-xs hover:bg-[var(--azuris-surface)]/40"
+                >
+                  <span className="w-16 shrink-0 text-[var(--text-muted)]">{fmtYmd(t.date)}</span>
+                  <span className="min-w-0 flex-1 truncate">{t.description ?? t.type}</span>
+                  <span className={`shrink-0 font-medium ${t.value < 0 ? 'text-orange-300' : 'text-[var(--accent-emerald)]'}`}>
+                    {t.value >= 0 ? '+' : ''}
+                    {brl(Math.round(t.value * 100))}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
+    </section>
+  )
+}
+
 export default async function SaudePage() {
   let d: DiagnosticoSaude | null = null
   let erro: string | null = null
@@ -114,6 +238,8 @@ export default async function SaudePage() {
           Falha ao carregar diagnóstico: {erro}
         </div>
       )}
+
+      <ReconciliacaoBloco />
 
       {d && (
         <div className="grid gap-4">

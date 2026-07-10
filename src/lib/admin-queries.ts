@@ -101,6 +101,21 @@ export async function resumoFinanceiro(): Promise<ResumoProduto[]> {
   }))
 }
 
+/** Total (todos os produtos) do líquido de vendas PAGAS — o número do KPI
+ *  "Líquido recebido" do dashboard, consolidado num escalar pra reconciliação. */
+export async function totalLiquidoRecebido(): Promise<{ liquido: number; bruto: number; pagas: number }> {
+  const rows = (await sql`
+    SELECT
+      COALESCE(SUM(valor_liquido_centavos) FILTER (WHERE status = 'paid'), 0) AS liquido,
+      COALESCE(SUM(valor_centavos)         FILTER (WHERE status = 'paid'), 0) AS bruto,
+      COUNT(*) FILTER (WHERE status = 'paid')                                 AS pagas
+    FROM inscricoes
+    WHERE NOT is_teste
+  `) as Array<Record<string, string>>
+  const r = rows[0] ?? { liquido: '0', bruto: '0', pagas: '0' }
+  return { liquido: Number(r.liquido), bruto: Number(r.bruto), pagas: Number(r.pagas) }
+}
+
 // --- Breakdown por tipo de ingresso (variante do produto) ---
 
 export interface ResumoTipo {
