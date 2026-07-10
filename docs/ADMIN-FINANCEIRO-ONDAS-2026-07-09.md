@@ -218,6 +218,19 @@ Rode em **sandbox** antes de valer. (Não foi exercitado nesta entrega.)
 
 ---
 
+## Revisão de arquitetura (pós-entrega)
+
+Revisão contra clean code / SOLID / cobertura (commits `b9d2ecf` fixes + `8e4e097` testes):
+
+- **P0.2 corrigido** — ciclos de assinatura passavam sem taxa/líquido → DRE superestimava a receita recorrente. Agora o webhook consolida (`atualizarFinanceiroPorAsaasId`) e o cron inclui pagas sem taxa.
+- **P0.1** — validação de boundary do Asaas (`parsePayment`/`reqStr` falham alto em vez de gravar `undefined`).
+- **Refactor** — orquestrador `lib/cobranca-pipeline.criarCobranca` (mata a duplicação dos 3 checkouts) + `lib/format` (helpers puros) + `fetch` injetável (`__setAsaasFetch`).
+- **Testes** — Vitest + 38 testes unitários (`src/lib/__tests__`, `pnpm test`): parcelamento, validação CPF/CNPJ, `mapAsaasStatus`, body-builder do `createPayment`, format, billing, helpers de apresentação.
+
+**Follow-up mapeado (NÃO feito):** `db.ts` god-module → split; datas UTC vs `CURRENT_DATE` (off-by-one à noite no BRT); números mágicos de preço (`55000`/`75000`) duplicados; testes de integração (dedupe, webhook idempotência, materialização) que pedem DB de teste. Fora do escopo selecionado: login hardening + export CSV.
+
+---
+
 ## Limitações e ressalvas
 
 - **Meios curados por cobrança:** impossível no Asaas (é 1 método OU todos). 2+ = todos os ativos na conta.
