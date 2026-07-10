@@ -35,6 +35,9 @@ export default async function PainelLayout({ children }: { children: React.React
             <Link href="/admin/saude" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
               Saúde
             </Link>
+            <Link href="/admin/importar" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+              Importar
+            </Link>
             <Link href="/admin/trafego" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
               Tráfego
             </Link>

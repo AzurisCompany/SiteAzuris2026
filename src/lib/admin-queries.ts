@@ -6,6 +6,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   proposta: 'Proposta customizada',
   assinatura: 'Assinatura',
+  'avulso-asaas': 'Avulso (Asaas)',
 }
 export function labelProduto(slug: string): string {
   return PRODUTO_LABEL[slug] ?? slug
@@ -17,6 +18,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'lakehouse-comunidade': 'Curso',
   proposta: 'Propostas',
   assinatura: 'Assinaturas',
+  'avulso-asaas': 'Avulsos',
 }
 export function tabProduto(slug: string): string {
   return PRODUTO_TAB[slug] ?? slug

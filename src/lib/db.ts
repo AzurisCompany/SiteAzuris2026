@@ -304,6 +304,70 @@ export async function vincularAsaas(id: number, v: VinculoAsaas): Promise<void> 
   `
 }
 
+/** Conjunto de asaas_payment_id já presentes no banco — pra diferenciar o que
+ *  existe só no Asaas (cobrança criada no painel). */
+export async function idsAsaasNoBanco(): Promise<Set<string>> {
+  const rows = (await sql`
+    SELECT asaas_payment_id FROM inscricoes WHERE asaas_payment_id IS NOT NULL
+  `) as Array<{ asaas_payment_id: string }>
+  return new Set(rows.map((r) => r.asaas_payment_id))
+}
+
+/** Dados pra importar uma cobrança que já existe no Asaas mas não no banco. */
+export interface InscricaoImportada {
+  curso_slug: string
+  nome: string
+  email: string
+  cpf_cnpj: string
+  telefone: string | null
+  billing_type: BillingType
+  valor_centavos: number
+  installments: number
+  status: InscricaoStatus
+  asaas_customer_id: string
+  asaas_payment_id: string
+  asaas_invoice_url: string | null
+  valor_liquido_centavos: number | null
+  taxa_centavos: number | null
+  due_date: string | null
+  asaas_status: string | null
+  pago_em: string | null
+  como_conheceu: string | null // guarda a descrição original do Asaas
+  is_teste: boolean
+}
+
+/**
+ * Cria uma inscrição a partir de uma cobrança já existente no Asaas (criada no
+ * painel, fora do nosso checkout). Idempotente: se o asaas_payment_id (UNIQUE) já
+ * existir, não duplica e devolve a linha existente. lote='unico' (avulso não tem lote).
+ */
+export async function criarInscricaoImportada(i: InscricaoImportada): Promise<{ row: InscricaoRow; jaExistia: boolean }> {
+  const paid_at = i.status === 'paid' ? i.pago_em ?? new Date().toISOString() : null
+  const rows = (await sql`
+    INSERT INTO inscricoes (
+      curso_slug, lote, nome, email, cpf_cnpj, telefone,
+      billing_type, valor_centavos, installments, status,
+      asaas_customer_id, asaas_payment_id, asaas_invoice_url,
+      valor_liquido_centavos, taxa_centavos, due_date, asaas_status, pago_em, paid_at,
+      como_conheceu, consentimento_lgpd, is_teste, last_synced_at
+    ) VALUES (
+      ${i.curso_slug}, 'unico', ${i.nome}, ${i.email}, ${i.cpf_cnpj}, ${i.telefone},
+      ${i.billing_type}, ${i.valor_centavos}, ${i.installments}, ${i.status},
+      ${i.asaas_customer_id}, ${i.asaas_payment_id}, ${i.asaas_invoice_url},
+      ${i.valor_liquido_centavos}, ${i.taxa_centavos}, ${i.due_date}, ${i.asaas_status}, ${i.pago_em}, ${paid_at},
+      ${i.como_conheceu}, false, ${i.is_teste}, NOW()
+    )
+    ON CONFLICT (asaas_payment_id) DO NOTHING
+    RETURNING *
+  `) as InscricaoRow[]
+  if (rows.length > 0) return { row: rows[0], jaExistia: false }
+  // Conflito: já existia — devolve a linha atual.
+  const existentes = (await sql`
+    SELECT * FROM inscricoes WHERE asaas_payment_id = ${i.asaas_payment_id} LIMIT 1
+  `) as InscricaoRow[]
+  return { row: existentes[0], jaExistia: true }
+}
+
 /** Atualiza valores de uma cobrança editada no Asaas (novo valor/vencimento). */
 export async function atualizarCobrancaEditada(
   id: number,

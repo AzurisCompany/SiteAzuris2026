@@ -92,6 +92,14 @@ export async function findOrCreateCustomer(input: CreateCustomerInput): Promise<
   return created as AsaasCustomer
 }
 
+/** Busca um cliente pelo id (GET /customers/{id}). Usado na importação de
+ *  cobranças criadas fora do nosso fluxo (o payment só traz o id do cliente). */
+export async function getCustomer(customerId: string): Promise<AsaasCustomer> {
+  const c = await asaasFetch(`/customers/${encodeURIComponent(customerId)}`, { method: 'GET' })
+  reqStr(c, 'id', 'getCustomer')
+  return c as AsaasCustomer
+}
+
 // --- Payment ---
 
 export type AsaasBillingType = 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
@@ -183,6 +191,22 @@ export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail>
   const p = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}`, { method: 'GET' })
   reqStr(p, 'id', 'getPayment')
   return p as AsaasPaymentDetail
+}
+
+/** Lista cobranças da conta (GET /payments), paginado. Usado pra mapear o que
+ *  existe no Asaas mas não no nosso banco (cobranças criadas no painel). */
+export async function listPayments(
+  opts: { limit?: number; offset?: number } = {},
+): Promise<{ data: AsaasPaymentDetail[]; totalCount: number; hasMore: boolean }> {
+  const limit = opts.limit ?? 100
+  const offset = opts.offset ?? 0
+  const r = (await asaasFetch(`/payments?limit=${limit}&offset=${offset}`, { method: 'GET' })) as {
+    data?: AsaasPaymentDetail[]
+    totalCount?: number
+    hasMore?: boolean
+  }
+  const data = Array.isArray(r.data) ? r.data : []
+  return { data, totalCount: r.totalCount ?? data.length, hasMore: r.hasMore ?? false }
 }
 
 /** Remove uma cobrança não paga (DELETE /payments/{id}). Só serve pra pending/overdue. */
