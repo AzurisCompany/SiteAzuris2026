@@ -65,11 +65,21 @@ function Linha({ c }: { c: CobrancaFora }) {
   )
 }
 
-export default async function ImportarPage() {
+// Piso padrão: só cobranças criadas a partir de 06/2026 (não olhamos histórico antigo).
+const DESDE_PADRAO = '2026-06-01'
+
+export default async function ImportarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ desde?: string }>
+}) {
+  const sp = await searchParams
+  const desde = /^\d{4}-\d{2}-\d{2}$/.test(sp.desde ?? '') ? (sp.desde as string) : DESDE_PADRAO
+
   let dados: Awaited<ReturnType<typeof cobrancasForaDoBanco>> | null = null
   let erro: string | null = null
   try {
-    dados = await cobrancasForaDoBanco()
+    dados = await cobrancasForaDoBanco({ desde })
   } catch (e) {
     erro = e instanceof Error ? e.message : 'erro ao consultar o Asaas'
   }
@@ -88,6 +98,27 @@ export default async function ImportarPage() {
           Importa cada uma como venda avulsa (bucket <span className="font-mono text-xs">avulso-asaas</span>),
           já com status, valor e líquido reais. Idempotente: reimportar não duplica.
         </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-[var(--text-muted)]">Criadas a partir de:</span>
+          {[
+            { label: 'jun/2026', v: '2026-06-01' },
+            { label: 'jul/2026', v: '2026-07-01' },
+            { label: '2026', v: '2026-01-01' },
+          ].map((o) => (
+            <Link
+              key={o.v}
+              href={`/admin/importar?desde=${o.v}`}
+              className={`rounded-full border px-3 py-1 font-semibold transition-colors ${
+                desde === o.v
+                  ? 'border-[var(--azuris-cyan)]/50 bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
+                  : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]'
+              }`}
+            >
+              {o.label}
+            </Link>
+          ))}
+          <span className="text-[var(--text-muted)]">· filtro atual: {fmtYmd(desde)}</span>
+        </div>
       </div>
 
       {erro && (
@@ -102,7 +133,7 @@ export default async function ImportarPage() {
             <span className="rounded-full bg-[var(--azuris-surface)] px-3 py-1">
               {dados.total} fora do banco
             </span>
-            <span>{dados.escaneadas} cobranças escaneadas no Asaas</span>
+            <span>{dados.escaneadas} escaneadas no Asaas (desde {fmtYmd(desde)})</span>
             {dados.truncado && (
               <span className="text-orange-400">⚠️ escaneamento truncado — pode haver mais além das primeiras páginas</span>
             )}

@@ -205,11 +205,15 @@ export async function getInstallmentPayments(installmentId: string): Promise<Asa
 /** Lista cobranças da conta (GET /payments), paginado. Usado pra mapear o que
  *  existe no Asaas mas não no nosso banco (cobranças criadas no painel). */
 export async function listPayments(
-  opts: { limit?: number; offset?: number } = {},
+  opts: { limit?: number; offset?: number; dateCreatedGe?: string; dateCreatedLe?: string } = {},
 ): Promise<{ data: AsaasPaymentDetail[]; totalCount: number; hasMore: boolean }> {
   const limit = opts.limit ?? 100
   const offset = opts.offset ?? 0
-  const r = (await asaasFetch(`/payments?limit=${limit}&offset=${offset}`, { method: 'GET' })) as {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  // Filtro por data de criação (YYYY-MM-DD). Recorta o escaneamento a um período.
+  if (opts.dateCreatedGe) params.set('dateCreated[ge]', opts.dateCreatedGe)
+  if (opts.dateCreatedLe) params.set('dateCreated[le]', opts.dateCreatedLe)
+  const r = (await asaasFetch(`/payments?${params.toString()}`, { method: 'GET' })) as {
     data?: AsaasPaymentDetail[]
     totalCount?: number
     hasMore?: boolean

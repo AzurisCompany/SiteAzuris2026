@@ -86,7 +86,12 @@ function somaCent(parcelas: AsaasPaymentDetail[], campo: 'value' | 'netValue'): 
  * devolve o que não tem inscrição no banco, enriquecido com o cliente.
  */
 export async function cobrancasForaDoBanco(
-  { maxPaginas = 3, pageSize = 100, maxDetalhe = 60 } = {},
+  { maxPaginas = 3, pageSize = 100, maxDetalhe = 60, desde }: {
+    maxPaginas?: number
+    pageSize?: number
+    maxDetalhe?: number
+    desde?: string // 'YYYY-MM-DD' — só cobranças criadas a partir dessa data
+  } = {},
 ): Promise<{ total: number; itens: CobrancaFora[]; escaneadas: number; truncado: boolean }> {
   const idsBanco = await idsAsaasNoBanco()
   const todas: AsaasPaymentDetail[] = []
@@ -94,7 +99,7 @@ export async function cobrancasForaDoBanco(
   let truncado = false
 
   for (let page = 0; page < maxPaginas; page++) {
-    const { data, hasMore } = await listPayments({ limit: pageSize, offset: page * pageSize })
+    const { data, hasMore } = await listPayments({ limit: pageSize, offset: page * pageSize, dateCreatedGe: desde })
     escaneadas += data.length
     todas.push(...data)
     if (!hasMore) break
