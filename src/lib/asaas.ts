@@ -193,6 +193,15 @@ export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail>
   return p as AsaasPaymentDetail
 }
 
+/** Lista todas as parcelas de um parcelamento (GET /payments?installment={id}). */
+export async function getInstallmentPayments(installmentId: string): Promise<AsaasPaymentDetail[]> {
+  const r = (await asaasFetch(
+    `/payments?installment=${encodeURIComponent(installmentId)}&limit=100`,
+    { method: 'GET' },
+  )) as { data?: AsaasPaymentDetail[] }
+  return Array.isArray(r.data) ? r.data : []
+}
+
 /** Lista cobranças da conta (GET /payments), paginado. Usado pra mapear o que
  *  existe no Asaas mas não no nosso banco (cobranças criadas no painel). */
 export async function listPayments(

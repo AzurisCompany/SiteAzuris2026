@@ -1,12 +1,19 @@
 // Mapear cobranças que existem no Asaas mas NÃO no nosso banco — tipicamente
 // criadas direto no painel do Asaas, fora do checkout. Lista pra revisão em
-// /admin/importar e importa uma a uma como inscrição no bucket 'avulso-asaas'.
+// /admin/importar e importa como inscrição no bucket 'avulso-asaas'.
 //
-// NOTA sobre parcelado: o Asaas trata cada parcela como um pagamento próprio.
-// Uma venda 3x aparece como 3 cobranças (mesma `installment`), cada uma com seu
-// valor/status. A importação é POR PAGAMENTO — parceladas viram N linhas. Honesto
-// em relação ao caixa (cada parcela recebida é receita daquela parcela).
-import { listPayments, getPayment, getCustomer, mapAsaasStatus, type AsaasPaymentDetail } from '@/lib/asaas'
+// PARCELADO: o Asaas trata cada parcela como um pagamento próprio, agrupado por
+// um `installment` id. Aqui a gente AGRUPA por installment e importa o grupo como
+// UMA venda (valor = soma das parcelas, installments = nº de parcelas, status
+// agregado). Cobranças avulsas (sem installment) entram como 1 linha cada.
+import {
+  listPayments,
+  getPayment,
+  getInstallmentPayments,
+  getCustomer,
+  mapAsaasStatus,
+  type AsaasPaymentDetail,
+} from '@/lib/asaas'
 import {
   idsAsaasNoBanco,
   criarInscricaoImportada,
@@ -17,15 +24,18 @@ import {
 export const BUCKET_AVULSO = 'avulso-asaas'
 
 export interface CobrancaFora {
-  id: string
+  tipo: 'single' | 'parcelado'
+  importId: string // single: payment id · parcelado: installment id
+  representanteId: string // payment id que vira asaas_payment_id da inscrição (idempotência)
+  parcelas: number
   descricao: string | null
-  valorCentavos: number
+  valorCentavos: number // total (soma das parcelas)
   liquidoCentavos: number | null
-  status: string // status cru do Asaas (RECEIVED, CONFIRMED, PENDING…)
-  statusNorm: string // normalizado (paid/pending/…)
+  statusNorm: string
+  statusLabel: string // ex.: "2/3 pagas" no parcelado
   billingType: string
   dueDate: string | null
-  installment: string | null // id do parcelamento, se for parcela
+  customerId: string
   clienteNome: string | null
   clienteEmail: string | null
   clienteDoc: string | null
@@ -33,96 +43,177 @@ export interface CobrancaFora {
 
 const reais2cent = (v: number | undefined | null) => (typeof v === 'number' ? Math.round(v * 100) : null)
 
+/** Descrição sem o prefixo "Parcela X de Y." que o Asaas põe em cada parcela. */
+function limparDescricao(desc: string | null | undefined): string | null {
+  if (!desc) return null
+  return desc.replace(/^\s*Parcela\s+\d+\s+de\s+\d+\.?\s*/i, '').trim() || desc
+}
+
+/** Status agregado de um grupo de parcelas (espelha o modelo do checkout:
+ *  cartão parcelado autorizado = venda paga). */
+function statusGrupo(parcelas: AsaasPaymentDetail[]): { norm: string; label: string } {
+  const norms = parcelas.map((p) => mapAsaasStatus(p.status))
+  const pagas = norms.filter((s) => s === 'paid').length
+  const total = parcelas.length
+  let norm = 'pending'
+  if (pagas > 0) norm = 'paid'
+  else if (norms.some((s) => s === 'overdue')) norm = 'overdue'
+  else if (norms.every((s) => s === 'cancelled')) norm = 'cancelled'
+  else if (norms.every((s) => s === 'refunded')) norm = 'refunded'
+  return { norm, label: `${pagas}/${total} pagas` }
+}
+
+/** Parcela representante do grupo (menor vencimento = parcela 1). */
+function representante(parcelas: AsaasPaymentDetail[]): AsaasPaymentDetail {
+  return [...parcelas].sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))[0]
+}
+
+function somaCent(parcelas: AsaasPaymentDetail[], campo: 'value' | 'netValue'): number | null {
+  let achou = false
+  let soma = 0
+  for (const p of parcelas) {
+    const c = reais2cent(p[campo])
+    if (c != null) {
+      achou = true
+      soma += c
+    }
+  }
+  return achou ? soma : null
+}
+
 /**
- * Varre as cobranças do Asaas (paginado) e devolve as que não têm inscrição no
- * banco, já enriquecidas com o cliente. `maxPaginas` limita o escaneamento pra
- * não estourar o tempo da request; `maxDetalhe` limita as buscas de cliente.
+ * Varre as cobranças do Asaas (paginado), agrupa parceladas por installment e
+ * devolve o que não tem inscrição no banco, enriquecido com o cliente.
  */
 export async function cobrancasForaDoBanco(
   { maxPaginas = 3, pageSize = 100, maxDetalhe = 60 } = {},
 ): Promise<{ total: number; itens: CobrancaFora[]; escaneadas: number; truncado: boolean }> {
   const idsBanco = await idsAsaasNoBanco()
-  const fora: AsaasPaymentDetail[] = []
+  const todas: AsaasPaymentDetail[] = []
   let escaneadas = 0
   let truncado = false
 
   for (let page = 0; page < maxPaginas; page++) {
     const { data, hasMore } = await listPayments({ limit: pageSize, offset: page * pageSize })
     escaneadas += data.length
-    for (const p of data) {
-      if (p.id && !idsBanco.has(p.id)) fora.push(p)
-    }
+    todas.push(...data)
     if (!hasMore) break
     if (page === maxPaginas - 1 && hasMore) truncado = true
   }
 
-  // Enriquamos só os primeiros N com o cliente (1 GET cada) pra manter a página rápida.
-  const itens: CobrancaFora[] = []
-  for (const p of fora.slice(0, maxDetalhe)) {
-    let nome: string | null = null
-    let email: string | null = null
-    let doc: string | null = null
-    try {
-      const c = await getCustomer(p.customer)
-      nome = c.name ?? null
-      email = c.email ?? null
-      doc = c.cpfCnpj ?? null
-    } catch {
-      // cliente pode ter sido removido — importa mesmo assim, sem nome
+  // Separa parceladas (por installment) das avulsas.
+  const grupos = new Map<string, AsaasPaymentDetail[]>()
+  const avulsas: AsaasPaymentDetail[] = []
+  for (const p of todas) {
+    if (!p.id) continue
+    if (p.installment) {
+      const g = grupos.get(p.installment) ?? []
+      g.push(p)
+      grupos.set(p.installment, g)
+    } else {
+      avulsas.push(p)
     }
+  }
+
+  const itens: CobrancaFora[] = []
+
+  for (const p of avulsas) {
+    if (idsBanco.has(p.id)) continue // já no banco
     itens.push({
-      id: p.id,
+      tipo: 'single',
+      importId: p.id,
+      representanteId: p.id,
+      parcelas: 1,
       descricao: p.description ?? null,
       valorCentavos: reais2cent(p.value) ?? 0,
       liquidoCentavos: reais2cent(p.netValue),
-      status: p.status,
       statusNorm: mapAsaasStatus(p.status),
+      statusLabel: mapAsaasStatus(p.status),
       billingType: p.billingType,
       dueDate: p.dueDate ?? null,
-      installment: p.installment ?? null,
-      clienteNome: nome,
-      clienteEmail: email,
-      clienteDoc: doc,
+      customerId: p.customer,
+      clienteNome: null,
+      clienteEmail: null,
+      clienteDoc: null,
     })
   }
 
-  return { total: fora.length, itens, escaneadas, truncado }
+  for (const [installmentId, membros] of grupos) {
+    // Grupo já importado se QUALQUER parcela já está no banco (importamos 1 linha/grupo).
+    if (membros.some((m) => m.id && idsBanco.has(m.id))) continue
+    const rep = representante(membros)
+    const { norm, label } = statusGrupo(membros)
+    itens.push({
+      tipo: 'parcelado',
+      importId: installmentId,
+      representanteId: rep.id,
+      parcelas: membros.length,
+      descricao: limparDescricao(rep.description),
+      valorCentavos: somaCent(membros, 'value') ?? 0,
+      liquidoCentavos: somaCent(membros, 'netValue'),
+      statusNorm: norm,
+      statusLabel: label,
+      billingType: rep.billingType,
+      dueDate: rep.dueDate ?? null,
+      customerId: rep.customer,
+      clienteNome: null,
+      clienteEmail: null,
+      clienteDoc: null,
+    })
+  }
+
+  // Enriquece só os primeiros N com o cliente (1 GET cada) pra manter a página rápida.
+  const cacheCliente = new Map<string, { nome: string | null; email: string | null; doc: string | null }>()
+  for (const it of itens.slice(0, maxDetalhe)) {
+    let c = cacheCliente.get(it.customerId)
+    if (!c) {
+      try {
+        const cli = await getCustomer(it.customerId)
+        c = { nome: cli.name ?? null, email: cli.email ?? null, doc: cli.cpfCnpj ?? null }
+      } catch {
+        c = { nome: null, email: null, doc: null }
+      }
+      cacheCliente.set(it.customerId, c)
+    }
+    it.clienteNome = c.nome
+    it.clienteEmail = c.email
+    it.clienteDoc = c.doc
+  }
+
+  return { total: itens.length, itens, escaneadas, truncado }
 }
 
 export type ImportarResultado =
   | { ok: true; inscricaoId: number; jaExistia: boolean }
   | { ok: false; erro: string }
 
-/**
- * Importa UMA cobrança do Asaas (por id) como inscrição no bucket avulso.
- * Busca o pagamento + cliente atuais no Asaas (fonte da verdade) e persiste.
- */
+async function clienteOuPlaceholder(customerId: string) {
+  try {
+    const c = await getCustomer(customerId)
+    return {
+      nome: c.name || 'Cliente Asaas',
+      email: c.email || '',
+      doc: (c.cpfCnpj || '').replace(/\D/g, ''),
+      telefone: c.mobilePhone ?? null,
+    }
+  } catch {
+    return { nome: 'Cliente Asaas', email: '', doc: '', telefone: null as string | null }
+  }
+}
+
+/** Importa UMA cobrança avulsa (não parcelada) do Asaas como inscrição. */
 export async function importarCobranca(
   asaasPaymentId: string,
   opts: { is_teste?: boolean } = {},
 ): Promise<ImportarResultado> {
   let payment: AsaasPaymentDetail
   try {
-    // getPayment garante o estado atual (a lista pode estar defasada).
     payment = await getPayment(asaasPaymentId)
   } catch (e) {
     return { ok: false, erro: e instanceof Error ? e.message : 'falha ao buscar o pagamento no Asaas' }
   }
 
-  let clienteNome = 'Cliente Asaas'
-  let clienteEmail = ''
-  let clienteDoc = ''
-  let telefone: string | null = null
-  try {
-    const c = await getCustomer(payment.customer)
-    clienteNome = c.name || clienteNome
-    clienteEmail = c.email || ''
-    clienteDoc = (c.cpfCnpj || '').replace(/\D/g, '')
-    telefone = c.mobilePhone ?? null
-  } catch {
-    // sem cliente: importa com placeholders (o pagamento é real)
-  }
-
+  const cli = await clienteOuPlaceholder(payment.customer)
   const bruto = reais2cent(payment.value)
   const liquido = reais2cent(payment.netValue)
   const pago = payment.clientPaymentDate || payment.paymentDate || payment.confirmedDate || null
@@ -130,10 +221,10 @@ export async function importarCobranca(
   try {
     const { row, jaExistia } = await criarInscricaoImportada({
       curso_slug: BUCKET_AVULSO,
-      nome: clienteNome,
-      email: clienteEmail,
-      cpf_cnpj: clienteDoc,
-      telefone,
+      nome: cli.nome,
+      email: cli.email,
+      cpf_cnpj: cli.doc,
+      telefone: cli.telefone,
       billing_type: (payment.billingType as BillingType) ?? 'UNDEFINED',
       valor_centavos: bruto ?? 0,
       installments: 1,
@@ -147,6 +238,60 @@ export async function importarCobranca(
       asaas_status: payment.status ?? null,
       pago_em: pago,
       como_conheceu: payment.description ?? null,
+      is_teste: opts.is_teste ?? false,
+    })
+    return { ok: true, inscricaoId: row.id, jaExistia }
+  } catch (e) {
+    return { ok: false, erro: e instanceof Error ? e.message : 'falha ao gravar a inscrição' }
+  }
+}
+
+/**
+ * Importa um PARCELAMENTO inteiro (todas as parcelas) como UMA venda: valor =
+ * soma das parcelas, installments = nº de parcelas, status agregado. A inscrição
+ * é chaveada pela parcela representante (menor vencimento) — idempotente.
+ */
+export async function importarInstallment(
+  installmentId: string,
+  opts: { is_teste?: boolean } = {},
+): Promise<ImportarResultado> {
+  let parcelas: AsaasPaymentDetail[]
+  try {
+    parcelas = await getInstallmentPayments(installmentId)
+  } catch (e) {
+    return { ok: false, erro: e instanceof Error ? e.message : 'falha ao buscar o parcelamento no Asaas' }
+  }
+  if (parcelas.length === 0) {
+    return { ok: false, erro: 'parcelamento sem pagamentos no Asaas' }
+  }
+
+  const rep = representante(parcelas)
+  const cli = await clienteOuPlaceholder(rep.customer)
+  const totalBruto = somaCent(parcelas, 'value') ?? 0
+  const totalLiquido = somaCent(parcelas, 'netValue')
+  const { norm } = statusGrupo(parcelas)
+  const pago = rep.clientPaymentDate || rep.paymentDate || rep.confirmedDate || null
+
+  try {
+    const { row, jaExistia } = await criarInscricaoImportada({
+      curso_slug: BUCKET_AVULSO,
+      nome: cli.nome,
+      email: cli.email,
+      cpf_cnpj: cli.doc,
+      telefone: cli.telefone,
+      billing_type: (rep.billingType as BillingType) ?? 'CREDIT_CARD',
+      valor_centavos: totalBruto,
+      installments: parcelas.length,
+      status: norm as InscricaoRow['status'],
+      asaas_customer_id: rep.customer,
+      asaas_payment_id: rep.id,
+      asaas_invoice_url: rep.invoiceUrl ?? null,
+      valor_liquido_centavos: totalLiquido,
+      taxa_centavos: totalLiquido != null ? totalBruto - totalLiquido : null,
+      due_date: rep.dueDate ?? null,
+      asaas_status: rep.status ?? null,
+      pago_em: pago,
+      como_conheceu: limparDescricao(rep.description),
       is_teste: opts.is_teste ?? false,
     })
     return { ok: true, inscricaoId: row.id, jaExistia }

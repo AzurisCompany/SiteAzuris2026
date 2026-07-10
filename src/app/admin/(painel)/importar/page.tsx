@@ -28,15 +28,18 @@ const BILLING_LABEL: Record<string, string> = {
 }
 
 function Linha({ c }: { c: CobrancaFora }) {
-  const badge = STATUS_BADGE[c.statusNorm] ?? { txt: c.status, cls: 'bg-[var(--azuris-surface)] text-[var(--text-muted)]' }
+  const badge = STATUS_BADGE[c.statusNorm] ?? { txt: c.statusNorm, cls: 'bg-[var(--azuris-surface)] text-[var(--text-muted)]' }
+  const parcelado = c.tipo === 'parcelado'
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--azuris-surface)] px-4 py-3 text-sm">
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{c.clienteNome ?? '— sem cliente'}</span>
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge.cls}`}>{badge.txt}</span>
-          {c.installment && (
-            <span className="rounded-full bg-[var(--azuris-surface)] px-2 py-0.5 text-xs text-[var(--text-muted)]">parcelado</span>
+          {parcelado && (
+            <span className="rounded-full bg-[var(--azuris-cyan)]/12 px-2 py-0.5 text-xs font-semibold text-[var(--azuris-cyan)]">
+              {c.parcelas}x · {c.statusLabel}
+            </span>
           )}
         </div>
         <div className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
@@ -45,17 +48,18 @@ function Linha({ c }: { c: CobrancaFora }) {
         <div className="mt-0.5 text-xs text-[var(--text-muted)]">
           {c.clienteEmail ?? ''}
           {c.clienteDoc ? ` · ${c.clienteDoc}` : ''}
-          {` · fatura ${c.id}`}
+          {parcelado ? ` · parcelamento ${c.importId}` : ` · fatura ${c.importId}`}
         </div>
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right">
           <div className="font-semibold">{brl(c.valorCentavos)}</div>
           <div className="text-xs text-[var(--text-muted)]">
+            {parcelado ? 'total · ' : ''}
             {BILLING_LABEL[c.billingType] ?? c.billingType} · venc. {fmtYmd(c.dueDate)}
           </div>
         </div>
-        <ImportarButton asaasPaymentId={c.id} />
+        <ImportarButton tipo={c.tipo} importId={c.importId} parcelas={c.parcelas} />
       </div>
     </div>
   )
@@ -114,15 +118,17 @@ export default async function ImportarPage() {
           ) : (
             <div className="space-y-2">
               {dados.itens.map((c) => (
-                <Linha key={c.id} c={c} />
+                <Linha key={c.importId} c={c} />
               ))}
             </div>
           )}
 
           <p className="text-xs text-[var(--text-muted)]">
-            ⚠️ Parceladas no cartão aparecem como uma linha por parcela (é assim que o Asaas as representa).
-            Importe as que quiser reconhecer como receita. Para evitar isso no futuro, crie cobranças avulsas
-            pelo <Link href="/admin/cobranca" className="text-[var(--azuris-cyan)] hover:underline">/admin/cobranca</Link>{' '}
+            ℹ️ Parceladas no cartão são <strong>agrupadas por parcelamento</strong> e importadas como
+            <strong> uma venda só</strong> (valor = soma das parcelas). O selo{' '}
+            <span className="font-mono">Nx · P/T pagas</span> mostra quantas parcelas já compensaram. Para
+            evitar cobranças fora do sistema no futuro, crie avulsas pelo{' '}
+            <Link href="/admin/cobranca" className="text-[var(--azuris-cyan)] hover:underline">/admin/cobranca</Link>{' '}
             em vez do painel do Asaas.
           </p>
         </>
