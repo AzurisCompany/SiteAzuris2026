@@ -141,17 +141,17 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
 
   if (confirmado) {
     return (
-      <div className="mt-8 rounded-2xl border border-[var(--accent-emerald)]/40 bg-[var(--accent-emerald)]/10 p-8 text-center">
-        <CheckCircle2 className="mx-auto size-12 text-[var(--accent-emerald)]" />
+      <div className="mt-8 rounded-2xl border border-emerald-300 bg-emerald-50 p-8 text-center">
+        <CheckCircle2 className="mx-auto size-12 text-emerald-700" />
         <h2 className="mt-4 text-2xl font-bold">
           {confirmado.duplicada ? 'Você já está inscrito!' : 'Inscrição confirmada!'}
         </h2>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-slate-700">
           {confirmado.duplicada
             ? 'Já existe uma inscrição com esse e-mail pra esse evento — não precisa fazer de novo.'
             : 'Te esperamos dia 30/07 a partir das 18h30 no IEP (Rua Emiliano Perneta, 174 — Centro, Curitiba).'}
         </p>
-        <p className="mt-3 text-xs text-[var(--text-muted)]">
+        <p className="mt-3 text-xs text-slate-500">
           Sua condição de associado/participante será conferida no credenciamento.
         </p>
       </div>
@@ -159,10 +159,10 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
   }
 
   const campo =
-    'w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--accent-emerald)] focus:outline-none'
+    'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm placeholder:text-slate-400 focus:border-emerald-600 focus:outline-none'
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-6 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+    <form onSubmit={onSubmit} className="mt-8 space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       {/* Seleção de ingresso (estilo Sympla: linhas com preço e prazo) */}
       <div className="space-y-3">
         <h2 className="text-lg font-bold">Escolha uma opção</h2>
@@ -173,10 +173,10 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               key={t.tipo_id}
               className={`flex items-start justify-between gap-4 rounded-xl border-2 p-4 transition-all ${
                 !t.disponivel
-                  ? 'cursor-not-allowed border-[var(--azuris-surface)] bg-[var(--azuris-ink)] opacity-50'
+                  ? 'cursor-not-allowed border-slate-200 bg-slate-50 opacity-60'
                   : ativo
-                    ? 'cursor-pointer border-[var(--accent-emerald)] bg-[var(--accent-emerald)]/5'
-                    : 'cursor-pointer border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                    ? 'cursor-pointer border-emerald-600 bg-emerald-50'
+                    : 'cursor-pointer border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
               <input
@@ -189,8 +189,8 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               />
               <div>
                 <div className="font-bold">{t.nome}</div>
-                {t.descricao && <div className="mt-0.5 text-xs text-[var(--text-muted)]">{t.descricao}</div>}
-                <div className="mt-1 text-xs text-[var(--text-muted)]">
+                {t.descricao && <div className="mt-0.5 text-xs text-slate-500">{t.descricao}</div>}
+                <div className="mt-1 text-xs text-slate-500">
                   {!t.disponivel
                     ? t.motivo === 'esgotado'
                       ? 'Esgotado'
@@ -202,11 +202,11 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               </div>
               <div className="text-right">
                 {t.gratuito ? (
-                  <div className="text-xl font-black text-[var(--accent-emerald)]">Grátis</div>
+                  <div className="text-xl font-black text-emerald-700">Grátis</div>
                 ) : (
                   <>
                     <div className="text-xl font-black">{brl(t.precoPixReais)}</div>
-                    <div className="text-xs text-[var(--text-muted)]">PIX ou cartão em até {t.maxParcelas}x</div>
+                    <div className="text-xs text-slate-500">PIX ou cartão em até {t.maxParcelas}x</div>
                   </>
                 )}
               </div>
@@ -219,16 +219,16 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
       <div className="space-y-4">
         <h2 className="text-lg font-bold">Seus dados</h2>
         <div>
-          <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Nome completo</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">Nome completo</label>
           <input type="text" required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" className={campo} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">E-mail</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">E-mail</label>
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@empresa.com" className={campo} />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Telefone (WhatsApp)</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Telefone (WhatsApp)</label>
             <input
               type="tel"
               required
@@ -243,17 +243,17 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
 
         {gratuito ? (
           <div>
-            <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Sou associado/participante de</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Sou associado/participante de</label>
             <select value={associacao} onChange={(e) => setAssociacao(e.target.value)} className={campo}>
               {ASSOCIACOES.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">A condição será conferida no credenciamento, na entrada do evento.</p>
+            <p className="mt-1 text-xs text-slate-500">A condição será conferida no credenciamento, na entrada do evento.</p>
           </div>
         ) : (
           <div>
-            <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">CPF ou CNPJ</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">CPF ou CNPJ</label>
             <input
               type="text"
               required
@@ -262,7 +262,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               placeholder="000.000.000-00 ou 00.000.000/0000-00"
               className={campo}
             />
-            <p className="mt-1 text-xs text-[var(--text-muted)]">Necessário pra emissão da cobrança.</p>
+            <p className="mt-1 text-xs text-slate-500">Necessário pra emissão da cobrança.</p>
           </div>
         )}
       </div>
@@ -275,20 +275,20 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
             <label
               className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
                 billingType === 'PIX'
-                  ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)]/5'
-                  : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                  ? 'border-emerald-600 bg-emerald-50'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
               <input type="radio" name="billing" value="PIX" checked={billingType === 'PIX'} onChange={() => setBillingType('PIX')} className="sr-only" />
               <div className="font-bold">PIX</div>
               <div className="text-2xl font-black">{brl(sel.precoPixReais)}</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">À vista, aprovação na hora</div>
+              <div className="mt-1 text-xs text-slate-500">À vista, aprovação na hora</div>
             </label>
             <label
               className={`cursor-pointer rounded-xl border-2 p-4 transition-all ${
                 billingType === 'CREDIT_CARD'
-                  ? 'border-[var(--accent-emerald)] bg-[var(--accent-emerald)]/5'
-                  : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                  ? 'border-emerald-600 bg-emerald-50'
+                  : 'border-slate-200 bg-white hover:border-slate-300'
               }`}
             >
               <input
@@ -301,16 +301,16 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               />
               <div className="flex items-center justify-between">
                 <span className="font-bold">Cartão</span>
-                <span className="text-xs text-[var(--text-muted)]">em até {sel.maxParcelas}x</span>
+                <span className="text-xs text-slate-500">em até {sel.maxParcelas}x</span>
               </div>
               <div className="text-2xl font-black">{brl(sel.precoCartaoBaseReais)}</div>
-              <div className="mt-1 text-xs text-[var(--text-muted)]">1x à vista · 2x a {sel.maxParcelas}x com juros do cartão</div>
+              <div className="mt-1 text-xs text-slate-500">1x à vista · 2x a {sel.maxParcelas}x com juros do cartão</div>
             </label>
           </div>
 
           {billingType === 'CREDIT_CARD' && sel.maxParcelas > 1 && (
             <div>
-              <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Parcelas</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Parcelas</label>
               <select value={parcelas} onChange={(e) => setInstallments(Number(e.target.value))} className={campo}>
                 {Array.from({ length: sel.maxParcelas }, (_, idx) => idx + 1).map((n) => {
                   const parcela = valorParcela(sel.precoCartaoBaseReais, n)
@@ -328,20 +328,20 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
         </div>
       )}
 
-      <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
-        <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-4 accent-[var(--accent-emerald)]" />
+      <label className="flex items-start gap-2 text-xs text-slate-700">
+        <input type="checkbox" required checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-4 accent-emerald-600" />
         <span>
           Autorizo o uso dos meus dados pra credenciamento e comunicação sobre este evento (LGPD). Os dados não são
           compartilhados pra fins comerciais.
         </span>
       </label>
 
-      {erro && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>}
+      {erro && <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{erro}</div>}
 
       <button
         type="submit"
         disabled={submitting || !sel?.disponivel}
-        className="w-full rounded-xl bg-[var(--accent-emerald)] px-6 py-4 text-base font-bold text-black shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none"
+        className="w-full rounded-xl bg-emerald-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-emerald-700 transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none"
       >
         {submitting
           ? 'Processando…'
@@ -354,7 +354,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
                 : `Pagar ${brl(sel.precoCartaoBaseReais)} no cartão`}
       </button>
 
-      <p className="text-center text-xs text-[var(--text-muted)]">
+      <p className="text-center text-xs text-slate-500">
         {gratuito ? 'Sem pagamento — sua vaga é confirmada na hora.' : 'Vai abrir o checkout seguro do Asaas pra você finalizar.'}
       </p>
     </form>

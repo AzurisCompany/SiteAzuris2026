@@ -217,13 +217,12 @@ export default async function EventoGuPage() {
             {/* Produtor */}
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-bold">Sobre o produtor</h2>
-              <div className="mt-3 flex items-start gap-4">
+              <div className="mt-3 flex flex-col items-start gap-4 sm:flex-row">
                 {/* eslint-disable-next-line @next/next/no-img-element -- logo SVG local */}
-                <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-12 w-auto shrink-0" />
-                <p className="text-sm text-slate-600">
-                  O <strong>GU Big Data &amp; IA</strong> é o grupo de usuários de dados e inteligência artificial de
-                  Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas.
-                  Realização deste encontro: GU Big Data &amp; IA · Rede Sol · SUCESU Paraná.{' '}
+                <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-10 w-auto max-w-[220px]" />
+                <p className="min-w-0 text-sm text-slate-600">
+                  O <strong>GU Big Data &amp; IA</strong>
+                  {' é o grupo de usuários de dados e inteligência artificial de Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas. Realização deste encontro: GU Big Data & IA · Rede Sol · SUCESU Paraná. '}
                   <a href="https://gubigdata.com.br" className="font-semibold text-emerald-700 hover:underline">
                     gubigdata.com.br
                   </a>

@@ -10,7 +10,8 @@ const HREF = `https://wa.me/${PHONE}?text=${encodeURIComponent(PREFILL)}`;
 
 export function WhatsAppFab() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) return null;
+  // /gubigdata é página de evento da comunidade (cara de marketplace) — sem widgets Azuris.
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/gubigdata")) return null;
 
   const onClick = () => {
     gaEvent("generate_lead", { method: "whatsapp", source: window.location.pathname });
