@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     },
     customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
     asaas: {
-      billingType: body.billing_type,
+      billingType: body.billing_type === 'CREDIT_CARD' ? 'CREDIT_CARD' : 'PIX',
       valueReais: valorCobradoReais,
       description: `Lakehouse: Pipeline na Prática — ${lote === 'lote1' ? 'Lote 1' : 'Lote 2'}`,
       externalReference: `lakehouse-comunidade:${lote}`,

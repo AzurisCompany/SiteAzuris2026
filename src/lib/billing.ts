@@ -7,6 +7,7 @@ export const BILLING_LABEL: Record<BillingType, string> = {
   CREDIT_CARD: 'Cartão',
   BOLETO: 'Boleto',
   UNDEFINED: 'Cliente escolhe',
+  GRATIS: 'Grátis',
 }
 
 /** Rótulo amigável de uma forma de pagamento (tolerante a valor cru do banco). */
@@ -22,4 +23,5 @@ export const BILLING_OPCOES: ReadonlyArray<readonly [string, string]> = [
   ['CREDIT_CARD', 'Cartão'],
   ['BOLETO', 'Boleto'],
   ['UNDEFINED', 'Cliente escolhe'],
+  ['GRATIS', 'Grátis'],
 ]

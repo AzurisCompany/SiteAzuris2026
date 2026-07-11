@@ -33,7 +33,8 @@ export const sql = new Proxy(((..._args: unknown[]) => {}) as unknown as NeonQue
 
 // PIX/CREDIT_CARD/BOLETO = método fixo; UNDEFINED = cliente escolhe entre os
 // meios ativos na conta Asaas (usado só nas cobranças avulsas com 2+ meios).
-export type BillingType = 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
+// GRATIS = inscrição sem cobrança (ingresso gratuito) — nunca vai pro Asaas.
+export type BillingType = 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED' | 'GRATIS'
 export type InscricaoStatus = 'pending' | 'paid' | 'overdue' | 'cancelled' | 'refunded'
 export type Lote = 'lote1' | 'lote2' | 'unico'
 
@@ -276,6 +277,38 @@ export async function buscarCobrancaDuplicada(k: ChaveDedupe): Promise<Inscricao
      LIMIT 1
   `) as InscricaoRow[]
   return rows[0] ?? null
+}
+
+/**
+ * Dedupe do fluxo GRATUITO (sem CPF, sem Asaas): a mesma pessoa (email) inscrita
+ * no mesmo produto+tipo e não-cancelada. Sem janela — inscrição grátis é única.
+ */
+export async function buscarInscricaoGratuita(
+  curso_slug: string,
+  email: string,
+  tipo_ingresso: string | null
+): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    SELECT *
+      FROM inscricoes
+     WHERE curso_slug = ${curso_slug}
+       AND LOWER(email) = ${email.toLowerCase()}
+       AND tipo_ingresso IS NOT DISTINCT FROM ${tipo_ingresso ?? null}
+       AND billing_type = 'GRATIS'
+       AND status <> 'cancelled'
+     ORDER BY created_at DESC
+     LIMIT 1
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/** Confirma uma inscrição gratuita (pending → paid, sem Asaas). */
+export async function confirmarInscricaoGratuita(id: number): Promise<void> {
+  await sql`
+    UPDATE inscricoes
+       SET status = 'paid', pago_em = NOW(), paid_at = NOW(), updated_at = NOW()
+     WHERE id = ${id}
+  `
 }
 
 /** Vincula os dados do Asaas à inscrição depois que a cobrança foi criada. */

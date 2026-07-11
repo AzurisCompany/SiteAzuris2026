@@ -12,7 +12,7 @@ import {
   cancelarAssinaturaRow,
   type BillingType,
 } from '@/lib/db'
-import { findOrCreateCustomer, createSubscription, cancelSubscription, type AsaasCycle } from '@/lib/asaas'
+import { findOrCreateCustomer, createSubscription, cancelSubscription, type AsaasCycle, type AsaasBillingType } from '@/lib/asaas'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 const CICLOS = new Set<AsaasCycle>(['WEEKLY', 'BIWEEKLY', 'MONTHLY', 'QUARTERLY', 'SEMIANNUALLY', 'YEARLY'])
 // Recorrência sem cartão tokenizado: PIX, boleto ou cliente escolhe.
-const MEIOS = new Set<BillingType>(['PIX', 'BOLETO', 'UNDEFINED'])
+const MEIOS = new Set<AsaasBillingType>(['PIX', 'BOLETO', 'UNDEFINED'])
 
 interface CriarBody {
   action?: string
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Valor mínimo é R$ ${VALOR_MINIMO_REAIS},00` }, { status: 400 })
   }
   if (!b.cycle || !CICLOS.has(b.cycle as AsaasCycle)) return NextResponse.json({ error: 'Frequência inválida' }, { status: 400 })
-  if (!b.billing_type || !MEIOS.has(b.billing_type as BillingType)) {
+  if (!b.billing_type || !MEIOS.has(b.billing_type as AsaasBillingType)) {
     return NextResponse.json({ error: 'Meio inválido pra recorrência (use PIX, boleto ou "cliente escolhe")' }, { status: 400 })
   }
   if (!b.descricao || b.descricao.trim().length < 3) return NextResponse.json({ error: 'Descrição inválida' }, { status: 400 })
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
   const valorReais = Number(b.valor_reais.toFixed(2))
   const valorCentavos = Math.round(valorReais * 100)
   const cycle = b.cycle as AsaasCycle
-  const billing_type = b.billing_type as BillingType
+  const billing_type = b.billing_type as AsaasBillingType
 
   // 1. Registra a assinatura antes do Asaas.
   let assinId: number

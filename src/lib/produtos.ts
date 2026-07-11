@@ -40,6 +40,23 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     voltarUrl: 'https://dssbr.com.br/blog/pre-venda-2026/',
     voltarLabel: '← voltar pro DSS 2026',
   },
+  // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
+  // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
+  // no admin (geral R$30 / associado grátis); este registro é o fallback e a config.
+  'gubigdata-2026-07': {
+    slug: 'gubigdata-2026-07',
+    nome: 'Encontro Presencial GU BigData & IA — 30 de julho',
+    descricao: '30 de julho · 18h30 · IEP, Curitiba',
+    precoCentavos: 3000, // R$ 30,00 — ingresso Geral (fallback se não houver tipos)
+    precoDeVendaCentavos: 0, // sem âncora — evento de comunidade, preço é o preço
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Ingresso — Encontro GU BigData & IA 30/07 (IEP, Curitiba)',
+    voltarUrl:
+      'https://gubigdata.com.br/2026/07/30/encontro-presencial-30-de-julho-conhecimento-como-ativo-e-ia-como-infraestrutura/',
+    voltarLabel: '← voltar pro site do GU BigData',
+  },
 }
 
 export function getProduto(slug: string): ProdutoConfig {

@@ -98,3 +98,14 @@ CREATE TABLE IF NOT EXISTS assinaturas (
   created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Janela de vendas e lotação por tipo de ingresso (eventos presenciais, ex.: GU BigData).
+ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS vendas_ate DATE;     -- última data de venda (inclusive); NULL = sem prazo
+ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS limite_qtd INTEGER;  -- lotação do tipo (paid+pending, sem is_teste); NULL = sem limite
+
+-- Seed do encontro GU BigData 30/07 (idempotente; NÃO sobrescreve edições do admin).
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('gubigdata-2026-07', 'geral', 'Geral', 'PIX ou cartão em até 3x', 3000, 3, 0, DATE '2026-07-29', NULL),
+  ('gubigdata-2026-07', 'associado', 'Associado IEP, GU BigData e Participante DSS', 'Gratuito — confirmação na entrada', 0, 1, 1, DATE '2026-07-29', NULL)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;

@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { type BillingType } from '@/lib/db'
+import { type AsaasBillingType } from '@/lib/asaas'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
@@ -42,8 +43,8 @@ function validate(b: RequestBody): string | null {
   if (typeof b.valor_reais !== 'number' || !Number.isFinite(b.valor_reais)) return 'Valor inválido'
   if (b.valor_reais < VALOR_MINIMO_REAIS) return `Valor mínimo é R$ ${VALOR_MINIMO_REAIS},00`
 
-  const METODOS: BillingType[] = ['PIX', 'CREDIT_CARD', 'BOLETO', 'UNDEFINED']
-  if (!b.billing_type || !METODOS.includes(b.billing_type)) return 'Forma de pagamento inválida'
+  const METODOS: AsaasBillingType[] = ['PIX', 'CREDIT_CARD', 'BOLETO', 'UNDEFINED']
+  if (!b.billing_type || !METODOS.includes(b.billing_type as AsaasBillingType)) return 'Forma de pagamento inválida'
   if (b.billing_type === 'CREDIT_CARD') {
     const n = b.installments ?? 1
     if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS) return `Parcelamento inválido (1 a ${MAX_PARCELAS})`
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
-  const billing_type = body.billing_type as BillingType
+  const billing_type = body.billing_type as AsaasBillingType
   const valorBaseReais = Number(body.valor_reais!.toFixed(2))
   const installments =
     billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), MAX_PARCELAS) : 1

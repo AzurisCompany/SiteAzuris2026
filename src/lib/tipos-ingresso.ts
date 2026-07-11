@@ -11,13 +11,22 @@ export interface TipoIngresso {
   tipo_id: string
   nome: string
   descricao: string | null
-  preco_centavos: number
+  preco_centavos: number // 0 = ingresso gratuito (só cadastro, sem Asaas)
   preco_de_centavos: number
   pix_desconto_pct: number // % (10 = 10%)
   cartao_acrescimo_pct: number // %
   max_parcelas: number
   ativo: boolean
   ordem: number
+  vendas_ate: string | null // 'YYYY-MM-DD' inclusive; null = sem prazo
+  limite_qtd: number | null // lotação (paid+pending, sem teste); null = sem limite
+}
+
+/** DATE do Postgres pode vir como string ou Date, dependendo do driver. */
+function isoDate(v: unknown): string | null {
+  if (v == null) return null
+  if (v instanceof Date) return v.toISOString().slice(0, 10)
+  return String(v).slice(0, 10)
 }
 
 function mapRow(r: Record<string, unknown>): TipoIngresso {
@@ -34,6 +43,8 @@ function mapRow(r: Record<string, unknown>): TipoIngresso {
     max_parcelas: Number(r.max_parcelas),
     ativo: Boolean(r.ativo),
     ordem: Number(r.ordem),
+    vendas_ate: isoDate(r.vendas_ate),
+    limite_qtd: r.limite_qtd == null ? null : Number(r.limite_qtd),
   }
 }
 
@@ -79,6 +90,8 @@ export interface UpsertTipoInput {
   max_parcelas?: number
   ativo?: boolean
   ordem?: number
+  vendas_ate?: string | null
+  limite_qtd?: number | null
 }
 
 /** Cria ou atualiza um tipo (chave lógica: produto_slug + tipo_id). */
@@ -86,12 +99,14 @@ export async function upsertTipo(i: UpsertTipoInput): Promise<TipoIngresso> {
   const rows = (await sql`
     INSERT INTO tipos_ingresso (
       produto_slug, tipo_id, nome, descricao, preco_centavos, preco_de_centavos,
-      pix_desconto_pct, cartao_acrescimo_pct, max_parcelas, ativo, ordem
+      pix_desconto_pct, cartao_acrescimo_pct, max_parcelas, ativo, ordem,
+      vendas_ate, limite_qtd
     ) VALUES (
       ${i.produto_slug}, ${i.tipo_id}, ${i.nome}, ${i.descricao ?? null},
       ${i.preco_centavos}, ${i.preco_de_centavos ?? 0},
       ${i.pix_desconto_pct ?? 0}, ${i.cartao_acrescimo_pct ?? 0},
-      ${i.max_parcelas ?? 1}, ${i.ativo ?? true}, ${i.ordem ?? 0}
+      ${i.max_parcelas ?? 1}, ${i.ativo ?? true}, ${i.ordem ?? 0},
+      ${i.vendas_ate ?? null}, ${i.limite_qtd ?? null}
     )
     ON CONFLICT (produto_slug, tipo_id) DO UPDATE SET
       nome = EXCLUDED.nome,
@@ -103,6 +118,8 @@ export async function upsertTipo(i: UpsertTipoInput): Promise<TipoIngresso> {
       max_parcelas = EXCLUDED.max_parcelas,
       ativo = EXCLUDED.ativo,
       ordem = EXCLUDED.ordem,
+      vendas_ate = EXCLUDED.vendas_ate,
+      limite_qtd = EXCLUDED.limite_qtd,
       updated_at = NOW()
     RETURNING *
   `) as Record<string, unknown>[]
@@ -111,6 +128,46 @@ export async function upsertTipo(i: UpsertTipoInput): Promise<TipoIngresso> {
 
 export async function deletarTipo(id: number): Promise<void> {
   await sql`DELETE FROM tipos_ingresso WHERE id = ${id}`
+}
+
+// --- Gratuidade e disponibilidade (janela de vendas + lotação) ---
+
+/** Ingresso gratuito: só cadastro, sem cobrança no Asaas. */
+export function ehGratuito(t: TipoIngresso): boolean {
+  return t.preco_centavos === 0
+}
+
+export type MotivoIndisponivel = 'encerrado' | 'esgotado'
+
+/**
+ * Disponibilidade de um tipo pra venda (regra PURA — testável).
+ * `hoje` em YYYY-MM-DD (BRT); `inscritos` = paid+pending não-teste do tipo.
+ */
+export function disponibilidadeDoTipo(
+  t: Pick<TipoIngresso, 'ativo' | 'vendas_ate' | 'limite_qtd'>,
+  hoje: string,
+  inscritos: number
+): { disponivel: boolean; motivo: MotivoIndisponivel | null } {
+  if (!t.ativo) return { disponivel: false, motivo: 'encerrado' }
+  if (t.vendas_ate && hoje > t.vendas_ate) return { disponivel: false, motivo: 'encerrado' }
+  if (t.limite_qtd != null && inscritos >= t.limite_qtd) return { disponivel: false, motivo: 'esgotado' }
+  return { disponivel: true, motivo: null }
+}
+
+/** Inscritos (paid+pending, sem teste) por tipo_ingresso de um produto — pra lotação. */
+export async function contarInscritosPorTipo(produto_slug: string): Promise<Record<string, number>> {
+  const rows = (await sql`
+    SELECT tipo_ingresso, COUNT(*)::int AS qtd
+    FROM inscricoes
+    WHERE curso_slug = ${produto_slug}
+      AND status IN ('paid', 'pending')
+      AND NOT is_teste
+      AND tipo_ingresso IS NOT NULL
+    GROUP BY tipo_ingresso
+  `) as Array<{ tipo_ingresso: string; qtd: number }>
+  const m: Record<string, number> = {}
+  for (const r of rows) m[r.tipo_ingresso] = Number(r.qtd)
+  return m
 }
 
 // --- Cálculo de preço (server-side, mesma regra de lib/produtos.ts) ---
