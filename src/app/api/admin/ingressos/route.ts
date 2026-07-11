@@ -43,8 +43,14 @@ export async function POST(request: Request) {
   const tipo_id = (b.tipo_id && b.tipo_id.trim() ? slugify(b.tipo_id) : slugify(b.nome))
   if (!tipo_id) return NextResponse.json({ error: 'Não consegui gerar o identificador do tipo' }, { status: 400 })
 
+  // R$ 0 = ingresso gratuito (só cadastro, sem Asaas); pago tem mínimo de R$ 1,00.
   const preco = Number(b.preco_centavos)
-  if (!Number.isInteger(preco) || preco < 100) return NextResponse.json({ error: 'Preço inválido (mínimo R$ 1,00)' }, { status: 400 })
+  if (!Number.isInteger(preco) || (preco !== 0 && preco < 100))
+    return NextResponse.json({ error: 'Preço inválido (R$ 0,00 = grátis; pago tem mínimo R$ 1,00)' }, { status: 400 })
+
+  const vendas_ate = typeof b.vendas_ate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.vendas_ate) ? b.vendas_ate : null
+  const limiteNum = Number(b.limite_qtd)
+  const limite_qtd = Number.isInteger(limiteNum) && limiteNum >= 1 ? limiteNum : null
 
   const num = (v: unknown, def = 0) => {
     const n = Number(v)
@@ -64,6 +70,8 @@ export async function POST(request: Request) {
       max_parcelas: Math.min(Math.max(Math.round(num(b.max_parcelas, 1)), 1), MAX_PARCELAS),
       ativo: b.ativo !== false,
       ordem: Math.round(num(b.ordem)),
+      vendas_ate,
+      limite_qtd,
     })
     return NextResponse.json({ ok: true, tipo })
   } catch (e) {

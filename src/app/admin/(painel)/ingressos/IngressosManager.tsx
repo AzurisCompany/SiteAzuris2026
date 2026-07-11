@@ -33,6 +33,8 @@ interface FormState {
   max_parcelas: number
   ativo: boolean
   ordem: number
+  vendas_ate: string // YYYY-MM-DD ou '' (sem prazo)
+  limiteRaw: string // lotação; '' = sem limite
 }
 
 function formVazio(produto_slug: string): FormState {
@@ -48,6 +50,8 @@ function formVazio(produto_slug: string): FormState {
     max_parcelas: 3,
     ativo: true,
     ordem: 0,
+    vendas_ate: '',
+    limiteRaw: '',
   }
 }
 
@@ -58,13 +62,15 @@ function tipoParaForm(t: TipoIngresso): FormState {
     tipo_id: t.tipo_id,
     nome: t.nome,
     descricao: t.descricao ?? '',
-    precoRaw: centavosParaInput(t.preco_centavos),
+    precoRaw: centavosParaInput(t.preco_centavos) || '0,00',
     precoDeRaw: centavosParaInput(t.preco_de_centavos),
     pix_desconto_pct: t.pix_desconto_pct,
     cartao_acrescimo_pct: t.cartao_acrescimo_pct,
     max_parcelas: t.max_parcelas,
     ativo: t.ativo,
     ordem: t.ordem,
+    vendas_ate: t.vendas_ate ?? '',
+    limiteRaw: t.limite_qtd == null ? '' : String(t.limite_qtd),
   }
 }
 
@@ -114,8 +120,9 @@ export default function IngressosManager({
   async function salvar(e: React.FormEvent) {
     e.preventDefault()
     setErro(null)
-    if (precoCentavos < 100) {
-      setErro('Preço inválido (mínimo R$ 1,00)')
+    // R$ 0,00 = ingresso gratuito (válido); pago tem mínimo R$ 1,00.
+    if (precoCentavos !== 0 && precoCentavos < 100) {
+      setErro('Preço inválido (R$ 0,00 = grátis; pago tem mínimo R$ 1,00)')
       return
     }
     setSalvando(true)
@@ -135,6 +142,8 @@ export default function IngressosManager({
           max_parcelas: form.max_parcelas,
           ativo: form.ativo,
           ordem: form.ordem,
+          vendas_ate: form.vendas_ate || null,
+          limite_qtd: form.limiteRaw.trim() ? Number(form.limiteRaw) : null,
         }),
       })
       const data = (await res.json()) as { error?: string }
@@ -227,10 +236,24 @@ export default function IngressosManager({
           <div>
             <label className={rotulo}>Preço cobrado (R$)</label>
             <input value={form.precoRaw} onChange={(e) => setForm({ ...form, precoRaw: e.target.value })} required inputMode="decimal" className={campo} placeholder="470,00" />
+            <p className="mt-1 text-[10px] text-[var(--text-muted)]">0,00 = ingresso gratuito (só cadastro, sem cobrança)</p>
           </div>
           <div>
             <label className={rotulo}>Âncora “de” riscada (R$, opcional)</label>
             <input value={form.precoDeRaw} onChange={(e) => setForm({ ...form, precoDeRaw: e.target.value })} inputMode="decimal" className={campo} placeholder="820,00 — deixe vazio pra não mostrar" />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={rotulo}>Vendas até (opcional)</label>
+            <input type="date" value={form.vendas_ate} onChange={(e) => setForm({ ...form, vendas_ate: e.target.value })} className={campo} />
+            <p className="mt-1 text-[10px] text-[var(--text-muted)]">último dia de venda (inclusive); vazio = sem prazo</p>
+          </div>
+          <div>
+            <label className={rotulo}>Limite de vagas (opcional)</label>
+            <input type="number" min={1} value={form.limiteRaw} onChange={(e) => setForm({ ...form, limiteRaw: e.target.value })} className={campo} placeholder="vazio = sem limite" />
+            <p className="mt-1 text-[10px] text-[var(--text-muted)]">conta pagas + pendentes (sem testes); atingiu → “esgotado”</p>
           </div>
         </div>
 
@@ -259,13 +282,17 @@ export default function IngressosManager({
           Ativo (aparece no checkout)
         </label>
 
-        {precoCentavos > 0 && (
+        {precoCentavos > 0 ? (
           <div className="rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-4 py-3 text-xs text-[var(--text-secondary)]">
             Preview: PIX <strong className="text-[var(--accent-emerald)]">{brl(precoPix)}</strong> · cartão base{' '}
             <strong>{brl(precoCartao)}</strong> em até {form.max_parcelas}x
             {parseCentavos(form.precoDeRaw) > precoCentavos && <> · âncora <span className="line-through">{brl(parseCentavos(form.precoDeRaw))}</span></>}
           </div>
-        )}
+        ) : form.precoRaw.trim() ? (
+          <div className="rounded-lg border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 px-4 py-3 text-xs text-[var(--accent-emerald)]">
+            Preview: ingresso <strong>GRATUITO</strong> — o checkout só cadastra (nome/e-mail/telefone), sem cobrança no Asaas.
+          </div>
+        ) : null}
 
         {erro && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>}
 
@@ -307,13 +334,26 @@ export default function IngressosManager({
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          {brl(t.preco_centavos)}
-                          {t.preco_de_centavos > t.preco_centavos && (
-                            <span className="ml-1 text-xs text-[var(--text-muted)] line-through">{brl(t.preco_de_centavos)}</span>
+                          {t.preco_centavos === 0 ? (
+                            <span className="font-semibold text-[var(--accent-emerald)]">Grátis</span>
+                          ) : (
+                            <>
+                              {brl(t.preco_centavos)}
+                              {t.preco_de_centavos > t.preco_centavos && (
+                                <span className="ml-1 text-xs text-[var(--text-muted)] line-through">{brl(t.preco_de_centavos)}</span>
+                              )}
+                            </>
+                          )}
+                          {(t.vendas_ate || t.limite_qtd != null) && (
+                            <div className="text-[10px] text-[var(--text-muted)]">
+                              {t.vendas_ate && <>até {t.vendas_ate.split('-').reverse().join('/')}</>}
+                              {t.vendas_ate && t.limite_qtd != null && ' · '}
+                              {t.limite_qtd != null && <>{t.limite_qtd} vagas</>}
+                            </div>
                           )}
                         </td>
                         <td className="px-4 py-3 text-xs text-[var(--text-secondary)]">
-                          {brl(pix)} / {brl(cartao)}
+                          {t.preco_centavos === 0 ? '—' : <>{brl(pix)} / {brl(cartao)}</>}
                         </td>
                         <td className="px-4 py-3 text-[var(--text-secondary)]">{t.max_parcelas}x</td>
                         <td className="px-4 py-3">

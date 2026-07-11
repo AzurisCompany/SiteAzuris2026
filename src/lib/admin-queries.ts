@@ -4,6 +4,7 @@ import { sql, type InscricaoRow } from '@/lib/db'
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
+  'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
   proposta: 'Proposta customizada',
   assinatura: 'Assinatura',
   'avulso-asaas': 'Avulso (Asaas)',
@@ -16,6 +17,7 @@ export function labelProduto(slug: string): string {
 export const PRODUTO_TAB: Record<string, string> = {
   'dss-2026': 'Ingressos DSS',
   'lakehouse-comunidade': 'Curso',
+  'gubigdata-2026-07': 'GU BigData',
   proposta: 'Propostas',
   assinatura: 'Assinaturas',
   'avulso-asaas': 'Avulsos',
