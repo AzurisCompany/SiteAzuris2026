@@ -68,14 +68,14 @@ export default async function InscricaoGuPage({
 
   return (
     <main className="min-h-screen bg-[#F4F5F7] text-slate-900">
-      {/* Top bar igual à página do evento */}
-      <header className="border-b border-slate-200 bg-white">
+      {/* Top bar igual à página do evento — azul-marinho do GU (logo tem traços brancos) */}
+      <header className="bg-[#0A0F1C]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <a href="/gubigdata" className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element -- SVG local, não passa pelo otimizador */}
             <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-9 w-auto" />
           </a>
-          <span className="text-xs font-medium text-slate-500">Eventos da comunidade</span>
+          <span className="text-xs font-medium text-slate-300">Eventos da comunidade</span>
         </div>
       </header>
 

@@ -71,14 +71,15 @@ export default async function EventoGuPage() {
 
   return (
     <main className="min-h-screen bg-[#F4F5F7] text-slate-900">
-      {/* Top bar do "marketplace" da comunidade */}
-      <header className="border-b border-slate-200 bg-white">
+      {/* Top bar do "marketplace" da comunidade — azul-marinho do site do GU
+          (#0A0F1C): o logo tem traços brancos e some em fundo claro. */}
+      <header className="bg-[#0A0F1C]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <a href="https://gubigdata.com.br" className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element -- SVG local, não passa pelo otimizador */}
             <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-9 w-auto" />
           </a>
-          <span className="text-xs font-medium text-slate-500">Eventos da comunidade</span>
+          <span className="text-xs font-medium text-slate-300">Eventos da comunidade</span>
         </div>
       </header>
 
@@ -218,8 +219,10 @@ export default async function EventoGuPage() {
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-bold">Sobre o produtor</h2>
               <div className="mt-3 flex flex-col items-start gap-4 sm:flex-row">
-                {/* eslint-disable-next-line @next/next/no-img-element -- logo SVG local */}
-                <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-10 w-auto max-w-[220px]" />
+                <span className="inline-flex rounded-lg bg-[#0A0F1C] px-4 py-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- logo SVG local */}
+                  <img src="/gubigdata/logo-gu-bigdata.svg" alt="GU BigData & IA" className="h-9 w-auto max-w-[200px]" />
+                </span>
                 <p className="min-w-0 text-sm text-slate-600">
                   O <strong>GU Big Data &amp; IA</strong>
                   {' é o grupo de usuários de dados e inteligência artificial de Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas. Realização deste encontro: GU Big Data & IA · Rede Sol · SUCESU Paraná. '}
