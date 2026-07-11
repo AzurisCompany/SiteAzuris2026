@@ -35,7 +35,14 @@ function dataBR(iso: string): string {
   return `${d}/${m}`
 }
 
-export default async function InscricaoGuPage() {
+export default async function InscricaoGuPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>
+}) {
+  const sp = await searchParams
+  const tipoPre = sp.tipo || null
+
   // Tipos ativos + disponibilidade (janela de vendas / lotação), tolerante a
   // banco sem migração — nesse caso a página mostra "inscrições em breve".
   let tipoOptions: TipoGuOption[] = []
@@ -114,7 +121,7 @@ export default async function InscricaoGuPage() {
         </div>
 
         {tipoOptions.length > 0 ? (
-          <InscricaoGuForm tipos={tipoOptions} />
+          <InscricaoGuForm tipos={tipoOptions} defaultTipo={tipoPre} />
         ) : (
           <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6 text-sm text-[var(--text-secondary)]">
             As inscrições abrem em breve. Enquanto isso, acompanha o{' '}

@@ -47,9 +47,14 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoGuForm({ tipos }: { tipos: TipoGuOption[] }) {
-  const primeiroDisponivel = useMemo(() => Math.max(0, tipos.findIndex((t) => t.disponivel)), [tipos])
-  const [tipoIdx, setTipoIdx] = useState(primeiroDisponivel)
+export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuOption[]; defaultTipo?: string | null }) {
+  // Pré-seleção vinda da página do evento (?tipo=...), senão o primeiro disponível.
+  const inicial = useMemo(() => {
+    const pre = tipos.findIndex((t) => t.tipo_id === defaultTipo && t.disponivel)
+    if (pre >= 0) return pre
+    return Math.max(0, tipos.findIndex((t) => t.disponivel))
+  }, [tipos, defaultTipo])
+  const [tipoIdx, setTipoIdx] = useState(inicial)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')

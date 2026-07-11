@@ -53,9 +53,8 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     cartaoAcrescimoPct: 0,
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
     asaasDescricao: 'Ingresso — Encontro GU BigData & IA 30/07 (IEP, Curitiba)',
-    voltarUrl:
-      'https://gubigdata.com.br/2026/07/30/encontro-presencial-30-de-julho-conhecimento-como-ativo-e-ia-como-infraestrutura/',
-    voltarLabel: '← voltar pro site do GU BigData',
+    voltarUrl: '/gubigdata',
+    voltarLabel: '← voltar pra página do evento',
   },
 }
 
