@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { ArrowUpRight, Heart } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, CalendarDays, Heart } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/PageHeader";
@@ -110,6 +111,33 @@ export default function ComunidadePage() {
         />
 
         <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+          {/* Próximo encontro presencial do GU BigData */}
+          <Link
+            href="/gubigdata/inscricao"
+            className="group mb-10 flex flex-col gap-4 rounded-2xl border border-emerald-accent/40 bg-emerald-accent/5 p-6 transition-colors hover:border-emerald-accent sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-start gap-4">
+              <CalendarDays className="mt-1 size-6 shrink-0 text-emerald-accent" />
+              <div>
+                <div className="text-xs uppercase tracking-wider text-emerald-accent/80">
+                  Próximo encontro presencial · GU BigData &amp; IA
+                </div>
+                <h2 className="mt-1 text-xl font-semibold">
+                  30 de julho, 18h30 — conhecimento como ativo e IA como
+                  infraestrutura corporativa
+                </h2>
+                <p className="mt-1 text-sm text-foam/70">
+                  IEP, Curitiba · palestras de Tatiana Cruz e Maicon Wendhausem ·
+                  gratuito para associados, R$ 30 no geral.
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg bg-emerald-accent px-4 py-2.5 text-sm font-semibold text-black sm:self-center">
+              Inscreva-se
+              <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </span>
+          </Link>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {INITIATIVES.map((i) => (
               <article
