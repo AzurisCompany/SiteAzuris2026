@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import { gaEvent } from '@/lib/gtag'
+import { maskPhone } from '@/lib/format'
 
 const CAMPO =
   'w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--azuris-cyan)] focus:outline-none'
@@ -10,6 +11,7 @@ const CAMPO =
 export default function ReservaForm() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
+  const [telefone, setTelefone] = useState('')
   const [consent, setConsent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -39,6 +41,7 @@ export default function ReservaForm() {
         body: JSON.stringify({
           nome: nome.trim(),
           email: email.trim().toLowerCase(),
+          telefone,
           tipo: 'reserva',
           consentimento: consent,
           utm,
@@ -103,7 +106,23 @@ export default function ReservaForm() {
           placeholder="voce@empresa.com"
           className={CAMPO}
         />
-        <p className="mt-1 text-xs text-[var(--text-muted)]">É por aqui que o aviso de abertura chega. Só isso.</p>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">É por aqui que o aviso de abertura chega.</p>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">WhatsApp</label>
+        <input
+          type="tel"
+          required
+          inputMode="numeric"
+          value={telefone}
+          onChange={(e) => setTelefone(maskPhone(e.target.value))}
+          placeholder="(41) 99999-9999"
+          className={CAMPO}
+        />
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Pra gente conversar e entender o que você já sabe — o preparatório está sendo montado em cima disso.
+        </p>
       </div>
 
       <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
@@ -115,7 +134,8 @@ export default function ReservaForm() {
           className="mt-0.5 size-4 accent-[var(--azuris-cyan)]"
         />
         <span>
-          Autorizo a Azuris a usar meu e-mail pra me avisar sobre o curso preparatório (LGPD). Sem repasse pra terceiros.
+          Autorizo a Azuris a usar meu e-mail e meu WhatsApp pra falar comigo sobre o curso preparatório (LGPD). Sem
+          repasse pra terceiros.
         </span>
       </label>
 

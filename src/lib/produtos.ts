@@ -63,6 +63,8 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   // Lista de espera do curso preparatório (Python/SQL/Docker) — pré-requisito do
   // Lakehouse. Reserva de interesse: NUNCA gera cobrança, só captura o lead pelo
   // tipo gratuito 'reserva'. asaasDescricao só existe pra satisfazer o registry.
+  // Telefone é exigido aqui não pra cobrar, mas pra conversar: a ementa do
+  // preparatório é montada a partir do que esses leads já sabem.
   'preparatorio-dados': {
     slug: 'preparatorio-dados',
     nome: 'Curso Preparatório de Dados — reserva de interesse',
@@ -75,7 +77,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     asaasDescricao: 'Reserva — Curso Preparatório de Dados (sem cobrança)',
     voltarUrl: '/lakehouse-comunidade',
     voltarLabel: '← voltar pro curso Lakehouse',
-    telefoneObrigatorio: false,
+    telefoneObrigatorio: true,
   },
 }
 

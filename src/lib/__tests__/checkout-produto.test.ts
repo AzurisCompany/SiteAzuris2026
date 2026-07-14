@@ -40,7 +40,13 @@ const TIPO_RESERVA: TipoIngresso = {
   limite_qtd: null,
 }
 
-const body = { nome: 'Fulano de Tal', email: 'Fulano@Exemplo.com', tipo: 'reserva', consentimento: true }
+const body = {
+  nome: 'Fulano de Tal',
+  email: 'Fulano@Exemplo.com',
+  telefone: '41999998888',
+  tipo: 'reserva',
+  consentimento: true,
+}
 
 describe('processarCheckout — reserva do preparatório (gratuito)', () => {
   beforeEach(() => {
@@ -50,7 +56,7 @@ describe('processarCheckout — reserva do preparatório (gratuito)', () => {
     criarInscricaoPendente.mockResolvedValue({ id: 42 })
   })
 
-  it('cria o lead sem CPF, sem telefone e sem Asaas', async () => {
+  it('cria o lead sem CPF e sem Asaas, guardando o WhatsApp', async () => {
     const r = await processarCheckout('preparatorio-dados', body)
 
     expect(r).toEqual({ status: 200, body: { ok: true, gratuito: true } })
@@ -62,7 +68,7 @@ describe('processarCheckout — reserva do preparatório (gratuito)', () => {
       billing_type: 'GRATIS',
       valor_centavos: 0,
       cpf_cnpj: '',
-      telefone: null,
+      telefone: '41999998888',
       email: 'fulano@exemplo.com', // normalizado em minúsculas
       consentimento_lgpd: true,
     })
@@ -95,17 +101,16 @@ describe('processarCheckout — reserva do preparatório (gratuito)', () => {
     expect(criarInscricaoPendente).not.toHaveBeenCalled()
   })
 
-  it('aceita telefone quando vem, mas rejeita telefone malformado', async () => {
-    await processarCheckout('preparatorio-dados', { ...body, telefone: '41999998888' })
-    expect(criarInscricaoPendente.mock.calls[0][0]).toMatchObject({ telefone: '41999998888' })
-
+  it('exige o WhatsApp — sem ele ou malformado, recusa', async () => {
+    expect(await processarCheckout('preparatorio-dados', { ...body, telefone: undefined })).toMatchObject({ status: 400 })
     expect(await processarCheckout('preparatorio-dados', { ...body, telefone: '123' })).toMatchObject({ status: 400 })
+    expect(criarInscricaoPendente).not.toHaveBeenCalled()
   })
 
   it('produto que exige telefone continua rejeitando cadastro sem telefone', async () => {
     getTipo.mockResolvedValue({ ...TIPO_RESERVA, produto_slug: 'gubigdata-2026-07', tipo_id: 'associado' })
 
-    const r = await processarCheckout('gubigdata-2026-07', { ...body, tipo: 'associado' })
+    const r = await processarCheckout('gubigdata-2026-07', { ...body, tipo: 'associado', telefone: undefined })
 
     expect(r.status).toBe(400)
     expect(criarInscricaoPendente).not.toHaveBeenCalled()

@@ -64,7 +64,8 @@ export default async function ReservaPreparatorioPage() {
             <li className="flex items-start gap-3">
               <CalendarClock className="mt-0.5 size-4 shrink-0 text-[var(--azuris-cyan)]" />
               <span>
-                <strong>Você é avisado primeiro na abertura</strong>, por e-mail, antes de qualquer divulgação aberta.
+                <strong>Você é avisado primeiro na abertura</strong>, por e-mail ou WhatsApp, antes de qualquer
+                divulgação aberta.
               </span>
             </li>
             <li className="flex items-start gap-3">
@@ -77,7 +78,8 @@ export default async function ReservaPreparatorioPage() {
 
           <p className="mt-5 border-t border-[var(--azuris-surface)] pt-4 text-xs text-[var(--text-muted)]">
             Sendo honesto: o preparatório ainda está sendo montado e não tem data. A reserva serve pra dimensionar a
-            turma e definir o conteúdo. Se nunca sair do papel, você só recebe um e-mail avisando isso.
+            turma e definir o conteúdo — por isso pedimos seu WhatsApp: a gente quer entender o que você já sabe pra
+            montar o curso em cima disso. Se nunca sair do papel, você só recebe um aviso dizendo isso.
           </p>
         </div>
 
@@ -94,8 +96,8 @@ export default async function ReservaPreparatorioPage() {
         )}
 
         <p className="mt-8 text-center text-xs text-[var(--text-muted)]">
-          Seus dados são usados só pra te avisar sobre este curso. Sem repasse pra terceiros e sem cobrança — você pode
-          pedir remoção da lista a qualquer momento respondendo o e-mail.
+          Seus dados são usados só pra falar com você sobre este curso. Sem repasse pra terceiros e sem cobrança — você
+          pode pedir remoção da lista a qualquer momento, por e-mail ou WhatsApp.
         </p>
       </div>
     </main>
