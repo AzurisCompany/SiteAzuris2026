@@ -97,6 +97,11 @@ const STATEMENTS: string[] = [
      ('gubigdata-2026-07', 'geral', 'Geral', 'Aberto ao público', 3000, 3, 0, DATE '2026-07-29', NULL),
      ('gubigdata-2026-07', 'associado', 'Associado IEP, GU BigData e Participante DSS', 'Gratuito — confirmação na entrada', 0, 1, 1, DATE '2026-07-29', NULL)
    ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
+  // Seed da reserva do curso preparatório (idempotente; NÃO sobrescreve edições do admin).
+  `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+   VALUES
+     ('preparatorio-dados', 'reserva', 'Reserva de interesse', 'Sem pagamento — aviso na abertura e desconto de fundador', 0, 1, 0, NULL, NULL)
+   ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
   // Recria a view de vagas excluindo registros de teste (não devem consumir vaga real).
   `CREATE OR REPLACE VIEW v_vagas_por_lote AS
      SELECT lote,

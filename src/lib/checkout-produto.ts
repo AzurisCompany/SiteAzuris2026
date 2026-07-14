@@ -57,8 +57,12 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   // Validação comum aos dois fluxos.
   if (!body.nome || body.nome.trim().length < 3) return erro(400, 'Nome inválido')
   if (!body.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) return erro(400, 'E-mail inválido')
+  // Telefone: obrigatório onde o produto exige; onde não exige, só valida se veio.
   const tel = onlyDigits(body.telefone)
-  if (tel.length !== 10 && tel.length !== 11) return erro(400, 'Telefone inválido (DDD + número, 10 ou 11 dígitos)')
+  const telInvalido = tel.length !== 10 && tel.length !== 11
+  if ((PRODUTO.telefoneObrigatorio || tel.length > 0) && telInvalido) {
+    return erro(400, 'Telefone inválido (DDD + número, 10 ou 11 dígitos)')
+  }
   if (body.consentimento !== true) return erro(400, 'É necessário aceitar os termos de uso dos dados (LGPD)')
 
   // Tipo de ingresso (se veio) + janela de vendas + lotação.

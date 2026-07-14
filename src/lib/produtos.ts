@@ -24,6 +24,8 @@ export interface ProdutoConfig {
   voltarUrl: string
   /** rótulo do botão voltar */
   voltarLabel: string
+  /** telefone exigido no cadastro. false = captura de lead com atrito mínimo (só nome + email) */
+  telefoneObrigatorio: boolean
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
@@ -39,6 +41,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     asaasDescricao: 'Ingresso DSS 2026 — Data Science Summit Brasil (pré-venda)',
     voltarUrl: 'https://dssbr.com.br/blog/pre-venda-2026/',
     voltarLabel: '← voltar pro DSS 2026',
+    telefoneObrigatorio: true,
   },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
@@ -55,6 +58,24 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     asaasDescricao: 'Ingresso — Encontro GU BigData & IA 30/07 (IEP, Curitiba)',
     voltarUrl: '/gubigdata',
     voltarLabel: '← voltar pra página do evento',
+    telefoneObrigatorio: true,
+  },
+  // Lista de espera do curso preparatório (Python/SQL/Docker) — pré-requisito do
+  // Lakehouse. Reserva de interesse: NUNCA gera cobrança, só captura o lead pelo
+  // tipo gratuito 'reserva'. asaasDescricao só existe pra satisfazer o registry.
+  'preparatorio-dados': {
+    slug: 'preparatorio-dados',
+    nome: 'Curso Preparatório de Dados — reserva de interesse',
+    descricao: 'Python, SQL e Docker · em construção, sem data definida',
+    precoCentavos: 0,
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 1,
+    asaasDescricao: 'Reserva — Curso Preparatório de Dados (sem cobrança)',
+    voltarUrl: '/lakehouse-comunidade',
+    voltarLabel: '← voltar pro curso Lakehouse',
+    telefoneObrigatorio: false,
   },
 }
 

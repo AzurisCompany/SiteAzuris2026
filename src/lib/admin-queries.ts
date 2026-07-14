@@ -5,6 +5,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
+  'preparatorio-dados': 'Preparatório (reservas)',
   proposta: 'Proposta customizada',
   assinatura: 'Assinatura',
   'avulso-asaas': 'Avulso (Asaas)',
