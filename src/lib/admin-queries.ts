@@ -288,7 +288,8 @@ export interface FiltrosVendas {
   offset?: number
 }
 
-export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoRow[]; total: number }> {
+/** Monta o WHERE compartilhado por listarVendas e emailsFiltrados a partir dos filtros. */
+function construirWhere(f: FiltrosVendas): { where: string; params: unknown[] } {
   const cond: string[] = []
   const params: unknown[] = []
   if (!f.mostrarTeste) {
@@ -332,7 +333,11 @@ export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoR
     const i = params.length
     cond.push(`(nome ILIKE $${i} OR email ILIKE $${i} OR cpf_cnpj ILIKE $${i})`)
   }
-  const where = cond.length ? `WHERE ${cond.join(' AND ')}` : ''
+  return { where: cond.length ? `WHERE ${cond.join(' AND ')}` : '', params }
+}
+
+export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoRow[]; total: number }> {
+  const { where, params } = construirWhere(f)
   const whereParams = [...params]
 
   const limit = Math.min(Math.max(f.limit ?? 50, 1), 200)
@@ -350,6 +355,70 @@ export async function listarVendas(f: FiltrosVendas): Promise<{ rows: InscricaoR
     c: string
   }>
   return { rows, total: Number(totalRows[0]?.c ?? 0) }
+}
+
+/**
+ * Emails distintos de TODOS os registros que batem no filtro (ignora paginação).
+ * Ordenado por inscrição mais recente; dedup case-insensitive preservando o mais novo.
+ */
+export async function emailsFiltrados(f: FiltrosVendas): Promise<string[]> {
+  const { where, params } = construirWhere(f)
+  const emailCond = `email IS NOT NULL AND email <> ''`
+  const fullWhere = where ? `${where} AND ${emailCond}` : `WHERE ${emailCond}`
+  const rows = (await sql.query(
+    `SELECT email FROM inscricoes ${fullWhere} ORDER BY created_at DESC`,
+    params
+  )) as Array<{ email: string }>
+  const vistos = new Set<string>()
+  const emails: string[] = []
+  for (const { email } of rows) {
+    const norm = email.trim().toLowerCase()
+    if (!norm || vistos.has(norm)) continue
+    vistos.add(norm)
+    emails.push(email.trim())
+  }
+  return emails
+}
+
+/**
+ * Emails distintos agrupados por produto, respeitando todos os filtros ATIVOS menos o `curso`
+ * (as abas precisam da lista de cada produto independente da aba selecionada).
+ * Retorna `todos` (união de todos os produtos, deduplicada) e `porCurso` (mapa slug → emails).
+ */
+export async function emailsPorProduto(
+  f: FiltrosVendas
+): Promise<{ todos: string[]; porCurso: Record<string, string[]> }> {
+  const { where, params } = construirWhere({ ...f, curso: undefined })
+  const emailCond = `email IS NOT NULL AND email <> ''`
+  const fullWhere = where ? `${where} AND ${emailCond}` : `WHERE ${emailCond}`
+  const rows = (await sql.query(
+    `SELECT email, curso_slug FROM inscricoes ${fullWhere} ORDER BY created_at DESC`,
+    params
+  )) as Array<{ email: string; curso_slug: string }>
+
+  const porCurso: Record<string, string[]> = {}
+  const vistosPorCurso: Record<string, Set<string>> = {}
+  const vistosTodos = new Set<string>()
+  const todos: string[] = []
+  for (const { email, curso_slug } of rows) {
+    const limpo = email.trim()
+    const norm = limpo.toLowerCase()
+    if (!norm) continue
+    if (!vistosTodos.has(norm)) {
+      vistosTodos.add(norm)
+      todos.push(limpo)
+    }
+    const slug = curso_slug || ''
+    if (!porCurso[slug]) {
+      porCurso[slug] = []
+      vistosPorCurso[slug] = new Set()
+    }
+    if (!vistosPorCurso[slug].has(norm)) {
+      vistosPorCurso[slug].add(norm)
+      porCurso[slug].push(limpo)
+    }
+  }
+  return { todos, porCurso }
 }
 
 /** Quantos registros estão marcados como teste (pra rótulo do toggle "ver testes"). */

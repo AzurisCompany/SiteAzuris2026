@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {
   listarVendas,
+  emailsPorProduto,
   resumoFinanceiro,
   contarTestes,
   opcoesFiltro,
@@ -17,6 +18,7 @@ import { labelBilling } from '@/lib/billing'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
+import CopiarEmailsButton from './CopiarEmailsButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,31 +60,28 @@ export default async function VendasPage({
   let resumo: ResumoProduto[] = []
   let qtdeTestes = 0
   let opcoes: { tipos: string[]; origens: string[] } = { tipos: [], origens: [] }
+  let emailsTodos: string[] = []
+  let emailsPorCurso: Record<string, string[]> = {}
+  const filtros = { curso, status, billing, tipo, pessoa, origem, de, ate, busca, mostrarTeste }
   try {
-    const [res, r, qt, op] = await Promise.all([
+    const [res, r, qt, op, em] = await Promise.all([
       listarVendas({
-        curso,
-        status,
-        billing,
-        tipo,
-        pessoa,
-        origem,
-        de,
-        ate,
-        busca,
-        mostrarTeste,
+        ...filtros,
         limit: PAGE_SIZE,
         offset: (page - 1) * PAGE_SIZE,
       }),
       resumoFinanceiro(),
       contarTestes(),
       opcoesFiltro(),
+      emailsPorProduto(filtros),
     ])
     rows = res.rows
     total = res.total
     resumo = r
     qtdeTestes = qt
     opcoes = op
+    emailsTodos = em.todos
+    emailsPorCurso = em.porCurso
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -117,9 +116,16 @@ export default async function VendasPage({
     return s ? `?${s}` : '/admin/vendas'
   }
   const abas = [
-    { slug: '', label: 'Todos', count: countTodos },
-    ...Object.keys(PRODUTO_LABEL).map((slug) => ({ slug, label: tabProduto(slug), count: countPorCurso[slug] ?? 0 })),
+    { slug: '', label: 'Todos', count: countTodos, emails: emailsTodos },
+    ...Object.keys(PRODUTO_LABEL).map((slug) => ({
+      slug,
+      label: tabProduto(slug),
+      count: countPorCurso[slug] ?? 0,
+      emails: emailsPorCurso[slug] ?? [],
+    })),
   ]
+  // Emails da aba ativa, pro botão do cabeçalho.
+  const emailsAtivos = curso ? emailsPorCurso[curso] ?? [] : emailsTodos
 
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
   const qs = (p: number) => {
@@ -146,6 +152,8 @@ export default async function VendasPage({
           <h1 className="text-2xl font-bold">Vendas</h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">{total} registro(s)</p>
         </div>
+        <div className="flex items-center gap-2">
+        <CopiarEmailsButton emails={emailsAtivos} />
         <Link
           href={toggleTesteHref}
           className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
@@ -156,6 +164,7 @@ export default async function VendasPage({
         >
           {mostrarTeste ? '← esconder testes' : `ver testes (${qtdeTestes})`}
         </Link>
+        </div>
       </div>
 
       {/* Abas por produto */}
@@ -163,20 +172,25 @@ export default async function VendasPage({
         {abas.map((aba) => {
           const ativa = curso === aba.slug
           return (
-            <Link
+            <div
               key={aba.slug || 'todos'}
-              href={tabHref(aba.slug)}
-              className={`-mb-px rounded-t-lg border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${
-                ativa
-                  ? 'border-[var(--azuris-cyan)] text-[var(--azuris-cyan)]'
-                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              className={`-mb-px flex items-center gap-1 border-b-2 pr-2 ${
+                ativa ? 'border-[var(--azuris-cyan)]' : 'border-transparent'
               }`}
             >
-              {aba.label}
-              <span className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${ativa ? 'bg-[var(--azuris-cyan)]/15' : 'bg-[var(--azuris-surface)]'}`}>
-                {aba.count}
-              </span>
-            </Link>
+              <Link
+                href={tabHref(aba.slug)}
+                className={`rounded-t-lg py-2 pl-4 text-sm font-semibold transition-colors ${
+                  ativa ? 'text-[var(--azuris-cyan)]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {aba.label}
+                <span className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${ativa ? 'bg-[var(--azuris-cyan)]/15' : 'bg-[var(--azuris-surface)]'}`}>
+                  {aba.count}
+                </span>
+              </Link>
+              <CopiarEmailsButton emails={aba.emails} variant="icon" titulo={`${aba.label} — ${aba.emails.length} email(s)`} />
+            </div>
           )
         })}
       </div>
