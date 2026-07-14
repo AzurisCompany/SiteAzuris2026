@@ -57,6 +57,9 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
   const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  // Última confirmação de pré-requisito antes do pagamento. Quem não tem a base
+  // entra, se perde e pede reembolso — mais barato barrar aqui do que lá dentro.
+  const [prereqOk, setPrereqOk] = useState(false)
 
   const [utm, setUtm] = useState<{ source?: string; medium?: string; campaign?: string; content?: string; term?: string }>({})
 
@@ -337,9 +340,31 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
         </div>
       )}
 
+      {/* Trava de pré-requisito — o curso não começa do zero e isso precisa estar dito antes do pagamento */}
+      <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-[var(--warning,#f59e0b)]/30 bg-[var(--warning,#f59e0b)]/5 px-4 py-3 text-sm">
+        <input
+          type="checkbox"
+          required
+          checked={prereqOk}
+          onChange={(e) => setPrereqOk(e.target.checked)}
+          className="mt-0.5 size-4 accent-[var(--azuris-cyan)]"
+        />
+        <span className="text-[var(--text-secondary)]">
+          Confirmo que já tenho <strong className="text-[var(--text-primary)]">Python intermediário, SQL e Docker</strong>{' '}
+          funcionando na minha máquina. Entendo que o curso parte daí e não ensina essa base —{' '}
+          <a
+            href="/preparatorio-dados/reserva?utm_source=checkout&utm_medium=gate&utm_campaign=preparatorio-reserva"
+            className="text-[var(--azuris-cyan)] underline"
+          >
+            se ainda não é o meu caso, o preparatório é o caminho
+          </a>
+          .
+        </span>
+      </label>
+
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !prereqOk}
         className="w-full rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-6 py-4 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
       >
         {submitting

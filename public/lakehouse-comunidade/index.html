@@ -306,6 +306,16 @@ footer .logo-mark { width: 40px; height: 28px; }
   max-width: 720px; margin: 0 auto 28px;
 }
 .hero p strong { color: var(--text-primary); }
+/* Corte de pré-requisito logo no hero — quem não tem a bagagem descobre aqui, não no checkout */
+.hero-prereq {
+  margin-top: 18px; font-size: 14.5px; color: var(--text-muted);
+}
+.hero-prereq strong { color: var(--text-secondary); font-weight: 600; }
+.hero-prereq a {
+  color: var(--accent-cyan); text-decoration: none;
+  border-bottom: 1px solid rgba(20, 183, 222, 0.35);
+}
+.hero-prereq a:hover { border-bottom-color: var(--accent-cyan); }
 
 /* Hero stack strip — logos oficiais como prova visual no topo */
 .hero-stack-strip {
@@ -535,6 +545,11 @@ h2 {
   line-height: 1.55;
   transition: transform 0.4s ease, background 0.4s, border-color 0.4s, font-size 0.4s;
 }
+.diagnostico-punchline a {
+  color: var(--accent-cyan); text-decoration: none;
+  border-bottom: 1px solid rgba(20, 183, 222, 0.4);
+}
+.diagnostico-punchline a:hover { border-bottom-color: var(--accent-cyan); }
 .diagnostico-punchline strong {
   color: var(--text-primary); font-weight: 700;
   transition: color 0.3s;
@@ -832,6 +847,81 @@ h2 {
   color: var(--warning); font-weight: 700;
 }
 
+/* Rodapé da coluna "ainda não" — a saída, pra lista não terminar em porta fechada */
+.para-quem-nota {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 14.5px; color: var(--text-muted); line-height: 1.6;
+}
+.para-quem-nota a {
+  color: var(--accent-cyan); text-decoration: none;
+  border-bottom: 1px solid rgba(20, 183, 222, 0.35);
+}
+.para-quem-nota a:hover { border-bottom-color: var(--accent-cyan); }
+.para-quem-box li strong { color: var(--text-secondary); font-weight: 600; }
+.para-quem-box code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em; color: var(--azuris-mist);
+  background: rgba(20, 183, 222, 0.08); padding: 1px 5px; border-radius: 4px;
+}
+
+/* Os casos que não são questão de tempo — separados dos "ainda não" de propósito */
+.fit-nunca {
+  max-width: 900px; margin: 20px auto 0;
+  border: 1px dashed var(--border); border-radius: 12px;
+  padding: 20px 24px;
+}
+.fit-nunca p {
+  color: var(--text-muted); font-size: 14.5px; line-height: 1.65; margin: 0;
+}
+.fit-nunca strong { color: var(--text-secondary); }
+
+/* Texto-ponte do fit — explica o corte antes da grade de pra-quem-é */
+.fit-ponte {
+  max-width: 900px; margin: 0 auto 28px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: 12px; padding: 26px 28px;
+}
+.fit-ponte p {
+  color: var(--text-secondary); font-size: 16px; line-height: 1.65;
+}
+.fit-ponte p + p { margin-top: 14px; }
+.fit-ponte strong { color: var(--text-primary); }
+.fit-ponte-cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  padding: 11px 20px; border-radius: 8px;
+  border: 1px solid rgba(20, 183, 222, 0.4);
+  color: var(--accent-cyan); font-size: 15px; font-weight: 600;
+  text-decoration: none; transition: background 0.2s, border-color 0.2s;
+}
+.fit-ponte-cta:hover {
+  background: rgba(20, 183, 222, 0.1); border-color: var(--accent-cyan);
+}
+
+.prontidao-intro {
+  max-width: 720px; margin: 0 auto 24px; text-align: center;
+  color: var(--text-secondary); font-size: 16px; line-height: 1.6;
+}
+
+/* Veredito do checklist de prontidão */
+.prontidao-veredito {
+  max-width: 720px; margin: 24px auto 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 22px 26px;
+  color: var(--text-secondary); font-size: 16px; line-height: 1.6;
+  transition: border-color 0.3s;
+}
+.prontidao-veredito strong { color: var(--text-primary); }
+.prontidao-veredito.pronto { border-color: rgba(16, 185, 129, 0.45); }
+.prontidao-veredito.quase { border-color: rgba(245, 158, 11, 0.45); }
+.prontidao-veredito.cedo { border-color: rgba(20, 183, 222, 0.45); }
+.prontidao-veredito .veredito-cta {
+  display: inline-block; margin-top: 14px;
+  color: var(--accent-cyan); font-weight: 600; text-decoration: none;
+  border-bottom: 1px solid rgba(20, 183, 222, 0.4);
+}
+.prontidao-veredito .veredito-cta:hover { border-bottom-color: var(--accent-cyan); }
+
 /* PRÉ-REQUISITOS */
 .prereqs-list { max-width: 720px; margin: 0 auto; list-style: none; }
 .prereqs-list li {
@@ -888,9 +978,12 @@ h2 {
 /* LOTES (escada de preços Turma 1 + 1 card de mercado desabilitado) */
 .lotes-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 28px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 @media (max-width: 1024px) {
   .lotes-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1036,6 +1129,14 @@ h2 {
 .cond-eleg .cond-ico { font-size: 20px; line-height: 1.4; flex: none; }
 .cond-eleg strong { color: #fbbf24; }
 .cond-eleg a { color: #fbbf24; font-weight: 600; text-decoration: underline; }
+/* A saída pro não-membro: ciano (caminho), não âmbar (condição) — duas âmbar seguidas viram alerta */
+.cond-eleg.cond-virar-membro {
+  background: linear-gradient(135deg, rgba(20, 183, 222, 0.10), rgba(20, 183, 222, 0.04));
+  border-color: rgba(20, 183, 222, 0.35);
+}
+.cond-eleg.cond-virar-membro strong { color: var(--azuris-mist); }
+.cond-eleg.cond-virar-membro a { color: var(--accent-cyan); }
+.cond-eleg.cond-virar-membro .cond-ico { color: var(--accent-cyan); }
 /* Venda corporativa / turma fechada */
 .cond-corp {
   background: linear-gradient(135deg, rgba(20, 183, 222, 0.08), rgba(99, 102, 241, 0.06));
@@ -1240,6 +1341,11 @@ footer .copy { margin-top: 16px; }
     </div>
 
     <a href="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=cta&amp;utm_campaign=lakehouse-t1-l1" class="btn-primary">Garantir minha vaga →</a>
+
+    <p class="hero-prereq">
+      O pipeline começa do zero — <strong>você, não</strong>. Aqui é preciso ter <strong>Python intermediário, SQL e Docker</strong> antes do módulo 1.
+      <a href="#fit">Veja se é a sua hora →</a>
+    </p>
   </div>
 </section>
 
@@ -1249,7 +1355,7 @@ footer .copy { margin-top: 16px; }
     <div class="section-eyebrow">Diagnóstico · clique nos que aplicam</div>
     <h2>Marque quantos se aplicam <span class="accent">a você</span>:</h2>
 
-    <div class="diagnostico-card">
+    <div class="diagnostico-card" data-diag="dor">
       <div class="diagnostico-item">
         <div class="diag-check">✕</div>
         <div class="diag-text">
@@ -1292,7 +1398,9 @@ footer .copy { margin-top: 16px; }
     </div>
 
     <div class="diagnostico-punchline">
-      <strong>Marcou 2 ou mais?</strong> Esse curso foi feito <span class="accent">pra você</span>. Vamos resolver isso módulo a módulo, no seu ritmo.
+      <strong>Marcou 2 ou mais?</strong> É exatamente essa distância que o curso fecha — <span class="accent">módulo a módulo, no seu ritmo</span>.
+      Uma ressalva honesta: o curso fecha a distância entre <em>teoria e prática</em>, não a distância entre <em>zero e Python</em>.
+      Se Python, SQL e Docker ainda não são rotina pra você, <a href="#fit">leia isto antes</a>.
     </div>
   </div>
 </section>
@@ -1549,13 +1657,33 @@ footer .copy { margin-top: 16px; }
 </section>
 
 <!-- PARA QUEM -->
-<section>
+<section id="fit">
   <div class="container">
     <div class="section-eyebrow">Fit do aluno</div>
-    <h2>Pra quem é — e pra quem <span class="accent">NÃO</span> é.</h2>
+    <h2>Pra quem é — e pra quem <span class="accent">ainda não</span> é.</h2>
+
+    <div class="fit-ponte">
+      <p>
+        Vamos ser honestos: montar pipeline de dados exige uma pilha de conhecimento prévio, e a gente sabe disso.
+        Python, SQL, linha de comando, Docker — cada um desses é um curso inteiro por si só. <strong>Este curso não
+        tem como partir do zero.</strong> Ele parte do dia em que você já tem o Docker rodando e escreve um JOIN sem
+        consultar, e leva você daí até um pipeline Lakehouse completo em produção.
+      </p>
+      <p>
+        Se essa base ainda não é sua, isso <strong>não é um defeito seu</strong> — é só uma questão de ordem. Entrar
+        agora seria pagar pra assistir uma aula em um idioma que você ainda não fala. Segura um pouco: estamos montando
+        o <strong>curso preparatório</strong> exatamente pra essa lacuna — Python, SQL e Docker até o ponto em que este
+        curso começa a fazer sentido. Ainda não tem data, mas quem reservar entra na lista de aviso e leva um
+        <strong>desconto de fundador</strong> quando abrir.
+      </p>
+      <a class="fit-ponte-cta" href="/preparatorio-dados/reserva?utm_source=landing&amp;utm_medium=fit&amp;utm_campaign=preparatorio-reserva">
+        Quero reserva no preparatório →
+      </a>
+    </div>
+
     <div class="para-quem-grid">
       <div class="para-quem-box positivo">
-        <h3>Este curso foi feito pra você se…</h3>
+        <h3>É a sua hora se…</h3>
         <ul>
           <li>É analista de dados querendo subir pra Engenharia de Dados</li>
           <li>É dev backend curioso sobre o stack analítico moderno</li>
@@ -1564,31 +1692,94 @@ footer .copy { margin-top: 16px; }
         </ul>
       </div>
       <div class="para-quem-box negativo">
-        <h3>Este curso NÃO é pra você se…</h3>
+        <h3>Ainda não é a sua hora se…</h3>
         <ul>
-          <li>Nunca programou em Python (exigimos intermediário)</li>
-          <li>Nunca usou Docker (precisa estar instalado e funcionando)</li>
-          <li>Quer só assistir vídeo passivamente, sem pôr a mão na massa (aqui tem entregável por módulo)</li>
-          <li>Busca certificação acadêmica ou validação MEC</li>
+          <li>Python ainda não é rotina — aqui ele é ferramenta, não conteúdo. <strong>O preparatório começa exatamente aí.</strong></li>
+          <li>Nunca subiu um <code>docker compose up</code> — no módulo 1 você já sobe cinco serviços. <strong>Também é preparatório.</strong></li>
+          <li>SQL só de <code>SELECT *</code> — sem JOIN e GROUP BY, o módulo 3 vira parede. <strong>Preparatório de novo.</strong></li>
         </ul>
+        <p class="para-quem-nota">
+          Nada disso é permanente — é só a ordem dos fatores. <a href="/preparatorio-dados/reserva?utm_source=landing&amp;utm_medium=fit-negativo&amp;utm_campaign=preparatorio-reserva">Reserve o preparatório</a> e a gente te avisa.
+        </p>
       </div>
+    </div>
+
+    <div class="fit-nunca">
+      <p>
+        <strong>E tem um caso que nenhum curso resolve:</strong> se você quer assistir vídeo passivamente, sem pôr a mão
+        na massa, aqui tem entregável em cada módulo — vai ser dinheiro jogado fora. E se você precisa de diploma
+        reconhecido pelo MEC, não somos instituição de ensino: nosso certificado vale pelo que você constrói, não pelo
+        carimbo.
+      </p>
     </div>
   </div>
 </section>
 
-<!-- PRÉ-REQUISITOS -->
-<section>
+<!-- PRÉ-REQUISITOS — checklist de prontidão: o aluno se conta, ninguém conta por ele -->
+<section id="prontidao">
   <div class="container">
-    <div class="section-eyebrow">Checklist técnico</div>
-    <h2>O que você precisa pra começar:</h2>
-    <ul class="prereqs-list">
-      <li><strong>Python intermediário</strong> — loops, funções, instalar pacote via pip</li>
-      <li><strong>SQL básico-intermediário</strong> — SELECT, JOIN, GROUP BY, subqueries</li>
-      <li><strong>Linha de comando Linux</strong> — navegar, editar arquivo, rodar comando</li>
-      <li><strong>Docker Desktop</strong> instalado e rodando</li>
-      <li>Máquina com <strong>16GB de RAM</strong> e <strong>50GB livres</strong> em disco</li>
-      <li><strong>~5h por semana</strong> de dedicação (no ritmo que você definir)</li>
-    </ul>
+    <div class="section-eyebrow">Checklist técnico · marque o que já é rotina</div>
+    <h2>Você está pronto <span class="accent">pra este curso</span>?</h2>
+    <p class="prontidao-intro">
+      Seis itens. Ninguém está olhando, e não tem resposta certa — só a sua. Marque com honestidade e o placar te diz
+      onde você está.
+    </p>
+
+    <div class="diagnostico-card" data-diag="prontidao">
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Python intermediário</span>
+          <strong>Escrevo loops e funções e instalo pacote com pip sem procurar tutorial.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">SQL básico-intermediário</span>
+          <strong>SELECT, JOIN, GROUP BY e subquery saem sem consultar.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Linha de comando Linux</span>
+          <strong>Navego, edito arquivo e rodo comando no terminal sem travar.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Docker</span>
+          <strong>Já rodei <code>docker compose up</code> e sei o que aconteceu depois.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Máquina</span>
+          <strong>16GB de RAM e 50GB livres em disco.</strong>
+        </div>
+      </div>
+
+      <div class="diagnostico-item">
+        <div class="diag-check">✕</div>
+        <div class="diag-text">
+          <span class="diag-setup">Tempo</span>
+          <strong>Consigo ~5h por semana, no ritmo que eu definir.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="prontidao-veredito" data-veredito
+         data-url-curso="/lakehouse-comunidade/inscricao?utm_source=landing&amp;utm_medium=prontidao&amp;utm_campaign=lakehouse-t1-l1"
+         data-url-prep="/preparatorio-dados/reserva?utm_source=landing&amp;utm_medium=prontidao&amp;utm_campaign=preparatorio-reserva">
+      Marque os itens acima pra ver onde você está.
+    </div>
   </div>
 </section>
 
@@ -1613,22 +1804,9 @@ footer .copy { margin-top: 16px; }
 <section id="investimento">
   <div class="container">
     <div class="section-eyebrow">O investimento — Turma 1 Comunidade</div>
-    <h2>Preço de comunidade · <span class="accent">3 lotes</span> + referência de mercado</h2>
+    <h2>Preço de <span class="accent">comunidade</span> + referência de mercado</h2>
 
     <div class="lotes-grid">
-      <div class="lote-card lote-founder">
-        <div class="lote-badge">Founder</div>
-        <div class="lote-preco"><span class="moeda">R$</span>197</div>
-        <div class="lote-vagas">5 vagas · convite pessoal</div>
-        <ul class="lote-features">
-          <li>Curso completo (20h)</li>
-          <li>Ingresso DSSBR 2026 (R$ 520)</li>
-          <li>Discord vitalício + cheat sheets</li>
-          <li>Certificado de conclusão</li>
-        </ul>
-        <div class="lote-status">Apenas por convite</div>
-      </div>
-
       <div class="lote-card lote-1">
         <div class="lote-badge">Membros GU / DSSBR</div>
         <div class="lote-preco"><span class="moeda">R$</span>550</div>
@@ -1675,6 +1853,15 @@ footer .copy { margin-top: 16px; }
     <div class="cond-eleg" style="margin-top: 24px;">
       <span class="cond-ico" aria-hidden="true">★</span>
       <div><strong>Preço de comunidade (R$ 550):</strong> exclusivo para <strong>membros do GU BigData IA</strong> e <strong>ex-participantes do DSSBR</strong>. Não é membro? O investimento é <strong>R$ 750</strong>.</div>
+    </div>
+
+    <div class="cond-eleg cond-virar-membro" style="margin-top: 12px;">
+      <span class="cond-ico" aria-hidden="true">→</span>
+      <div>
+        <strong>Ainda não é membro?</strong> O GU BigData &amp; IA é um grupo de usuários que existe desde antes do curso —
+        encontros, conteúdo e comunidade. Quem participa tem preço de comunidade aqui.
+        <a href="https://gubigdata.com.br" target="_blank" rel="noopener">Conhecer o GU BigData →</a>
+      </div>
     </div>
 
     <p class="lotes-bonus-explain">
@@ -1933,36 +2120,82 @@ footer .copy { margin-top: 16px; }
   sections.forEach(s => observer.observe(s));
 })();
 
-/* Diagnóstico — checkboxes interativos */
+/* Diagnósticos — checkboxes interativos. Dois cards na página com placares
+   independentes: 'dor' (acende a punchline) e 'prontidao' (veredito por faixa). */
 (function() {
-  const checks = document.querySelectorAll('.diag-check');
-  const punchline = document.querySelector('.diagnostico-punchline');
-  if (!checks.length || !punchline) return;
+  const cards = document.querySelectorAll('[data-diag]');
+  if (!cards.length) return;
 
-  const updateGlow = () => {
-    const count = document.querySelectorAll('.diag-check.checked').length;
-    punchline.classList.toggle('glowing', count >= 2);
+  const veredito = document.querySelector('[data-veredito]');
+
+  const VEREDITOS = [
+    {
+      min: 6, classe: 'pronto',
+      html: (u) => '<strong>Seis de seis.</strong> A base está lá — a única dúvida que sobra é se você quer construir isso agora.'
+        + '<br><a class="veredito-cta" href="' + u.curso + '">Garantir minha vaga →</a>'
+    },
+    {
+      min: 4, classe: 'quase',
+      html: (u) => '<strong>Falta pouco.</strong> Dá pra entrar: o que faltou você resolve em paralelo, mas resolva antes do módulo 2 — '
+        + 'depois dele a stack não espera. Na dúvida sobre o que falta, fale com a gente antes de pagar.'
+        + '<br><a class="veredito-cta" href="' + u.curso + '">Garantir minha vaga →</a>'
+    },
+    {
+      min: 0, classe: 'cedo',
+      html: (u) => '<strong>Ainda não é a sua hora — e tudo bem.</strong> Entrar assim seria pagar pra ficar perdido, e a gente '
+        + 'não quer o seu dinheiro nessas condições. O preparatório é exatamente pra essa etapa.'
+        + '<br><a class="veredito-cta" href="' + u.prep + '">Reservar vaga no preparatório →</a>'
+    }
+  ];
+
+  const atualizarVeredito = (card) => {
+    if (!veredito) return;
+    const marcados = card.querySelectorAll('.diag-check.checked').length;
+    veredito.classList.remove('pronto', 'quase', 'cedo');
+    if (!marcados) {
+      veredito.textContent = 'Marque os itens acima pra ver onde você está.';
+      return;
+    }
+    const faixa = VEREDITOS.find((v) => marcados >= v.min);
+    veredito.classList.add(faixa.classe);
+    veredito.innerHTML = marcados + ' de 6 — ' + faixa.html({
+      curso: veredito.dataset.urlCurso,
+      prep: veredito.dataset.urlPrep
+    });
   };
 
-  checks.forEach((check) => {
-    check.setAttribute('role', 'checkbox');
-    check.setAttribute('aria-checked', 'false');
-    check.setAttribute('tabindex', '0');
-    check.setAttribute('aria-label', 'Marcar item do diagnóstico');
+  cards.forEach((card) => {
+    const tipo = card.dataset.diag;
+    const punchline = tipo === 'dor' ? document.querySelector('.diagnostico-punchline') : null;
 
-    const toggle = () => {
-      const checked = check.classList.toggle('checked');
-      check.setAttribute('aria-checked', String(checked));
-      check.textContent = checked ? '✓' : '✕';
-      updateGlow();
+    const atualizar = () => {
+      if (tipo === 'dor' && punchline) {
+        const marcados = card.querySelectorAll('.diag-check.checked').length;
+        punchline.classList.toggle('glowing', marcados >= 2);
+      }
+      if (tipo === 'prontidao') atualizarVeredito(card);
     };
 
-    check.addEventListener('click', toggle);
-    check.addEventListener('keydown', (e) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        toggle();
-      }
+    card.querySelectorAll('.diag-check').forEach((check) => {
+      check.setAttribute('role', 'checkbox');
+      check.setAttribute('aria-checked', 'false');
+      check.setAttribute('tabindex', '0');
+      check.setAttribute('aria-label', 'Marcar item do diagnóstico');
+
+      const toggle = () => {
+        const checked = check.classList.toggle('checked');
+        check.setAttribute('aria-checked', String(checked));
+        check.textContent = checked ? '✓' : '✕';
+        atualizar();
+      };
+
+      check.addEventListener('click', toggle);
+      check.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          toggle();
+        }
+      });
     });
   });
 })();
