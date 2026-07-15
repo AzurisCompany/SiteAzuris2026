@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { labelBilling } from '@/lib/billing'
+import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
+import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/components/checkout/DadosNota'
 
 // Espelho da regra de parcelamento do servidor (lib/parcelamento) — só pra PREVIEW.
 // O valor cobrado é sempre recalculado no servidor; aqui é ajuda visual.
@@ -44,11 +46,16 @@ interface Resultado {
   billing_type: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 }
 
+/** Proposta corporativa é o caminho de PJ que mais vira nota — endereço obrigatório. */
+const ENDERECO_OBRIGATORIO_PJ = true
+
 export default function CobrancaForm() {
   const router = useRouter()
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
+  const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
   const [cpf, setCpf] = useState('')
+  const [nota, setNota] = useState<NotaValue>(notaInicial)
   const [telefone, setTelefone] = useState('')
   const [descricao, setDescricao] = useState('')
   const [valorRaw, setValorRaw] = useState('')
@@ -103,6 +110,7 @@ export default function CobrancaForm() {
           billing_type: billingType,
           installments: soCartao ? parcelas : 1,
           dias_vencimento: diasVenc,
+          ...notaParaPayload(nota, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
         }),
       })
       const data = (await res.json()) as Resultado & { error?: string }
@@ -249,7 +257,7 @@ export default function CobrancaForm() {
     <form onSubmit={enviar} className="max-w-2xl space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={rotulo}>Nome / razão social</label>
+          <label className={rotulo}>Nome do contato</label>
           <input value={nome} onChange={(e) => setNome(e.target.value)} required minLength={3} className={campo} placeholder="Fulano de Tal" />
         </div>
         <div>
@@ -257,14 +265,26 @@ export default function CobrancaForm() {
           <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" className={campo} placeholder="cliente@empresa.com" />
         </div>
         <div>
-          <label className={rotulo}>CPF / CNPJ</label>
-          <input value={cpf} onChange={(e) => setCpf(e.target.value)} required inputMode="numeric" className={campo} placeholder="só números (11 ou 14 dígitos)" />
-        </div>
-        <div>
           <label className={rotulo}>Telefone (WhatsApp)</label>
           <input value={telefone} onChange={(e) => setTelefone(e.target.value)} required inputMode="numeric" className={campo} placeholder="DDD + número" />
         </div>
       </div>
+
+      <CampoDocumento
+        tema="admin"
+        pessoaTipo={pessoaTipo}
+        onPessoaTipoChange={setPessoaTipo}
+        valor={cpf}
+        onChange={setCpf}
+      />
+
+      <DadosNota
+        tema="admin"
+        value={nota}
+        onChange={setNota}
+        pessoaTipo={pessoaTipo}
+        enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+      />
 
       <div>
         <label className={rotulo}>Descrição da proposta</label>

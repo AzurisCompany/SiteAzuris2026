@@ -10,6 +10,7 @@ import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
+import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic'
 /** Slug interno das cobranças avulsas (aparece como "Proposta customizada" no admin). */
 export const PROPOSTA_SLUG = 'proposta'
 
-interface RequestBody {
+interface RequestBody extends ExtrasInput {
   nome?: string
   email?: string
   cpf_cnpj?: string
@@ -34,6 +35,10 @@ function validate(b: RequestBody): string | null {
   if (!b.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) return 'E-mail inválido'
 
   if (!cpfCnpjValido(onlyDigits(b.cpf_cnpj))) return 'CPF/CNPJ inválido (dígito verificador não confere)'
+
+  // Proposta corporativa é o caminho de PJ que mais vira nota — mesmo padrão dos checkouts.
+  const erroExtras = validarExtras(b, { cpfCnpj: b.cpf_cnpj, enderecoObrigatorioPJ: true })
+  if (erroExtras) return erroExtras
 
   const tel = onlyDigits(b.telefone)
   if (tel.length !== 10 && tel.length !== 11) return 'Telefone inválido (DDD + número, 10 ou 11 dígitos)'
@@ -87,6 +92,8 @@ export async function POST(request: Request) {
   const nome = body.nome!.trim()
   const email = body.email!.trim().toLowerCase()
   const telefone = onlyDigits(body.telefone)
+  const extras = normalizarExtras(body, cpf)
+  const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
     dedupe: { curso_slug: PROPOSTA_SLUG, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos },
@@ -105,17 +112,21 @@ export async function POST(request: Request) {
       utm_campaign: null,
       utm_content: null,
       utm_term: null,
-      empresa: null,
-      cargo: null,
-      pessoa_tipo: cpf.length === 14 ? 'PJ' : 'PF',
-      razao_social: null,
-      nf_endereco: null,
+      ...extras,
       // guarda a descrição da proposta aqui — sem campo dedicado (visível no detalhe).
       como_conheceu: `Proposta customizada: ${descricao}`,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
     },
-    customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
+    // Tomador da nota = dono do documento: PJ entra pela razão social.
+    customer: {
+      name: extras.pessoa_tipo === 'PJ' && extras.razao_social ? extras.razao_social : nome,
+      email,
+      cpfCnpj: cpf,
+      mobilePhone: telefone,
+      company: extras.razao_social,
+      ...(endereco ?? {}),
+    },
     asaas: {
       billingType: billing_type,
       valueReais: valorCobradoReais,
