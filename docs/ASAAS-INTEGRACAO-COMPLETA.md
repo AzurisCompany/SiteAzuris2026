@@ -176,6 +176,27 @@ created_at, updated_at
 Procura por CPF/CNPJ (`GET /customers?cpfCnpj=`); se existir, reusa; senão cria
 (`POST /customers`). **Sempre reusar por documento** evita duplicar cliente e "comer vaga" de novo.
 
+**O cadastro do cliente é o que emite a nota.** A NFS-e (`POST /invoices`) NÃO recebe
+endereço: o Asaas monta a nota a partir do cadastro do cliente. Por isso mandamos aqui
+o endereço do tomador e a razão social — sem isso a nota não sai, por mais completo que
+esteja o nosso `nf_endereco`. Mapa dos campos (de [[checkout-extras]] `enderecoParaAsaas`):
+
+| nosso        | Asaas          |
+|--------------|----------------|
+| cep          | `postalCode`   |
+| logradouro   | `address`      |
+| numero       | `addressNumber`|
+| complemento  | `complement`   |
+| bairro       | `province`     |
+| razao_social | `company` + `name` (PJ) |
+
+`cidade`/`uf` ficam de fora de propósito — o Asaas resolve as duas pelo `postalCode`.
+
+Cliente **reusado** com endereço novo é atualizado via `PUT /customers/{id}` (patch parcial,
+só os campos com valor). Sem isso, quem já comprou antes ficaria preso ao cadastro incompleto
+da primeira compra e a nota nunca sairia. Falha nesse PUT é logada e engolida: cadastro é
+acessório, cobrança é o negócio — um não derruba o outro.
+
 ### 6.2 Criar cobrança (`createPayment`, `POST /payments`)
 ```ts
 billingType ∈ 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'  // UNDEFINED = cliente escolhe no checkout
