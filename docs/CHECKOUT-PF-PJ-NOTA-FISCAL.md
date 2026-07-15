@@ -9,7 +9,8 @@ pedir o CPF da pessoa ou, se for empresa, o CNPJ... e apresentar isso na interfa
 precisamos de dados de endereço completo para emissão da nota. Revisa se temos essa informação
 sendo pedida."*
 
-**Status: implementado e verificado localmente. NÃO commitado, NÃO deployado.**
+**Status: commitado em `main` (`95268ed`→`a06e037`), verificado localmente, NÃO DEPLOYADO.**
+Produção segue no `4631549` — nada disto está no ar.
 
 ---
 
