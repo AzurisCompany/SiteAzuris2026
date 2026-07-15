@@ -12,6 +12,44 @@ export function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
+/** Máscara de CPF conforme se digita: 000.000.000-00. */
+export function maskCpf(v: string): string {
+  return v
+    .replace(/\D/g, '')
+    .slice(0, 11)
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
+}
+
+/** Máscara de CNPJ conforme se digita: 00.000.000/0000-00. */
+export function maskCnpj(v: string): string {
+  return v
+    .replace(/\D/g, '')
+    .slice(0, 14)
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
+    .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5')
+}
+
+/** Máscara de CEP conforme se digita: 00000-000. */
+export function maskCep(v: string): string {
+  return v
+    .replace(/\D/g, '')
+    .slice(0, 8)
+    .replace(/^(\d{5})(\d)/, '$1-$2')
+}
+
+/**
+ * Máscara do documento conforme o tipo de pessoa escolhido no checkout.
+ * O tipo decide o formato (e o teto de dígitos) — não o contrário: quem marcou
+ * PJ não consegue digitar um CPF de 11 dígitos e passar despercebido.
+ */
+export function maskDocumento(v: string, tipo: 'PF' | 'PJ'): string {
+  return tipo === 'PJ' ? maskCnpj(v) : maskCpf(v)
+}
+
 export function onlyDigits(s: string | null | undefined): string {
   return (s ?? '').replace(/\D/g, '')
 }

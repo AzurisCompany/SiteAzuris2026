@@ -26,6 +26,12 @@ export interface ProdutoConfig {
   voltarLabel: string
   /** telefone exigido no cadastro. false = captura de lead com atrito mínimo (só nome + email) */
   telefoneObrigatorio: boolean
+  /**
+   * PJ (CNPJ) só fecha a compra com endereço completo — é o que permite emitir a
+   * nota depois. false = mostra o seletor PF/PJ e aceita endereço, mas não obriga
+   * (evento de comunidade barato, onde o atrito custa mais que a nota).
+   */
+  enderecoObrigatorioPJ: boolean
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
@@ -42,6 +48,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     voltarUrl: 'https://dssbr.com.br/blog/pre-venda-2026/',
     voltarLabel: '← voltar pro DSS 2026',
     telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
   },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
@@ -59,6 +66,9 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     voltarUrl: '/gubigdata',
     voltarLabel: '← voltar pra página do evento',
     telefoneObrigatorio: true,
+    // Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a
+    // inscrição por endereço. Quem for PJ e quiser nota preenche por opção.
+    enderecoObrigatorioPJ: false,
   },
   // Lista de espera do curso preparatório (Python/SQL/Docker) — pré-requisito do
   // Lakehouse. Reserva de interesse: NUNCA gera cobrança, só captura o lead pelo
@@ -78,6 +88,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     voltarUrl: '/lakehouse-comunidade',
     voltarLabel: '← voltar pro curso Lakehouse',
     telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: false, // reserva não cobra nada — não há nota pra emitir
   },
 }
 
