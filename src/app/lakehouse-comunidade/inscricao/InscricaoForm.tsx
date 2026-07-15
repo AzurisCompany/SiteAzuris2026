@@ -4,6 +4,10 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { gaEvent } from '@/lib/gtag'
 import { MAX_PARCELAS, valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
+import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
+
+/** Curso vendido pra empresa quase sempre vira nota — PJ não fecha sem endereço. */
+const ENDERECO_OBRIGATORIO_PJ = true
 
 type Perfil = 'membro' | 'nao-membro'
 
@@ -25,21 +29,6 @@ const PERFIL_LABEL: Record<Perfil, string> = {
   'nao-membro': 'Não sou membro',
 }
 
-function maskCpfCnpj(v: string): string {
-  const d = v.replace(/\D/g, '').slice(0, 14)
-  if (d.length <= 11) {
-    return d
-      .replace(/^(\d{3})(\d)/, '$1.$2')
-      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
-  }
-  return d
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5')
-}
-
 function maskPhone(v: string): string {
   const d = v.replace(/\D/g, '').slice(0, 11)
   if (d.length <= 10) return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
@@ -50,6 +39,7 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
   const [perfil, setPerfil] = useState<Perfil>(perfilInicial)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
+  const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
@@ -104,7 +94,7 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
-          ...extrasParaPayload(extras),
+          ...extrasParaPayload(extras, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
         }),
       })
 
@@ -240,18 +230,13 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">CPF ou CNPJ</label>
-          <input
-            type="text"
-            required
-            value={cpfCnpj}
-            onChange={(e) => setCpfCnpj(maskCpfCnpj(e.target.value))}
-            placeholder="000.000.000-00 ou 00.000.000/0000-00"
-            className="w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--azuris-cyan)] focus:outline-none"
-          />
-          <p className="mt-1 text-xs text-[var(--text-muted)]">Necessário pra emissão da cobrança.</p>
-        </div>
+        <CampoDocumento
+          pessoaTipo={pessoaTipo}
+          onPessoaTipoChange={setPessoaTipo}
+          valor={cpfCnpj}
+          onChange={setCpfCnpj}
+          ajuda="Necessário pra emissão da cobrança."
+        />
       </div>
 
       {/* Forma de pagamento */}
@@ -332,7 +317,12 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
         )}
       </div>
 
-      <CamposExtras value={extras} onChange={setExtras} />
+      <CamposExtras
+        value={extras}
+        onChange={setExtras}
+        pessoaTipo={pessoaTipo}
+        enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+      />
 
       {erro && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">

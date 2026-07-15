@@ -21,7 +21,7 @@ import {
   contarInscritosPorTipo,
   type TipoIngresso,
 } from '@/lib/tipos-ingresso'
-import { normalizarExtras, type ExtrasInput } from '@/lib/checkout-extras'
+import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
 
 export interface CheckoutBody extends ExtrasInput {
   nome: string
@@ -120,6 +120,11 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
 
   // ── Fluxo PAGO (comportamento idêntico ao checkout DSSBR original).
   if (!cpfCnpjValido(onlyDigits(body.cpf_cnpj))) return erro(400, 'CPF/CNPJ inválido (dígito verificador não confere)')
+  const erroExtras = validarExtras(body, {
+    cpfCnpj: body.cpf_cnpj,
+    enderecoObrigatorioPJ: PRODUTO.enderecoObrigatorioPJ,
+  })
+  if (erroExtras) return erro(400, erroExtras)
   if (body.billing_type !== 'PIX' && body.billing_type !== 'CREDIT_CARD') return erro(400, 'Forma de pagamento inválida')
   if (body.billing_type === 'CREDIT_CARD') {
     const n = body.installments ?? 1
@@ -157,6 +162,8 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const cpf = onlyDigits(body.cpf_cnpj)
+  const extras = normalizarExtras(body, cpf)
+  const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
     dedupe: { curso_slug: PRODUTO.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos, tipo_ingresso: tipoIngresso },
@@ -176,11 +183,20 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
       utm_campaign: body.utm?.campaign ?? null,
       utm_content: body.utm?.content ?? null,
       utm_term: body.utm?.term ?? null,
-      ...normalizarExtras(body),
+      ...extras,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
     },
-    customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
+    // Na nota, o tomador é o dono do documento: PJ entra pela razão social, não
+    // pelo nome de quem preencheu o form (esse fica na nossa coluna `nome`).
+    customer: {
+      name: extras.pessoa_tipo === 'PJ' && extras.razao_social ? extras.razao_social : nome,
+      email,
+      cpfCnpj: cpf,
+      mobilePhone: telefone,
+      company: extras.razao_social,
+      ...(endereco ?? {}),
+    },
     asaas: {
       billingType: billing,
       valueReais: valorCobradoReais,

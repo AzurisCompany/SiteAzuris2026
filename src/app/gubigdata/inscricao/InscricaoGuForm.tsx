@@ -4,6 +4,12 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
+import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
+import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/components/checkout/DadosNota'
+
+// Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a
+// inscrição por endereço. Espelha PRODUTOS['gubigdata-2026-07'].
+const ENDERECO_OBRIGATORIO_PJ = false
 
 /** Opção de tipo de ingresso já com disponibilidade resolvida no servidor. */
 export interface TipoGuOption {
@@ -26,21 +32,6 @@ const ASSOCIACOES = ['Associado IEP', 'Membro GU BigData & IA', 'Participante DS
 
 const brl = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`
 
-function maskCpfCnpj(v: string): string {
-  const d = v.replace(/\D/g, '').slice(0, 14)
-  if (d.length <= 11) {
-    return d
-      .replace(/^(\d{3})(\d)/, '$1.$2')
-      .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
-  }
-  return d
-    .replace(/^(\d{2})(\d)/, '$1.$2')
-    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5')
-}
-
 function maskPhone(v: string): string {
   const d = v.replace(/\D/g, '').slice(0, 11)
   if (d.length <= 10) return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
@@ -58,7 +49,9 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [telefone, setTelefone] = useState('')
+  const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
   const [cpfCnpj, setCpfCnpj] = useState('')
+  const [nota, setNota] = useState<NotaValue>(notaInicial)
   const [associacao, setAssociacao] = useState<string>(ASSOCIACOES[0])
   const [billingType, setBillingType] = useState<BillingType>('PIX')
   const [installments, setInstallments] = useState(1)
@@ -96,6 +89,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
                 cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
                 billing_type: billingType,
                 installments: billingType === 'CREDIT_CARD' ? parcelas : 1,
+                ...notaParaPayload(nota, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
               }),
         }),
       })
@@ -252,18 +246,23 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
             <p className="mt-1 text-xs text-slate-500">A condição será conferida no credenciamento, na entrada do evento.</p>
           </div>
         ) : (
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">CPF ou CNPJ</label>
-            <input
-              type="text"
-              required
-              value={cpfCnpj}
-              onChange={(e) => setCpfCnpj(maskCpfCnpj(e.target.value))}
-              placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              className={campo}
+          <>
+            <CampoDocumento
+              tema="light"
+              pessoaTipo={pessoaTipo}
+              onPessoaTipoChange={setPessoaTipo}
+              valor={cpfCnpj}
+              onChange={setCpfCnpj}
+              ajuda="Necessário pra emissão da cobrança."
             />
-            <p className="mt-1 text-xs text-slate-500">Necessário pra emissão da cobrança.</p>
-          </div>
+            <DadosNota
+              tema="light"
+              value={nota}
+              onChange={setNota}
+              pessoaTipo={pessoaTipo}
+              enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+            />
+          </>
         )}
       </div>
 

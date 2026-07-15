@@ -5,7 +5,7 @@
 import { NextResponse } from 'next/server'
 import { determinarLotePorPerfil, normalizarPerfil, type BillingType } from '@/lib/db'
 import { MAX_PARCELAS, valorParcela, totalComJuros } from '@/lib/parcelamento'
-import { normalizarExtras, type ExtrasInput } from '@/lib/checkout-extras'
+import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
@@ -46,7 +46,10 @@ function validate(body: RequestBody): string | null {
   }
 
   if (body.consentimento !== true) return 'É necessário aceitar os termos de uso dos dados (LGPD)'
-  return null
+
+  // Curso vendido pra empresa quase sempre vira nota — PJ não fecha sem endereço.
+  // (O Lakehouse tem checkout próprio e não passa pelo registry de [[produtos]].)
+  return validarExtras(body, { cpfCnpj: body.cpf_cnpj, enderecoObrigatorioPJ: true })
 }
 
 export async function POST(request: Request) {
@@ -86,6 +89,8 @@ export async function POST(request: Request) {
   const nome = body.nome.trim()
   const email = body.email.trim().toLowerCase()
   const telefone = body.telefone ? onlyDigits(body.telefone) : null
+  const extras = normalizarExtras(body, cpf)
+  const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
     dedupe: { curso_slug: 'lakehouse-comunidade', cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos, tipo_ingresso: perfil },
@@ -105,11 +110,19 @@ export async function POST(request: Request) {
       utm_campaign: body.utm?.campaign ?? null,
       utm_content: body.utm?.content ?? null,
       utm_term: body.utm?.term ?? null,
-      ...normalizarExtras(body),
+      ...extras,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
     },
-    customer: { name: nome, email, cpfCnpj: cpf, mobilePhone: telefone },
+    // Tomador da nota = dono do documento: PJ entra pela razão social.
+    customer: {
+      name: extras.pessoa_tipo === 'PJ' && extras.razao_social ? extras.razao_social : nome,
+      email,
+      cpfCnpj: cpf,
+      mobilePhone: telefone,
+      company: extras.razao_social,
+      ...(endereco ?? {}),
+    },
     asaas: {
       billingType: body.billing_type === 'CREDIT_CARD' ? 'CREDIT_CARD' : 'PIX',
       valueReais: valorCobradoReais,
