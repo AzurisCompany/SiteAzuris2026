@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { mapAsaasStatus, createPayment, parsePayment, __setAsaasFetch } from '@/lib/asaas'
+import { mapAsaasStatus, createPayment, parsePayment, findOrCreateCustomer, __setAsaasFetch } from '@/lib/asaas'
 
 describe('mapAsaasStatus', () => {
   it('mapeia os status pagos', () => {
@@ -65,5 +65,77 @@ describe('createPayment — body builder', () => {
     expect(lastBody.externalReference).toBeUndefined()
     await createPayment({ ...base, billingType: 'PIX', externalReference: 'ref:1' })
     expect(lastBody.externalReference).toBe('ref:1')
+  })
+})
+
+// O endereço só serve pra emitir nota se chegar no CADASTRO DO CLIENTE: o Asaas
+// monta a NFS-e a partir dele, não do que mandamos em POST /invoices.
+describe('findOrCreateCustomer — cadastro fiscal', () => {
+  type Chamada = { url: string; method: string; body: Record<string, unknown> }
+  let chamadas: Chamada[]
+
+  const enderecoPJ = {
+    company: 'Azuris LTDA',
+    postalCode: '80010010',
+    address: 'Rua XV de Novembro',
+    addressNumber: '100',
+    province: 'Centro',
+  }
+
+  /** Fake do Asaas: `existente` = o que o GET /customers?cpfCnpj= devolve. */
+  function fake(existente: Record<string, unknown> | null) {
+    chamadas = []
+    __setAsaasFetch(async (url, init) => {
+      const method = init?.method ?? 'GET'
+      chamadas.push({ url: String(url), method, body: JSON.parse(String(init?.body ?? '{}')) })
+      if (method === 'GET') {
+        return new Response(JSON.stringify({ data: existente ? [existente] : [] }), { status: 200 })
+      }
+      return new Response(JSON.stringify({ id: 'c1', ...(existente ?? {}) }), { status: 200 })
+    })
+  }
+
+  it('manda o endereço ao criar cliente novo', async () => {
+    fake(null)
+    await findOrCreateCustomer({ name: 'Azuris LTDA', email: 'a@x.com', cpfCnpj: '11222333000181', ...enderecoPJ })
+    const post = chamadas.find((c) => c.method === 'POST')!
+    expect(post.body).toMatchObject(enderecoPJ)
+  })
+
+  // Sem isso, quem já comprou antes fica preso ao cadastro incompleto da 1ª compra
+  // e a nota dele nunca sai.
+  it('atualiza o cadastro do cliente reusado quando chega endereço novo', async () => {
+    fake({ id: 'c9', name: 'Azuris LTDA', email: 'a@x.com', cpfCnpj: '11222333000181' })
+    const r = await findOrCreateCustomer({ name: 'Azuris LTDA', email: 'a@x.com', cpfCnpj: '11222333000181', ...enderecoPJ })
+    const put = chamadas.find((c) => c.method === 'PUT')
+    expect(put?.url).toContain('/customers/c9')
+    expect(put?.body).toMatchObject(enderecoPJ)
+    expect(r.id).toBe('c9') // update é parcial e preserva o id — não cria cliente novo
+  })
+
+  it('não faz PUT quando o cadastro já está igual', async () => {
+    fake({ id: 'c9', name: 'Azuris LTDA', email: 'a@x.com', cpfCnpj: '11222333000181', ...enderecoPJ })
+    await findOrCreateCustomer({ name: 'Azuris LTDA', email: 'a@x.com', cpfCnpj: '11222333000181', ...enderecoPJ })
+    expect(chamadas.some((c) => c.method === 'PUT')).toBe(false)
+  })
+
+  it('PF sem endereço não manda campos vazios (o PUT sobrescreveria com nada)', async () => {
+    fake({ id: 'c9', name: 'Fulano', email: 'f@x.com', cpfCnpj: '11144477735', postalCode: '80010010' })
+    await findOrCreateCustomer({ name: 'Fulano', email: 'f@x.com', cpfCnpj: '11144477735', company: null })
+    expect(chamadas.some((c) => c.method === 'PUT')).toBe(false)
+  })
+
+  // Cadastro é acessório; cobrança é o negócio. Um não pode derrubar o outro.
+  it('falha ao atualizar cadastro não derruba a venda', async () => {
+    chamadas = []
+    __setAsaasFetch(async (url, init) => {
+      const method = init?.method ?? 'GET'
+      if (method === 'GET') {
+        return new Response(JSON.stringify({ data: [{ id: 'c9', name: 'X', email: 'a@x.com', cpfCnpj: '11222333000181' }] }), { status: 200 })
+      }
+      return new Response('{"errors":[{"description":"boom"}]}', { status: 400 })
+    })
+    const r = await findOrCreateCustomer({ name: 'X', email: 'a@x.com', cpfCnpj: '11222333000181', ...enderecoPJ })
+    expect(r.id).toBe('c9')
   })
 })

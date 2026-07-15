@@ -60,6 +60,15 @@ export interface CreateCustomerInput {
   email: string
   cpfCnpj: string
   mobilePhone?: string | null
+  /** razão social — vai no campo `company` do Asaas (PJ) */
+  company?: string | null
+  /** Endereço do tomador. Sem ele a NFS-e não sai: o Asaas monta a nota a partir
+   *  do CADASTRO DO CLIENTE, não do que mandamos em POST /invoices. */
+  postalCode?: string | null
+  address?: string | null
+  addressNumber?: string | null
+  complement?: string | null
+  province?: string | null
 }
 
 export interface AsaasCustomer {
@@ -68,15 +77,60 @@ export interface AsaasCustomer {
   email: string
   cpfCnpj: string
   mobilePhone?: string
+  company?: string
+  postalCode?: string
+  address?: string
+  addressNumber?: string
+  complement?: string
+  province?: string
+}
+
+/** Campos de cadastro (fora name/email/cpfCnpj) que sincronizamos com o Asaas. */
+const CAMPOS_CADASTRO = ['company', 'postalCode', 'address', 'addressNumber', 'complement', 'province'] as const
+
+/** Só os campos com valor — o Asaas trata update como patch e sobrescreveria com vazio. */
+function camposComValor(input: CreateCustomerInput): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const k of CAMPOS_CADASTRO) {
+    const v = input[k]
+    if (typeof v === 'string' && v.trim()) out[k] = v.trim()
+  }
+  return out
+}
+
+/** Atualiza um cliente existente (PUT /customers/{id}, parcial). */
+export async function updateCustomer(id: string, patch: Record<string, unknown>): Promise<AsaasCustomer> {
+  const c = await asaasFetch(`/customers/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(patch),
+  })
+  reqStr(c, 'id', 'updateCustomer')
+  return c as AsaasCustomer
 }
 
 export async function findOrCreateCustomer(input: CreateCustomerInput): Promise<AsaasCustomer> {
+  const cadastro = camposComValor(input)
+
   // Procura por CPF/CNPJ primeiro
   const search = (await asaasFetch(`/customers?cpfCnpj=${encodeURIComponent(input.cpfCnpj)}`, {
     method: 'GET',
   })) as { data?: AsaasCustomer[] }
   if (Array.isArray(search?.data) && search.data.length > 0) {
-    return search.data[0] as AsaasCustomer
+    const existente = search.data[0] as AsaasCustomer
+    // Cliente reusado: se ele chegou com endereço/razão social novos, atualiza o
+    // cadastro. Sem isso, quem já comprou antes fica preso ao cadastro incompleto
+    // da primeira compra e a nota dele nunca sai.
+    const faltantes = Object.entries(cadastro).filter(([k, v]) => (existente[k as keyof AsaasCustomer] ?? '') !== v)
+    if (faltantes.length > 0) {
+      try {
+        return await updateCustomer(existente.id, Object.fromEntries(faltantes))
+      } catch (e) {
+        // Atualizar cadastro não é motivo pra derrubar uma venda — a cobrança
+        // funciona mesmo com endereço velho; só a NF pode precisar de correção.
+        console.error('Falha ao atualizar cadastro do cliente no Asaas (cobrança segue):', e)
+      }
+    }
+    return existente
   }
 
   const created = await asaasFetch('/customers', {
@@ -87,6 +141,7 @@ export async function findOrCreateCustomer(input: CreateCustomerInput): Promise<
       cpfCnpj: input.cpfCnpj,
       mobilePhone: input.mobilePhone ?? undefined,
       notificationDisabled: false,
+      ...cadastro,
     }),
   })
   return created as AsaasCustomer
