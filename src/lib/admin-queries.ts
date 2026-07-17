@@ -420,6 +420,50 @@ export async function emailsFiltrados(f: FiltrosVendas): Promise<string[]> {
  * (as abas precisam da lista de cada produto independente da aba selecionada).
  * Retorna `todos` (união de todos os produtos, deduplicada) e `porCurso` (mapa slug → emails).
  */
+export interface TotaisVendas {
+  /** linhas que o filtro pegou (não só a página) */
+  linhas: number
+  valor_centavos: number
+  liquido_centavos: number
+  taxa_centavos: number
+  /** quantas dessas linhas têm líquido/taxa preenchidos (só as sincronizadas com o Asaas) */
+  linhas_sincronizadas: number
+}
+
+/**
+ * Somatório do conjunto INTEIRO que o filtro pegou — não da página. Mesma cláusula
+ * where da listarVendas, sem limit/offset.
+ *
+ * Soma TODOS os status que o filtro deixou passar (pendente, vencido, etc), porque
+ * é o somatório da coluna que está na tela. Não confundir com [[resumoFinanceiro]],
+ * que é o dashboard e soma só `paid`. Pra ver só pago aqui, filtre por status.
+ *
+ * `liquido`/`taxa` são NULL até a venda sincronizar com o Asaas — o SUM ignora NULL,
+ * então esses dois podem cobrir MENOS linhas que o valor bruto. Por isso devolvemos
+ * `linhas_sincronizadas`: sem esse número, a soma do líquido mente calada.
+ */
+export async function totaisVendas(f: FiltrosVendas): Promise<TotaisVendas> {
+  const { where, params } = construirWhere(f)
+  const rows = (await sql.query(
+    `SELECT
+       COUNT(*)                                     AS linhas,
+       COALESCE(SUM(valor_centavos), 0)             AS valor_centavos,
+       COALESCE(SUM(valor_liquido_centavos), 0)     AS liquido_centavos,
+       COALESCE(SUM(taxa_centavos), 0)              AS taxa_centavos,
+       COUNT(valor_liquido_centavos)                AS linhas_sincronizadas
+     FROM inscricoes ${where}`,
+    params
+  )) as Array<Record<string, string | number>>
+  const r = rows[0]
+  return {
+    linhas: Number(r?.linhas ?? 0),
+    valor_centavos: Number(r?.valor_centavos ?? 0),
+    liquido_centavos: Number(r?.liquido_centavos ?? 0),
+    taxa_centavos: Number(r?.taxa_centavos ?? 0),
+    linhas_sincronizadas: Number(r?.linhas_sincronizadas ?? 0),
+  }
+}
+
 export async function emailsPorProduto(
   f: FiltrosVendas
 ): Promise<{ todos: string[]; porCurso: Record<string, string[]> }> {

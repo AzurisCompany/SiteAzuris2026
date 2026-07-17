@@ -5,6 +5,7 @@ import {
   resumoFinanceiro,
   contarTestes,
   opcoesFiltro,
+  totaisVendas,
   labelProduto,
   tabProduto,
   brl,
@@ -13,6 +14,7 @@ import {
   STATUS_LABEL,
   STATUS_COR,
   type ResumoProduto,
+  type TotaisVendas,
 } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
 import type { InscricaoRow } from '@/lib/db'
@@ -29,6 +31,16 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COR[status] ?? ''}`}>
       {STATUS_LABEL[status] ?? status}
     </span>
+  )
+}
+
+/** Σ da coluna: soma o filtro INTEIRO, não a página. */
+function SomaColuna({ centavos }: { centavos: number | undefined }) {
+  if (centavos == null) return null
+  return (
+    <div className="mt-1 whitespace-nowrap text-sm font-bold normal-case tracking-normal text-[var(--azuris-cyan)]">
+      Σ {brl(centavos)}
+    </div>
   )
 }
 
@@ -62,9 +74,10 @@ export default async function VendasPage({
   let opcoes: { tipos: string[]; origens: string[] } = { tipos: [], origens: [] }
   let emailsTodos: string[] = []
   let emailsPorCurso: Record<string, string[]> = {}
+  let totais: TotaisVendas | null = null
   const filtros = { curso, status, billing, tipo, pessoa, origem, de, ate, busca, mostrarTeste }
   try {
-    const [res, r, qt, op, em] = await Promise.all([
+    const [res, r, qt, op, em, tot] = await Promise.all([
       listarVendas({
         ...filtros,
         limit: PAGE_SIZE,
@@ -74,6 +87,7 @@ export default async function VendasPage({
       contarTestes(),
       opcoesFiltro(),
       emailsPorProduto(filtros),
+      totaisVendas(filtros),
     ])
     rows = res.rows
     total = res.total
@@ -82,6 +96,7 @@ export default async function VendasPage({
     opcoes = op
     emailsTodos = em.todos
     emailsPorCurso = em.porCurso
+    totais = tot
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -150,7 +165,19 @@ export default async function VendasPage({
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Vendas</h1>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">{total} registro(s)</p>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
+            {total} registro(s) · Σ soma o filtro inteiro, não só esta página
+            {totais && totais.linhas_sincronizadas < totais.linhas && (
+              // Sem isso o Σ do líquido mente calado: SUM ignora NULL, e líquido/taxa
+              // só existem depois do sync com o Asaas.
+              <>
+                {' · '}
+                <span className="text-amber-300">
+                  líquido/taxa cobrem {totais.linhas_sincronizadas} de {totais.linhas} (o resto não sincronizou)
+                </span>
+              </>
+            )}
+          </p>
         </div>
         <div className="flex items-center gap-2">
         <CopiarEmailsButton emails={emailsAtivos} />
@@ -219,13 +246,24 @@ export default async function VendasPage({
         <table className="w-full text-sm">
           <thead className="bg-[var(--azuris-deep)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
             <tr>
-              <th className="px-4 py-3">Cliente</th>
-              <th className="px-4 py-3">Produto</th>
-              <th className="px-4 py-3">Valor</th>
-              <th className="px-4 py-3">Pgto</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Data</th>
-              <th className="px-4 py-3 text-right">Ação</th>
+              <th className="px-4 py-3 align-top">Cliente</th>
+              <th className="px-4 py-3 align-top">Produto</th>
+              <th className="px-4 py-3 align-top">
+                Valor
+                <SomaColuna centavos={totais?.valor_centavos} />
+              </th>
+              <th className="px-4 py-3 align-top">
+                Líquido
+                <SomaColuna centavos={totais?.liquido_centavos} />
+              </th>
+              <th className="px-4 py-3 align-top">
+                Taxa
+                <SomaColuna centavos={totais?.taxa_centavos} />
+              </th>
+              <th className="px-4 py-3 align-top">Pgto</th>
+              <th className="px-4 py-3 align-top">Status</th>
+              <th className="px-4 py-3 align-top">Data</th>
+              <th className="px-4 py-3 align-top text-right">Ação</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--azuris-surface)]">
@@ -263,6 +301,17 @@ export default async function VendasPage({
                   {brl(r.valor_centavos)}
                   {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}
                 </td>
+                {/* Líquido e taxa só existem depois do sync com o Asaas. */}
+                <td className="px-4 py-3 text-[var(--text-secondary)]">
+                  {r.valor_liquido_centavos == null ? (
+                    <span className="text-[var(--text-muted)]">—</span>
+                  ) : (
+                    brl(r.valor_liquido_centavos)
+                  )}
+                </td>
+                <td className="px-4 py-3 text-[var(--text-secondary)]">
+                  {r.taxa_centavos == null ? <span className="text-[var(--text-muted)]">—</span> : brl(r.taxa_centavos)}
+                </td>
                 <td className="px-4 py-3 text-[var(--text-secondary)]">{labelBilling(r.billing_type)}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
@@ -273,7 +322,7 @@ export default async function VendasPage({
             ))}
             {rows.length === 0 && !erro && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                <td colSpan={9} className="px-4 py-10 text-center text-[var(--text-muted)]">
                   Nenhuma venda encontrada com esses filtros.
                 </td>
               </tr>
