@@ -1,14 +1,12 @@
 import Link from 'next/link'
-import { brl, whatsappUrl, STATUS_LABEL, STATUS_COR } from '@/lib/admin-queries'
+import { brl, whatsappUrl, tabProduto, STATUS_LABEL, STATUS_COR } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
+import { descricaoManual } from '@/lib/cobranca-manual'
 import type { InscricaoRow } from '@/lib/db'
 import SyncRowButton from './SyncRowButton'
 
-const PREFIXO_DESC = 'Proposta customizada: '
-
 function descricao(insc: InscricaoRow): string {
-  const raw = insc.como_conheceu ?? ''
-  return raw.startsWith(PREFIXO_DESC) ? raw.slice(PREFIXO_DESC.length) : raw || '—'
+  return descricaoManual(insc.como_conheceu) || insc.como_conheceu || '—'
 }
 
 function fmtData(iso: string): string {
@@ -36,6 +34,7 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
           <thead className="bg-[var(--azuris-deep)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
             <tr>
               <th className="px-4 py-3">Cliente</th>
+              <th className="px-4 py-3">Produto</th>
               <th className="px-4 py-3">Descrição</th>
               <th className="px-4 py-3">Valor</th>
               <th className="px-4 py-3">Meio</th>
@@ -57,6 +56,11 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                     </span>
                   )}
                   <div className="text-xs text-[var(--text-muted)]">{r.email}</div>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="inline-flex rounded-full border border-[var(--azuris-surface)] px-2 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
+                    {tabProduto(r.curso_slug)}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-[var(--text-secondary)]">{descricao(r)}</td>
                 <td className="px-4 py-3">
@@ -99,7 +103,7 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                <td colSpan={8} className="px-4 py-10 text-center text-[var(--text-muted)]">
                   Nenhuma cobrança gerada ainda.
                 </td>
               </tr>

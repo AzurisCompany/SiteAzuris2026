@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { getInscricao, labelProduto } from '@/lib/admin-queries'
+import { descricaoManual } from '@/lib/cobranca-manual'
 import { trocarMeioCobranca, cancelarInscricao, type BillingType } from '@/lib/db'
 import {
   getPayment,
@@ -86,10 +87,8 @@ export async function POST(request: Request) {
   // Vencimento: mantém o atual se ainda for futuro; senão, 3 dias a partir de hoje.
   const dueDate = insc.due_date && insc.due_date >= hojeBRT() ? insc.due_date : todayPlusDays(3)
 
-  const descricao =
-    insc.curso_slug === 'proposta' && insc.como_conheceu?.startsWith('Proposta customizada: ')
-      ? insc.como_conheceu.slice('Proposta customizada: '.length)
-      : labelProduto(insc.curso_slug)
+  // Cobrança manual guarda a descrição digitada; venda do site herda o nome do produto.
+  const descricao = descricaoManual(insc.como_conheceu) || labelProduto(insc.curso_slug)
 
   // 1) Cancela a cobrança anterior no Asaas. Se ela não existir mais (getPayment 404),
   //    não há o que apagar. Se existir e o DELETE falhar, ABORTA sem mexer no banco —

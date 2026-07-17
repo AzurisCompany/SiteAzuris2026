@@ -1,7 +1,9 @@
 // POST /api/admin/cobranca  (protegido)
-// Gera uma cobrança AVULSA no Asaas a partir de uma proposta fechada — valor e
-// descrição livres. Reusa o pipeline comum (criarCobranca). A inscrição fica com
-// curso_slug='proposta' pra virar um balde próprio no admin. Webhook fecha o status.
+// Gera uma cobrança MANUAL no Asaas a partir de uma proposta fechada — valor e
+// descrição livres. Reusa o pipeline comum (criarCobranca). O produto escolhido
+// vira o curso_slug (a aba do painel); sem produto, cai em 'proposta'. O valor é
+// sempre o que o admin digitou — aqui ele é a fonte da verdade, não o registry.
+// Webhook fecha o status.
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { type BillingType } from '@/lib/db'
@@ -11,18 +13,23 @@ import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
+import {
+  getOpcaoCobranca,
+  ORIGEM_ADMIN,
+  PREFIXO_MANUAL,
+  PROPOSTA_SLUG,
+  type OpcaoCobranca,
+} from '@/lib/cobranca-manual'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-/** Slug interno das cobranças avulsas (aparece como "Proposta customizada" no admin). */
-export const PROPOSTA_SLUG = 'proposta'
 
 interface RequestBody extends ExtrasInput {
   nome?: string
   email?: string
   cpf_cnpj?: string
   telefone?: string
+  curso_slug?: string
   descricao?: string
   valor_reais?: number
   billing_type?: BillingType
@@ -30,14 +37,17 @@ interface RequestBody extends ExtrasInput {
   dias_vencimento?: number
 }
 
-function validate(b: RequestBody): string | null {
+function validate(b: RequestBody, opcao: OpcaoCobranca): string | null {
   if (!b.nome || b.nome.trim().length < 3) return 'Nome inválido'
   if (!b.email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email)) return 'E-mail inválido'
 
   if (!cpfCnpjValido(onlyDigits(b.cpf_cnpj))) return 'CPF/CNPJ inválido (dígito verificador não confere)'
 
-  // Proposta corporativa é o caminho de PJ que mais vira nota — mesmo padrão dos checkouts.
-  const erroExtras = validarExtras(b, { cpfCnpj: b.cpf_cnpj, enderecoObrigatorioPJ: true })
+  // Endereço de PJ segue a regra do produto — igual ao checkout público dele.
+  const erroExtras = validarExtras(b, {
+    cpfCnpj: b.cpf_cnpj,
+    enderecoObrigatorioPJ: opcao.enderecoObrigatorioPJ,
+  })
   if (erroExtras) return erroExtras
 
   const tel = onlyDigits(b.telefone)
@@ -74,7 +84,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
-  const error = validate(body)
+  // Produto = balde da venda. Só a allowlist entra: curso_slug vem do client.
+  const opcao = getOpcaoCobranca(body.curso_slug ?? PROPOSTA_SLUG)
+  if (!opcao) return NextResponse.json({ error: 'Produto inválido' }, { status: 400 })
+
+  const error = validate(body, opcao)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
   const billing_type = body.billing_type as AsaasBillingType
@@ -96,9 +110,11 @@ export async function POST(request: Request) {
   const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
-    dedupe: { curso_slug: PROPOSTA_SLUG, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos },
+    dedupe: { curso_slug: opcao.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos },
     inscricao: {
-      curso_slug: PROPOSTA_SLUG,
+      curso_slug: opcao.slug,
+      // Cobrança manual não é venda de lote: fica fora da contagem de vagas do
+      // Lakehouse (v_vagas_por_lote conta lote1/lote2).
       lote: 'unico',
       nome,
       email,
@@ -107,14 +123,16 @@ export async function POST(request: Request) {
       billing_type,
       valor_centavos: valorCobradoCentavos,
       installments,
-      utm_source: null,
+      // Carimbo de origem: é o que identifica a venda como nascida no admin agora
+      // que ela pode cair em qualquer balde de produto.
+      utm_source: ORIGEM_ADMIN,
       utm_medium: null,
       utm_campaign: null,
       utm_content: null,
       utm_term: null,
       ...extras,
-      // guarda a descrição da proposta aqui — sem campo dedicado (visível no detalhe).
-      como_conheceu: `Proposta customizada: ${descricao}`,
+      // guarda a descrição digitada aqui — sem campo dedicado (visível no detalhe).
+      como_conheceu: `${PREFIXO_MANUAL}${descricao}`,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),
     },
@@ -131,7 +149,7 @@ export async function POST(request: Request) {
       billingType: billing_type,
       valueReais: valorCobradoReais,
       description: descricao,
-      externalReference: (id) => `${PROPOSTA_SLUG}:${id}`,
+      externalReference: (id) => `${opcao.slug}:${id}`,
       dueDate: todayPlusDays(dueDays),
       installmentCount: installments > 1 ? installments : undefined,
       installmentValueReais: installments > 1 ? installmentValueReais : undefined,

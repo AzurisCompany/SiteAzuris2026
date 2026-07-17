@@ -1,5 +1,7 @@
 // Queries e helpers de apresentação da área admin (somente leitura).
-import { sql, type InscricaoRow } from '@/lib/db'
+import { sql, PRECO_POR_PERFIL, type InscricaoRow } from '@/lib/db'
+import { PRODUTOS } from '@/lib/produtos'
+import { ORIGEM_ADMIN, PROPOSTA_SLUG, type PrecosSugeridos } from '@/lib/cobranca-manual'
 
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
@@ -56,6 +58,30 @@ export const STATUS_COR: Record<string, string> = {
 export function brl(centavos: number | null | undefined): string {
   const v = (centavos ?? 0) / 100
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+/**
+ * Preço de tabela de cada produto, pro prefill do form de cobrança manual.
+ * É SUGESTÃO: o valor cobrado é o que o admin digitar (lote corporativo, desconto
+ * negociado). Slug sem entrada aqui (proposta) nasce com o campo vazio.
+ */
+export function precosSugeridosCobranca(): PrecosSugeridos {
+  const dss = PRODUTOS['dss-2026']
+  const gu = PRODUTOS['gubigdata-2026-07']
+  return {
+    'lakehouse-comunidade': {
+      centavos: PRECO_POR_PERFIL['nao-membro'].preco_centavos,
+      dica: `não-membro · membro ${brl(PRECO_POR_PERFIL.membro.preco_centavos)}`,
+    },
+    'dss-2026': {
+      centavos: dss.precoCentavos,
+      dica: `pré-venda · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
+    },
+    'gubigdata-2026-07': {
+      centavos: gu.precoCentavos,
+      dica: 'ingresso Geral (associado é gratuito)',
+    },
+  }
 }
 
 // --- Dashboard ---
@@ -281,6 +307,8 @@ export interface FiltrosVendas {
   tipo?: string
   pessoa?: string // 'PF' | 'PJ'
   origem?: string // utm_source
+  /** só cobranças nascidas no admin (qualquer produto), incluindo as antigas sem utm_source */
+  manual?: boolean
   de?: string // data inicial (YYYY-MM-DD), inclusive
   ate?: string // data final (YYYY-MM-DD), inclusive
   busca?: string
@@ -319,6 +347,12 @@ function construirWhere(f: FiltrosVendas): { where: string; params: unknown[] } 
   if (f.origem) {
     params.push(f.origem)
     cond.push(`utm_source = $${params.length}`)
+  }
+  if (f.manual) {
+    // Cobrança do admin carimba utm_source='admin'. As geradas antes do seletor de
+    // produto não têm carimbo nenhum — só o slug 'proposta' as identifica.
+    params.push(ORIGEM_ADMIN, PROPOSTA_SLUG)
+    cond.push(`(utm_source = $${params.length - 1} OR curso_slug = $${params.length})`)
   }
   if (f.de) {
     params.push(f.de)

@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import { labelBilling } from '@/lib/billing'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
 import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/components/checkout/DadosNota'
+import {
+  OPCOES_COBRANCA,
+  getOpcaoCobranca,
+  PROPOSTA_SLUG,
+  type OpcaoCobranca,
+  type PrecosSugeridos,
+} from '@/lib/cobranca-manual'
 
 // Espelho da regra de parcelamento do servidor (lib/parcelamento) — só pra PREVIEW.
 // O valor cobrado é sempre recalculado no servidor; aqui é ajuda visual.
@@ -46,11 +53,15 @@ interface Resultado {
   billing_type: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 }
 
-/** Proposta corporativa é o caminho de PJ que mais vira nota — endereço obrigatório. */
-const ENDERECO_OBRIGATORIO_PJ = true
+/** Preço de tabela → texto do campo de valor ("47000" → "470,00"). Vazio = sem sugestão. */
+function prefillValor(precos: PrecosSugeridos, slug: string): string {
+  const p = precos[slug]
+  return p ? (p.centavos / 100).toFixed(2).replace('.', ',') : ''
+}
 
-export default function CobrancaForm() {
+export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
   const router = useRouter()
+  const [slug, setSlug] = useState<string>(PROPOSTA_SLUG)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
@@ -68,7 +79,21 @@ export default function CobrancaForm() {
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const [copiado, setCopiado] = useState<'link' | 'msg' | null>(null)
 
+  const opcao = getOpcaoCobranca(slug) ?? OPCOES_COBRANCA[OPCOES_COBRANCA.length - 1]
+  const precoSugerido = precos[slug] ?? null
+
   const valorReais = useMemo(() => parseValor(valorRaw), [valorRaw])
+
+  // Trocar de produto reescreve descrição e valor — mas nunca por cima do que você
+  // digitou: só substitui o campo vazio ou o prefill do produto anterior.
+  function trocarProduto(nova: OpcaoCobranca) {
+    const anterior = opcao
+    setDescricao((d) => (d === '' || d === anterior.descricaoPadrao ? nova.descricaoPadrao : d))
+    setValorRaw((v) =>
+      v === '' || v === prefillValor(precos, anterior.slug) ? prefillValor(precos, nova.slug) : v,
+    )
+    setSlug(nova.slug)
+  }
 
   // 1 meio marcado = método fixo; 2+ = UNDEFINED (cliente escolhe na fatura Asaas).
   const marcados = [
@@ -105,12 +130,13 @@ export default function CobrancaForm() {
           email,
           cpf_cnpj: cpf,
           telefone,
+          curso_slug: slug,
           descricao,
           valor_reais: valorReais,
           billing_type: billingType,
           installments: soCartao ? parcelas : 1,
           dias_vencimento: diasVenc,
-          ...notaParaPayload(nota, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
+          ...notaParaPayload(nota, pessoaTipo, opcao.enderecoObrigatorioPJ),
         }),
       })
       const data = (await res.json()) as Resultado & { error?: string }
@@ -166,8 +192,9 @@ export default function CobrancaForm() {
   function novaCobranca() {
     setResultado(null)
     setErro(null)
-    setValorRaw('')
-    setDescricao('')
+    // Volta pro produto atual em branco — mantém o balde, limpa os dados do cliente.
+    setValorRaw(prefillValor(precos, slug))
+    setDescricao(opcao.descricaoPadrao)
     setNome('')
     setEmail('')
     setCpf('')
@@ -255,6 +282,33 @@ export default function CobrancaForm() {
   // --- Formulário ---
   return (
     <form onSubmit={enviar} className="max-w-2xl space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+      <div>
+        <label className={rotulo}>Produto</label>
+        <div className="flex flex-wrap gap-2">
+          {OPCOES_COBRANCA.map((o) => {
+            const ativo = o.slug === slug
+            return (
+              <button
+                key={o.slug}
+                type="button"
+                aria-pressed={ativo}
+                onClick={() => trocarProduto(o)}
+                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
+                  ativo
+                    ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
+                    : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {o.label}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Define em qual aba do painel a venda entra. O valor é sempre o que você digitar.
+        </p>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={rotulo}>Nome do contato</label>
@@ -283,11 +337,11 @@ export default function CobrancaForm() {
         value={nota}
         onChange={setNota}
         pessoaTipo={pessoaTipo}
-        enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+        enderecoObrigatorioPJ={opcao.enderecoObrigatorioPJ}
       />
 
       <div>
-        <label className={rotulo}>Descrição da proposta</label>
+        <label className={rotulo}>Descrição da cobrança</label>
         <input value={descricao} onChange={(e) => setDescricao(e.target.value)} required minLength={3} className={campo} placeholder="Ex.: Lote corporativo — 8 ingressos DSSBR 2026" />
         <p className="mt-1 text-xs text-[var(--text-muted)]">Aparece na fatura do cliente e no detalhe da venda.</p>
       </div>
@@ -297,6 +351,11 @@ export default function CobrancaForm() {
           <label className={rotulo}>Valor total (R$)</label>
           <input value={valorRaw} onChange={(e) => setValorRaw(e.target.value)} required inputMode="decimal" className={campo} placeholder="3.800,00" />
           {valorReais > 0 && <p className="mt-1 text-xs text-[var(--text-muted)]">= {brl(valorReais)}</p>}
+          {precoSugerido && (
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              Tabela: {brl(precoSugerido.centavos / 100)} · {precoSugerido.dica}
+            </p>
+          )}
         </div>
         <div>
           <label className={rotulo}>Vencimento em</label>
