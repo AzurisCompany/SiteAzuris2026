@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { valorParcela, totalComJuros, MAX_PARCELAS, TAXA_JUROS_AM } from '@/lib/parcelamento'
+import { valorParcela, totalComJuros, valorParcelaSemJuros, MAX_PARCELAS, MAX_PARCELAS_ADMIN, TAXA_JUROS_AM } from '@/lib/parcelamento'
 
 describe('parcelamento', () => {
   it('1x é à vista, sem juros', () => {
@@ -38,5 +38,18 @@ describe('parcelamento', () => {
     const esperado = Number(((550 * i) / (1 - Math.pow(1 + i, -3))).toFixed(2))
     expect(valorParcela(550, 3)).toBe(esperado)
     expect(totalComJuros(550, 3)).toBe(Number((esperado * 3).toFixed(2)))
+  })
+
+  it('sem juros: parcela é a divisão simples e 1x é o total cheio', () => {
+    expect(valorParcelaSemJuros(500, 1)).toBe(500)
+    expect(valorParcelaSemJuros(500, 4)).toBe(125)
+    // arredonda a 2 casas mesmo quando não divide exato (o Asaas ajusta via totalValue)
+    expect(valorParcelaSemJuros(500, 3)).toBe(166.67)
+    // sempre <= parcela com juros pro mesmo n
+    expect(valorParcelaSemJuros(550, 3)).toBeLessThan(valorParcela(550, 3))
+  })
+
+  it('o teto do admin é maior que o público', () => {
+    expect(MAX_PARCELAS_ADMIN).toBeGreaterThan(MAX_PARCELAS)
   })
 })

@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { type BillingType } from '@/lib/db'
 import { type AsaasBillingType } from '@/lib/asaas'
-import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
+import { valorParcela, totalComJuros, valorParcelaSemJuros, MAX_PARCELAS_ADMIN } from '@/lib/parcelamento'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
@@ -34,6 +34,7 @@ interface RequestBody extends ExtrasInput {
   valor_reais?: number
   billing_type?: BillingType
   installments?: number
+  com_juros?: boolean // cartão parcelado: true = juros repassados; false = sem juros (Azuris absorve)
   dias_vencimento?: number
 }
 
@@ -62,7 +63,8 @@ function validate(b: RequestBody, opcao: OpcaoCobranca): string | null {
   if (!b.billing_type || !METODOS.includes(b.billing_type as AsaasBillingType)) return 'Forma de pagamento inválida'
   if (b.billing_type === 'CREDIT_CARD') {
     const n = b.installments ?? 1
-    if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS) return `Parcelamento inválido (1 a ${MAX_PARCELAS})`
+    if (!Number.isInteger(n) || n < 1 || n > MAX_PARCELAS_ADMIN)
+      return `Parcelamento inválido (1 a ${MAX_PARCELAS_ADMIN})`
   }
 
   if (b.dias_vencimento != null) {
@@ -94,10 +96,17 @@ export async function POST(request: Request) {
   const billing_type = body.billing_type as AsaasBillingType
   const valorBaseReais = Number(body.valor_reais!.toFixed(2))
   const installments =
-    billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), MAX_PARCELAS) : 1
-  // Juros só no cartão parcelado (2x+). PIX/Boleto/UNDEFINED = valor cheio à vista.
-  const installmentValueReais = valorParcela(valorBaseReais, installments)
-  const valorCobradoReais = billing_type === 'CREDIT_CARD' ? totalComJuros(valorBaseReais, installments) : valorBaseReais
+    billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), MAX_PARCELAS_ADMIN) : 1
+  // Cartão parcelado (2x+) pode ser COM ou SEM juros (escolha do admin). Sem juros:
+  // a Azuris absorve a taxa, o total cobrado = valor base. PIX/Boleto/UNDEFINED e 1x
+  // = valor cheio à vista.
+  const parcelado = billing_type === 'CREDIT_CARD' && installments > 1
+  const comJuros = body.com_juros !== false // default: repassa juros
+  const installmentValueReais = comJuros
+    ? valorParcela(valorBaseReais, installments)
+    : valorParcelaSemJuros(valorBaseReais, installments)
+  // Sem juros o total é o valor base; com juros soma a tabela Price.
+  const valorCobradoReais = parcelado && comJuros ? totalComJuros(valorBaseReais, installments) : valorBaseReais
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const descricao = body.descricao!.trim()
   const dueDays = body.dias_vencimento ?? 3
@@ -151,8 +160,10 @@ export async function POST(request: Request) {
       description: descricao,
       externalReference: (id) => `${opcao.slug}:${id}`,
       dueDate: todayPlusDays(dueDays),
-      installmentCount: installments > 1 ? installments : undefined,
-      installmentValueReais: installments > 1 ? installmentValueReais : undefined,
+      installmentCount: parcelado ? installments : undefined,
+      // Com juros: parcela pré-fixada (Price). Sem juros: manda o total, Asaas divide.
+      installmentValueReais: parcelado && comJuros ? installmentValueReais : undefined,
+      installmentTotalReais: parcelado && !comJuros ? valorBaseReais : undefined,
     },
   })
 
@@ -186,6 +197,7 @@ export async function POST(request: Request) {
     valor: valorCobradoReais,
     installments,
     installmentValue: installments > 1 ? installmentValueReais : valorCobradoReais,
+    com_juros: parcelado ? comJuros : true,
     billing_type,
   })
 }

@@ -167,7 +167,8 @@ export interface CreatePaymentInput {
   externalReference?: string
   dueDate: string // YYYY-MM-DD
   installmentCount?: number // só pra CREDIT_CARD
-  installmentValueReais?: number // só pra CREDIT_CARD (cada parcela)
+  installmentValueReais?: number // só pra CREDIT_CARD (cada parcela) — parcelamento COM juros pré-fixado
+  installmentTotalReais?: number // só pra CREDIT_CARD — parcelamento SEM juros: total dividido pelo Asaas
 }
 
 export interface AsaasPayment {
@@ -202,8 +203,14 @@ export async function createPayment(input: CreatePaymentInput): Promise<AsaasPay
 
   if (input.billingType === 'CREDIT_CARD' && input.installmentCount && input.installmentCount > 1) {
     body.installmentCount = input.installmentCount
-    body.installmentValue = input.installmentValueReais
-      ?? Number((input.valueReais / input.installmentCount).toFixed(2))
+    // SEM juros: manda o total e deixa o Asaas dividir (absorve o centavo do arredondamento).
+    // COM juros: manda o valor pré-fixado de cada parcela (tabela Price).
+    if (input.installmentTotalReais != null) {
+      body.totalValue = input.installmentTotalReais
+    } else {
+      body.installmentValue = input.installmentValueReais
+        ?? Number((input.valueReais / input.installmentCount).toFixed(2))
+    }
   } else {
     body.value = input.valueReais
   }

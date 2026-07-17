@@ -28,6 +28,7 @@ export interface CriarCobrancaInput {
     dueDate: string
     installmentCount?: number
     installmentValueReais?: number
+    installmentTotalReais?: number
   }
 }
 

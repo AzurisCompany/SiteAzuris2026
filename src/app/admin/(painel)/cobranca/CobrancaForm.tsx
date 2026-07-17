@@ -12,17 +12,8 @@ import {
   type OpcaoCobranca,
   type PrecosSugeridos,
 } from '@/lib/cobranca-manual'
-
-// Espelho da regra de parcelamento do servidor (lib/parcelamento) — só pra PREVIEW.
-// O valor cobrado é sempre recalculado no servidor; aqui é ajuda visual.
-const MAX_PARCELAS = 5
-const TAXA_JUROS_AM = 0.0299
-function valorParcela(totalReais: number, n: number): number {
-  if (n <= 1) return Number(totalReais.toFixed(2))
-  const i = TAXA_JUROS_AM
-  const pmt = (totalReais * i) / (1 - Math.pow(1 + i, -n))
-  return Number(pmt.toFixed(2))
-}
+// Math de parcelamento (puro) direto da lib — o servidor recalcula, aqui é só PREVIEW.
+import { valorParcela, valorParcelaSemJuros, MAX_PARCELAS_ADMIN, TAXA_JUROS_AM } from '@/lib/parcelamento'
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
@@ -50,6 +41,7 @@ interface Resultado {
   valor: number
   installments: number
   installmentValue: number
+  com_juros?: boolean
   billing_type: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 }
 
@@ -71,7 +63,10 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
   const [descricao, setDescricao] = useState('')
   const [valorRaw, setValorRaw] = useState('')
   const [metodos, setMetodos] = useState({ pix: true, boleto: false, cartao: false })
+  // Parcelamento do cartão: 'cliente' = fatura Asaas decide; 'fixo' = admin fixa nº + juros.
+  const [modoParcela, setModoParcela] = useState<'cliente' | 'fixo'>('cliente')
   const [parcelas, setParcelas] = useState(1)
+  const [comJuros, setComJuros] = useState(true)
   const [diasVenc, setDiasVenc] = useState(3)
 
   const [enviando, setEnviando] = useState(false)
@@ -104,13 +99,17 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
   const billingType: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED' | null =
     marcados.length === 0 ? null : marcados.length === 1 ? marcados[0] : 'UNDEFINED'
   const soCartao = billingType === 'CREDIT_CARD'
+  // Parcelas mandadas ao servidor: no modo 'cliente' vai 1x (a fatura Asaas parcela);
+  // no modo 'fixo' vai o nº escolhido.
+  const parcelasFixas = soCartao && modoParcela === 'fixo' ? parcelas : 1
 
-  // Preview do parcelamento — só quando cartão é o ÚNICO meio (aí pré-fixamos os juros).
+  // Preview do parcelamento — só no modo 'fixo' (o modo 'cliente' não pré-fixa nada).
   const previewParcela = useMemo(() => {
-    if (!soCartao || valorReais <= 0) return null
-    const vp = valorParcela(valorReais, parcelas)
-    return { total: Number((vp * parcelas).toFixed(2)), parcela: vp }
-  }, [soCartao, valorReais, parcelas])
+    if (!soCartao || modoParcela !== 'fixo' || valorReais <= 0) return null
+    const vp = comJuros ? valorParcela(valorReais, parcelas) : valorParcelaSemJuros(valorReais, parcelas)
+    const total = comJuros ? Number((vp * parcelas).toFixed(2)) : valorReais
+    return { total, parcela: vp }
+  }, [soCartao, modoParcela, comJuros, valorReais, parcelas])
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault()
@@ -134,7 +133,8 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
           descricao,
           valor_reais: valorReais,
           billing_type: billingType,
-          installments: soCartao ? parcelas : 1,
+          installments: parcelasFixas,
+          com_juros: comJuros,
           dias_vencimento: diasVenc,
           ...notaParaPayload(nota, pessoaTipo, opcao.enderecoObrigatorioPJ),
         }),
@@ -158,9 +158,13 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
     if (!resultado) return ''
     const primeiroNome = nome.trim().split(/\s+/)[0] || ''
     const linhaParc =
-      resultado.billing_type === 'CREDIT_CARD' && resultado.installments > 1
-        ? `\nParcelável em até ${resultado.installments}x de ${brl(resultado.installmentValue)}.`
-        : ''
+      resultado.billing_type !== 'CREDIT_CARD'
+        ? ''
+        : resultado.installments > 1
+          ? `\nParcelado em ${resultado.installments}x de ${brl(resultado.installmentValue)}${
+              resultado.com_juros === false ? ' sem juros' : ''
+            }.`
+          : '\nNo cartão você pode parcelar na própria fatura.'
     const metodoNota =
       resultado.billing_type === 'UNDEFINED' ? ' (PIX, boleto ou cartão)'
         : resultado.billing_type === 'PIX' ? ' (PIX)'
@@ -200,6 +204,8 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
     setCpf('')
     setTelefone('')
     setParcelas(1)
+    setModoParcela('cliente')
+    setComJuros(true)
     setMetodos({ pix: true, boleto: false, cartao: false })
     setDiasVenc(3)
   }
@@ -216,7 +222,11 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
         </div>
         <p className="text-sm text-[var(--text-muted)]">
           {descricao.trim()} · venda #{resultado.id} ·{' '}
-          {resultado.billing_type === 'CREDIT_CARD' ? `Cartão ${resultado.installments}x` : labelBilling(resultado.billing_type)}
+          {resultado.billing_type === 'CREDIT_CARD'
+            ? resultado.installments > 1
+              ? `Cartão ${resultado.installments}x${resultado.com_juros === false ? ' sem juros' : ''}`
+              : 'Cartão (cliente parcela na fatura)'
+            : labelBilling(resultado.billing_type)}
         </p>
 
         <div>
@@ -399,15 +409,6 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
               </button>
             )
           })}
-          {soCartao && (
-            <select value={parcelas} onChange={(e) => setParcelas(Number(e.target.value))} className={`${campo} w-auto`}>
-              {Array.from({ length: MAX_PARCELAS }, (_, i) => i + 1).map((n) => (
-                <option key={n} value={n}>
-                  {n}x {n === 1 ? 'à vista' : 'com juros'}
-                </option>
-              ))}
-            </select>
-          )}
         </div>
         {billingType === null && (
           <p className="mt-2 text-xs text-amber-300">Marque ao menos um meio de pagamento.</p>
@@ -418,12 +419,95 @@ export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
             os marcados. Sem juros pré-fixados — se pagar no cartão, o parcelamento segue as regras da conta Asaas.
           </p>
         )}
-        {previewParcela && (
-          <p className="mt-2 text-xs text-[var(--text-muted)]">
-            {parcelas === 1
-              ? `1x de ${brl(previewParcela.parcela)}`
-              : `${parcelas}x de ${brl(previewParcela.parcela)} = ${brl(previewParcela.total)} (juros ${(TAXA_JUROS_AM * 100).toFixed(2)}% a.m. repassados)`}
-          </p>
+        {soCartao && (
+          <div className="mt-3 space-y-3 rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] p-3">
+            <div className="flex flex-wrap gap-2">
+              {([
+                ['cliente', 'Cliente escolhe na fatura'],
+                ['fixo', 'Eu fixo as parcelas'],
+              ] as const).map(([key, label]) => {
+                const ativo = modoParcela === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={ativo}
+                    onClick={() => setModoParcela(key)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      ativo
+                        ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
+                        : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {modoParcela === 'cliente' ? (
+              <p className="text-xs text-[var(--text-muted)]">
+                A fatura do Asaas mostra o seletor de parcelas e o cliente decide. Os juros seguem a configuração de
+                parcelamento da sua conta Asaas.
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-end gap-4">
+                  <div>
+                    <label className={rotulo}>Parcelas</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={parcelas}
+                        onChange={(e) =>
+                          setParcelas(Math.min(Math.max(Math.round(Number(e.target.value) || 1), 1), MAX_PARCELAS_ADMIN))
+                        }
+                        type="number"
+                        min={1}
+                        max={MAX_PARCELAS_ADMIN}
+                        className={`${campo} w-20`}
+                      />
+                      <span className="text-sm text-[var(--text-muted)]">x (até {MAX_PARCELAS_ADMIN})</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={rotulo}>Juros</label>
+                    <div className="flex gap-2">
+                      {([
+                        [true, 'Com juros'],
+                        [false, 'Sem juros'],
+                      ] as const).map(([val, label]) => {
+                        const ativo = comJuros === val
+                        return (
+                          <button
+                            key={label}
+                            type="button"
+                            aria-pressed={ativo}
+                            onClick={() => setComJuros(val)}
+                            className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
+                              ativo
+                                ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
+                                : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+                {previewParcela && (
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {parcelas === 1
+                      ? `1x de ${brl(previewParcela.parcela)} (à vista)`
+                      : comJuros
+                        ? `${parcelas}x de ${brl(previewParcela.parcela)} = ${brl(previewParcela.total)} (juros ${(TAXA_JUROS_AM * 100).toFixed(2)}% a.m. repassados ao cliente)`
+                        : `${parcelas}x de ${brl(previewParcela.parcela)} = ${brl(previewParcela.total)} (sem juros — a Azuris absorve a taxa do cartão)`}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         )}
       </div>
 
