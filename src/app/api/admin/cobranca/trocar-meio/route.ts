@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { getInscricao, labelProduto } from '@/lib/admin-queries'
-import { descricaoManual } from '@/lib/cobranca-manual'
+import { descricaoManual, PREFIXO_MANUAL } from '@/lib/cobranca-manual'
 import { trocarMeioCobranca, cancelarInscricao, type BillingType } from '@/lib/db'
 import {
   getPayment,
@@ -29,7 +29,11 @@ interface Body {
   billing_type?: BillingType
   installments?: number
   valor_reais?: number // valor base (à vista); juros do cartão são somados por cima
+  descricao?: string // texto que o cliente vê na fatura; vazio = mantém o atual
 }
+
+/** Descrição da fatura tem limite prático no Asaas — corta antes de mandar. */
+const MAX_DESCRICAO = 500
 
 const METODOS: BillingType[] = ['PIX', 'CREDIT_CARD', 'BOLETO', 'UNDEFINED']
 
@@ -79,16 +83,23 @@ export async function POST(request: Request) {
   const valorCobradoReais = billing_type === 'CREDIT_CARD' ? totalComJuros(valorBaseReais, installments) : valorBaseReais
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
 
+  // Cobrança manual guarda a descrição digitada; venda do site herda o nome do produto.
+  const descricaoAtual = descricaoManual(insc.como_conheceu) || labelProduto(insc.curso_slug)
+  const descricaoNova = (body.descricao ?? '').trim().slice(0, MAX_DESCRICAO)
+  const descricao = descricaoNova || descricaoAtual
+
   // Nada mudou? evita cancelar+regerar à toa (e gerar link novo sem motivo).
-  if (billing_type === insc.billing_type && installments === insc.installments && valorCobradoCentavos === insc.valor_centavos) {
-    return NextResponse.json({ error: 'Nada mudou — escolha outro meio, parcelas ou valor.' }, { status: 400 })
+  if (
+    billing_type === insc.billing_type &&
+    installments === insc.installments &&
+    valorCobradoCentavos === insc.valor_centavos &&
+    descricao === descricaoAtual
+  ) {
+    return NextResponse.json({ error: 'Nada mudou — escolha outro meio, parcelas, valor ou descrição.' }, { status: 400 })
   }
 
   // Vencimento: mantém o atual se ainda for futuro; senão, 3 dias a partir de hoje.
   const dueDate = insc.due_date && insc.due_date >= hojeBRT() ? insc.due_date : todayPlusDays(3)
-
-  // Cobrança manual guarda a descrição digitada; venda do site herda o nome do produto.
-  const descricao = descricaoManual(insc.como_conheceu) || labelProduto(insc.curso_slug)
 
   // 1) Cancela a cobrança anterior no Asaas. Se ela não existir mais (getPayment 404),
   //    não há o que apagar. Se existir e o DELETE falhar, ABORTA sem mexer no banco —
@@ -150,7 +161,12 @@ export async function POST(request: Request) {
   // 3) Re-vincula a inscrição à nova cobrança.
   const bruto = typeof payment.value === 'number' ? Math.round(payment.value * 100) : valorCobradoCentavos
   const liquido = typeof payment.netValue === 'number' ? Math.round(payment.netValue * 100) : null
+  // Descrição só persiste em venda manual — lá `como_conheceu` É a descrição.
+  // Em venda do site aquela coluna guarda a resposta do "como conheceu": sobrescrever
+  // apagaria o dado. Nessas, a descrição nova vale pra fatura gerada agora.
+  const ehManual = descricaoManual(insc.como_conheceu) != null
   await trocarMeioCobranca(insc.id, {
+    como_conheceu: ehManual && descricao !== descricaoAtual ? PREFIXO_MANUAL + descricao : null,
     billing_type,
     installments,
     valor_centavos: bruto,

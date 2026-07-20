@@ -10,8 +10,10 @@ import {
   STATUS_COR,
 } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
+import { descricaoManual } from '@/lib/cobranca-manual'
 import SyncButton from './SyncButton'
 import TesteButton from '../TesteButton'
+import CancelarButton from '../CancelarButton'
 import AcoesCobranca from './AcoesCobranca'
 import NotaFiscal from './NotaFiscal'
 
@@ -49,7 +51,10 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
   if (!insc) notFound()
   const eventos = await getEventos(insc.asaas_payment_id)
 
-  const editavel = !!insc.asaas_payment_id && (insc.status === 'pending' || insc.status === 'overdue')
+  const pendente = insc.status === 'pending' || insc.status === 'overdue'
+  const editavel = !!insc.asaas_payment_id && pendente
+  // Venda nascida no admin guarda a descrição digitada; venda do site herda o nome do produto.
+  const descricaoAtual = descricaoManual(insc.como_conheceu) || labelProduto(insc.curso_slug)
 
   const end = insc.nf_endereco
   const endStr = end
@@ -146,12 +151,19 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
             invoiceUrl={insc.asaas_invoice_url}
             telefone={insc.telefone}
             nome={insc.nome}
-            descricao={labelProduto(insc.curso_slug)}
+            descricao={descricaoAtual}
             valorReais={insc.valor_centavos / 100}
             dueDate={insc.due_date}
             installments={insc.installments}
             billingType={insc.billing_type}
+            manual={descricaoManual(insc.como_conheceu) != null}
           />
+        </Bloco>
+      )}
+
+      {pendente && (
+        <Bloco titulo="Cancelar cobrança">
+          <CancelarButton id={insc.id} nome={insc.nome} variante="bloco" />
         </Bloco>
       )}
 

@@ -38,9 +38,11 @@ interface Props {
   dueDate: string | null
   installments: number
   billingType: string
+  /** Venda nascida no admin — só nela a descrição reescrita fica gravada. */
+  manual: boolean
 }
 
-export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descricao, valorReais, dueDate, installments, billingType }: Props) {
+export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descricao, valorReais, dueDate, installments, billingType, manual }: Props) {
   const router = useRouter()
   const hoje = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const parcelada = installments > 1
@@ -52,10 +54,11 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
   const [ok, setOk] = useState(false)
   const [copiado, setCopiado] = useState<'link' | 'msg' | null>(null)
 
-  // --- Trocar meio de pagamento (cancela + regera) ---
+  // --- Regerar cobrança: valor / meio / parcelas / descrição (cancela + cria nova) ---
   const [novoMeio, setNovoMeio] = useState(billingType)
   const [novasParcelas, setNovasParcelas] = useState(installments)
   const [baseRaw, setBaseRaw] = useState(valorReais.toFixed(2).replace('.', ','))
+  const [novaDescricao, setNovaDescricao] = useState(descricao)
   const [trocando, setTrocando] = useState(false)
   const [erroTroca, setErroTroca] = useState<string | null>(null)
   const [novoLink, setNovoLink] = useState<string | null>(null)
@@ -66,8 +69,12 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
   const parcelasEfetivas = meioCartao ? Math.min(Math.max(novasParcelas, 1), MAX_PARCELAS) : 1
   const previaCobrado = meioCartao ? totalComJuros(baseNum, parcelasEfetivas) : baseNum
   const previaParcela = meioCartao ? valorParcela(baseNum, parcelasEfetivas) : baseNum
+  const descricaoEfetiva = novaDescricao.trim() || descricao
   const semMudanca =
-    novoMeio === billingType && parcelasEfetivas === installments && Math.round(previaCobrado * 100) === Math.round(valorReais * 100)
+    novoMeio === billingType &&
+    parcelasEfetivas === installments &&
+    Math.round(previaCobrado * 100) === Math.round(valorReais * 100) &&
+    descricaoEfetiva === descricao
 
   const novoValor = useMemo(() => parseValor(valorRaw), [valorRaw])
 
@@ -108,7 +115,7 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
     setErroTroca(null)
     setNovoLink(null)
     if (semMudanca) {
-      setErroTroca('Nada mudou — escolha outro meio, parcelas ou valor.')
+      setErroTroca('Nada mudou — mexa no valor, meio, parcelas ou descrição.')
       return
     }
     if (!window.confirm('Isso CANCELA a cobrança atual no Asaas e gera uma nova (link novo). Continuar?')) return
@@ -122,6 +129,7 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
           billing_type: novoMeio,
           installments: meioCartao ? parcelasEfetivas : undefined,
           valor_reais: baseNum,
+          descricao: descricaoEfetiva,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -231,12 +239,13 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
         {!waUrl && <p className="mt-2 text-xs text-amber-300">Telefone sem WhatsApp válido — use copiar link/mensagem.</p>}
       </div>
 
-      {/* Trocar meio de pagamento (cancela a atual + gera nova) */}
+      {/* Regerar: cancela a atual + gera nova com valor/meio/parcelas/descrição novos */}
       <div className="border-t border-[var(--azuris-surface)] pt-4">
-        <span className={rotulo}>Trocar meio de pagamento</span>
+        <span className={rotulo}>Regerar cobrança (nova proposta)</span>
         <p className="mb-3 text-xs text-[var(--text-muted)]">
-          Cancela a cobrança atual no Asaas e gera uma nova com o meio escolhido. Gera um link novo. Use quando o cliente
-          quer trocar (ex.: PIX → cartão parcelado).
+          Cancela a cobrança atual no Asaas e cria uma nova pro mesmo cliente, com <strong>link novo</strong>. É o
+          caminho pra renegociar valor, trocar de meio (PIX → cartão parcelado) ou reescrever a proposta. Vale também
+          pra parcelada, que o campo de valor acima não edita.
         </p>
         <form onSubmit={trocarMeio} className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-3">
@@ -269,6 +278,22 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
               <label className={rotulo}>Valor base (R$)</label>
               <input value={baseRaw} onChange={(e) => setBaseRaw(e.target.value)} inputMode="decimal" className={campo} />
             </div>
+          </div>
+
+          <div>
+            <label className={rotulo}>Descrição na fatura</label>
+            <input
+              value={novaDescricao}
+              onChange={(e) => setNovaDescricao(e.target.value)}
+              maxLength={500}
+              placeholder={descricao}
+              className={campo}
+            />
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              {manual
+                ? 'É o que o cliente lê na fatura. Fica gravado na venda.'
+                : 'Venda vinda do site — o texto novo vai pra fatura, mas a venda continua rotulada pelo produto no painel.'}
+            </p>
           </div>
 
           <p className="text-xs text-[var(--text-muted)]">
@@ -309,7 +334,7 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
             disabled={trocando || semMudanca}
             className="rounded-lg border border-[var(--azuris-cyan)]/60 px-4 py-2 text-sm font-bold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/10 disabled:opacity-40"
           >
-            {trocando ? 'regerando…' : 'Cancelar atual e regerar'}
+            {trocando ? 'regerando…' : 'Cancelar atual e gerar nova'}
           </button>
         </form>
       </div>

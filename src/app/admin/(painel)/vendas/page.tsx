@@ -20,6 +20,7 @@ import { labelBilling } from '@/lib/billing'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
+import CancelarButton from './CancelarButton'
 import CopiarEmailsButton from './CopiarEmailsButton'
 
 export const dynamic = 'force-dynamic'
@@ -316,7 +317,12 @@ export default async function VendasPage({
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
                 <td className="px-4 py-3 text-right">
-                  <TesteButton id={r.id} isTeste={r.is_teste} />
+                  <div className="inline-flex flex-wrap justify-end gap-1.5">
+                    <TesteButton id={r.id} isTeste={r.is_teste} />
+                    {(r.status === 'pending' || r.status === 'overdue') && (
+                      <CancelarButton id={r.id} nome={r.nome} />
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

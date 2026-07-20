@@ -435,11 +435,15 @@ export async function trocarMeioCobranca(
     taxa_centavos: number | null
     due_date: string | null
     asaas_status: string | null
+    /** Só vem preenchido quando a venda é manual e o admin reescreveu a descrição
+     *  da fatura (a descrição mora em como_conheceu, com prefixo — ver cobranca-manual). */
+    como_conheceu?: string | null
   }
 ): Promise<InscricaoRow | null> {
   const rows = (await sql`
     UPDATE inscricoes
-       SET billing_type = ${v.billing_type},
+       SET como_conheceu = COALESCE(${v.como_conheceu ?? null}, como_conheceu),
+           billing_type = ${v.billing_type},
            installments = ${v.installments},
            valor_centavos = ${v.valor_centavos},
            asaas_customer_id = ${v.asaas_customer_id},
