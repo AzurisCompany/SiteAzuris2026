@@ -72,3 +72,28 @@ export function todayPlusDays(days: number): string {
   base.setUTCDate(base.getUTCDate() + days)
   return base.toISOString().slice(0, 10)
 }
+
+/**
+ * Normaliza uma coluna DATE do Postgres pra YYYY-MM-DD.
+ *
+ * O driver do Neon devolve `DATE` como **objeto Date**, não string — o tipo
+ * `due_date: string | null` em InscricaoRow sempre mentiu. Renderizar isso no
+ * React derruba a página inteira ("Objects are not valid as a React child"), e
+ * comparar com string (`due_date >= hojeBRT()`) dá sempre false calado.
+ *
+ * Lê os componentes LOCAIS do Date, não o ISO: o driver monta o objeto na
+ * meia-noite do fuso do servidor (em BRT vira 03:00Z), então `toISOString()`
+ * só acerta por a Vercel rodar em UTC — num fuso a leste devolveria o dia
+ * anterior. getFullYear/getMonth/getDate acertam nos dois casos.
+ */
+export function toISODate(v: unknown): string | null {
+  if (v == null) return null
+  if (v instanceof Date) {
+    if (Number.isNaN(v.getTime())) return null
+    const mes = String(v.getMonth() + 1).padStart(2, '0')
+    const dia = String(v.getDate()).padStart(2, '0')
+    return `${v.getFullYear()}-${mes}-${dia}`
+  }
+  const s = String(v)
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null
+}

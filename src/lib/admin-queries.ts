@@ -2,6 +2,7 @@
 import { sql, PRECO_POR_PERFIL, type InscricaoRow } from '@/lib/db'
 import { PRODUTOS } from '@/lib/produtos'
 import { ORIGEM_ADMIN, PROPOSTA_SLUG, type PrecosSugeridos } from '@/lib/cobranca-manual'
+import { toISODate } from '@/lib/format'
 
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
@@ -510,7 +511,11 @@ export async function contarTestes(): Promise<number> {
 
 export async function getInscricao(id: number): Promise<InscricaoRow | null> {
   const rows = (await sql`SELECT * FROM inscricoes WHERE id = ${id}`) as InscricaoRow[]
-  return rows[0] ?? null
+  const row = rows[0]
+  if (!row) return null
+  // O driver devolve DATE como objeto Date — normaliza pra o tipo declarado virar
+  // verdade. Sem isso a página de detalhe quebra ao renderizar. Ver toISODate.
+  return { ...row, due_date: toISODate(row.due_date) }
 }
 
 export interface EventoAsaas {
