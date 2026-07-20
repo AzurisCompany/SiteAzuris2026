@@ -239,8 +239,9 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
         {!waUrl && <p className="mt-2 text-xs text-amber-300">Telefone sem WhatsApp válido — use copiar link/mensagem.</p>}
       </div>
 
-      {/* Regerar: cancela a atual + gera nova com valor/meio/parcelas/descrição novos */}
-      <div className="border-t border-[var(--azuris-surface)] pt-4">
+      {/* Regerar: cancela a atual + gera nova com valor/meio/parcelas/descrição novos.
+          O id é alvo do link "regerar" da lista de cobranças avulsas. */}
+      <div id="regerar" className="scroll-mt-24 border-t border-[var(--azuris-surface)] pt-4">
         <span className={rotulo}>Regerar cobrança (nova proposta)</span>
         <p className="mb-3 text-xs text-[var(--text-muted)]">
           Cancela a cobrança atual no Asaas e cria uma nova pro mesmo cliente, com <strong>link novo</strong>. É o

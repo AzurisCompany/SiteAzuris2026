@@ -320,7 +320,17 @@ export default async function VendasPage({
                   <div className="inline-flex flex-wrap justify-end gap-1.5">
                     <TesteButton id={r.id} isTeste={r.is_teste} />
                     {(r.status === 'pending' || r.status === 'overdue') && (
-                      <CancelarButton id={r.id} nome={r.nome} />
+                      <>
+                        {/* Regerar é formulário (valor/meio/parcelas/descrição) — mora no detalhe. */}
+                        <Link
+                          href={`/admin/vendas/${r.id}#regerar`}
+                          title="Cancelar esta e gerar outra com valor/descrição novos"
+                          className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                        >
+                          regerar
+                        </Link>
+                        <CancelarButton id={r.id} nome={r.nome} />
+                      </>
                     )}
                   </div>
                 </td>

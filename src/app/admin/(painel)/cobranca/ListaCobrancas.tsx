@@ -4,6 +4,7 @@ import { labelBilling } from '@/lib/billing'
 import { descricaoManual } from '@/lib/cobranca-manual'
 import type { InscricaoRow } from '@/lib/db'
 import SyncRowButton from './SyncRowButton'
+import CancelarButton from '../vendas/CancelarButton'
 
 function descricao(insc: InscricaoRow): string {
   return descricaoManual(insc.como_conheceu) || insc.como_conheceu || '—'
@@ -97,6 +98,19 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                       </a>
                     )}
                     <SyncRowButton id={r.id} />
+                    {/* Renegociar valor/descrição e cancelar só fazem sentido enquanto não pagou. */}
+                    {(r.status === 'pending' || r.status === 'overdue') && (
+                      <>
+                        <Link
+                          href={`/admin/vendas/${r.id}#regerar`}
+                          title="Cancelar esta e gerar outra com valor/descrição novos"
+                          className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                        >
+                          regerar
+                        </Link>
+                        <CancelarButton id={r.id} nome={r.nome} />
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
