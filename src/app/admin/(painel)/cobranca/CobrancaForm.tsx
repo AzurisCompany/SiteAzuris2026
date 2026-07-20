@@ -307,29 +307,27 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
   return (
     <form onSubmit={enviar} className="max-w-2xl space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
       <div>
-        <label className={rotulo}>Produto</label>
-        <div className="flex flex-wrap gap-2">
-          {OPCOES_COBRANCA.map((o) => {
-            const ativo = o.slug === slug
-            return (
-              <button
-                key={o.slug}
-                type="button"
-                aria-pressed={ativo}
-                onClick={() => trocarProduto(o)}
-                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${
-                  ativo
-                    ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 text-[var(--azuris-cyan)]'
-                    : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {o.label}
-              </button>
-            )
-          })}
-        </div>
+        <label className={rotulo} htmlFor="produto-cobranca">
+          Produto
+        </label>
+        <select
+          id="produto-cobranca"
+          value={slug}
+          onChange={(e) => {
+            const o = getOpcaoCobranca(e.target.value)
+            if (o) trocarProduto(o)
+          }}
+          className={campo}
+        >
+          {OPCOES_COBRANCA.map((o) => (
+            <option key={o.slug} value={o.slug}>
+              {o.label}
+            </option>
+          ))}
+        </select>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          Define em qual aba do painel a venda entra. O valor é sempre o que você digitar.
+          Define em qual aba do painel a venda entra (é o mesmo <code>?curso=</code> dos filtros de vendas). O valor é
+          sempre o que você digitar.
         </p>
       </div>
 
