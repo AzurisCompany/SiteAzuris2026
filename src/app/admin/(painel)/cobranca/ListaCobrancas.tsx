@@ -97,6 +97,13 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                         wpp
                       </a>
                     )}
+                    <Link
+                      href={`/admin/cobranca?de=${r.id}`}
+                      title="Nova cobrança reaproveitando os dados deste cliente"
+                      className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                    >
+                      copiar dados
+                    </Link>
                     <SyncRowButton id={r.id} />
                     {/* Renegociar valor/descrição e cancelar só fazem sentido enquanto não pagou. */}
                     {(r.status === 'pending' || r.status === 'overdue') && (

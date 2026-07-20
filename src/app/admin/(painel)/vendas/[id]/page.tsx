@@ -89,6 +89,13 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
       <div className="flex flex-wrap items-center gap-3">
         <SyncButton id={insc.id} />
         <TesteButton id={insc.id} isTeste={insc.is_teste} />
+        {/* Mesmo cliente, outro produto: leva os dados dele pra cobrança avulsa. */}
+        <Link
+          href={`/admin/cobranca?de=${insc.id}`}
+          className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+        >
+          nova cobrança com estes dados
+        </Link>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

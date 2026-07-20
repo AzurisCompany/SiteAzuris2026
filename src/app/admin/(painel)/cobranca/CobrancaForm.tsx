@@ -51,15 +51,29 @@ function prefillValor(precos: PrecosSugeridos, slug: string): string {
   return p ? (p.centavos / 100).toFixed(2).replace('.', ',') : ''
 }
 
-export default function CobrancaForm({ precos }: { precos: PrecosSugeridos }) {
+/**
+ * Cadastro de um cliente copiado de uma venda existente (link "nova cobrança com
+ * estes dados"). Só os dados dele — produto, valor e descrição o admin escolhe do
+ * zero, porque é justamente isso que mudou.
+ */
+export interface Prefill {
+  nome: string
+  email: string
+  cpf: string
+  telefone: string
+  pessoaTipo: PessoaTipo
+  nota: NotaValue
+}
+
+export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeridos; prefill?: Prefill }) {
   const router = useRouter()
   const [slug, setSlug] = useState<string>(PROPOSTA_SLUG)
-  const [nome, setNome] = useState('')
-  const [email, setEmail] = useState('')
-  const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
-  const [cpf, setCpf] = useState('')
-  const [nota, setNota] = useState<NotaValue>(notaInicial)
-  const [telefone, setTelefone] = useState('')
+  const [nome, setNome] = useState(prefill?.nome ?? '')
+  const [email, setEmail] = useState(prefill?.email ?? '')
+  const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>(prefill?.pessoaTipo ?? 'PF')
+  const [cpf, setCpf] = useState(prefill?.cpf ?? '')
+  const [nota, setNota] = useState<NotaValue>(prefill?.nota ?? notaInicial)
+  const [telefone, setTelefone] = useState(prefill?.telefone ?? '')
   const [descricao, setDescricao] = useState('')
   const [valorRaw, setValorRaw] = useState('')
   const [metodos, setMetodos] = useState({ pix: true, boleto: false, cartao: false })

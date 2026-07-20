@@ -318,6 +318,13 @@ export default async function VendasPage({
                 <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="inline-flex flex-wrap justify-end gap-1.5">
+                    <Link
+                      href={`/admin/cobranca?de=${r.id}`}
+                      title="Nova cobrança reaproveitando os dados deste cliente"
+                      className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                    >
+                      copiar dados
+                    </Link>
                     <TesteButton id={r.id} isTeste={r.is_teste} />
                     {(r.status === 'pending' || r.status === 'overdue') && (
                       <>
