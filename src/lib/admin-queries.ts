@@ -6,6 +6,8 @@ import { toISODate } from '@/lib/format'
 
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
+  'dss-one-day-2026': 'DSS 2026 — Passe One Day',
+  'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
   'preparatorio-dados': 'Preparatório (reservas)',
@@ -20,6 +22,8 @@ export function labelProduto(slug: string): string {
 /** Rótulo curto pras abas da lista de vendas. */
 export const PRODUTO_TAB: Record<string, string> = {
   'dss-2026': 'Ingressos DSS',
+  'dss-one-day-2026': 'One Day DSS',
+  'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'gubigdata-2026-07': 'GU BigData',
   proposta: 'Propostas',
@@ -68,6 +72,8 @@ export function brl(centavos: number | null | undefined): string {
  */
 export function precosSugeridosCobranca(): PrecosSugeridos {
   const dss = PRODUTOS['dss-2026']
+  const oneDay = PRODUTOS['dss-one-day-2026']
+  const oneDayCurso = PRODUTOS['dss-one-day-curso-2026']
   const gu = PRODUTOS['gubigdata-2026-07']
   return {
     'lakehouse-comunidade': {
@@ -77,6 +83,14 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     'dss-2026': {
       centavos: dss.precoCentavos,
       dica: `pré-venda · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
+    },
+    'dss-one-day-2026': {
+      centavos: oneDay.precoCentavos,
+      dica: `Lote 1 (1 dia) · lote final ${brl(oneDay.precoDeVendaCentavos)}`,
+    },
+    'dss-one-day-curso-2026': {
+      centavos: oneDayCurso.precoCentavos,
+      dica: 'combo: One Day + portal do curso Pipeline',
     },
     'gubigdata-2026-07': {
       centavos: gu.precoCentavos,

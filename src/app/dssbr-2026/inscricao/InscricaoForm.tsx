@@ -30,6 +30,10 @@ interface Props {
   maxParcelas: number
   /** tipos de ingresso cadastrados; se não-vazio, mostra o seletor e ignora os preços únicos acima */
   tipos?: TipoOption[]
+  /** endpoint do POST de inscrição (default: checkout DSS full). */
+  endpoint?: string
+  /** identificação do item pro GA begin_checkout (default: DSS full). */
+  gaItem?: { id: string; name: string }
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -46,6 +50,8 @@ export default function InscricaoForm({
   precoCartaoBaseReais: baseCartao,
   maxParcelas: baseMax,
   tipos,
+  endpoint = '/api/dssbr-2026/inscricao',
+  gaItem = { id: 'dss-2026', name: 'Data Science Summit Brasil 2026' },
 }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -104,7 +110,7 @@ export default function InscricaoForm({
     setSubmitting(true)
 
     try {
-      const res = await fetch('/api/dssbr-2026/inscricao', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,8 +141,8 @@ export default function InscricaoForm({
           payment_type: billingType,
           items: [
             {
-              item_id: 'dss-2026',
-              item_name: 'Data Science Summit Brasil 2026',
+              item_id: gaItem.id,
+              item_name: gaItem.name,
               item_variant: sel?.tipo_id,
               price: valorCobradoReais,
               quantity: 1,

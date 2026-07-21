@@ -52,6 +52,18 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-2026'].enderecoObrigatorioPJ,
   },
   {
+    slug: 'dss-one-day-2026',
+    label: 'Ingresso DSS One Day',
+    descricaoPadrao: PRODUTOS['dss-one-day-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['dss-one-day-2026'].enderecoObrigatorioPJ,
+  },
+  {
+    slug: 'dss-one-day-curso-2026',
+    label: 'DSS One Day + Curso',
+    descricaoPadrao: PRODUTOS['dss-one-day-curso-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['dss-one-day-curso-2026'].enderecoObrigatorioPJ,
+  },
+  {
     slug: 'gubigdata-2026-07',
     label: 'Ingresso GU',
     descricaoPadrao: PRODUTOS['gubigdata-2026-07'].asaasDescricao,

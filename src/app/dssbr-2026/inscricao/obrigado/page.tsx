@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { getProduto } from '@/lib/produtos'
+import { dssMetadata } from '../../metadata'
 
 const PRODUTO = getProduto('dss-2026')
 
-export const metadata: Metadata = {
-  title: 'Inscrição enviada — Data Science Summit Brasil 2026',
-  robots: { index: false, follow: false },
-}
+export const metadata: Metadata = dssMetadata({
+  path: '/dssbr-2026/inscricao/obrigado',
+  title: 'Inscrição enviada — DSS 2026 · Data Science Summit Brasil',
+  description: 'Sua inscrição no DSS 2026 foi enviada. Nos vemos em 27–29 de outubro, em Curitiba.',
+  noindex: true,
+})
 
 export default function ObrigadoPage() {
   return (

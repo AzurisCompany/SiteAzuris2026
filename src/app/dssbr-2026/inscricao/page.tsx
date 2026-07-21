@@ -3,6 +3,7 @@ import { Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
 import InscricaoForm, { type TipoOption } from './InscricaoForm'
+import { dssMetadata } from '../metadata'
 
 const PRODUTO = getProduto('dss-2026')
 
@@ -11,12 +12,13 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
   'Oi! Estava no checkout do DSSBR 2026 e quero saber sobre os pacotes para grupos / compras corporativas.',
 )}`
 
-export const metadata: Metadata = {
-  title: 'Inscrição — Data Science Summit Brasil 2026',
+export const metadata: Metadata = dssMetadata({
+  path: '/dssbr-2026/inscricao',
+  title: 'Inscrição — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Garanta sua vaga na pré-venda do DSS 2026. PIX à vista ou cartão em até 3x (1x à vista, 2x-3x com juros).',
-  robots: { index: false, follow: false }, // página de checkout, sem indexação
-}
+    'Garanta sua vaga no DSS 2026 (27–29/out, Curitiba). PIX à vista ou cartão em até 3x (1x à vista, 2x-3x com juros).',
+  noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
+})
 
 export const dynamic = 'force-dynamic'
 

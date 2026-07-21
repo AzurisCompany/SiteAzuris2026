@@ -2,35 +2,151 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
+import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
+import { dssMetadata } from './metadata'
 
-const PRODUTO = getProduto('dss-2026')
 const DSS = 'https://dssbr.com.br'
-const CHECKOUT = '/dssbr-2026/inscricao?utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
+const UTM = 'utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
+const CHECKOUT_FULL = `/dssbr-2026/inscricao?${UTM}`
+const CHECKOUT_ONEDAY = `/dssbr-2026/one-day?${UTM}`
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
 const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
   'Oi! Vim pela página do DSSBR 2026 e quero saber sobre os pacotes especiais para grupos / compras corporativas.',
 )}`
 
-const precoBase = PRODUTO.precoCentavos / 100
-const precoDeVenda = PRODUTO.precoDeVendaCentavos / 100
-const precoPix = Number((precoBase * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
-const precoCartao = Number((precoBase * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
-const descontoPct = Math.round((1 - precoPix / precoDeVenda) * 100)
 const brl = (v: number) => v.toFixed(2).replace('.', ',')
 
-export const metadata: Metadata = {
-  title: 'DSSBR 2026 — Data Science Summit Brasil | 27, 28 e 29 de outubro, Curitiba',
-  description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Pré-venda a partir de R$ 470.',
-  openGraph: {
-    title: 'DSSBR 2026 — Data Science Summit Brasil',
-    description:
-      'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba.',
-    images: [`${DSS}/assets/photos/dss2025-012.jpg`],
-    type: 'website',
-  },
+// Landing lê o preço vigente dos MESMOS lugares que o checkout, pra nunca desincronizar:
+// FullPass vem do tipo de ingresso ATIVO no admin (Lote 1 R$570 hoje); One Day vem do
+// registry (Lote gerido no código). force-dynamic (igual ao checkout) garante que o
+// preço mostrado é sempre o preço cobrado — sem risco de fallback velho no build.
+export const dynamic = 'force-dynamic'
+
+const PRODUTO_FULL = getProduto('dss-2026')
+const PRODUTO_ONEDAY = getProduto('dss-one-day-2026')
+const PRODUTO_ONEDAY_CURSO = getProduto('dss-one-day-curso-2026')
+const CHECKOUT_ONEDAY_CURSO = `/dssbr-2026/one-day-curso?${UTM}`
+
+interface Pass {
+  id: string
+  nome: string
+  subtitulo: string
+  lote: string
+  pix: number
+  deVenda: number
+  cartao: number
+  maxParcelas: number
+  desconto: number
+  destaque: boolean
+  badge?: string
+  checkout: string
+  cta: string
+  inclui: string[]
 }
+
+/** Preço vigente do FullPass: tipo ATIVO no admin, com fallback no registry. */
+async function passFullPass(): Promise<Pass> {
+  let pix = Number((PRODUTO_FULL.precoCentavos / 100).toFixed(2))
+  let deVenda = PRODUTO_FULL.precoDeVendaCentavos / 100
+  let cartao = pix
+  let maxParcelas = PRODUTO_FULL.maxParcelas
+  let lote = 'Lote 1'
+  try {
+    const tipos = await listarTiposAtivos(PRODUTO_FULL.slug)
+    if (tipos.length > 0) {
+      const p = precosDoTipo(tipos[0])
+      pix = p.precoPixReais
+      deVenda = p.precoDeVendaReais
+      cartao = p.precoCartaoBaseReais
+      maxParcelas = p.maxParcelas
+      lote = tipos[0].nome
+    }
+  } catch {
+    // banco sem migração → usa o preço do registry (fallback acima)
+  }
+  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
+  return {
+    id: 'full',
+    nome: 'FullPass · 3 dias',
+    subtitulo: 'Acesso completo ao evento inteiro',
+    lote,
+    pix,
+    deVenda,
+    cartao,
+    maxParcelas,
+    desconto,
+    destaque: true,
+    badge: 'Mais completo',
+    checkout: CHECKOUT_FULL,
+    cta: 'Garantir FullPass',
+    inclui: [
+      'Acesso aos 3 dias de evento',
+      'Workshops hands-on, keynotes e tracks',
+      'Rodada de negócios e networking',
+      'Reembolso até 45 dias antes do evento',
+    ],
+  }
+}
+
+/** One Day: preço do registry (Lote 1 R$190, âncora R$270). */
+function passOneDay(): Pass {
+  const pix = Number((PRODUTO_ONEDAY.precoCentavos / 100).toFixed(2))
+  const deVenda = PRODUTO_ONEDAY.precoDeVendaCentavos / 100
+  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
+  return {
+    id: 'oneday',
+    nome: 'One Day · 1 dia',
+    subtitulo: 'Um dia de evento à sua escolha',
+    lote: 'Lote 1',
+    pix,
+    deVenda,
+    cartao: pix,
+    maxParcelas: PRODUTO_ONEDAY.maxParcelas,
+    desconto,
+    destaque: false,
+    checkout: CHECKOUT_ONEDAY,
+    cta: 'Garantir One Day',
+    inclui: ['1 dia de evento', 'Plenária Principal', 'Auditório Secundário', 'Área de exposição', 'Coffee Break'],
+  }
+}
+
+/** Combo (cross-sell): One Day + portal do curso Pipeline. Preço fixo R$277, sem âncora. */
+function passOneDayCurso(): Pass {
+  const pix = Number((PRODUTO_ONEDAY_CURSO.precoCentavos / 100).toFixed(2))
+  const deVenda = PRODUTO_ONEDAY_CURSO.precoDeVendaCentavos / 100
+  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
+  return {
+    id: 'oneday-curso',
+    nome: 'One Day + Curso',
+    subtitulo: '1 dia + portal do curso Pipeline de Dados',
+    lote: 'Combo',
+    pix,
+    deVenda,
+    cartao: pix,
+    maxParcelas: PRODUTO_ONEDAY_CURSO.maxParcelas,
+    desconto,
+    destaque: false,
+    badge: 'Leva o curso junto',
+    checkout: CHECKOUT_ONEDAY_CURSO,
+    cta: 'Garantir combo',
+    inclui: [
+      '1 dia de evento (One Day)',
+      'Plenária, Auditório e Área de exposição',
+      'Coffee Break',
+      'Portal do curso Lakehouse: Pipeline na Prática',
+    ],
+  }
+}
+
+export const metadata: Metadata = dssMetadata({
+  path: '/dssbr-2026',
+  title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
+  description:
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 190.',
+  ogDescription:
+    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 190.',
+})
 
 const STATS = [
   { n: '658', label: 'participantes' },
@@ -96,19 +212,67 @@ const LOGOS = [
 
 const PHOTOS = ['dss2025-000.jpg', 'dss2025-012.jpg', 'dss2025-008.jpg', 'dss2025-015.jpg', 'dss2025-018.jpg', 'dss2025-005.jpg']
 
-function CtaButton({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function IngressoCard({ p }: { p: Pass }) {
   return (
-    <a
-      href={CHECKOUT}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-7 py-4 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 ${className}`}
+    <div
+      className={`flex flex-col rounded-2xl border bg-gradient-to-br from-deep to-ink p-8 ${
+        p.destaque ? 'border-cyan-brand/50' : 'border-slate/60'
+      }`}
     >
-      {children}
-      <ArrowRight className="size-5" />
-    </a>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-xs uppercase tracking-widest text-cyan-brand">{p.nome}</div>
+        {p.badge && (
+          <span className="rounded-full bg-cyan-brand/10 px-3 py-1 text-xs font-semibold text-cyan-brand">{p.badge}</span>
+        )}
+      </div>
+      <div className="mt-2 text-sm text-foam/60">{p.subtitulo}</div>
+
+      <div className="mt-4 text-xs text-foam/40">
+        {p.lote}
+        {p.deVenda > p.pix && (
+          <>
+            {' · '}
+            <span className="line-through">R$ {brl(p.deVenda)}</span> no lote final
+          </>
+        )}
+      </div>
+      <div className="mt-1 text-4xl font-black">
+        R$ {brl(p.pix)} <span className="text-base font-semibold text-foam/50">no PIX</span>
+      </div>
+      <div className="mt-1 text-sm text-foam/60">
+        {p.desconto > 0 && <>{p.desconto}% off · </>}cartão R$ {brl(p.cartao)} em até {p.maxParcelas}x (1x à vista, 2x-
+        {p.maxParcelas}x com juros)
+      </div>
+
+      <ul className="mt-6 flex-1 space-y-2 text-sm text-foam/70">
+        {p.inclui.map((item) => (
+          <li key={item} className="flex gap-2">
+            <Check className="mt-0.5 size-4 shrink-0 text-emerald-accent" /> {item}
+          </li>
+        ))}
+      </ul>
+
+      <a
+        href={p.checkout}
+        className={`mt-7 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl ${
+          p.destaque
+            ? 'bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)]'
+            : 'border border-slate/60 bg-deep/60 hover:border-cyan-brand/50'
+        }`}
+      >
+        {p.cta}
+        <ArrowRight className="size-5" />
+      </a>
+    </div>
   )
 }
 
-export default function DssbrLandingPage() {
+export default async function DssbrLandingPage() {
+  const full = await passFullPass()
+  const oneday = passOneDay()
+  const onedayCurso = passOneDayCurso()
+  const PASSES: Pass[] = [full, oneday, onedayCurso]
+
   return (
     <main className="min-h-screen bg-ink text-foam">
       {/* HERO */}
@@ -151,13 +315,20 @@ export default function DssbrLandingPage() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <CtaButton>Garantir minha vaga — R$ {precoPix.toFixed(0)} no PIX</CtaButton>
+            <a
+              href="#ingressos"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-7 py-4 text-base font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+            >
+              Garantir minha vaga
+              <ArrowRight className="size-5" />
+            </a>
             <a href="#programacao" className="text-sm font-semibold text-foam/70 hover:text-cyan-brand transition-colors">
               ver a programação ↓
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            Pré-venda · de <span className="line-through">R$ {brl(precoDeVenda)}</span> por R$ {brl(precoPix)} no PIX · cartão em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros).
+            FullPass 3 dias R$ {brl(full.pix)} · One Day (1 dia) a partir de R$ {oneday.pix.toFixed(0)} · combo One Day
+            + curso R$ {onedayCurso.pix.toFixed(0)} · PIX ou cartão em até {full.maxParcelas}x.
           </p>
 
           {/* GRUPOS & CORPORATIVO */}
@@ -307,36 +478,27 @@ export default function DssbrLandingPage() {
         </div>
       </section>
 
-      {/* CTA FINAL / PREÇO */}
-      <section className="py-20 bg-deep/40 border-t border-slate/60">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Garanta sua vaga na <span className="text-brand-gradient">pré-venda</span>.
-          </h2>
-          <p className="mt-4 text-foam/70">
-            Lote 1 com o melhor preço. FullPass dos 3 dias de evento.
-          </p>
-
-          <div className="mt-8 rounded-2xl border border-slate/60 bg-gradient-to-br from-deep to-ink p-8">
-            <div className="text-xs uppercase tracking-widest text-foam/40">Pré-venda · Lote 1 · FullPass 3 dias</div>
-            <div className="mt-2 text-sm text-foam/40 line-through">R$ {brl(precoDeVenda)} no lote final</div>
-            <div className="mt-1 text-5xl font-black">
-              R$ {brl(precoPix)} <span className="text-xl font-semibold text-foam/50">no PIX</span>
-            </div>
-            <div className="mt-2 text-sm text-foam/60">
-              {descontoPct}% mais barato que o lote final · ou cartão R$ {brl(precoCartao)} em até {PRODUTO.maxParcelas}x (1x à vista, 2x-{PRODUTO.maxParcelas}x com juros)
-            </div>
-            <ul className="mt-6 space-y-2 text-sm text-foam/70 text-left max-w-sm mx-auto">
-              <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Acesso aos 3 dias de evento</li>
-              <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Workshops hands-on, keynotes e tracks</li>
-              <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Rodada de negócios e networking</li>
-              <li className="flex gap-2"><Check className="size-4 shrink-0 text-emerald-accent mt-0.5" /> Reembolso até 45 dias antes do evento</li>
-            </ul>
-            <CtaButton className="mt-8 w-full sm:w-auto">Garantir minha vaga</CtaButton>
-            <p className="mt-3 text-xs text-foam/45">Checkout seguro via Asaas · PIX ou cartão · inscrição individual.</p>
+      {/* INGRESSOS */}
+      <section id="ingressos" className="py-20 bg-deep/40 border-t border-slate/60">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              Garanta sua vaga na <span className="text-brand-gradient">pré-venda</span>.
+            </h2>
+            <p className="mt-4 text-foam/70">Lote 1 com o melhor preço. Escolha o ingresso que combina com você.</p>
           </div>
 
-          <p className="mt-10 text-sm text-foam/50">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {PASSES.map((p) => (
+              <IngressoCard key={p.id} p={p} />
+            ))}
+          </div>
+
+          <p className="mt-6 text-center text-xs text-foam/45">
+            Checkout seguro via Asaas · PIX ou cartão · inscrição individual.
+          </p>
+
+          <p className="mt-10 text-center text-sm text-foam/50">
             Dúvidas? <a href="mailto:contato@dssbr.com.br" className="underline hover:text-cyan-brand">contato@dssbr.com.br</a>
             {' '}· WhatsApp (41) 99800-3687 · uma realização <a href="/" className="underline hover:text-cyan-brand">Azuris</a>.
           </p>
