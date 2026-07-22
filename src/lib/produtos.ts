@@ -51,15 +51,15 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
   },
   // Passe de 1 dia do DSS 2026 (o full são 3 dias — ver 'dss-2026'). Lote é gerido
-  // AQUI, no preço: hoje vende Lote 1 (R$190) com âncora do Lote 3 (R$270) riscada.
-  // Quando o lote virar, sobe precoCentavos (Lote 2 = 23000, Lote 3 = 27000). Sem
+  // AQUI, no preço: hoje vende Lote 1 (R$247) com âncora do Lote 3 (R$357) riscada.
+  // Quando o lote virar, sobe precoCentavos (Lote 2 = 29700, Lote 3 = 35700). Sem
   // tipos cadastrados → o checkout usa o preço único deste registry.
   'dss-one-day-2026': {
     slug: 'dss-one-day-2026',
     nome: 'DSS 2026 — Passe One Day',
     descricao: 'Passe de 1 dia · 27 a 29 de outubro · IEP, Curitiba',
-    precoCentavos: 19000, // R$ 190,00 — Lote 1 (o que se paga agora, PIX ou cartão 1x)
-    precoDeVendaCentavos: 27000, // R$ 270,00 — Lote 3 / final (âncora "de" riscada)
+    precoCentavos: 24700, // R$ 247,00 — Lote 1 (o que se paga agora, PIX ou cartão 1x)
+    precoDeVendaCentavos: 35700, // R$ 357,00 — Lote 3 / final (âncora "de" riscada)
     pixDescontoPct: 0, // sem off no PIX; o preço do lote é o preço
     cartaoAcrescimoPct: 0, // cartão = preço do lote; só juros no parcelamento (2x–3x)
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
@@ -70,7 +70,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: true, // passe corporativo também vira nota
   },
   // Combo (cross-sell): One Day + acesso ao portal do curso "Lakehouse: Pipeline na
-  // Prática" ([[project_curso_lakehouse_pages]]). Preço fixo R$277 (sem lote, sem
+  // Prática" ([[project_curso_lakehouse_pages]]). Preço fixo R$360 (sem lote, sem
   // âncora — o curso avulso é R$550+, mas o combo dá acesso ao PORTAL/conteúdo, não
   // ao pacote completo com ao-vivo+1:1; não riscamos preço pra não superprometer).
   // FULFILLMENT DO CURSO É MANUAL: a compra registra a inscrição; liberar o portal
@@ -79,7 +79,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     slug: 'dss-one-day-curso-2026',
     nome: 'DSS One Day + Portal do Curso Pipeline',
     descricao: 'Passe de 1 dia + portal do curso · 27 a 29 de outubro · IEP, Curitiba',
-    precoCentavos: 27700, // R$ 277,00 — combo (o que se paga, PIX ou cartão 1x)
+    precoCentavos: 36000, // R$ 360,00 — combo (o que se paga, PIX ou cartão 1x)
     precoDeVendaCentavos: 0, // sem âncora riscada (ver comentário acima)
     pixDescontoPct: 0,
     cartaoAcrescimoPct: 0,

@@ -4,7 +4,7 @@ import PasseCheckout from '../PasseCheckout'
 import { dssMetadata } from '../metadata'
 
 // Combo (cross-sell): One Day + acesso ao portal do curso "Lakehouse: Pipeline na
-// Prática". Preço fixo R$277, sem lote/âncora. Fulfillment do curso é MANUAL (a
+// Prática". Preço fixo R$360, sem lote/âncora. Fulfillment do curso é MANUAL (a
 // compra registra a inscrição; liberar o portal é passo operacional do Binhara).
 const PRODUTO = getProduto('dss-one-day-curso-2026')
 
@@ -19,7 +19,7 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/one-day-curso',
   title: 'One Day + Portal do Curso — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Combo do DSS 2026: passe de 1 dia + acesso ao portal do curso Lakehouse: Pipeline na Prática por R$ 277. PIX ou cartão em até 3x.',
+    'Combo do DSS 2026: passe de 1 dia + acesso ao portal do curso Lakehouse: Pipeline na Prática por R$ 360. PIX ou cartão em até 3x.',
   noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
 })
 

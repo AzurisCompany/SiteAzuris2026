@@ -4,16 +4,16 @@ import PasseCheckout from '../PasseCheckout'
 import { dssMetadata } from '../metadata'
 
 // Passe One Day — 1 dia do DSS 2026. Lote gerido no preço do registry (sem tipos):
-// vende Lote 1 (R$190) com âncora do lote final (R$270) riscada. Corpo do checkout
+// vende Lote 1 (R$247) com âncora do lote final (R$357) riscada. Corpo do checkout
 // vem do PasseCheckout compartilhado; aqui só a config específica do produto.
 const PRODUTO = getProduto('dss-one-day-2026')
 
 // Escada de lotes só pra exibição — a fonte da verdade do preço é o registry
 // (precoCentavos). Ao virar o lote, ajusta ambos: o registry e o `atual` daqui.
 const LOTES = [
-  { nome: 'Lote 1', valor: 190, atual: true },
-  { nome: 'Lote 2', valor: 230, atual: false },
-  { nome: 'Lote 3', valor: 270, atual: false },
+  { nome: 'Lote 1', valor: 247, atual: true },
+  { nome: 'Lote 2', valor: 297, atual: false },
+  { nome: 'Lote 3', valor: 357, atual: false },
 ]
 
 const INCLUI = ['1 dia de evento', 'Plenária Principal', 'Auditório Secundário', 'Área de exposição', 'Coffee Break']
@@ -22,7 +22,7 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/one-day',
   title: 'Passe One Day — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 1 a partir de R$ 190 no PIX ou cartão em até 3x.',
+    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 1 a partir de R$ 247 no PIX ou cartão em até 3x.',
   noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
 })
 

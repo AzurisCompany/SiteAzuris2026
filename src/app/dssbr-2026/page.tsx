@@ -89,7 +89,7 @@ async function passFullPass(): Promise<Pass> {
   }
 }
 
-/** One Day: preço do registry (Lote 1 R$190, âncora R$270). */
+/** One Day: preço do registry (Lote 1 R$247, âncora R$357). */
 function passOneDay(): Pass {
   const pix = Number((PRODUTO_ONEDAY.precoCentavos / 100).toFixed(2))
   const deVenda = PRODUTO_ONEDAY.precoDeVendaCentavos / 100
@@ -111,7 +111,7 @@ function passOneDay(): Pass {
   }
 }
 
-/** Combo (cross-sell): One Day + portal do curso Pipeline. Preço fixo R$277, sem âncora. */
+/** Combo (cross-sell): One Day + portal do curso Pipeline. Preço fixo R$360, sem âncora. */
 function passOneDayCurso(): Pass {
   const pix = Number((PRODUTO_ONEDAY_CURSO.precoCentavos / 100).toFixed(2))
   const deVenda = PRODUTO_ONEDAY_CURSO.precoDeVendaCentavos / 100
@@ -143,9 +143,9 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 190.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 247.',
   ogDescription:
-    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 190.',
+    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 247.',
 })
 
 const STATS = [
