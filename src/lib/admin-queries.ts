@@ -515,6 +515,26 @@ export async function emailsPorProduto(
   return { todos, porCurso }
 }
 
+/** Teto do export de contatos. A base inteira tem centenas de linhas; o limite é só
+ *  pra uma query solta não virar um arquivo de 50 MB sem ninguém perceber. */
+export const EXPORT_MAX_LINHAS = 5000
+
+/**
+ * Todas as linhas que o filtro pegou, sem paginação — pro CSV de contatos.
+ * Mesmo WHERE da [[listarVendas]] + exigência de email (contato sem email não
+ * serve pra lista). Ordenado do mais recente pro mais antigo porque o dedup do
+ * [[montarCsvContatos]] mantém a PRIMEIRA ocorrência de cada pessoa.
+ */
+export async function vendasParaExport(f: FiltrosVendas): Promise<InscricaoRow[]> {
+  const { where, params } = construirWhere(f)
+  const emailCond = `email IS NOT NULL AND email <> ''`
+  const fullWhere = where ? `${where} AND ${emailCond}` : `WHERE ${emailCond}`
+  return (await sql.query(
+    `SELECT * FROM inscricoes ${fullWhere} ORDER BY created_at DESC LIMIT ${EXPORT_MAX_LINHAS}`,
+    params
+  )) as InscricaoRow[]
+}
+
 /** Quantos registros estão marcados como teste (pra rótulo do toggle "ver testes"). */
 export async function contarTestes(): Promise<number> {
   const rows = (await sql`SELECT COUNT(*) AS c FROM inscricoes WHERE is_teste`) as Array<{ c: string }>

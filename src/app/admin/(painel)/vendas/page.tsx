@@ -22,6 +22,7 @@ import Filtros from './Filtros'
 import TesteButton from './TesteButton'
 import CancelarButton from './CancelarButton'
 import CopiarEmailsButton from './CopiarEmailsButton'
+import BaixarCsvLink from './BaixarCsvLink'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,6 +132,15 @@ export default async function VendasPage({
     const s = u.toString()
     return s ? `?${s}` : '/admin/vendas'
   }
+  // CSV de contatos: mesma rota, mesmos filtros da tela, um arquivo por produto.
+  const exportHref = (slug: string) => {
+    const u = baseParams()
+    if (slug) u.set('curso', slug)
+    if (mostrarTeste) u.set('teste', '1')
+    const s = u.toString()
+    return `/api/admin/exportar${s ? `?${s}` : ''}`
+  }
+
   const abas = [
     { slug: '', label: 'Todos', count: countTodos, emails: emailsTodos },
     ...Object.keys(PRODUTO_LABEL).map((slug) => ({
@@ -182,6 +192,11 @@ export default async function VendasPage({
         </div>
         <div className="flex items-center gap-2">
         <CopiarEmailsButton emails={emailsAtivos} />
+        <BaixarCsvLink
+          href={exportHref(curso)}
+          titulo={curso ? tabProduto(curso) : 'todos os produtos'}
+          vazio={emailsAtivos.length === 0}
+        />
         <Link
           href={toggleTesteHref}
           className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
@@ -218,6 +233,12 @@ export default async function VendasPage({
                 </span>
               </Link>
               <CopiarEmailsButton emails={aba.emails} variant="icon" titulo={`${aba.label} — ${aba.emails.length} email(s)`} />
+              <BaixarCsvLink
+                href={exportHref(aba.slug)}
+                variant="icon"
+                titulo={`${aba.label} — ${aba.emails.length} contato(s)`}
+                vazio={aba.emails.length === 0}
+              />
             </div>
           )
         })}
