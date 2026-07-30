@@ -10,10 +10,12 @@ import { precosSugeridosCobranca, PRODUTO_TAB } from '@/lib/admin-queries'
 import { PRODUTOS } from '@/lib/produtos'
 
 describe('OPCOES_COBRANCA', () => {
-  it('cobre os 4 baldes: curso, DSS, GU e customizado', () => {
+  it('cobre os baldes: curso, DSS (full + One Day), GU e customizado', () => {
     expect(OPCOES_COBRANCA.map((o) => o.slug)).toEqual([
       'lakehouse-comunidade',
       'dss-2026',
+      'dss-one-day-2026',
+      'dss-one-day-curso-2026',
       'gubigdata-2026-07',
       PROPOSTA_SLUG,
     ])
