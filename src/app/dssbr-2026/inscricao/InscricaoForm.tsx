@@ -6,8 +6,9 @@ import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
 
-/** Espelha PRODUTOS['dss-2026'].enderecoObrigatorioPJ — ingresso corporativo vira nota. */
-const ENDERECO_OBRIGATORIO_PJ = true
+/** Default: espelha PRODUTOS['dss-2026'].enderecoObrigatorioPJ — ingresso corporativo vira nota.
+ *  Produtos de pessoa física (ex.: adesão do ETT) passam `enderecoObrigatorioPJ={false}`. */
+const ENDERECO_OBRIGATORIO_PJ_PADRAO = true
 
 /** Opção de tipo de ingresso vinda do catálogo (admin). */
 export interface TipoOption {
@@ -34,6 +35,8 @@ interface Props {
   endpoint?: string
   /** identificação do item pro GA begin_checkout (default: DSS full). */
   gaItem?: { id: string; name: string }
+  /** PJ só fecha com endereço completo (default: true, como no DSS). Espelha o registry. */
+  enderecoObrigatorioPJ?: boolean
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -52,6 +55,7 @@ export default function InscricaoForm({
   tipos,
   endpoint = '/api/dssbr-2026/inscricao',
   gaItem = { id: 'dss-2026', name: 'Data Science Summit Brasil 2026' },
+  enderecoObrigatorioPJ = ENDERECO_OBRIGATORIO_PJ_PADRAO,
 }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -122,7 +126,7 @@ export default function InscricaoForm({
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
-          ...extrasParaPayload(extras, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
+          ...extrasParaPayload(extras, pessoaTipo, enderecoObrigatorioPJ),
         }),
       })
 
@@ -354,7 +358,7 @@ export default function InscricaoForm({
         value={extras}
         onChange={setExtras}
         pessoaTipo={pessoaTipo}
-        enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+        enderecoObrigatorioPJ={enderecoObrigatorioPJ}
       />
 
       {erro && (

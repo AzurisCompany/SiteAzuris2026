@@ -415,6 +415,18 @@ export async function getSubscription(subscriptionId: string): Promise<AsaasSubs
   return (await asaasFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'GET' })) as AsaasSubscription
 }
 
+/**
+ * Cobranças geradas por uma assinatura (GET /subscriptions/{id}/payments).
+ * Usado pelo checkout público pra devolver o link da PRIMEIRA cobrança: criar a
+ * subscription não devolve invoiceUrl, e sem ele o cliente assina e não paga nada.
+ */
+export async function getSubscriptionPayments(subscriptionId: string): Promise<AsaasPaymentDetail[]> {
+  const r = (await asaasFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}/payments?limit=100`, {
+    method: 'GET',
+  })) as { data?: AsaasPaymentDetail[] }
+  return Array.isArray(r.data) ? r.data : []
+}
+
 /** Cancela (deleta) uma assinatura no Asaas — para de gerar novos ciclos. */
 export async function cancelSubscription(subscriptionId: string): Promise<{ deleted: boolean }> {
   return (await asaasFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}`, { method: 'DELETE' })) as {

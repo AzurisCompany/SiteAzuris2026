@@ -99,6 +99,11 @@ CREATE TABLE IF NOT EXISTS assinaturas (
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Produto da assinatura (ex.: 'ett-assinatura'). NULL = avulsa criada no admin.
+-- É o curso_slug que o ciclo materializado recebe — dá aba própria por produto no painel.
+ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS produto_slug TEXT;
+CREATE INDEX IF NOT EXISTS idx_assinaturas_produto_email ON assinaturas(produto_slug, email);
+
 -- Janela de vendas e lotação por tipo de ingresso (eventos presenciais, ex.: GU BigData).
 ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS vendas_ate DATE;     -- última data de venda (inclusive); NULL = sem prazo
 ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS limite_qtd INTEGER;  -- lotação do tipo (paid+pending, sem is_teste); NULL = sem limite

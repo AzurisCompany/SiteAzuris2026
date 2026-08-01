@@ -110,6 +110,26 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     // inscrição por endereço. Quem for PJ e quiser nota preenche por opção.
     enderecoObrigatorioPJ: false,
   },
+  // Adesão do English Talk Time ([[project_ecosystem]]). Cobrada UMA VEZ — não vira
+  // mensalidade. Dá 2 encontros individuais de 1h, material personalizado, entrada nos
+  // encontros de conversação, conta no ETT Player/Speak e os 30 primeiros dias de
+  // plataforma. A mensalidade (Trilha de Dedicação, R$39/mês) é OUTRO produto, recorrente,
+  // que NÃO passa por aqui: assinatura tem checkout próprio em /api/ett/assinatura ([[ett]]).
+  'ett-adesao': {
+    slug: 'ett-adesao',
+    nome: 'English Talk Time — Adesão',
+    descricao: 'Pagamento único · 2h de mentoria individual + 30 dias de plataforma',
+    precoCentavos: 7000, // R$ 70,00 — preço único da adesão (PIX ou cartão 1x)
+    precoDeVendaCentavos: 0, // sem âncora riscada — o preço é o preço
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'ETT — Adesão (2 encontros individuais, material e 30 dias de plataforma)',
+    voltarUrl: 'https://englishtalktime.com.br',
+    voltarLabel: '← voltar pro English Talk Time',
+    telefoneObrigatorio: true, // o ETT roda no WhatsApp; sem telefone não dá pra marcar os encontros
+    enderecoObrigatorioPJ: false, // produto de pessoa física; PJ pede nota por exceção
+  },
   // Lista de espera do curso preparatório (Python/SQL/Docker) — pré-requisito do
   // Lakehouse. Reserva de interesse: NUNCA gera cobrança, só captura o lead pelo
   // tipo gratuito 'reserva'. asaasDescricao só existe pra satisfazer o registry.

@@ -588,6 +588,8 @@ export interface AssinaturaRow {
   id: number
   asaas_subscription_id: string | null
   asaas_customer_id: string | null
+  /** produto da assinatura (ex.: 'ett-assinatura'). NULL = avulsa criada no admin. */
+  produto_slug: string | null
   nome: string
   email: string
   cpf_cnpj: string
@@ -603,6 +605,8 @@ export interface AssinaturaRow {
 }
 
 export interface NovaAssinatura {
+  /** produto da assinatura; omitido = avulsa (cai na aba genérica "Assinaturas") */
+  produto_slug?: string | null
   nome: string
   email: string
   cpf_cnpj: string
@@ -617,8 +621,8 @@ export interface NovaAssinatura {
 /** Cria a assinatura como 'active' ANTES do Asaas (asaas_* nulos até vincular). */
 export async function criarAssinatura(a: NovaAssinatura): Promise<AssinaturaRow> {
   const rows = (await sql`
-    INSERT INTO assinaturas (nome, email, cpf_cnpj, telefone, billing_type, valor_centavos, cycle, descricao, is_teste)
-    VALUES (${a.nome}, ${a.email}, ${a.cpf_cnpj}, ${a.telefone}, ${a.billing_type}, ${a.valor_centavos}, ${a.cycle}, ${a.descricao}, ${a.is_teste ?? false})
+    INSERT INTO assinaturas (produto_slug, nome, email, cpf_cnpj, telefone, billing_type, valor_centavos, cycle, descricao, is_teste)
+    VALUES (${a.produto_slug ?? null}, ${a.nome}, ${a.email}, ${a.cpf_cnpj}, ${a.telefone}, ${a.billing_type}, ${a.valor_centavos}, ${a.cycle}, ${a.descricao}, ${a.is_teste ?? false})
     RETURNING *
   `) as AssinaturaRow[]
   return rows[0]
@@ -654,6 +658,22 @@ export async function getAssinatura(id: number): Promise<AssinaturaRow | null> {
   return rows[0] ?? null
 }
 
+/**
+ * Assinatura ATIVA de um e-mail num produto — trava do checkout público: sem isso,
+ * quem clica duas vezes em "assinar" fica com duas subscriptions cobrando por mês.
+ */
+export async function assinaturaAtivaDoProduto(produtoSlug: string, email: string): Promise<AssinaturaRow | null> {
+  const rows = (await sql`
+    SELECT * FROM assinaturas
+     WHERE produto_slug = ${produtoSlug}
+       AND LOWER(email) = ${email.toLowerCase()}
+       AND status = 'active'
+     ORDER BY created_at DESC
+     LIMIT 1
+  `) as AssinaturaRow[]
+  return rows[0] ?? null
+}
+
 export async function getAssinaturaPorAsaasId(subscriptionId: string): Promise<AssinaturaRow | null> {
   const rows = (await sql`
     SELECT * FROM assinaturas WHERE asaas_subscription_id = ${subscriptionId}
@@ -666,7 +686,9 @@ export async function listarAssinaturas(): Promise<AssinaturaRow[]> {
 }
 
 /**
- * Materializa um ciclo de assinatura como uma inscrição (curso_slug='assinatura').
+ * Materializa um ciclo de assinatura como uma inscrição. O curso_slug vem do
+ * produto da assinatura (ex.: 'ett-assinatura'), com fallback 'assinatura' pras
+ * avulsas criadas no admin — é o que dá aba própria por produto no painel.
  * Idempotente por asaas_payment_id: só insere se ainda não existe. Roda no webhook
  * quando chega um pagamento vinculado a uma subscription conhecida — assim cada mês
  * cobrado aparece em Vendas/Financeiro. O status real é ajustado logo depois pelo
@@ -691,7 +713,7 @@ export async function materializarCicloAssinatura(p: {
       asaas_customer_id, asaas_payment_id, asaas_invoice_url, due_date, asaas_status,
       status, como_conheceu, consentimento_lgpd, is_teste
     )
-    SELECT 'assinatura', 'unico', a.nome, a.email, a.cpf_cnpj, a.telefone,
+    SELECT COALESCE(a.produto_slug, 'assinatura'), 'unico', a.nome, a.email, a.cpf_cnpj, a.telefone,
            COALESCE(${p.billingType ?? null}, a.billing_type), COALESCE(${valorCentavos > 0 ? valorCentavos : null}, a.valor_centavos), 1,
            ${p.customer ?? null}, ${p.id}, ${p.invoiceUrl ?? null}, ${p.dueDate ?? null}, ${p.status ?? null},
            'pending', ${'Assinatura: '} || COALESCE(a.descricao, ''), true, a.is_teste

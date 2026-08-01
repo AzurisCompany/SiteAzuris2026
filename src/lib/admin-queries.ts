@@ -26,8 +26,11 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'gubigdata-2026-07': 'GU BigData',
+  'ett-adesao': 'ETT Adesão',
+  'ett-assinatura': 'ETT Assinatura', // ciclos da Trilha de Dedicação ([[ett]])
+  'preparatorio-dados': 'Preparatório',
   proposta: 'Propostas',
-  assinatura: 'Assinaturas',
+  assinatura: 'Assinaturas', // recorrências avulsas criadas no admin (sem produto)
   'avulso-asaas': 'Avulsos',
 }
 export function tabProduto(slug: string): string {

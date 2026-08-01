@@ -71,6 +71,13 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['gubigdata-2026-07'].enderecoObrigatorioPJ,
   },
   {
+    slug: 'ett-adesao',
+    label: 'ETT Adesão',
+    descricaoPadrao: PRODUTOS['ett-adesao'].asaasDescricao,
+    // Pessoa física; PJ que quiser nota preenche endereço por opção.
+    enderecoObrigatorioPJ: PRODUTOS['ett-adesao'].enderecoObrigatorioPJ,
+  },
+  {
     slug: PROPOSTA_SLUG,
     label: 'Customizado',
     descricaoPadrao: '',

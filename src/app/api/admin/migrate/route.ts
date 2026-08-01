@@ -82,6 +82,9 @@ const STATEMENTS: string[] = [
      created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
      updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
    )`,
+  // Produto da assinatura (ex.: 'ett-assinatura'); NULL = avulsa criada no admin.
+  `ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS produto_slug TEXT`,
+  `CREATE INDEX IF NOT EXISTS idx_assinaturas_produto_email ON assinaturas(produto_slug, email)`,
   // Nota Fiscal (NFS-e emitida via Asaas) vinculada à inscrição.
   `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_id TEXT`,
   `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_status TEXT`,
