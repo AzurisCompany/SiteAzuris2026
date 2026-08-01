@@ -1,12 +1,12 @@
-# ETT no gateway — adesão (R$70) e assinatura (R$39/mês)
+# ETT no gateway — adesão (R$67) e assinatura (R$37/mês)
 
 Dois produtos do English Talk Time passando pelo checkout da Azuris. Preços e copy
 vêm da home do englishtalktime.com.br.
 
 | Produto | URL | Preço | Natureza |
 |---|---|---|---|
-| Adesão | `/ett/adesao` | R$ 70 | cobrança **única** (PIX ou cartão 1–3x) |
-| Trilha de Dedicação | `/ett/assinatura` | R$ 39/mês ou R$ 390/ano | **recorrente** (subscription no Asaas) |
+| Adesão | `/ett/adesao` | R$ 67 | cobrança **única** (PIX ou cartão 1–3x) |
+| Trilha de Dedicação | `/ett/assinatura` | R$ 37/mês ou R$ 370/ano | **recorrente** (subscription no Asaas) |
 
 Ambas `noindex` — a página indexável é o site do ETT; estas são só checkout.
 
@@ -19,7 +19,7 @@ Nada novo de infraestrutura. Entrou como mais um registro em
 - `POST /api/ett/adesao/inscricao` → 19 linhas chamando `processarCheckout('ett-adesao', body)`.
 - Página usa o `InscricaoForm` do DSS, agora com prop `enderecoObrigatorioPJ`
   (default `true`, como era). O ETT passa `false`: é produto de pessoa física, e
-  travar por endereço custaria conversão numa compra de R$70.
+  travar por endereço custaria conversão numa compra de R$67.
 - Cai na aba **ETT Adesão** de `/admin/vendas` e no CSV de contatos, como qualquer
   outro produto. Também dá pra faturar à mão em `/admin/cobranca` (opção "ETT Adesão").
 
@@ -59,6 +59,10 @@ linhas órfãs).
 
 `src/lib/ett.ts` é a fonte da verdade: o client manda `plano: 'mensal' | 'anual'`,
 o valor e o `cycle` saem daqui. Plano fora da lista → 400.
+
+O **anual é derivado da mensalidade** (`MENSAL_CENTAVOS * 10`), não digitado: a
+promessa da home é "dois meses de desconto", e com dois números soltos o próximo
+reajuste quebrava a conta em silêncio. Mensalidade a R$37 → anual R$370.
 
 ## Migração
 

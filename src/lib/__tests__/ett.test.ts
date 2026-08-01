@@ -5,8 +5,8 @@ import { PRODUTO_TAB } from '@/lib/admin-queries'
 
 describe('planos da assinatura do ETT', () => {
   it('mensal e anual são os preços anunciados na home do ETT', () => {
-    expect(getPlanoEtt('mensal')?.valorCentavos).toBe(3900)
-    expect(getPlanoEtt('anual')?.valorCentavos).toBe(39000)
+    expect(getPlanoEtt('mensal')?.valorCentavos).toBe(3700)
+    expect(getPlanoEtt('anual')?.valorCentavos).toBe(37000)
   })
 
   it('cada plano tem o ciclo certo no Asaas — trocar isso muda a frequência da cobrança', () => {
@@ -22,7 +22,10 @@ describe('planos da assinatura do ETT', () => {
   })
 
   it('o anual economiza exatamente 2 mensalidades', () => {
-    expect(economiaAnualCentavos()).toBe(2 * 3900)
+    const mensal = getPlanoEtt('mensal')!.valorCentavos
+    expect(economiaAnualCentavos()).toBe(2 * mensal)
+    // A promessa da home é "dois meses de desconto": anual = 10 mensalidades.
+    expect(getPlanoEtt('anual')!.valorCentavos).toBe(10 * mensal)
   })
 
   it('toda descrição vai identificável na fatura do cliente', () => {
@@ -34,9 +37,9 @@ describe('planos da assinatura do ETT', () => {
 })
 
 describe('produtos do ETT no painel', () => {
-  it('adesão é cobrança única de R$70, sem desconto e sem âncora', () => {
+  it('adesão é cobrança única de R$67, sem desconto e sem âncora', () => {
     const p = PRODUTOS['ett-adesao']
-    expect(p.precoCentavos).toBe(7000)
+    expect(p.precoCentavos).toBe(6700)
     expect(p.pixDescontoPct).toBe(0)
     expect(p.cartaoAcrescimoPct).toBe(0)
     expect(p.precoDeVendaCentavos).toBe(0)

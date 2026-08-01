@@ -119,7 +119,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     slug: 'ett-adesao',
     nome: 'English Talk Time — Adesão',
     descricao: 'Pagamento único · 2h de mentoria individual + 30 dias de plataforma',
-    precoCentavos: 7000, // R$ 70,00 — preço único da adesão (PIX ou cartão 1x)
+    precoCentavos: 6700, // R$ 67,00 — preço único da adesão (PIX ou cartão 1x)
     precoDeVendaCentavos: 0, // sem âncora riscada — o preço é o preço
     pixDescontoPct: 0,
     cartaoAcrescimoPct: 0,

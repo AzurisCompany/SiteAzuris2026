@@ -31,8 +31,13 @@ export interface PlanoEtt {
   nota: string
 }
 
+/** Mensalidade em centavos — o anual é derivado dela pra os dois nunca desencontrarem. */
+const MENSAL_CENTAVOS = 3700 // R$ 37,00
+/** "Dois meses de desconto" da home = pagar 10 meses. Mexeu na regra? Mexe aqui. */
+const MESES_COBRADOS_NO_ANUAL = 10
+
 /**
- * Os dois planos anunciados na home do ETT: R$39/mês ou R$390/ano ("dois meses de
+ * Os dois planos anunciados na home do ETT: R$37/mês ou R$370/ano ("dois meses de
  * desconto"). Mudou o preço lá? Muda aqui — o valor do POST vem daqui, nunca do client.
  */
 export const PLANOS_ETT: PlanoEtt[] = [
@@ -40,7 +45,7 @@ export const PLANOS_ETT: PlanoEtt[] = [
     id: 'mensal',
     label: 'Mensal',
     cycle: 'MONTHLY',
-    valorCentavos: 3900,
+    valorCentavos: MENSAL_CENTAVOS,
     unidade: 'por mês',
     descricao: 'ETT — Trilha de Dedicação (mensal)',
     nota: 'Renova todo mês. Cancela quando quiser.',
@@ -49,10 +54,10 @@ export const PLANOS_ETT: PlanoEtt[] = [
     id: 'anual',
     label: 'Anual',
     cycle: 'YEARLY',
-    valorCentavos: 39000,
+    valorCentavos: MENSAL_CENTAVOS * MESES_COBRADOS_NO_ANUAL,
     unidade: 'por ano',
     descricao: 'ETT — Trilha de Dedicação (anual)',
-    nota: 'Equivale a 10 meses — dois meses de desconto.',
+    nota: `Equivale a ${MESES_COBRADOS_NO_ANUAL} meses — dois meses de desconto.`,
   },
 ]
 

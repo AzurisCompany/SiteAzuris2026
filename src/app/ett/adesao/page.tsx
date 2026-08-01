@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getProduto } from '@/lib/produtos'
+import { getPlanoEtt } from '@/lib/ett'
 import InscricaoForm from '@/app/dssbr-2026/inscricao/InscricaoForm'
 import EttShell, { ResumoEtt } from '../EttShell'
 
-// Checkout da adesão do English Talk Time — R$70 cobrados UMA VEZ (não vira
+// Checkout da adesão do English Talk Time — R$67 cobrados UMA VEZ (não vira
 // mensalidade). Preço vem do registry ([[produtos]] 'ett-adesao') e é recalculado
 // no servidor no POST. A mensalidade é a outra página: /ett/assinatura.
 const PRODUTO = getProduto('ett-adesao')
@@ -20,7 +21,7 @@ const INCLUI = [
 export const metadata: Metadata = {
   title: 'Adesão — English Talk Time',
   description:
-    'Adesão do English Talk Time: R$ 70 uma vez, com 2 horas de mentoria individual, material personalizado e os 30 primeiros dias de plataforma inclusos.',
+    'Adesão do English Talk Time: R$ 67 uma vez, com 2 horas de mentoria individual, material personalizado e os 30 primeiros dias de plataforma inclusos.',
   robots: { index: false, follow: false }, // checkout; a página indexável é englishtalktime.com.br
 }
 
@@ -49,7 +50,7 @@ export default function EttAdesaoPage() {
         <>
           A partir do dia 31, a continuidade é a{' '}
           <Link href="/ett/assinatura" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
-            Trilha de Dedicação (R$ 39/mês)
+            Trilha de Dedicação (R$ {getPlanoEtt('mensal')!.valorCentavos / 100}/mês)
           </Link>
           .
         </>
