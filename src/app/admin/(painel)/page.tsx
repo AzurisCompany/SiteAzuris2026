@@ -5,6 +5,7 @@ import {
   labelProduto,
   labelTipo,
   brl,
+  CHECKOUT_URL,
   type ResumoProduto,
   type ResumoTipo,
 } from '@/lib/admin-queries'
@@ -54,6 +55,11 @@ export default async function DashboardPage() {
   )
   const conversao = tot.criadas > 0 ? Math.round((tot.pagas / tot.criadas) * 100) : 0
 
+  // Produto com checkout no ar mas ainda sem nenhuma venda não sai do GROUP BY —
+  // e é justamente o que precisa de olho em cima. Entra zerado, com link pro checkout.
+  const comVenda = new Set(resumo.map((r) => r.curso_slug))
+  const semVenda = Object.entries(CHECKOUT_URL).filter(([slug]) => !comVenda.has(slug))
+
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between flex-wrap gap-3">
@@ -83,6 +89,11 @@ export default async function DashboardPage() {
         <h2 className="text-lg font-bold">Por produto</h2>
         {resumo.length === 0 && !erro && (
           <p className="text-sm text-[var(--text-muted)]">Nenhuma inscrição registrada ainda.</p>
+        )}
+        {semVenda.length > 0 && (
+          <p className="text-sm text-[var(--text-muted)]">
+            {semVenda.length} produto(s) com checkout no ar e nenhuma venda ainda — listados no fim.
+          </p>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
           {resumo.map((r) => {
@@ -148,6 +159,38 @@ export default async function DashboardPage() {
               </div>
             )
           })}
+
+          {/* Checkout no ar, venda zero. Card apagado de propósito: é lembrete, não conquista. */}
+          {semVenda.map(([slug, url]) => (
+            <div
+              key={slug}
+              className="rounded-2xl border border-dashed border-[var(--azuris-surface)] bg-[var(--azuris-deep)]/40 p-5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-bold text-[var(--text-secondary)]">{labelProduto(slug)}</h3>
+                <span className="text-xs text-[var(--text-muted)]">sem vendas ainda</span>
+              </div>
+              <div className="mt-4 text-sm text-[var(--text-muted)]">
+                Checkout publicado, nenhuma inscrição registrada até agora.
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3 text-xs">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[var(--azuris-cyan)] hover:underline"
+                >
+                  abrir checkout ↗
+                </a>
+                <Link
+                  href={`/admin/vendas?curso=${encodeURIComponent(slug)}`}
+                  className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                >
+                  ver na lista de vendas
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

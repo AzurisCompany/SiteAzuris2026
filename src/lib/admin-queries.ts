@@ -10,6 +10,8 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
+  'ett-adesao': 'English Talk Time — Adesão',
+  'ett-assinatura': 'ETT — Trilha de Dedicação',
   'preparatorio-dados': 'Preparatório (reservas)',
   proposta: 'Proposta customizada',
   assinatura: 'Assinatura',
@@ -35,6 +37,25 @@ export const PRODUTO_TAB: Record<string, string> = {
 }
 export function tabProduto(slug: string): string {
   return PRODUTO_TAB[slug] ?? slug
+}
+
+/**
+ * Onde se compra cada produto (path público). Chave = curso_slug.
+ *
+ * A Visão geral é montada a partir de `inscricoes`, então produto recém-lançado
+ * — sem nenhuma venda — não aparecia em lugar nenhum do painel: exatamente o
+ * produto que a gente mais precisa acompanhar. Com este mapa, ele aparece
+ * zerado, com link pro próprio checkout.
+ */
+export const CHECKOUT_URL: Record<string, string> = {
+  'lakehouse-comunidade': '/lakehouse-comunidade/inscricao',
+  'dss-2026': '/dssbr-2026/inscricao',
+  'dss-one-day-2026': '/dssbr-2026/one-day',
+  'dss-one-day-curso-2026': '/dssbr-2026/one-day-curso',
+  'gubigdata-2026-07': '/gubigdata/inscricao',
+  'ett-adesao': '/ett/adesao',
+  'ett-assinatura': '/ett/assinatura',
+  'preparatorio-dados': '/preparatorio-dados/reserva',
 }
 
 /** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).
