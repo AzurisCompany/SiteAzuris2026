@@ -99,6 +99,10 @@ CREATE TABLE IF NOT EXISTS assinaturas (
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Quando o e-mail de confirmação de pagamento foi enviado (NULL = ainda não).
+-- Trava contra duplicidade: o Asaas dispara CONFIRMED e RECEIVED pro mesmo pagamento.
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS email_confirmacao_em TIMESTAMPTZ;
+
 -- Produto da assinatura (ex.: 'ett-assinatura'). NULL = avulsa criada no admin.
 -- É o curso_slug que o ciclo materializado recebe — dá aba própria por produto no painel.
 ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS produto_slug TEXT;

@@ -82,6 +82,9 @@ const STATEMENTS: string[] = [
      created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
      updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
    )`,
+  // Quando o e-mail de confirmação de pagamento foi enviado (NULL = ainda não).
+  // É a trava contra e-mail duplicado: o Asaas manda CONFIRMED e RECEIVED pro mesmo pagamento.
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS email_confirmacao_em TIMESTAMPTZ`,
   // Produto da assinatura (ex.: 'ett-assinatura'); NULL = avulsa criada no admin.
   `ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS produto_slug TEXT`,
   `CREATE INDEX IF NOT EXISTS idx_assinaturas_produto_email ON assinaturas(produto_slug, email)`,

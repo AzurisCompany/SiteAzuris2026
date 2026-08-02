@@ -80,6 +80,8 @@ export interface InscricaoRow {
   last_synced_at: string | null
   // --- marcação manual ---
   is_teste: boolean // registro de teste/sandbox: some da lista e dos KPIs por padrão
+  // --- e-mail transacional ---
+  email_confirmacao_em: string | null // quando a confirmação de pagamento foi enviada
   // --- Nota Fiscal (Asaas NFS-e) ---
   nf_id: string | null
   nf_status: string | null
@@ -499,6 +501,28 @@ export async function atualizarStatusPorAsaasId(
     RETURNING *
   `) as InscricaoRow[]
   return rows[0] ?? null
+}
+
+/**
+ * Reserva o direito de mandar o e-mail de confirmação desta inscrição.
+ *
+ * Devolve true só na PRIMEIRA chamada: o UPDATE condicional é a trava. O Asaas
+ * manda PAYMENT_CONFIRMED e PAYMENT_RECEIVED pro mesmo pagamento (e reenvia
+ * quando o webhook demora), então sem isso o cliente recebe o mesmo e-mail 2–3x.
+ */
+export async function reservarEnvioConfirmacao(id: number): Promise<boolean> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET email_confirmacao_em = NOW()
+     WHERE id = ${id} AND email_confirmacao_em IS NULL
+    RETURNING id
+  `) as Array<{ id: number }>
+  return rows.length > 0
+}
+
+/** Devolve a reserva quando o envio falha — senão o e-mail nunca mais é tentado. */
+export async function liberarEnvioConfirmacao(id: number): Promise<void> {
+  await sql`UPDATE inscricoes SET email_confirmacao_em = NULL WHERE id = ${id}`
 }
 
 /**

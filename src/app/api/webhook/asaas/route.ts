@@ -15,6 +15,7 @@ import {
   type InscricaoStatus,
 } from '@/lib/db'
 import type { AsaasEvent, AsaasWebhookPayload } from '@/lib/asaas'
+import { notificarPagamentoConfirmado } from '@/lib/email/notificar'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -107,6 +108,12 @@ export async function POST(request: Request) {
   }
 
   console.log(`Webhook Asaas: ${event} → inscricao ${row.id} (${row.email}) status=${newStatus}`)
+
+  // E-mail de confirmação: efeito colateral, uma vez só por inscrição, e engole o
+  // próprio erro — o Asaas reenvia o webhook se a gente não devolver 200.
+  if (newStatus === 'paid') {
+    await notificarPagamentoConfirmado(row)
+  }
 
   return NextResponse.json({ ok: true, action: 'updated', inscricaoId: row.id })
 }
