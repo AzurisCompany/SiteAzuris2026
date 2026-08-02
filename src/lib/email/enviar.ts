@@ -9,7 +9,9 @@ import 'server-only'
 
 import { Resend } from 'resend'
 import { CompraConfirmada } from '@/emails/CompraConfirmada'
+import { AlertaVendas } from '@/emails/AlertaVendas'
 import type { ConteudoEmail } from '@/lib/email/conteudo'
+import type { Alerta } from '@/lib/vigilancia'
 
 export type ResultadoEnvio =
   | { readonly ok: true; readonly id: string }
@@ -41,10 +43,48 @@ function responderPara(): string | null {
   return v && v.trim().length > 0 ? v.trim() : null
 }
 
+/** Pra onde vão os alertas internos (vigia de vendas). Cai no replyTo se não houver. */
+export function destinoAlertas(): string | null {
+  const v = process.env.EMAIL_ALERTAS
+  return v && v.trim().length > 0 ? v.trim() : responderPara()
+}
+
+/** Base dos links dentro dos e-mails. */
+export function baseUrl(): string {
+  const v = process.env.EMAIL_BASE_URL
+  return v && v.trim().length > 0 ? v.trim().replace(/\/+$/, '') : 'https://azuris.com.br'
+}
+
 function resultado(data: { id: string } | null, error: { message: string } | null): ResultadoEnvio {
   if (error) return { ok: false, erro: error.message }
   if (!data) return { ok: false, erro: 'Resend não retornou um id de envio.' }
   return { ok: true, id: data.id }
+}
+
+/** Alerta interno do vigia de vendas ([[vigilancia]]) — vai pra nós, não pro cliente. */
+export async function enviarAlertaVendas(alertas: ReadonlyArray<Alerta>): Promise<ResultadoEnvio> {
+  const key = chave()
+  if (!key) return { ok: false, erro: 'RESEND_API_KEY ausente — envio desligado neste ambiente.' }
+  const para = destinoAlertas()
+  if (!para) return { ok: false, erro: 'Sem destino de alerta (defina EMAIL_ALERTAS ou EMAIL_RESPONDER_PARA).' }
+
+  const criticos = alertas.filter((a) => a.severidade === 'critico').length
+  const assunto =
+    criticos > 0
+      ? `🔴 ${criticos} alerta(s) crítico(s) de venda — checkout em risco`
+      : `🟡 ${alertas.length} alerta(s) de venda`
+
+  try {
+    const { data, error } = await new Resend(key).emails.send({
+      from: remetente(),
+      to: [para],
+      subject: assunto,
+      react: AlertaVendas({ alertas, urlAdmin: `${baseUrl()}/admin/ingressos` }),
+    })
+    return resultado(data, error)
+  } catch (e) {
+    return { ok: false, erro: e instanceof Error ? e.message : 'Falha inesperada no envio.' }
+  }
 }
 
 export interface EnviarCompraConfirmadaInput {

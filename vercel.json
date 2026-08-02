@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/reconciliar",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/vigia-vendas",
+      "schedule": "0 12 * * *"
     }
   ]
 }
