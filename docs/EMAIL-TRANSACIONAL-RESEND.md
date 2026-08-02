@@ -85,6 +85,23 @@ ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS email_confirmacao_em TIMESTAMPTZ
 engolido (webhook segue de pé) e o cliente não recebe nada. Roda junto com a do
 `assinaturas.produto_slug`, no mesmo `POST /api/admin/migrate`.
 
+## Vigia de vendas (cron diário)
+
+`GET /api/cron/vigia-vendas` — roda 12:00 UTC (9h BRT) pelo Vercel Cron e manda
+e-mail **só quando há alerta**. Regras puras em `src/lib/vigilancia.ts`:
+
+| Situação | Severidade |
+|---|---|
+| Produto sem NENHUM tipo disponível | 🔴 crítico |
+| Prazo vencendo em ≤ 3 dias | 🟡 aviso (🔴 se for a última opção viva) |
+| Lotação ≥ 80% | 🟡 aviso (🔴 se for a última opção viva) |
+| Produto fechado há mais de 7 dias | nada — evento passado não é incidente |
+
+Autenticação: `Bearer CRON_SECRET` **ou** sessão de admin — dá pra abrir logado no
+navegador. `?seco=1` diagnostica sem enviar e-mail.
+
+Destino do alerta: `EMAIL_ALERTAS`, com fallback pra `EMAIL_RESPONDER_PARA`.
+
 ## O que NÃO foi feito
 
 - **Só o e-mail de pagamento confirmado.** Inscrição gratuita (associado do GU,
