@@ -20,7 +20,7 @@ const PRODUCTS: Product[] = [
     tagline:
       "Data Science Summit Brasil — uma das maiores conferências de Dados & IA do país. Fundada e curada pela Azuris. 27 a 29 de outubro, Curitiba.",
     href: "/dssbr-2026",
-    badge: "🎟️ Pré-venda aberta",
+    badge: "🎟️ Ingressos abertos",
     className: "md:col-span-2 md:row-span-2",
     emoji: "🇧🇷",
     image: "https://dssbr.com.br/assets/photos/dss2025-012.jpg",

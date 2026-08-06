@@ -84,8 +84,8 @@ export default function InscricaoForm({
     if (installments > maxParcelas) setInstallments(maxParcelas)
   }, [maxParcelas, installments])
 
-  // Pré-venda: ambos os pagamentos partem do preço de pré-venda; mostramos o
-  // preço cheio de venda riscado como âncora (o que vai custar no lote final).
+  // Ambos os pagamentos partem do preço do lote vigente; mostramos o preço cheio
+  // de venda riscado como âncora (o que vai custar no lote final).
   const temAncora = precoDeVendaReais > precoPixReais
   const descontoPct = temAncora ? Math.round((1 - precoPixReais / precoDeVendaReais) * 100) : 0
 

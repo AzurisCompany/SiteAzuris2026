@@ -482,10 +482,12 @@ export default async function DssbrLandingPage() {
       <section id="ingressos" className="py-20 bg-deep/40 border-t border-slate/60">
         <div className="mx-auto max-w-5xl px-6">
           <div className="text-center">
+            {/* Sem nome de lote no título nem na linha de apoio: o lote vigente é o que
+                o card mostra (vem do admin). Texto fixo aqui desencontra do preço abaixo. */}
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Garanta sua vaga na <span className="text-brand-gradient">pré-venda</span>.
+              Garanta sua vaga no <span className="text-brand-gradient">DSS 2026</span>.
             </h2>
-            <p className="mt-4 text-foam/70">Lote 1 com o melhor preço. Escolha o ingresso que combina com você.</p>
+            <p className="mt-4 text-foam/70">O lote atual é o melhor preço — quando ele vira, o preço sobe. Escolha o ingresso que combina com você.</p>
           </div>
 
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

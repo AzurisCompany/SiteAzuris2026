@@ -93,7 +93,7 @@ export default async function InscricaoPage() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
-                Pré-venda · Lote 1
+                FullPass · 3 dias
               </div>
               <div className="mt-1 text-sm text-[var(--text-muted)] line-through">
                 R$ {precoDeVendaReais.toFixed(2).replace('.', ',')} no lote final
@@ -128,7 +128,9 @@ export default async function InscricaoPage() {
 
         {temTipos && (
           <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
-            <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">Pré-venda · {PRODUTO.descricao}</div>
+            {/* O lote vem do tipo selecionado no form — aqui só o evento, pra não
+                carimbar um rótulo de lote que briga com o que a pessoa escolheu. */}
+            <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">{PRODUTO.descricao}</div>
             <div className="mt-2 space-y-2 text-sm">
               <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                 <span className="text-[var(--azuris-cyan)]">●</span>

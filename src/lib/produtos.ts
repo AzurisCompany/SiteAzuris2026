@@ -38,13 +38,19 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   'dss-2026': {
     slug: 'dss-2026',
     nome: 'Data Science Summit Brasil 2026',
-    descricao: 'Pré-venda · 27 a 29 de outubro · IEP, Curitiba',
-    precoCentavos: 47000, // R$ 470,00 — preço da pré-venda (o que se paga, PIX ou cartão 1x)
+    // Sem nome de lote aqui: quem diz o lote é o tipo de ingresso escolhido no
+    // checkout. Rótulo fixo de lote nesta linha vira mentira na virada do lote.
+    descricao: '27 a 29 de outubro · IEP, Curitiba',
+    // O preço que VENDE vem do tipo de ingresso ativo em /admin/ingressos (Lote 1,
+    // R$570 hoje). Este número é o FALLBACK de quando o banco não responde — e por
+    // isso tem que acompanhar o lote vigente: fallback velho mostra um preço que
+    // ninguém mais pratica. A pré-venda de R$470 encerrou em 17/07/2026.
+    precoCentavos: 57000, // R$ 570,00 — Lote 1 (o que se paga, PIX ou cartão 1x)
     precoDeVendaCentavos: 82000, // R$ 820,00 — preço cheio de venda (âncora riscada)
-    pixDescontoPct: 0, // pré-venda já é o desconto; sem off adicional no PIX
-    cartaoAcrescimoPct: 0, // cartão = preço de pré-venda; só juros no parcelamento (2x–3x)
+    pixDescontoPct: 0, // o preço do lote é o preço; sem off adicional no PIX
+    cartaoAcrescimoPct: 0, // cartão = preço do lote; só juros no parcelamento (2x–3x)
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
-    asaasDescricao: 'Ingresso DSS 2026 — Data Science Summit Brasil (pré-venda)',
+    asaasDescricao: 'Ingresso DSS 2026 — Data Science Summit Brasil (FullPass, 3 dias)',
     voltarUrl: 'https://dssbr.com.br/blog/pre-venda-2026/',
     voltarLabel: '← voltar pro DSS 2026',
     telefoneObrigatorio: true,

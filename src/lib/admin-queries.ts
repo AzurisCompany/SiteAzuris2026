@@ -106,7 +106,7 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     },
     'dss-2026': {
       centavos: dss.precoCentavos,
-      dica: `pré-venda · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
+      dica: `Lote 1 (FullPass) · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
     },
     'dss-one-day-2026': {
       centavos: oneDay.precoCentavos,

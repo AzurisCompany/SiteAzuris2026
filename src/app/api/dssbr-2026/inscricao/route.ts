@@ -1,5 +1,5 @@
 // POST /api/dssbr-2026/inscricao
-// Checkout da pré-venda DSS 2026. A lógica (validação → preço no servidor →
+// Checkout do FullPass do DSS 2026. A lógica (validação → preço no servidor →
 // criarCobranca) vive em [[checkout-produto]], compartilhada com o GU BigData.
 import { NextResponse } from 'next/server'
 import { processarCheckout, type CheckoutBody } from '@/lib/checkout-produto'
