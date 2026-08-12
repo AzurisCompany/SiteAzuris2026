@@ -1,7 +1,8 @@
 # Sessão 2026-08-12 — GTM `GTM-T7647L5K` em todas as páginas, como regra
 
 **Tipo:** releitura do projeto + instalação do Google Tag Manager em todo o site.
-**Estado do repo ao fim:** `main` = (ver commits abaixo), working tree limpa.
+**Estado do repo ao fim:** `main` = `af17027`, working tree limpa. **14 commits não pushados.**
+**Commits desta sessão:** `cd0e147` (feat GTM) e `af17027` (este doc + o de 11/08).
 **Deploys:** **nenhum** — prod segue em `d388228` (06/08). A tag **não está no ar ainda**.
 **Testes:** 153 passando (17 arquivos), eram 149/16. Build ok.
 
