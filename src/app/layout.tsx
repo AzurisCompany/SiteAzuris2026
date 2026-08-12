@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { GTM_ID } from "@/lib/gtm";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { CourseFloatingBanner } from "@/components/CourseFloatingBanner";
@@ -97,6 +98,30 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-foam">
+        {/* Google Tag Manager (noscript) — precisa ser o primeiro filho do <body> */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        {/* End Google Tag Manager (noscript) */}
+
+        {/* Google Tag Manager — container de TODAS as rotas (root layout).
+            afterInteractive é a estratégia recomendada pelo Next pro GTM: o snippet
+            já cria o <script async>, então subir pra beforeInteractive só atrasaria
+            o first paint sem adiantar coleta. */}
+        <Script id="gtm-init" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`}
+        </Script>
+        {/* End Google Tag Manager */}
+
         {/* Google Tag (gtag.js) — GA4 via Google tag GT-NNZW5FW (propriedade da Azuris) */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=GT-NNZW5FW"
