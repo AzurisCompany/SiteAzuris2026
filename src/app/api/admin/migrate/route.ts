@@ -117,6 +117,22 @@ const STATEMENTS: string[] = [
      FROM inscricoes
      WHERE curso_slug = 'lakehouse-comunidade' AND NOT is_teste
      GROUP BY lote`,
+  // Cupons de desconto (vendedoras e parceiros) — a tabela guarda a REGRA, não os
+  // links. Checkout consulta a linha a cada uso, então ativo=false mata na hora.
+  `CREATE TABLE IF NOT EXISTS cupons (
+     id             BIGSERIAL PRIMARY KEY,
+     codigo         TEXT NOT NULL,
+     nome           TEXT NOT NULL,
+     tipo           TEXT NOT NULL DEFAULT 'vendedora',
+     produto_slug   TEXT NOT NULL,
+     pct            INTEGER NOT NULL,
+     validade_horas INTEGER,
+     limite_usos    INTEGER,
+     ativo          BOOLEAN NOT NULL DEFAULT true,
+     created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+     updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+   )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_cupons_codigo ON cupons(codigo)`,
 ]
 
 export async function POST() {

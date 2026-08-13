@@ -22,7 +22,7 @@ import {
   type TipoIngresso,
 } from '@/lib/tipos-ingresso'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
-import { lerCupom, aplicarDesconto } from '@/lib/cupom'
+import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 
 export interface CheckoutBody extends ExtrasInput {
   nome: string
@@ -34,6 +34,8 @@ export interface CheckoutBody extends ExtrasInput {
   tipo?: string
   /** token do link de vendedora ([[cupom]]); concede % de desconto, nunca um preço */
   cupom?: string
+  /** código puro do cupom de parceiro (?c=), sem prazo — validado em [[cupons]] */
+  cupom_codigo?: string
   /** ignorado no fluxo gratuito */
   billing_type?: BillingType
   installments?: number
@@ -88,19 +90,23 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   const email = body.email.trim().toLowerCase()
   const telefone = tel || null
 
-  // Cupom de vendedora: token assinado, revalidado AQUI (o cliente pode ter
-  // adulterado a URL entre a página e o POST). Inválido ou vencido → null, e o
-  // checkout segue no preço cheio sem reclamar. Ver [[cupom]].
-  const cupom = lerCupom(body.cupom, PRODUTO.slug)
+  // Desconto: revalidado AQUI, sempre — o cliente pode ter adulterado a URL
+  // entre a página e o POST, e o cupom pode ter sido desligado no admin no meio
+  // do preenchimento do formulário. Recusa de qualquer tipo → preço cheio, sem
+  // erro na cara de quem está comprando. Ver [[cupons]].
+  const { aplicado: cupom } = await resolverDesconto(
+    { token: body.cupom, codigo: body.cupom_codigo },
+    PRODUTO.slug
+  )
 
   // Atribuição: com cupom válido, quem vendeu é a vendedora assinada no token —
   // não o que veio na URL, que o cliente pode ter perdido ao copiar o link.
   // É daqui que sai a comissão (colunas utm_* já existentes, e o CSV do admin).
   const utm = {
-    source: cupom ? 'vendedora' : (body.utm?.source ?? null),
+    source: cupom ? cupom.tipo : (body.utm?.source ?? null),
     medium: cupom ? 'link' : (body.utm?.medium ?? null),
     campaign: body.utm?.campaign ?? null,
-    content: cupom ? cupom.vendedora : (body.utm?.content ?? null),
+    content: cupom ? cupom.codigo : (body.utm?.content ?? null),
     term: body.utm?.term ?? null,
   }
 
@@ -186,7 +192,7 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     // Carimba na cobrança POR QUE ela saiu mais barata — sem isso, conciliar um
     // R$513 solto no extrato do Asaas vira adivinhação.
     descricaoAsaas = `${descricaoAsaas} — desconto ${cupom.pct}%`
-    externalRef = `${externalRef}:v-${cupom.vendedora}`
+    externalRef = `${externalRef}:cupom-${cupom.codigo}`
   }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const cpf = onlyDigits(body.cpf_cnpj)

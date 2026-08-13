@@ -5,9 +5,7 @@ import {
   criarCupom,
   aplicarDesconto,
   formatarValidade,
-  parseVendedoras,
-  acharVendedora,
-  slugVendedora,
+  normalizarCodigo,
   CUPOM_PCT_MAX,
   CUPOM_PCT_PADRAO,
   VALIDADE_HORAS_PADRAO,
@@ -23,10 +21,10 @@ const DAQUI_2_DIAS = AGORA + 48 * 60 * 60 * 1000
 
 describe('cupom — assinatura e validade', () => {
   it('vai e volta: o que foi assinado é o que se lê', () => {
-    const token = assinarCupom({ vendedora: 'ana-paula', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
+    const token = assinarCupom({ codigo: 'ana-paula', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
 
     expect(lerCupom(token, 'dss-2026', AGORA)).toEqual({
-      vendedora: 'ana-paula',
+      codigo: 'ana-paula',
       produto: 'dss-2026',
       pct: 10,
       exp: DAQUI_2_DIAS,
@@ -34,14 +32,14 @@ describe('cupom — assinatura e validade', () => {
   })
 
   it('token vencido não vale — nem por 1 milissegundo', () => {
-    const token = assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: AGORA })
+    const token = assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: AGORA })
 
     expect(lerCupom(token, 'dss-2026', AGORA)).toBeNull()
     expect(lerCupom(token, 'dss-2026', AGORA - 1)).not.toBeNull() // 1ms antes ainda valia
   })
 
   it('assinatura mexida é rejeitada', () => {
-    const token = assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
+    const token = assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
     const [payload, sig] = token.split('.')
 
     expect(lerCupom(`${payload}.${sig.replace(/.$/, sig.endsWith('a') ? 'b' : 'a')}`, 'dss-2026', AGORA)).toBeNull()
@@ -50,14 +48,14 @@ describe('cupom — assinatura e validade', () => {
 
   it('payload reescrito (mais desconto, mais prazo) não passa sem a assinatura certa', () => {
     const forjado = Buffer.from(['ana', 'dss-2026', '90', String(AGORA + 10 ** 10)].join('|')).toString('base64url')
-    const token = assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
+    const token = assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
     const sigDoOriginal = token.split('.')[1]
 
     expect(lerCupom(`${forjado}.${sigDoOriginal}`, 'dss-2026', AGORA)).toBeNull()
   })
 
   it('cupom de um produto não vale em outro', () => {
-    const token = assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
+    const token = assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
 
     expect(lerCupom(token, 'dss-one-day-2026', AGORA)).toBeNull()
   })
@@ -70,16 +68,16 @@ describe('cupom — assinatura e validade', () => {
   })
 
   it('recusa assinar acima do teto — o teto não é negociável nem por quem chama', () => {
-    expect(() => assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 90, exp: DAQUI_2_DIAS })).toThrow()
+    expect(() => assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 90, exp: DAQUI_2_DIAS })).toThrow()
     expect(() =>
-      assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: CUPOM_PCT_MAX + 1, exp: DAQUI_2_DIAS })
+      assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: CUPOM_PCT_MAX + 1, exp: DAQUI_2_DIAS })
     ).toThrow()
-    expect(() => assinarCupom({ vendedora: 'Ana Paula', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })).toThrow()
+    expect(() => assinarCupom({ codigo: 'Ana Paula', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })).toThrow()
   })
 
   it('sem segredo no ambiente, ninguém assina e nada é aceito', () => {
     const antes = process.env.CUPOM_SECRET
-    const token = assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
+    const token = assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })
     process.env.CUPOM_SECRET = ''
     const admin = process.env.ADMIN_SESSION_SECRET
     const senha = process.env.ADMIN_PASSWORD
@@ -87,7 +85,7 @@ describe('cupom — assinatura e validade', () => {
     process.env.ADMIN_PASSWORD = ''
     try {
       expect(lerCupom(token, 'dss-2026', AGORA)).toBeNull()
-      expect(() => assinarCupom({ vendedora: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })).toThrow()
+      expect(() => assinarCupom({ codigo: 'ana', produto: 'dss-2026', pct: 10, exp: DAQUI_2_DIAS })).toThrow()
     } finally {
       process.env.CUPOM_SECRET = antes
       if (admin === undefined) delete process.env.ADMIN_SESSION_SECRET
@@ -98,7 +96,7 @@ describe('cupom — assinatura e validade', () => {
   })
 
   it('criarCupom usa o padrão da casa: 10% por 48h', () => {
-    const { token, cupom } = criarCupom({ vendedora: 'carla', produto: 'dss-2026' }, AGORA)
+    const { token, cupom } = criarCupom({ codigo: 'carla', produto: 'dss-2026' }, AGORA)
 
     expect(cupom.pct).toBe(CUPOM_PCT_PADRAO)
     expect(cupom.exp).toBe(AGORA + VALIDADE_HORAS_PADRAO * 60 * 60 * 1000)
@@ -137,51 +135,16 @@ describe('cupom — validade escrita pra humano', () => {
   })
 })
 
-describe('cupom — cadastro de vendedoras', () => {
-  it('lê o formato "Nome: CODIGO", uma por linha', () => {
-    expect(parseVendedoras('Ana Paula: ANA-7K2M\nCarla Souza: CARLA93Z')).toEqual([
-      { nome: 'Ana Paula', slug: 'ana-paula', codigo: 'ANA-7K2M' },
-      { nome: 'Carla Souza', slug: 'carla-souza', codigo: 'CARLA93Z' },
-    ])
+describe('cupom — código digitado por gente', () => {
+  it('normaliza caixa, acento e espaço pro mesmo código', () => {
+    expect(normalizarCodigo('CEL01')).toBe('cel01')
+    expect(normalizarCodigo(' cel 01 ')).toBe('cel-01')
+    expect(normalizarCodigo('Márcia-2026')).toBe('marcia-2026')
+    expect(normalizarCodigo('GHCM-FQYN')).toBe('ghcm-fqyn')
   })
 
-  it('aceita "=", vírgula e espaço sobrando — é caixa de texto de humano', () => {
-    const lidas = parseVendedoras('  Ana = ANA-7K2M , Carla:  CARLA93Z  ')
-
-    expect(lidas.map((v) => v.codigo)).toEqual(['ANA-7K2M', 'CARLA93Z'])
-  })
-
-  it('ignora linha malformada e código curto demais, sem derrubar o resto', () => {
-    const lidas = parseVendedoras('Ana: ANA-7K2M\nlinha sem codigo\nBia: 123\n: SEM-NOME\nCarla: CARLA93Z')
-
-    expect(lidas.map((v) => v.nome)).toEqual(['Ana', 'Carla'])
-  })
-
-  it('nome repetido não gera duas vendedoras (a primeira vence)', () => {
-    const lidas = parseVendedoras('Ana: ANA-7K2M\nana: OUTRO-CODIGO')
-
-    expect(lidas).toHaveLength(1)
-    expect(lidas[0].codigo).toBe('ANA-7K2M')
-  })
-
-  it('vazio é vazio — ninguém gera link', () => {
-    expect(parseVendedoras('')).toEqual([])
-    expect(parseVendedoras(null)).toEqual([])
-    expect(parseVendedoras(undefined)).toEqual([])
-  })
-
-  it('slug tira acento e espaço — é o que carimba utm_content', () => {
-    expect(slugVendedora('Márcia Gonçalves')).toBe('marcia-goncalves')
-    expect(slugVendedora('  Ana   Paula  ')).toBe('ana-paula')
-  })
-
-  it('acha pelo código ignorando caixa e espaço', () => {
-    const lidas = parseVendedoras('Ana: ANA-7K2M')
-
-    expect(acharVendedora(lidas, ' ana-7k2m ')?.nome).toBe('Ana')
-    expect(acharVendedora(lidas, 'ANA-7K2M')?.nome).toBe('Ana')
-    expect(acharVendedora(lidas, 'ANA-7K2X')).toBeNull()
-    expect(acharVendedora(lidas, '')).toBeNull()
-    expect(acharVendedora([], 'ANA-7K2M')).toBeNull()
+  it('lixo vira string vazia em vez de explodir', () => {
+    expect(normalizarCodigo(null)).toBe('')
+    expect(normalizarCodigo('!!!')).toBe('')
   })
 })

@@ -1,125 +1,141 @@
-# Link de desconto pras vendedoras (FullPass DSS 2026)
+# Cupons de desconto — vendedoras e parceiros
 
-Uma vendedora abre `/vendas`, digita o código dela e recebe um link pronto pro cliente com
-**10% de desconto** no FullPass, **válido por 48 horas**. Ninguém precisa entrar no admin, e
-ninguém digita preço em lugar nenhum.
+Duas situações, um mecanismo:
 
-- **Página da vendedora:** `/vendas` (noindex, fora do menu, `Disallow` no robots)
-- **Link gerado:** `/dssbr-2026/inscricao?d=<token>&utm_source=vendedora&utm_medium=link&utm_content=<slug>`
-- **Cadastro de quem pode gerar:** `/admin/financeiro` → seção *Vendedoras (link com desconto)*
-- **Código:** `src/lib/cupom.ts` · rota `src/app/api/vendas/link/route.ts` · testes em
-  `src/lib/__tests__/cupom.test.ts` e `cupom-checkout.test.ts`
+- **Vendedora**: entra em `/vendas`, digita a senha dela e recebe um link **novo**, com prazo
+  (48h por padrão), pra mandar pro cliente. Um por cliente, quantos quiser.
+- **Parceiro**: recebe de você um link **fixo**, sem prazo (`?c=CODIGO`), pra divulgar. Ele não
+  acessa nada — você copia o link na aba e manda.
+
+Nos dois casos o desconto sai do preço no servidor, e **desligar o cupom no admin derruba os
+links na hora**, inclusive os que já estão na mão de cliente.
+
+- **Aba do admin:** `/admin/cupons` — cadastro, ligar/desligar e quanto cada um já vendeu
+- **Página da vendedora:** `/vendas` (noindex, `Disallow` no robots)
+- **Código:** `src/lib/cupom.ts` (token) · `src/lib/cupons.ts` (tabela + regra) ·
+  `src/app/api/vendas/link/route.ts` · `src/app/api/admin/cupons/route.ts`
+- **Testes:** `src/lib/__tests__/cupom.test.ts` e `cupom-checkout.test.ts`
 
 ---
 
 ## 1. A regra que sustenta tudo
 
 **O link concede um percentual, nunca um preço.** Quem calcula quanto se paga é sempre o
-servidor, em `processarCheckout()` — o mesmo lugar de sempre. O desconto entra no **preço do
-ingresso**, antes das regras de PIX e parcelamento, então os juros de 2x–3x incidem sobre o
-valor já com desconto.
+servidor, em `processarCheckout()`. O desconto entra no **preço do ingresso**, antes das regras
+de PIX e parcelamento, então os juros de 2x–3x incidem sobre o valor já com desconto.
 
 ```
 Lote 1 (admin) R$ 570  →  −10%  →  R$ 513  →  regra de PIX/cartão  →  valor cobrado
 ```
 
-Se algum dia alguém for tentado a mandar o valor pelo body do POST: não. O cliente edita.
+E **quem manda no percentual é a linha da tabela, não o token**. Mudar 15% pra 12% no admin
+muda os links que já estão na rua.
 
-## 2. Como o link expira sem banco nem cron
+## 2. As duas formas de chegar com desconto
 
-O token é `base64url("vendedora|produto|pct|expira_em") + "." + HMAC-SHA256 truncado`.
+| | Vendedora | Parceiro |
+|---|---|---|
+| URL | `?d=<token assinado>` | `?c=CODIGO` |
+| Prazo | `validade_horas` (48) | nenhum (`NULL`) |
+| Quem gera | ela, em `/vendas`, um por cliente | você, uma vez, na aba |
+| Morre quando | vence sozinho | só quando você desliga |
 
-A validade está **dentro do que é assinado**. Esticar a data, trocar o percentual ou mudar o
-produto quebra a assinatura, e `lerCupom()` devolve `null`. Não existe estado pra guardar, nem
-job pra rodar: o link morre de velhice sozinho.
+**O código da vendedora não vale como `?c=`.** Sem essa trava, bastaria usar o código dela numa
+URL pra ter um link permanente e furar as 48h. Cupom com `validade_horas` só circula assinado.
 
-**Segredo:** `CUPOM_SECRET`, com fallback pra `ADMIN_SESSION_SECRET` e depois `ADMIN_PASSWORD`
-— por isso funciona sem env nova. Sem nenhum dos três, nada é assinado e nada é aceito (falha
-fechada, nunca aberta).
+## 3. Por que o token da vendedora é assinado
 
-**Teto rígido:** `CUPOM_PCT_MAX = 20`. Um token pedindo 90% é recusado na leitura, mesmo que
-venha assinado. Se o segredo vazar, o estrago para em 20%.
+`base64url("codigo|produto|pct|expira_em") + "." + HMAC-SHA256 truncado`.
 
-## 3. O que o cliente vê
+A validade está **dentro do que é assinado**: esticar a data quebra a assinatura. É isso que
+permite prazo por link sem guardar uma linha por link gerado.
+
+**Segredo:** `CUPOM_SECRET`, com fallback pra `ADMIN_SESSION_SECRET` e depois `ADMIN_PASSWORD`.
+Sem nenhum dos três, nada é assinado e nada é aceito (falha fechada).
+
+**Teto rígido:** `CUPOM_PCT_MAX = 20`, conferido na leitura do token **e** na gravação do
+cadastro. Token pedindo 90% é recusado mesmo assinado.
+
+## 4. O que o cliente vê
 
 | Situação | Página |
 |---|---|
-| Link válido | Tarja verde: *"Desconto de 10% aplicado · ~~R$ 570~~ R$ 513 · vale até 15/08 às 12h29"*, e todos os valores já com desconto |
-| Link vencido ou adulterado | Nota discreta: *"o link expirou — os valores abaixo são os normais"* e o checkout **normal**, no preço cheio |
+| Link válido | Tarja verde com o preço de/por e, se houver prazo, até quando vale |
+| Vencido, desligado, esgotado ou adulterado | Nota discreta de "expirou" e o checkout **normal**, no preço cheio |
 
-Link vencido **nunca** vira página de erro. Perder a venda porque o cupom expirou seria o pior
+Link morto **nunca** vira página de erro. Perder a venda porque o cupom expirou seria o pior
 desfecho possível.
 
-## 4. Atribuição (de onde sai a comissão)
+## 5. Atribuição (de onde sai a comissão)
 
 Com cupom válido, o servidor **sobrescreve** a origem:
 
 | coluna | valor |
 |---|---|
-| `utm_source` | `vendedora` |
+| `utm_source` | `vendedora` ou `parceiro` |
 | `utm_medium` | `link` |
-| `utm_content` | slug da vendedora (`ana-paula`) |
+| `utm_content` | o **código** do cupom |
 | `utm_campaign` | o que veio na URL, preservado |
 
-São colunas que **já existem** em `inscricoes` — aparecem no `/admin`, na venda, e no CSV de
-contatos (`/api/admin/exportar`). Não foi preciso construir relatório nenhum.
+São colunas que já existem em `inscricoes` — aparecem no `/admin`, na venda e no CSV de
+contatos. A aba de cupons soma por aí: `usos` conta paid+pending (pendente já ocupa vaga do
+limite), a receita conta só o que entrou.
 
-A cobrança no Asaas também fica carimbada: descrição ganha `— desconto 10%` e o
-`externalReference` vira `dss-2026:lote-1:v-ana-paula`. Sem isso, um R$513 solto no extrato é
-adivinhação na hora de conciliar.
+A cobrança no Asaas fica carimbada: descrição ganha `— desconto 10%` e o `externalReference`
+vira `dss-2026:lote-1:cupom-<codigo>`.
 
-## 5. Cadastrar / descadastrar vendedora
+⚠️ **Trocar o código de um cupom zera o histórico dele** — as inscrições antigas continuam
+gravadas com o código velho. Renomeie o `nome` à vontade; o código, não.
 
-`/admin/financeiro` → *Vendedoras (link com desconto)*. Uma por linha:
+## 6. Tabela `cupons`
 
-```
-Ana Paula: ANA-7K2M
-Carla Souza: CARLA93Z
-```
+| campo | pra quê |
+|---|---|
+| `codigo` | normalizado em minúsculas; é a chave lógica |
+| `nome` | quem é (aparece na aba, não no link) |
+| `tipo` | `vendedora` \| `parceiro` |
+| `produto_slug` | um cupom vale pra **um** produto |
+| `pct` | desconto inteiro, teto de 20 |
+| `validade_horas` | `NULL` = link sem prazo |
+| `limite_usos` | `NULL` = ilimitado |
+| `ativo` | **o botão de matar** |
 
-Vale na hora, **sem deploy** (fica na tabela `config_financeiro`, chave `vendedoras`). Aceita
-`=` no lugar de `:`, e vírgula no lugar de quebra de linha. Linha malformada é ignorada em
-silêncio — por isso a tela mostra, embaixo do campo, **o que o sistema entendeu**. Se o nome de
-alguém não aparecer ali, ela não consegue gerar link.
+Migração aditiva e idempotente, em `sql/admin-migration.sql` e espelhada em
+`POST /api/admin/migrate` (é por essa rota que roda em produção).
 
-Códigos: use algo com pelo menos 6 caracteres e que não se adivinhe (`ANA-7K2M`, não `ANA123`).
-Códigos com menos de 4 caracteres são recusados pelo parser.
-
-**Tirar a linha revoga o acesso na hora** — mas **não** mata links já gerados. Esses vencem
-sozinhos em até 48h. É a contrapartida assumida de não ter tabela (seção 7).
-
-## 6. Como testar de ponta a ponta (local)
+## 7. Como testar de ponta a ponta (local)
 
 ```bash
 cd web && npx next dev -p 3111
 
-# 1. cadastra uma vendedora (senha = ADMIN_PASSWORD do .env.local)
+# senha = ADMIN_PASSWORD do .env.local
 curl -s -c /tmp/cj -X POST localhost:3111/api/admin/login \
   -H 'Content-Type: application/json' -d '{"senha":"SUA_SENHA"}'
-curl -s -b /tmp/cj -X POST localhost:3111/api/admin/config \
-  -H 'Content-Type: application/json' \
-  -d '{"chave":"vendedoras","valor":"Ana Paula: ANA-7K2M"}'
+curl -s -b /tmp/cj -X POST localhost:3111/api/admin/migrate    # cria a tabela
 
-# 2. gera o link
-curl -s -X POST localhost:3111/api/vendas/link \
-  -H 'Content-Type: application/json' -d '{"codigo":"ANA-7K2M"}'
+curl -s -b /tmp/cj -X POST localhost:3111/api/admin/cupons -H 'Content-Type: application/json' \
+  -d '{"nome":"Celeste","codigo":"CEL01","tipo":"vendedora","produto_slug":"dss-2026","pct":10,"validade_horas":48}'
+curl -s -b /tmp/cj -X POST localhost:3111/api/admin/cupons -H 'Content-Type: application/json' \
+  -d '{"nome":"Parceiro X","codigo":"PARC15","tipo":"parceiro","produto_slug":"dss-2026","pct":15,"validade_horas":null}'
 
-# 3. confere o preço na página (deve sair 513, não 570)
-curl -s "localhost:3111/dssbr-2026/inscricao?d=<token>" | grep -o "513,00" | head -1
+curl -s -X POST localhost:3111/api/vendas/link -H 'Content-Type: application/json' -d '{"codigo":"CEL01"}'
+
+curl -s "localhost:3111/dssbr-2026/inscricao?d=<token>"  | grep -o "513,00" | head -1
+curl -s "localhost:3111/dssbr-2026/inscricao?c=PARC15"   | grep -o "484,50" | head -1
 ```
 
-## 7. Decisões e contrapartidas
+## 8. Decisões e contrapartidas
 
-- **Sem tabela de cupons.** Escolhido pra não precisar de migração nem CRUD. O preço: link
-  vazado não é revogável antes de vencer — o estrago máximo é 10% por 2 dias. Se um dia isso
-  incomodar (ou se quiserem "1 uso por link", ou painel de conversão por vendedora), é aí que
-  entra a tabela.
-- **Sem limite de usos.** A vendedora gera um link por cliente de qualquer jeito, e link de
-  1 uso cria o caso chato de quem abandona o checkout e volta com o link queimado.
-- **Só o FullPass.** O mecanismo é genérico (`produto` está dentro do token e é conferido na
-  leitura), mas hoje só a rota `/api/vendas/link` emite, e só pra `dss-2026`. Estender pro One
-  Day é trocar uma constante.
-- **Sem sessão em `/vendas`.** O código É a credencial. A rota atrasa 400ms em código errado e
-  devolve mensagem única — encarece brute force sem incomodar quem acerta.
+- **A tabela guarda a regra, não os links.** Não existe linha por link gerado — por isso o prazo
+  da vendedora vive dentro da assinatura, e não no banco.
+- **Código de parceiro é curto e adivinhável de propósito** (`GAIO15`): ele precisa divulgar. A
+  defesa é o botão de desligar e o limite de usos, não o sigilo.
+- **`limite_usos` conta pending.** Quem abandonou o checkout ocupa vaga até a cobrança vencer.
+  É o mesmo critério da lotação de ingresso, para não vender além do combinado.
+- **Sem sessão em `/vendas`.** O código É a credencial. A rota atrasa 400ms em erro e devolve
+  mensagem única.
+- **Histórico anterior a 13/08/2026:** o cadastro morava numa caixa de texto em
+  `/admin/financeiro` (chave `vendedoras` da `config_financeiro`), sem revogação e sem painel.
+  Foi substituído por esta tabela; a chave velha ficou órfã no banco e pode ser apagada.
 
 Última revisão: **2026-08-13**.

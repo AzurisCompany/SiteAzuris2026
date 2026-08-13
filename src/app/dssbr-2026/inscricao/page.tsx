@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Users, BadgePercent, Clock } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
-import { lerCupom, aplicarDesconto, formatarValidade } from '@/lib/cupom'
+import { formatarValidade } from '@/lib/cupom'
+import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm, { type TipoOption } from './InscricaoForm'
 import { dssMetadata } from '../metadata'
 
@@ -26,15 +27,16 @@ export const dynamic = 'force-dynamic'
 export default async function InscricaoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ d?: string }>
+  searchParams: Promise<{ d?: string; c?: string }>
 }) {
-  // Link de vendedora ([[cupom]]): `?d=<token assinado>`. Vencido ou adulterado
-  // → null e a página segue no preço cheio. O valor cobrado é recalculado de
-  // novo no POST; o que se faz aqui é só MOSTRAR o preço certo.
-  const tokenDaUrl = (await searchParams).d
-  const cupom = lerCupom(tokenDaUrl, PRODUTO.slug)
-  /** Veio com link de desconto, mas ele não vale mais (ou foi mexido). */
-  const cupomMorto = !!tokenDaUrl && !cupom
+  // Duas formas de chegar com desconto ([[cupons]]): `?d=` é o link assinado que
+  // a vendedora gerou (tem prazo); `?c=` é o código fixo do parceiro. Qualquer
+  // recusa → preço cheio. O valor é recalculado de novo no POST; aqui só se
+  // MOSTRA o preço certo.
+  const sp = await searchParams
+  const { aplicado: cupom, recusa } = await resolverDesconto({ token: sp.d, codigo: sp.c }, PRODUTO.slug)
+  /** Veio com link de desconto, mas ele não vale (vencido, desligado, esgotado). */
+  const cupomMorto = recusa !== null
   const comDesconto = (centavos: number) => (cupom ? aplicarDesconto(centavos, cupom.pct) : centavos)
 
   const precoBaseReais = comDesconto(PRODUTO.precoCentavos) / 100
@@ -119,10 +121,12 @@ export default async function InscricaoPage({
                   </strong>{' '}
                   — o desconto já está nos valores abaixo.
                 </p>
-                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                  <Clock className="size-3.5" />
-                  Este link vale até {formatarValidade(cupom.exp)}.
-                </p>
+                {cupom.exp != null && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
+                    <Clock className="size-3.5" />
+                    Este link vale até {formatarValidade(cupom.exp)}.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -214,7 +218,8 @@ export default async function InscricaoPage({
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={PRODUTO.maxParcelas}
           tipos={tipoOptions}
-          cupom={cupom ? tokenDaUrl : undefined}
+          cupom={cupom && sp.d ? sp.d : undefined}
+          cupomCodigo={cupom && !sp.d ? cupom.codigo : undefined}
         />
 
         <p className="mt-8 text-xs text-[var(--text-muted)] text-center">

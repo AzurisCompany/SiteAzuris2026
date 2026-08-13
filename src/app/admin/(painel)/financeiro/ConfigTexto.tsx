@@ -27,6 +27,9 @@ export default function ConfigTexto({
   const [ok, setOk] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
+  /** Tem texto digitado que ainda não foi gravado no banco. */
+  const sujo = valor !== valorAtual
+
   async function salvar() {
     setSalvando(true)
     setOk(false)
@@ -70,13 +73,26 @@ export default function ConfigTexto({
         <button
           onClick={salvar}
           disabled={salvando}
-          className={`rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-semibold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20 disabled:opacity-60 ${
-            linhas ? 'self-start' : 'shrink-0'
-          }`}
+          className={
+            // Sujo = botão gritante. Digitar e sair da tela sem gravar já custou
+            // duas vezes o "código não confere" na cara de uma vendedora.
+            sujo
+              ? `rounded-lg bg-[var(--azuris-cyan)] px-4 py-2.5 text-sm font-bold text-[var(--azuris-ink)] hover:brightness-110 disabled:opacity-60 ${
+                  linhas ? 'self-start' : 'shrink-0'
+                }`
+              : `rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-semibold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20 disabled:opacity-60 ${
+                  linhas ? 'self-start' : 'shrink-0'
+                }`
+          }
         >
-          {salvando ? '…' : ok ? 'salvo ✓' : 'salvar'}
+          {salvando ? 'salvando…' : ok ? 'salvo ✓' : sujo ? 'SALVAR alterações' : 'salvar'}
         </button>
       </div>
+      {sujo && !salvando && (
+        <p className="mt-1.5 text-xs font-semibold text-amber-300">
+          ⚠ Alterado e ainda não salvo — sai desta tela agora e você perde o que digitou.
+        </p>
+      )}
       {erro && <p className="mt-1 text-xs text-red-300">{erro}</p>}
     </div>
   )

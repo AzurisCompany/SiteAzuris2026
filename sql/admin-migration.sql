@@ -124,3 +124,22 @@ INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centav
 VALUES
   ('preparatorio-dados', 'reserva', 'Reserva de interesse', 'Sem pagamento — aviso na abertura e desconto de fundador', 0, 1, 0, NULL, NULL)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
+-- Cupons de desconto (vendedoras e parceiros) — ver docs/LINK-DESCONTO-VENDEDORAS.md.
+-- A tabela guarda a REGRA, não os links. O link de vendedora é um token assinado com
+-- prazo próprio; o de parceiro é o código puro (?c=CODIGO), sem prazo. Em ambos os
+-- casos o checkout consulta esta linha: ativo=false mata todo mundo na hora.
+CREATE TABLE IF NOT EXISTS cupons (
+  id             BIGSERIAL PRIMARY KEY,
+  codigo         TEXT NOT NULL,              -- normalizado em minúsculas
+  nome           TEXT NOT NULL,              -- "Celeste", "Gaio Consultoria"
+  tipo           TEXT NOT NULL DEFAULT 'vendedora', -- 'vendedora' | 'parceiro'
+  produto_slug   TEXT NOT NULL,
+  pct            INTEGER NOT NULL,           -- % inteiro; teto em lib/cupom.ts
+  validade_horas INTEGER,                    -- NULL = link sem prazo (parceiro)
+  limite_usos    INTEGER,                    -- NULL = ilimitado
+  ativo          BOOLEAN NOT NULL DEFAULT true,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cupons_codigo ON cupons(codigo);

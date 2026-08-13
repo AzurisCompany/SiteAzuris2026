@@ -33,6 +33,8 @@ interface Props {
   tipos?: TipoOption[]
   /** token do link de vendedora ([[cupom]]) — vai junto no POST pro servidor revalidar */
   cupom?: string
+  /** código fixo do cupom de parceiro (?c=) — idem, revalidado no servidor */
+  cupomCodigo?: string
   /** endpoint do POST de inscrição (default: checkout DSS full). */
   endpoint?: string
   /** identificação do item pro GA begin_checkout (default: DSS full). */
@@ -56,6 +58,7 @@ export default function InscricaoForm({
   maxParcelas: baseMax,
   tipos,
   cupom,
+  cupomCodigo,
   endpoint = '/api/dssbr-2026/inscricao',
   gaItem = { id: 'dss-2026', name: 'Data Science Summit Brasil 2026' },
   enderecoObrigatorioPJ = ENDERECO_OBRIGATORIO_PJ_PADRAO,
@@ -127,6 +130,7 @@ export default function InscricaoForm({
           telefone: telefone.replace(/\D/g, ''),
           tipo: sel?.tipo_id,
           cupom,
+          cupom_codigo: cupomCodigo,
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,
