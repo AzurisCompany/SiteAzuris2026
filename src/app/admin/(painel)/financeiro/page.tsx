@@ -8,6 +8,7 @@ import {
 } from '@/lib/admin-queries'
 import { getConfigsFinanceiro } from '@/lib/db'
 import { hojeBRT } from '@/lib/format'
+import { parseVendedoras, CUPOM_PCT_PADRAO, VALIDADE_HORAS_PADRAO } from '@/lib/cupom'
 import GraficoVendas from './GraficoVendas'
 import ConfigNumero from './ConfigNumero'
 import ConfigTexto from './ConfigTexto'
@@ -230,6 +231,51 @@ export default async function FinanceiroPage() {
             placeholder="depende do município"
           />
         </div>
+      </section>
+
+      {/* --- Vendedoras (link com desconto) --- */}
+      <section className="space-y-4 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-5">
+        <div>
+          <h2 className="text-lg font-bold">Vendedoras (link com desconto)</h2>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Quem está aqui gera sozinha, em <code className="text-[var(--azuris-cyan)]">/vendas</code>, link do FullPass
+            com {CUPOM_PCT_PADRAO}% off que expira em {VALIDADE_HORAS_PADRAO}h. Uma por linha, no formato{' '}
+            <code className="text-[var(--azuris-cyan)]">Nome: CODIGO</code>. Tirar a linha daqui revoga o acesso na hora
+            (mas <strong>não</strong> mata links já gerados — esses vencem sozinhos).
+          </p>
+        </div>
+        <ConfigTexto
+          chave="vendedoras"
+          rotulo="Cadastro"
+          valorAtual={config.vendedoras ?? ''}
+          placeholder={'Ana Paula: ANA-7K2M\nCarla Souza: CARLA-93ZX'}
+          linhas={5}
+        />
+        {(() => {
+          const lidas = parseVendedoras(config.vendedoras)
+          if (lidas.length === 0) {
+            return (
+              <p className="text-xs text-[var(--text-muted)]">
+                Nenhuma vendedora reconhecida ainda — enquanto estiver vazio, <code>/vendas</code> não gera link nenhum.
+              </p>
+            )
+          }
+          // Espelho do que o sistema ENTENDEU do texto livre — sem isso, uma linha
+          // malformada é ignorada em silêncio e a pessoa fica sem conseguir gerar link.
+          return (
+            <div className="flex flex-wrap gap-2">
+              {lidas.map((v) => (
+                <span
+                  key={v.slug}
+                  className="rounded-full border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-1 text-xs"
+                >
+                  <strong className="text-[var(--text-primary)]">{v.nome}</strong>{' '}
+                  <span className="text-[var(--text-muted)]">· {v.codigo} · utm_content={v.slug}</span>
+                </span>
+              ))}
+            </div>
+          )
+        })()}
       </section>
     </div>
   )

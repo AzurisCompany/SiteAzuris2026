@@ -6,7 +6,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/azuriz", "/admin"],
+        // /vendas é ferramenta interna do time comercial ([[cupom]]), não página de público.
+        disallow: ["/api/", "/_next/", "/azuriz", "/admin", "/vendas"],
       },
     ],
     sitemap: "https://azuris.com.br/sitemap.xml",

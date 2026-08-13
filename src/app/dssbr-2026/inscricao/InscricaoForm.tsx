@@ -31,6 +31,8 @@ interface Props {
   maxParcelas: number
   /** tipos de ingresso cadastrados; se não-vazio, mostra o seletor e ignora os preços únicos acima */
   tipos?: TipoOption[]
+  /** token do link de vendedora ([[cupom]]) — vai junto no POST pro servidor revalidar */
+  cupom?: string
   /** endpoint do POST de inscrição (default: checkout DSS full). */
   endpoint?: string
   /** identificação do item pro GA begin_checkout (default: DSS full). */
@@ -53,6 +55,7 @@ export default function InscricaoForm({
   precoCartaoBaseReais: baseCartao,
   maxParcelas: baseMax,
   tipos,
+  cupom,
   endpoint = '/api/dssbr-2026/inscricao',
   gaItem = { id: 'dss-2026', name: 'Data Science Summit Brasil 2026' },
   enderecoObrigatorioPJ = ENDERECO_OBRIGATORIO_PJ_PADRAO,
@@ -123,6 +126,7 @@ export default function InscricaoForm({
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
           tipo: sel?.tipo_id,
+          cupom,
           billing_type: billingType,
           installments: billingType === 'CREDIT_CARD' ? installments : 1,
           utm,

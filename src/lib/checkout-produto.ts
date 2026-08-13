@@ -22,6 +22,7 @@ import {
   type TipoIngresso,
 } from '@/lib/tipos-ingresso'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
+import { lerCupom, aplicarDesconto } from '@/lib/cupom'
 
 export interface CheckoutBody extends ExtrasInput {
   nome: string
@@ -31,6 +32,8 @@ export interface CheckoutBody extends ExtrasInput {
   telefone?: string
   /** tipo de ingresso cadastrado (opcional; sem ele, usa o preço único do registry) */
   tipo?: string
+  /** token do link de vendedora ([[cupom]]); concede % de desconto, nunca um preço */
+  cupom?: string
   /** ignorado no fluxo gratuito */
   billing_type?: BillingType
   installments?: number
@@ -85,6 +88,22 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   const email = body.email.trim().toLowerCase()
   const telefone = tel || null
 
+  // Cupom de vendedora: token assinado, revalidado AQUI (o cliente pode ter
+  // adulterado a URL entre a página e o POST). Inválido ou vencido → null, e o
+  // checkout segue no preço cheio sem reclamar. Ver [[cupom]].
+  const cupom = lerCupom(body.cupom, PRODUTO.slug)
+
+  // Atribuição: com cupom válido, quem vendeu é a vendedora assinada no token —
+  // não o que veio na URL, que o cliente pode ter perdido ao copiar o link.
+  // É daqui que sai a comissão (colunas utm_* já existentes, e o CSV do admin).
+  const utm = {
+    source: cupom ? 'vendedora' : (body.utm?.source ?? null),
+    medium: cupom ? 'link' : (body.utm?.medium ?? null),
+    campaign: body.utm?.campaign ?? null,
+    content: cupom ? cupom.vendedora : (body.utm?.content ?? null),
+    term: body.utm?.term ?? null,
+  }
+
   // ── Fluxo GRATUITO: cadastro direto confirmado, sem CPF e sem Asaas.
   if (tipo && ehGratuito(tipo)) {
     const existente = await buscarInscricaoGratuita(PRODUTO.slug, email, tipo.tipo_id)
@@ -101,11 +120,11 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
         billing_type: 'GRATIS',
         valor_centavos: 0,
         installments: 1,
-        utm_source: body.utm?.source ?? null,
-        utm_medium: body.utm?.medium ?? null,
-        utm_campaign: body.utm?.campaign ?? null,
-        utm_content: body.utm?.content ?? null,
-        utm_term: body.utm?.term ?? null,
+        utm_source: utm.source,
+        utm_medium: utm.medium,
+        utm_campaign: utm.campaign,
+        utm_content: utm.content,
+        utm_term: utm.term,
         ...normalizarExtras(body),
         consentimento_lgpd: true,
         consentimento_em: new Date().toISOString(),
@@ -142,7 +161,10 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   let valorCobradoReais: number
 
   if (tipo) {
-    const cobrado = valorCobradoDoTipo(tipo, billing, body.installments ?? 1)
+    // O desconto do cupom entra no PREÇO DO INGRESSO, antes das regras de PIX e
+    // parcelamento — assim os juros de 2x-3x incidem sobre o valor já com desconto.
+    const tipoEfetivo = cupom ? { ...tipo, preco_centavos: aplicarDesconto(tipo.preco_centavos, cupom.pct) } : tipo
+    const cobrado = valorCobradoDoTipo(tipoEfetivo, billing, body.installments ?? 1)
     installments = cobrado.installments
     installmentValueReais = cobrado.installmentValueReais
     valorCobradoReais = cobrado.valorReais
@@ -150,7 +172,7 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     descricaoAsaas = `${PRODUTO.asaasDescricao} — ${tipo.nome}`
     externalRef = `${PRODUTO.slug}:${tipo.tipo_id}`
   } else {
-    const precoBaseReais = PRODUTO.precoCentavos / 100
+    const precoBaseReais = (cupom ? aplicarDesconto(PRODUTO.precoCentavos, cupom.pct) : PRODUTO.precoCentavos) / 100
     const precoCartaoBaseReais = Number((precoBaseReais * (1 + PRODUTO.cartaoAcrescimoPct)).toFixed(2))
     installments =
       body.billing_type === 'CREDIT_CARD' ? Math.min(Math.max(body.installments ?? 1, 1), PRODUTO.maxParcelas) : 1
@@ -159,6 +181,12 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
       body.billing_type === 'PIX'
         ? Number((precoBaseReais * (1 - PRODUTO.pixDescontoPct)).toFixed(2))
         : totalComJuros(precoCartaoBaseReais, installments)
+  }
+  if (cupom) {
+    // Carimba na cobrança POR QUE ela saiu mais barata — sem isso, conciliar um
+    // R$513 solto no extrato do Asaas vira adivinhação.
+    descricaoAsaas = `${descricaoAsaas} — desconto ${cupom.pct}%`
+    externalRef = `${externalRef}:v-${cupom.vendedora}`
   }
   const valorCobradoCentavos = Math.round(valorCobradoReais * 100)
   const cpf = onlyDigits(body.cpf_cnpj)
@@ -178,11 +206,11 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
       billing_type: billing,
       valor_centavos: valorCobradoCentavos,
       installments,
-      utm_source: body.utm?.source ?? null,
-      utm_medium: body.utm?.medium ?? null,
-      utm_campaign: body.utm?.campaign ?? null,
-      utm_content: body.utm?.content ?? null,
-      utm_term: body.utm?.term ?? null,
+      utm_source: utm.source,
+      utm_medium: utm.medium,
+      utm_campaign: utm.campaign,
+      utm_content: utm.content,
+      utm_term: utm.term,
       ...extras,
       consentimento_lgpd: true,
       consentimento_em: new Date().toISOString(),

@@ -6,17 +6,20 @@ import { useRouter } from 'next/navigation'
 const campo =
   'w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm focus:border-[var(--azuris-cyan)] focus:outline-none placeholder:text-[var(--text-muted)]'
 
-/** Editor inline de um parâmetro de texto (config da NF). */
+/** Editor inline de um parâmetro de texto (config da NF, cadastro de vendedoras). */
 export default function ConfigTexto({
   chave,
   rotulo,
   valorAtual,
   placeholder,
+  linhas,
 }: {
-  chave: 'nf_servico_descricao' | 'nf_municipal_service_code' | 'nf_municipal_service_name'
+  chave: 'nf_servico_descricao' | 'nf_municipal_service_code' | 'nf_municipal_service_name' | 'vendedoras'
   rotulo: string
   valorAtual: string
   placeholder?: string
+  /** > 0 vira textarea (cadastro com uma linha por pessoa) */
+  linhas?: number
 }) {
   const router = useRouter()
   const [valor, setValor] = useState(valorAtual)
@@ -52,12 +55,24 @@ export default function ConfigTexto({
   return (
     <div>
       <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">{rotulo}</label>
-      <div className="flex gap-2">
-        <input value={valor} onChange={(e) => setValor(e.target.value)} placeholder={placeholder} className={campo} />
+      <div className={linhas ? 'flex flex-col gap-2' : 'flex gap-2'}>
+        {linhas ? (
+          <textarea
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+            placeholder={placeholder}
+            rows={linhas}
+            className={`${campo} font-mono`}
+          />
+        ) : (
+          <input value={valor} onChange={(e) => setValor(e.target.value)} placeholder={placeholder} className={campo} />
+        )}
         <button
           onClick={salvar}
           disabled={salvando}
-          className="shrink-0 rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-semibold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20 disabled:opacity-60"
+          className={`rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-semibold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20 disabled:opacity-60 ${
+            linhas ? 'self-start' : 'shrink-0'
+          }`}
         >
           {salvando ? '…' : ok ? 'salvo ✓' : 'salvar'}
         </button>
