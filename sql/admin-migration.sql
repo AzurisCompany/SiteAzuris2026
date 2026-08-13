@@ -125,7 +125,7 @@ VALUES
   ('preparatorio-dados', 'reserva', 'Reserva de interesse', 'Sem pagamento — aviso na abertura e desconto de fundador', 0, 1, 0, NULL, NULL)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
 
--- Cupons de desconto (vendedoras e parceiros) — ver docs/LINK-DESCONTO-VENDEDORAS.md.
+-- Cupons de desconto (vendedoras e parceiros) — ver docs/CUPONS-DESCONTO.md.
 -- A tabela guarda a REGRA, não os links. O link de vendedora é um token assinado com
 -- prazo próprio; o de parceiro é o código puro (?c=CODIGO), sem prazo. Em ambos os
 -- casos o checkout consulta esta linha: ativo=false mata todo mundo na hora.
