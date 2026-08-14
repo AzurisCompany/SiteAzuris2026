@@ -109,6 +109,45 @@ Unique `(produto_slug, tipo_id)`. Percentuais em **% inteiro** (não fração).
 
 ---
 
+## Onda D — o que mudou em 2026-08-14
+
+Três acréscimos em cima do que está acima. Detalhe em
+[INGRESSO-OCULTO-ESTUDANTE.md](./INGRESSO-OCULTO-ESTUDANTE.md) e
+[CUPONS-DESCONTO.md](./CUPONS-DESCONTO.md); o mapa geral em
+[CATALOGO-PRECOS-E-VENDAS.md](./CATALOGO-PRECOS-E-VENDAS.md).
+
+### 1. Coluna `tipos_ingresso.oculto` — ingresso fora da vitrine
+`ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS oculto BOOLEAN NOT NULL DEFAULT false`
+(aditiva; todo tipo existente continua visível). Tipo oculto **some da lista do checkout** e
+só é vendido por `?tipo=<tipo_id>`.
+
+- **`listarTiposAtivos` virou `listarTiposPublicos`** (`ativo AND NOT oculto`) — "ativo" tinha
+  virado sinônimo de "aparece", e deixou de ser. Os 5 call sites acompanharam.
+- `aplicarTipoDoLink()` (pura, testada) resolve o `?tipo=`: link bom inclui e pré-seleciona o
+  oculto; recusa cai na vitrine com tarja, nunca em página de erro.
+- Admin: checkbox **oculto**, link pronto pra copiar e tarja "só por link" na tabela.
+
+### 2. Tipos de ingresso no seletor da cobrança avulsa
+`/admin/cobranca` listava só produtos, então vender um tipo na mão gravava a venda **sem**
+`tipo_ingresso` — fora da lotação e do breakdown. Agora cada tipo **ativo** entra como opção
+logo abaixo do produto dele (`opcoesComTipos`), com preço do catálogo sugerido:
+
+- a opção passou a ser identificada por **`slug:tipo`** (`opcaoId`), não só pelo slug;
+- **oculto entra** (vender na mão é o caso dele); **gratuito não** (cobrança de R$ 0 não existe);
+- a API confere o tipo contra o banco (`getTipo`, tem que ser do mesmo produto) e carimba a
+  venda; **não** checa prazo nem lotação — venda manual é decisão do admin;
+- tipo novo cadastrado em `/admin/ingressos` aparece aqui **sem deploy**.
+
+### 3. Abas de origem em `/admin/vendas`
+Faixa **Origem** abaixo das abas de produto, combinável com elas: **Link de vendedora** e
+**Parceiro**, filtrando pelo `utm_source` que o checkout carimba (= tipo do cupom). A lista sai
+de `TIPOS_CUPOM`, então tipo novo de cupom nasce com aba. Nessas abas a tabela ganha a coluna
+**Cupom** (`utm_content`). `contarPorOrigem` conta com os filtros da tela **ignorando** o
+filtro de origem — senão as abas inativas mostrariam zero e pareceriam vazias. Copiar e-mails
+e CSV já seguiam os filtros: valem por aba.
+
+---
+
 ## Fluxo de uso (pós-deploy)
 
 1. `cd web && npx vercel --prod --yes`

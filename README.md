@@ -5,6 +5,34 @@ Site institucional da **Azuris** — engenharia de dados e IA.
 Reconstrução completa do `azuris.com.br` substituindo a versão WordPress/Divi por
 uma stack moderna, dark-first, focada em profissionais de dados.
 
+O que começou como site institucional hoje também **vende**: checkout próprio (Asaas) pro
+DSS 2026, One Day, GU BigData, ETT e o curso Lakehouse, com área administrativa financeira
+em `/admin`. O mapa disso está em
+**[docs/CATALOGO-PRECOS-E-VENDAS.md](./docs/CATALOGO-PRECOS-E-VENDAS.md)** — comece por ele.
+
+## Documentação
+
+**Vendas e preço**
+- [CATALOGO-PRECOS-E-VENDAS.md](./docs/CATALOGO-PRECOS-E-VENDAS.md) — onde mora cada preço e como uma venda nasce (**entrada**)
+- [CHECKOUT-ASAAS-REPRODUCAO.md](./docs/CHECKOUT-ASAAS-REPRODUCAO.md) — pipeline do checkout, do zero
+- [ASAAS-INTEGRACAO-COMPLETA.md](./docs/ASAAS-INTEGRACAO-COMPLETA.md) — API, webhook, idempotência
+- [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./docs/CHECKOUT-PF-PJ-NOTA-FISCAL.md) — PF/PJ, endereço e nota
+- [CUPONS-DESCONTO.md](./docs/CUPONS-DESCONTO.md) — link de vendedora e cupom de parceiro
+- [INGRESSO-OCULTO-ESTUDANTE.md](./docs/INGRESSO-OCULTO-ESTUDANTE.md) — ingresso reservado, só por link
+- [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
+
+**Admin**
+- [ADMIN-VENDAS-COBRANCA-INGRESSOS.md](./docs/ADMIN-VENDAS-COBRANCA-INGRESSOS.md) — cobrança avulsa, tipos de ingresso, filtros e abas
+- [ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./docs/ADMIN-FINANCEIRO-ONDAS-2026-07-09.md) — recebíveis, DRE, NF, assinaturas
+- [ADMIN-RECONCILIACAO-IMPORTACAO.md](./docs/ADMIN-RECONCILIACAO-IMPORTACAO.md) · [ADMIN-TROCAR-MEIO-PAGAMENTO.md](./docs/ADMIN-TROCAR-MEIO-PAGAMENTO.md) · [ADMIN-CANCELAR-E-COPIAR-COBRANCA.md](./docs/ADMIN-CANCELAR-E-COPIAR-COBRANCA.md) · [ADMIN-EXPORT-CSV-CONTATOS.md](./docs/ADMIN-EXPORT-CSV-CONTATOS.md)
+
+**Plataforma**
+- [EMAIL-TRANSACIONAL-RESEND.md](./docs/EMAIL-TRANSACIONAL-RESEND.md) — confirmação de pagamento e vigia de vendas
+- [GOOGLE-TAG-MANAGER.md](./docs/GOOGLE-TAG-MANAGER.md) — GTM em toda página (regra do [AGENTS.md](./AGENTS.md))
+
+Cada sessão de trabalho deixa também um `CONTEXTO-SESSAO-*.md` na raiz — narrativa do que
+mudou, por quê, e o que ficou pendente.
+
 ## Stack
 
 - **Next.js 16** (App Router, Turbopack) + **React 19.2**
