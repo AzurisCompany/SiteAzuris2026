@@ -1,11 +1,21 @@
 # Sessão 2026-08-14 — ingresso de estudante do DSS (R$ 400), só por link
 
-**Tipo:** releitura do projeto + produto novo (variante de ingresso do DSS 2026).
-**Estado do repo ao fim:** `main` = `720de7a` (ingresso oculto `f6bdefe` + cobrança avulsa `720de7a`) + os commits de doc. Working tree limpa.
-**Deploys:** **3**, todos verificados no ar. Migração de prod rodada (43/43; era 42 antes da coluna nova).
+**Tipo:** releitura do projeto → produto novo (variante de ingresso do DSS) → dois ajustes que ele
+expôs no admin → consolidação da documentação do repo inteiro.
+
+**Estado do repo ao fim:** working tree limpa. Commits de código: `f6bdefe` (ingresso oculto),
+`720de7a` (tipos na cobrança avulsa), `7b6abc6` (abas de origem). Commits de doc: `a39c05a`
+(mapa de preços e vendas) e `ebc02bb` (arquitetura, banco, infra, runbook, institucional).
+
+**Deploys:** **3**, todos verificados no ar. A onda de documentação não vai pra produção.
+**Migração de prod:** rodada, 43/43 (era 42 antes da coluna `oculto`); integridade conferida antes e depois.
 **Testes:** 198 passando (19 arquivos), eram 184. Build ok.
 
-Doc de referência: [`docs/INGRESSO-OCULTO-ESTUDANTE.md`](./docs/INGRESSO-OCULTO-ESTUDANTE.md).
+**Em produção ao fim da sessão:** ingresso Estudante R$ 400 (oculto, 50 vagas) ·
+`/admin/cobranca` com tipos de ingresso · `/admin/vendas` com abas de origem.
+
+Docs de referência: [`docs/INGRESSO-OCULTO-ESTUDANTE.md`](./docs/INGRESSO-OCULTO-ESTUDANTE.md) e
+[`docs/CATALOGO-PRECOS-E-VENDAS.md`](./docs/CATALOGO-PRECOS-E-VENDAS.md).
 
 ---
 
@@ -89,7 +99,33 @@ por `NIL-2026`, **R$ 543,99 no cartão em 3x** (= R$ 513 com desconto de 10% + j
 novo: cupom → preço derivado no servidor → Asaas → webhook fechando o status. Parceiro
 segue zerada.
 
-## 7. Armadilhas
+## 7. Onda 4 — documentar tudo (sem deploy)
+
+Pedido repetido duas vezes, e a segunda foi lida como "o resto também". Duas levas:
+
+**Preço e venda** (`a39c05a`) — `docs/CATALOGO-PRECOS-E-VENDAS.md`, o doc que faltava: o preço de
+um produto pode vir de **três lugares** (catálogo no banco, registry, lote do Lakehouse) e nada
+dizia isso — foi o que deixou o código em R$470 por três semanas com o checkout cobrando R$570.
+Traz também os três modificadores em ordem, o caminho da venda, ingresso oculto × cupom, snapshot
+datado, tabela "quero mudar X" e as armadilhas. Mais a onda D no doc do admin e as abas no de cupons.
+
+**O resto** (`ebc02bb`) — cinco documentos novos: `ARQUITETURA.md` (três metades, camadas, rotas,
+convenções), `BANCO-DE-DADOS.md` (6 tabelas, colunas que fazem mais do que parecem, migração),
+`AMBIENTE-E-INFRA.md` (~19 variáveis com "o que quebra sem ela", crons, DNS, analytics),
+`RUNBOOK.md` (receitas e diagnóstico por sintoma) e `SITE-INSTITUCIONAL.md`.
+
+O **README virou índice** — descrevia o site de maio, com "MDX (planejado)", "/blog (stub)" e as
+variáveis de ambiente resumidas às duas do PostHog, que são justamente as que não estão configuradas.
+
+Versão navegável (artifact privado, "Onde Mora o Preço"):
+`https://claude.ai/code/artifact/d2a62d27-50d9-4232-9295-d441c108b3f0` — republicar pelo mesmo
+caminho mantém a URL.
+
+Duas confusões que só apareceram ao escrever: **`produtos-catalogo.ts` (vitrine) × `produtos.ts`
+(checkout)**, nomes quase iguais e papéis diferentes; e **`ativo` × `oculto`** — inativo não vende,
+oculto vende e só não se anuncia. Ambas viraram aviso escrito.
+
+## 8. Armadilhas
 
 - **O link não é segredo.** Quem adivinhar `?tipo=estudante` compra a R$ 400 — não há
   assinatura HMAC como nos cupons. A barreira real é o comprovante na entrada. Se doer,
@@ -103,9 +139,14 @@ segue zerada.
 
 **Desta sessão:**
 
-- Divulgar o link (nenhum canal ainda aponta pra ele).
+- **Divulgar o link do estudante** — nenhum canal aponta pra ele ainda.
+- **Conferir se o e-mail do Resend chegou** na venda paga de hoje: é a primeira chance de
+  verificar isso num caso real, e o registro fica em `email_confirmacao_em`.
+- Trocar `BIN01` por um código forte antes de distribuir mais (5 caracteres, adivinhável).
 - Decidir se o estudante entra como filtro/rótulo em algum relatório — hoje ele já
   aparece sozinho no breakdown "Por tipo" do `/admin`.
+- Os dois tipos do GU seguem ativos com prazo vencido, então aparecem no seletor da cobrança
+  avulsa. Não atrapalha nada; se incomodar, é só desativar os dois.
 
 **De antes, inalterado:**
 
