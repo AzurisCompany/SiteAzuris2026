@@ -1,7 +1,7 @@
 # Sessão 2026-08-14 — ingresso de estudante do DSS (R$ 400), só por link
 
 **Tipo:** releitura do projeto + produto novo (variante de ingresso do DSS 2026).
-**Estado do repo ao fim:** `main` = `1ca4a58` (ingresso oculto `f6bdefe` + cobrança avulsa) + o commit deste doc. Working tree limpa.
+**Estado do repo ao fim:** `main` = `720de7a` (ingresso oculto `f6bdefe` + cobrança avulsa `720de7a`) + os commits de doc. Working tree limpa.
 **Deploys:** **2**, ambos verificados no ar. Migração de prod rodada (43/43; era 42 antes da coluna nova).
 **Testes:** 197 passando (19 arquivos), eram 184. Build ok.
 
