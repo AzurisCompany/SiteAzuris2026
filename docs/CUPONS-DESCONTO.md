@@ -84,6 +84,14 @@ limite), a receita conta só o que entrou.
 A cobrança no Asaas fica carimbada: descrição ganha `— desconto 10%` e o `externalReference`
 vira `dss-2026:lote-1:cupom-<codigo>`.
 
+**Abas de origem em `/admin/vendas` (2026-08-14):** a faixa "Origem" (abaixo das abas de
+produto, e combinável com elas) filtra por esse mesmo `utm_source` — **Link de vendedora**
+e **Parceiro**, com contagem. Nelas a tabela ganha a coluna **Cupom** (`utm_content`), que
+é quem vendeu. A lista de abas sai de `TIPOS_CUPOM` (`lib/cupons.ts`): tipo novo de cupom
+nasce com aba. Copiar e-mails e o CSV de contatos respeitam os filtros, então já saem por
+aba. Um canário em `cupom-checkout.test.ts` amarra o `utm_source` gravado ao valor que a
+aba filtra — se desencontrarem, a aba fica muda e "0 vendas" parece plausível.
+
 ⚠️ **Trocar o código de um cupom zera o histórico dele** — as inscrições antigas continuam
 gravadas com o código velho. Renomeie o `nome` à vontade; o código, não.
 

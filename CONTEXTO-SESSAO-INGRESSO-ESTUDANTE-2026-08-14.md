@@ -2,8 +2,8 @@
 
 **Tipo:** releitura do projeto + produto novo (variante de ingresso do DSS 2026).
 **Estado do repo ao fim:** `main` = `720de7a` (ingresso oculto `f6bdefe` + cobrança avulsa `720de7a`) + os commits de doc. Working tree limpa.
-**Deploys:** **2**, ambos verificados no ar. Migração de prod rodada (43/43; era 42 antes da coluna nova).
-**Testes:** 197 passando (19 arquivos), eram 184. Build ok.
+**Deploys:** **3**, todos verificados no ar. Migração de prod rodada (43/43; era 42 antes da coluna nova).
+**Testes:** 198 passando (19 arquivos), eram 184. Build ok.
 
 Doc de referência: [`docs/INGRESSO-OCULTO-ESTUDANTE.md`](./docs/INGRESSO-OCULTO-ESTUDANTE.md).
 
@@ -65,7 +65,31 @@ Verificado no ar: seletor traz "Ingresso DSS — Lote 1", "Ingresso DSS — Estu
 "Ingresso GU — Geral"; o Associado (grátis) ficou de fora. Tipo inexistente e tipo de
 outro produto → **400 antes de qualquer cobrança nascer**.
 
-## 6. Armadilhas
+## 6. Onda 3 — abas de origem em `/admin/vendas` (deploy 3)
+
+Pedido: ver separado o que veio pelo **link de desconto** (`/vendas`) e o que veio de
+**parceiro**. Virou uma faixa "Origem" abaixo das abas de produto — as duas dimensões
+valem juntas (DSS + vendedora, por exemplo). O filtro é o `utm_source` que o checkout
+carimba, que é o **tipo do cupom**; a lista de abas sai de `TIPOS_CUPOM`, então tipo novo
+nasce com aba.
+
+Detalhes que importam:
+
+- `contarPorOrigem` conta com os filtros da tela **ignorando o filtro de origem** — senão,
+  com uma aba aberta, as outras mostrariam zero e pareceriam vazias.
+- Nessas abas entra a coluna **Cupom** (`utm_content`): quem vendeu.
+- Vazio diz "a aba acende sozinha na primeira venda", não "nenhum resultado".
+- Canário novo: o `utm_source` gravado no checkout tem que ser exatamente o valor que a aba
+  filtra. Sem isso a aba fica muda e ninguém percebe — "0 vendas" é um resultado plausível.
+- Copiar e-mails e CSV já seguiam os filtros → valem por aba de graça.
+
+**No ar:** a aba **Link de vendedora já tem 1 venda — e ela é REAL e PAGA**: FullPass Lote 1
+por `NIL-2026`, **R$ 543,99 no cartão em 3x** (= R$ 513 com desconto de 10% + juros), status
+**Pago**, hoje (14/08). É o **primeiro dinheiro de verdade** de ponta a ponta no checkout
+novo: cupom → preço derivado no servidor → Asaas → webhook fechando o status. Parceiro
+segue zerada.
+
+## 7. Armadilhas
 
 - **O link não é segredo.** Quem adivinhar `?tipo=estudante` compra a R$ 400 — não há
   assinatura HMAC como nos cupons. A barreira real é o comprovante na entrada. Se doer,
@@ -85,10 +109,11 @@ outro produto → **400 antes de qualquer cobrança nascer**.
 
 **De antes, inalterado:**
 
-- **Nenhum PIX real, em nenhum produto** — nem DSS, nem One Day, nem GU, nem ETT, nem cupom.
-  Agora tem mais um caminho sem teste com dinheiro de verdade.
+- ~~Nenhum pagamento real~~ — **caiu hoje**: a venda do `NIL-2026` (cartão 3x, R$ 543,99,
+  Pago) fechou o ciclo com dinheiro de verdade. **PIX** e o **fluxo de estudante** seguem
+  sem teste real, e o e-mail do Resend nunca foi conferido numa venda de verdade.
 - `CUPOM_SECRET` não definida na Vercel (assinatura caindo no `ADMIN_SESSION_SECRET`);
-  trocar `BIN01`/`CEL01` por códigos fortes; cupom de parceiro nunca criado em prod.
+  trocar `BIN01`/`CEL01` por códigos fortes. Cupom de **parceiro** ainda nunca usado em prod.
 - Os 3 passos manuais no console pra destravar `/admin/trafego` (sessão de 11/08, seção 6).
 - Commits não pushados pro GitHub (auto-deploy segue inexistente; prod vai por CLI).
 - 6 erros da sincronização Asaas de 01/08, sem diagnóstico.
