@@ -12,8 +12,19 @@ em `/admin`. O mapa disso está em
 
 ## Documentação
 
+**Comece aqui**
+- [ARQUITETURA.md](./docs/ARQUITETURA.md) — as três metades do app, camadas, rotas, convenções
+- [CATALOGO-PRECOS-E-VENDAS.md](./docs/CATALOGO-PRECOS-E-VENDAS.md) — onde mora cada preço e como uma venda nasce
+- [RUNBOOK.md](./docs/RUNBOOK.md) — deploy, migração, receitas de venda e diagnóstico
+
+**Plataforma**
+- [BANCO-DE-DADOS.md](./docs/BANCO-DE-DADOS.md) — tabelas, colunas que fazem mais do que parecem, migração
+- [AMBIENTE-E-INFRA.md](./docs/AMBIENTE-E-INFRA.md) — variáveis, deploy, crons, DNS, analytics
+- [SITE-INSTITUCIONAL.md](./docs/SITE-INSTITUCIONAL.md) — home, blog, cases, produtos, SEO
+- [EMAIL-TRANSACIONAL-RESEND.md](./docs/EMAIL-TRANSACIONAL-RESEND.md) — confirmação de pagamento e vigia de vendas
+- [GOOGLE-TAG-MANAGER.md](./docs/GOOGLE-TAG-MANAGER.md) — GTM em toda página (regra do [AGENTS.md](./AGENTS.md))
+
 **Vendas e preço**
-- [CATALOGO-PRECOS-E-VENDAS.md](./docs/CATALOGO-PRECOS-E-VENDAS.md) — onde mora cada preço e como uma venda nasce (**entrada**)
 - [CHECKOUT-ASAAS-REPRODUCAO.md](./docs/CHECKOUT-ASAAS-REPRODUCAO.md) — pipeline do checkout, do zero
 - [ASAAS-INTEGRACAO-COMPLETA.md](./docs/ASAAS-INTEGRACAO-COMPLETA.md) — API, webhook, idempotência
 - [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./docs/CHECKOUT-PF-PJ-NOTA-FISCAL.md) — PF/PJ, endereço e nota
@@ -26,10 +37,6 @@ em `/admin`. O mapa disso está em
 - [ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./docs/ADMIN-FINANCEIRO-ONDAS-2026-07-09.md) — recebíveis, DRE, NF, assinaturas
 - [ADMIN-RECONCILIACAO-IMPORTACAO.md](./docs/ADMIN-RECONCILIACAO-IMPORTACAO.md) · [ADMIN-TROCAR-MEIO-PAGAMENTO.md](./docs/ADMIN-TROCAR-MEIO-PAGAMENTO.md) · [ADMIN-CANCELAR-E-COPIAR-COBRANCA.md](./docs/ADMIN-CANCELAR-E-COPIAR-COBRANCA.md) · [ADMIN-EXPORT-CSV-CONTATOS.md](./docs/ADMIN-EXPORT-CSV-CONTATOS.md)
 
-**Plataforma**
-- [EMAIL-TRANSACIONAL-RESEND.md](./docs/EMAIL-TRANSACIONAL-RESEND.md) — confirmação de pagamento e vigia de vendas
-- [GOOGLE-TAG-MANAGER.md](./docs/GOOGLE-TAG-MANAGER.md) — GTM em toda página (regra do [AGENTS.md](./AGENTS.md))
-
 Cada sessão de trabalho deixa também um `CONTEXTO-SESSAO-*.md` na raiz — narrativa do que
 mudou, por quê, e o que ficou pendente.
 
@@ -39,22 +46,29 @@ mudou, por quê, e o que ficou pendente.
 - **Tailwind CSS v4** com tokens de design derivados da logo
 - **react-three-fiber** + **three.js** para o hero 3D (data-flow particles)
 - **motion** (Framer rebrand v12) para microinterações
-- **PostHog** para analytics, A/B testing e session replay
-- **Proxy** (`src/proxy.ts`, ex-middleware do Next 16) para detecção de
-  tráfego incidental e roteamento condicional
-- **MDX** (planejado) para blog e cases
+- **Postgres (Neon)** + **Asaas** para inscrição, cobrança e webhook
+- **Resend** para e-mail transacional (confirmação de pagamento, alertas do vigia)
+- **MDX** (`next-mdx-remote`) no blog; cases são estruturas tipadas, não MDX
+- **Proxy** (`src/proxy.ts`, ex-middleware do Next 16) para o tráfego incidental do Azuriz FC
+- **GTM** em toda página + gtag legado; **PostHog** está no código, mas sem chave configurada
 
 ## Rotas
 
+Mapa completo — institucional, checkout e admin — em
+[docs/ARQUITETURA.md](./docs/ARQUITETURA.md). Resumo:
+
 ```
-/                              Home (hero 3D, ecossistema, cases, parceiros, stack, founder)
-/sobre                         Quem somos + pilares + bio
-/cases                         Cases reais com KPIs
-/produtos                      Hub dos produtos
-/produtos/curso-pipelines      LP do curso em lançamento
-/blog                          (stub MDX)
-/contato                       Canais diretos
-/azuriz                        Landing dedicada para tráfego incidental do Azuriz FC
+/                              Home (hero 3D, ecossistema, cases, comunidade, stack, founder)
+/sobre  /cases  /blog          Institucional (estático)
+/servicos + 5 landings         Serviços
+/produtos  /produtos/[slug]    Ecossistema (7 produtos)
+/comunidade                    Hadoop.com.br, GU BigData, grupo de estudos
+/dssbr-2026 + /inscricao       DSS 2026 — landing e checkout (dinâmicos)
+/dssbr-2026/one-day[-curso]    Passe de 1 dia e combo com o curso
+/gubigdata  /ett  /preparatorio-dados  /lakehouse-comunidade   Outros checkouts
+/vendas                        Vendedora gera o link de desconto dela
+/admin/*                       Painel financeiro e operacional (senha única)
+/azuriz                        Landing para o tráfego perdido do Azuriz FC
 ```
 
 ## Ecossistema
@@ -77,7 +91,8 @@ O domínio `azuris.com.br` recebe tráfego acidental de quem busca o `azuriz.com
    `?fc=1`) — `AzurizBanner.tsx`
 2. **Landing dedicada** em `/azuriz` (takeover) com CTA pro ETT, UTMs trackeáveis
 
-Ambas as variantes emitem eventos PostHog para medir conversão.
+As duas variantes emitem evento pra medir conversão (hoje via GTM/gtag — o PostHog está sem
+chave). ⚠️ Nunca use a palavra "banner" em `id`/`class`: adblock esconde o elemento.
 
 ## Desenvolvimento
 
@@ -94,16 +109,27 @@ Servidor sobe em `http://localhost:3000`. Em WSL/Windows, use o IP da WSL
 
 Copie `.env.example` para `.env.local` e preencha:
 
-```
-NEXT_PUBLIC_POSTHOG_KEY=phc_xxxxxxxxxxxxxxxxxxxx
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
-```
+São ~19 variáveis: banco, Asaas, senha do admin, Resend, cupons, crons e analytics. O que cada
+uma faz — e **o que quebra sem ela** — está em
+[docs/AMBIENTE-E-INFRA.md](./docs/AMBIENTE-E-INFRA.md).
 
-Sem a chave, o site funciona normalmente — apenas o tracking fica inativo.
+## Testes
+
+```bash
+npx vitest run     # 19 arquivos, ~198 testes de regra pura (sem banco, sem rede)
+```
 
 ## Deploy
 
-Vercel é o destino. `vercel link` → `vercel --prod`.
+Vercel, **por linha de comando** — não há auto-deploy pelo GitHub:
+
+```bash
+npx vitest run && npm run build
+npx vercel --prod --yes
+```
+
+Mudou schema? Rode a migração logo depois (`POST /api/admin/migrate`). Passo a passo, rollback e
+receitas de operação em [docs/RUNBOOK.md](./docs/RUNBOOK.md).
 
 ## Identidade visual
 
