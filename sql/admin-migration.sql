@@ -112,6 +112,9 @@ CREATE INDEX IF NOT EXISTS idx_assinaturas_produto_email ON assinaturas(produto_
 ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS vendas_ate DATE;     -- última data de venda (inclusive); NULL = sem prazo
 ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS limite_qtd INTEGER;  -- lotação do tipo (paid+pending, sem is_teste); NULL = sem limite
 
+-- Ingresso reservado: fora da vitrine, só compra quem chega com ?tipo=<tipo_id> (ex.: Estudante).
+ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS oculto BOOLEAN NOT NULL DEFAULT false;
+
 -- Seed do encontro GU BigData 30/07 (idempotente; NÃO sobrescreve edições do admin).
 INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
 VALUES

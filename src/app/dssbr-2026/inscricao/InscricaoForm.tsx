@@ -31,6 +31,8 @@ interface Props {
   maxParcelas: number
   /** tipos de ingresso cadastrados; se não-vazio, mostra o seletor e ignora os preços únicos acima */
   tipos?: TipoOption[]
+  /** tipo_id que já vem selecionado (quem chegou por link de ingresso reservado) */
+  defaultTipo?: string | null
   /** token do link de vendedora ([[cupom]]) — vai junto no POST pro servidor revalidar */
   cupom?: string
   /** código fixo do cupom de parceiro (?c=) — idem, revalidado no servidor */
@@ -57,6 +59,7 @@ export default function InscricaoForm({
   precoCartaoBaseReais: baseCartao,
   maxParcelas: baseMax,
   tipos,
+  defaultTipo,
   cupom,
   cupomCodigo,
   endpoint = '/api/dssbr-2026/inscricao',
@@ -70,7 +73,12 @@ export default function InscricaoForm({
   const [telefone, setTelefone] = useState('')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
   const [installments, setInstallments] = useState(1)
-  const [tipoIdx, setTipoIdx] = useState(0)
+  // Quem chega por link de ingresso reservado já cai com ele marcado — o card
+  // continua trocável, então ninguém fica preso ao tipo que veio na URL.
+  const [tipoIdx, setTipoIdx] = useState(() => {
+    const i = tipos?.findIndex((t) => t.tipo_id === defaultTipo) ?? -1
+    return i >= 0 ? i : 0
+  })
   const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)

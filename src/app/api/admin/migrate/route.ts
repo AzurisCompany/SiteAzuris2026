@@ -97,6 +97,8 @@ const STATEMENTS: string[] = [
   // Janela de vendas e lotação por tipo de ingresso (eventos presenciais, ex.: GU BigData).
   `ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS vendas_ate DATE`,
   `ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS limite_qtd INTEGER`,
+  // Ingresso reservado: fora da vitrine, só compra quem chega com ?tipo=<tipo_id> (ex.: Estudante).
+  `ALTER TABLE tipos_ingresso ADD COLUMN IF NOT EXISTS oculto BOOLEAN NOT NULL DEFAULT false`,
   // Seed do encontro GU BigData 30/07 (idempotente; NÃO sobrescreve edições do admin).
   `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
    VALUES

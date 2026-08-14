@@ -3,7 +3,9 @@ import { CalendarDays, MapPin } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { hojeBRT } from '@/lib/format'
 import {
-  listarTiposAtivos,
+  listarTiposPublicos,
+  getTipo,
+  aplicarTipoDoLink,
   contarInscritosPorTipo,
   disponibilidadeDoTipo,
   precosDoTipo,
@@ -35,18 +37,22 @@ export default async function InscricaoGuPage({
   searchParams: Promise<Record<string, string | undefined>>
 }) {
   const sp = await searchParams
-  const tipoPre = sp.tipo || null
 
-  // Tipos ativos + disponibilidade (janela de vendas / lotação), tolerante a
+  // Tipos da vitrine + disponibilidade (janela de vendas / lotação), tolerante a
   // banco sem migração — nesse caso a página mostra "inscrições em breve".
   let tipoOptions: TipoGuOption[] = []
+  let tipoPre: string | null = null
   try {
-    const [tipos, inscritos] = await Promise.all([
-      listarTiposAtivos(PRODUTO.slug),
+    const [publicos, inscritos] = await Promise.all([
+      listarTiposPublicos(PRODUTO.slug),
       contarInscritosPorTipo(PRODUTO.slug),
     ])
     const hoje = hojeBRT()
-    tipoOptions = tipos.map((t) => {
+    // `?tipo=` pode apontar pra um ingresso oculto (fora da vitrine) — ver [[tipos-ingresso]].
+    const doLink = sp.tipo ? await getTipo(PRODUTO.slug, sp.tipo) : null
+    const link = aplicarTipoDoLink(publicos, sp.tipo, doLink, hoje, inscritos[doLink?.tipo_id ?? ''] ?? 0)
+    tipoPre = link.selecionado
+    tipoOptions = link.tipos.map((t) => {
       const p = precosDoTipo(t)
       const disp = disponibilidadeDoTipo(t, hoje, inscritos[t.tipo_id] ?? 0)
       return {

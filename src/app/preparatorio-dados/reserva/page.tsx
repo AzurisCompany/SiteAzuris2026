@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { CalendarClock, GraduationCap, Tag } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { hojeBRT } from '@/lib/format'
-import { listarTiposAtivos, contarInscritosPorTipo, disponibilidadeDoTipo } from '@/lib/tipos-ingresso'
+import { listarTiposPublicos, contarInscritosPorTipo, disponibilidadeDoTipo } from '@/lib/tipos-ingresso'
 import ReservaForm from './ReservaForm'
 
 // Lista de espera do preparatório — tema dark padrão do site (o tema claro do
@@ -25,7 +25,7 @@ export default async function ReservaPreparatorioPage() {
   let aberta = false
   try {
     const [tipos, inscritos] = await Promise.all([
-      listarTiposAtivos(PRODUTO.slug),
+      listarTiposPublicos(PRODUTO.slug),
       contarInscritosPorTipo(PRODUTO.slug),
     ])
     const tipo = tipos.find((t) => t.tipo_id === TIPO_ID)

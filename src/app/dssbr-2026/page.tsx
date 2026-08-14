@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
-import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
+import { listarTiposPublicos, precosDoTipo } from '@/lib/tipos-ingresso'
 import { dssMetadata } from './metadata'
 
 const DSS = 'https://dssbr.com.br'
@@ -53,7 +53,7 @@ async function passFullPass(): Promise<Pass> {
   let maxParcelas = PRODUTO_FULL.maxParcelas
   let lote = 'Lote 1'
   try {
-    const tipos = await listarTiposAtivos(PRODUTO_FULL.slug)
+    const tipos = await listarTiposPublicos(PRODUTO_FULL.slug)
     if (tipos.length > 0) {
       const p = precosDoTipo(tipos[0])
       pix = p.precoPixReais

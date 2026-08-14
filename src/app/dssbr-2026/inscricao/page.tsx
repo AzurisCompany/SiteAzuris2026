@@ -1,7 +1,15 @@
 import type { Metadata } from 'next'
 import { Users, BadgePercent, Clock } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
-import { listarTiposAtivos, precosDoTipo } from '@/lib/tipos-ingresso'
+import {
+  listarTiposPublicos,
+  getTipo,
+  contarInscritosPorTipo,
+  aplicarTipoDoLink,
+  precosDoTipo,
+  type RecusaLink,
+} from '@/lib/tipos-ingresso'
+import { hojeBRT } from '@/lib/format'
 import { formatarValidade } from '@/lib/cupom'
 import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm, { type TipoOption } from './InscricaoForm'
@@ -27,7 +35,7 @@ export const dynamic = 'force-dynamic'
 export default async function InscricaoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ d?: string; c?: string }>
+  searchParams: Promise<{ d?: string; c?: string; tipo?: string }>
 }) {
   // Duas formas de chegar com desconto ([[cupons]]): `?d=` é o link assinado que
   // a vendedora gerou (tem prazo); `?c=` é o código fixo do parceiro. Qualquer
@@ -49,10 +57,23 @@ export default async function InscricaoPage({
   // Preço cheio do primeiro tipo ativo — é o "de" da tarja de desconto. Sai do
   // admin, não de texto fixo: tarja com preço de lote velho é propaganda enganosa.
   let precoCheioCentavos = PRODUTO.precoCentavos
+  /** tipo que o link `?tipo=` pré-seleciona (ingresso reservado, ex.: Estudante) */
+  let tipoDoLink: string | null = null
+  let recusaLink: RecusaLink | null = null
   try {
-    const tipos = await listarTiposAtivos(PRODUTO.slug)
-    if (tipos[0]) precoCheioCentavos = tipos[0].preco_centavos
-    tipoOptions = tipos.map((t) => {
+    const publicos = await listarTiposPublicos(PRODUTO.slug)
+    // Busca DIRETA, não um find() na vitrine: o tipo do link pode ser oculto, e
+    // oculto por definição não está na lista pública.
+    const doLink = sp.tipo ? await getTipo(PRODUTO.slug, sp.tipo) : null
+    const inscritos =
+      doLink?.limite_qtd != null ? ((await contarInscritosPorTipo(PRODUTO.slug))[doLink.tipo_id] ?? 0) : 0
+    const link = aplicarTipoDoLink(publicos, sp.tipo, doLink, hojeBRT(), inscritos)
+    tipoDoLink = link.selecionado
+    recusaLink = link.recusa
+    // Âncora da tarja de cupom: sempre o 1º tipo da VITRINE (o lote vigente) —
+    // não o ingresso reservado, que faria a comparação mentir.
+    if (publicos[0]) precoCheioCentavos = publicos[0].preco_centavos
+    tipoOptions = link.tipos.map((t) => {
       const p = precosDoTipo({ ...t, preco_centavos: comDesconto(t.preco_centavos) })
       return {
         tipo_id: t.tipo_id,
@@ -97,6 +118,29 @@ export default async function InscricaoPage({
               <span>
                 O link de desconto que você usou <strong className="text-[var(--text-primary)]">expirou</strong> — os
                 valores abaixo são os normais. Se alguém do time te enviou esse link, peça um novo.
+              </span>
+            </p>
+          </div>
+        )}
+
+        {/* Link de ingresso reservado que não vale mais: mesma filosofia do cupom
+            vencido — a inscrição segue, no preço da vitrine, com o motivo à vista. */}
+        {recusaLink && (
+          <div className="mt-6 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
+            <p className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+              <Clock className="mt-0.5 size-4 shrink-0 text-[var(--text-muted)]" />
+              <span>
+                {recusaLink === 'indisponivel' ? (
+                  <>
+                    O ingresso desse link <strong className="text-[var(--text-primary)]">esgotou</strong> (ou saiu de
+                    venda) — os valores abaixo são os normais.
+                  </>
+                ) : (
+                  <>
+                    O link de ingresso que você usou <strong className="text-[var(--text-primary)]">não existe mais</strong>{' '}
+                    — os valores abaixo são os normais. Se alguém do time te enviou esse link, peça um novo.
+                  </>
+                )}
               </span>
             </p>
           </div>
@@ -218,6 +262,7 @@ export default async function InscricaoPage({
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={PRODUTO.maxParcelas}
           tipos={tipoOptions}
+          defaultTipo={tipoDoLink}
           cupom={cupom && sp.d ? sp.d : undefined}
           cupomCodigo={cupom && !sp.d ? cupom.codigo : undefined}
         />

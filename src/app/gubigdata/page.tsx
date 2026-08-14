@@ -4,7 +4,7 @@ import { CalendarDays, MapPin } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { hojeBRT } from '@/lib/format'
 import {
-  listarTiposAtivos,
+  listarTiposPublicos,
   contarInscritosPorTipo,
   disponibilidadeDoTipo,
   precosDoTipo,
@@ -47,7 +47,7 @@ export default async function EventoGuPage() {
   let tickets: TicketOption[] = []
   try {
     const [tipos, inscritos] = await Promise.all([
-      listarTiposAtivos(PRODUTO.slug),
+      listarTiposPublicos(PRODUTO.slug),
       contarInscritosPorTipo(PRODUTO.slug),
     ])
     const hoje = hojeBRT()

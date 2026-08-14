@@ -69,6 +69,8 @@ export async function POST(request: Request) {
       cartao_acrescimo_pct: Math.min(Math.max(num(b.cartao_acrescimo_pct), 0), 100),
       max_parcelas: Math.min(Math.max(Math.round(num(b.max_parcelas, 1)), 1), MAX_PARCELAS),
       ativo: b.ativo !== false,
+      // Oculto só quando pedido explicitamente: o default de qualquer tipo é aparecer.
+      oculto: b.oculto === true,
       ordem: Math.round(num(b.ordem)),
       vendas_ate,
       limite_qtd,

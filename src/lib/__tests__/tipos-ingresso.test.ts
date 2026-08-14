@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { disponibilidadeDoTipo, ehGratuito, precosDoTipo, valorCobradoDoTipo, type TipoIngresso } from '@/lib/tipos-ingresso'
+import {
+  aplicarTipoDoLink,
+  disponibilidadeDoTipo,
+  ehGratuito,
+  precosDoTipo,
+  valorCobradoDoTipo,
+  type TipoIngresso,
+} from '@/lib/tipos-ingresso'
 
 const base: TipoIngresso = {
   id: 1,
@@ -13,6 +20,7 @@ const base: TipoIngresso = {
   cartao_acrescimo_pct: 0,
   max_parcelas: 3,
   ativo: true,
+  oculto: false,
   ordem: 0,
   vendas_ate: null,
   limite_qtd: null,
@@ -49,6 +57,54 @@ describe('disponibilidadeDoTipo', () => {
   it('encerrado tem precedência sobre esgotado', () => {
     const t = { ...base, vendas_ate: '2026-07-01', limite_qtd: 1 }
     expect(disponibilidadeDoTipo(t, '2026-07-11', 5).motivo).toBe('encerrado')
+  })
+})
+
+// O ingresso reservado (Estudante do DSS, R$ 400) depende INTEIRAMENTE destas
+// regras: se um oculto vazar pra vitrine, vira desconto aberto pra todo mundo.
+describe('aplicarTipoDoLink (ingresso oculto, só por link)', () => {
+  const lote1: TipoIngresso = { ...base, id: 7, produto_slug: 'dss-2026', tipo_id: 'lote-1', nome: 'Lote 1', preco_centavos: 57000, ordem: 1 }
+  const estudante: TipoIngresso = { ...base, id: 9, produto_slug: 'dss-2026', tipo_id: 'estudante', nome: 'Estudante', preco_centavos: 40000, oculto: true, ordem: 2, limite_qtd: 50 }
+  const hoje = '2026-08-14'
+
+  it('sem ?tipo= a vitrine sai como está, sem nada pré-selecionado', () => {
+    expect(aplicarTipoDoLink([lote1], null, null, hoje, 0)).toEqual({ tipos: [lote1], selecionado: null, recusa: null })
+  })
+
+  it('com o link certo, o oculto ENTRA na lista e já vem selecionado', () => {
+    const r = aplicarTipoDoLink([lote1], 'estudante', estudante, hoje, 10)
+    expect(r.tipos.map((t) => t.tipo_id)).toEqual(['lote-1', 'estudante'])
+    expect(r.selecionado).toBe('estudante')
+    expect(r.recusa).toBeNull()
+  })
+
+  it('id que não existe → vitrine pública e recusa explicada (nunca página de erro)', () => {
+    const r = aplicarTipoDoLink([lote1], 'estudantee', null, hoje, 0)
+    expect(r.tipos).toEqual([lote1])
+    expect(r).toMatchObject({ selecionado: null, recusa: 'inexistente' })
+  })
+
+  it('lote de estudante esgotado (50/50) → cai no preço cheio, sem sumir com a inscrição', () => {
+    const r = aplicarTipoDoLink([lote1], 'estudante', estudante, hoje, 50)
+    expect(r.tipos.map((t) => t.tipo_id)).toEqual(['lote-1'])
+    expect(r.recusa).toBe('indisponivel')
+  })
+
+  it('oculto desligado no admin não é vendido nem por link', () => {
+    const r = aplicarTipoDoLink([lote1], 'estudante', { ...estudante, ativo: false }, hoje, 0)
+    expect(r.selecionado).toBeNull()
+    expect(r.recusa).toBe('indisponivel')
+  })
+
+  it('link pra um tipo que já está na vitrine só pré-seleciona, sem duplicar o card', () => {
+    const r = aplicarTipoDoLink([lote1], 'lote-1', lote1, hoje, 0)
+    expect(r.tipos).toEqual([lote1])
+    expect(r.selecionado).toBe('lote-1')
+  })
+
+  it('a ordem do admin manda: oculto com ordem menor aparece antes do lote', () => {
+    const r = aplicarTipoDoLink([lote1], 'estudante', { ...estudante, ordem: 0 }, hoje, 0)
+    expect(r.tipos.map((t) => t.tipo_id)).toEqual(['estudante', 'lote-1'])
   })
 })
 

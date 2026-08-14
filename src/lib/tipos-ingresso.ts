@@ -17,6 +17,8 @@ export interface TipoIngresso {
   cartao_acrescimo_pct: number // %
   max_parcelas: number
   ativo: boolean
+  /** fora da vitrine: não aparece na lista pública, só pra quem chega com `?tipo=` */
+  oculto: boolean
   ordem: number
   vendas_ate: string | null // 'YYYY-MM-DD' inclusive; null = sem prazo
   limite_qtd: number | null // lotação (paid+pending, sem teste); null = sem limite
@@ -42,6 +44,7 @@ function mapRow(r: Record<string, unknown>): TipoIngresso {
     cartao_acrescimo_pct: Number(r.cartao_acrescimo_pct),
     max_parcelas: Number(r.max_parcelas),
     ativo: Boolean(r.ativo),
+    oculto: Boolean(r.oculto),
     ordem: Number(r.ordem),
     vendas_ate: isoDate(r.vendas_ate),
     limite_qtd: r.limite_qtd == null ? null : Number(r.limite_qtd),
@@ -59,11 +62,15 @@ export async function listarTipos(produto_slug?: string): Promise<TipoIngresso[]
   return rows.map(mapRow)
 }
 
-/** Só os tipos ATIVOS de um produto, em ordem — pro checkout. */
-export async function listarTiposAtivos(produto_slug: string): Promise<TipoIngresso[]> {
+/**
+ * Vitrine do checkout: tipos ativos E não-ocultos, em ordem.
+ * Tipo oculto NUNCA sai daqui — ele só entra na página por `?tipo=` (ver
+ * `aplicarTipoDoLink`), o que é o que sustenta o preço reservado (estudante).
+ */
+export async function listarTiposPublicos(produto_slug: string): Promise<TipoIngresso[]> {
   const rows = (await sql`
     SELECT * FROM tipos_ingresso
-    WHERE produto_slug = ${produto_slug} AND ativo = true
+    WHERE produto_slug = ${produto_slug} AND ativo = true AND oculto = false
     ORDER BY ordem, id
   `) as Record<string, unknown>[]
   return rows.map(mapRow)
@@ -89,6 +96,7 @@ export interface UpsertTipoInput {
   cartao_acrescimo_pct?: number
   max_parcelas?: number
   ativo?: boolean
+  oculto?: boolean
   ordem?: number
   vendas_ate?: string | null
   limite_qtd?: number | null
@@ -99,13 +107,13 @@ export async function upsertTipo(i: UpsertTipoInput): Promise<TipoIngresso> {
   const rows = (await sql`
     INSERT INTO tipos_ingresso (
       produto_slug, tipo_id, nome, descricao, preco_centavos, preco_de_centavos,
-      pix_desconto_pct, cartao_acrescimo_pct, max_parcelas, ativo, ordem,
+      pix_desconto_pct, cartao_acrescimo_pct, max_parcelas, ativo, oculto, ordem,
       vendas_ate, limite_qtd
     ) VALUES (
       ${i.produto_slug}, ${i.tipo_id}, ${i.nome}, ${i.descricao ?? null},
       ${i.preco_centavos}, ${i.preco_de_centavos ?? 0},
       ${i.pix_desconto_pct ?? 0}, ${i.cartao_acrescimo_pct ?? 0},
-      ${i.max_parcelas ?? 1}, ${i.ativo ?? true}, ${i.ordem ?? 0},
+      ${i.max_parcelas ?? 1}, ${i.ativo ?? true}, ${i.oculto ?? false}, ${i.ordem ?? 0},
       ${i.vendas_ate ?? null}, ${i.limite_qtd ?? null}
     )
     ON CONFLICT (produto_slug, tipo_id) DO UPDATE SET
@@ -117,6 +125,7 @@ export async function upsertTipo(i: UpsertTipoInput): Promise<TipoIngresso> {
       cartao_acrescimo_pct = EXCLUDED.cartao_acrescimo_pct,
       max_parcelas = EXCLUDED.max_parcelas,
       ativo = EXCLUDED.ativo,
+      oculto = EXCLUDED.oculto,
       ordem = EXCLUDED.ordem,
       vendas_ate = EXCLUDED.vendas_ate,
       limite_qtd = EXCLUDED.limite_qtd,
@@ -152,6 +161,37 @@ export function disponibilidadeDoTipo(
   if (t.vendas_ate && hoje > t.vendas_ate) return { disponivel: false, motivo: 'encerrado' }
   if (t.limite_qtd != null && inscritos >= t.limite_qtd) return { disponivel: false, motivo: 'esgotado' }
   return { disponivel: true, motivo: null }
+}
+
+export type RecusaLink = 'inexistente' | 'indisponivel'
+
+/**
+ * Decide o que o `?tipo=` da URL concede (regra PURA — testável).
+ *
+ * É isto que faz o ingresso reservado (ex.: Estudante) existir: ele fica `oculto`
+ * no catálogo, some da vitrine, e só entra na lista de opções de quem chega com o
+ * link. Qualquer recusa — código inexistente, tipo desligado, lote esgotado —
+ * **não vira página de erro**: cai na vitrine pública, no preço cheio, e a página
+ * explica o motivo. Perder a venda porque o link envelheceu seria o pior desfecho.
+ *
+ * `pedido` = valor cru do `?tipo=`; `doLink` = o que o banco devolveu pra ele.
+ */
+export function aplicarTipoDoLink(
+  publicos: TipoIngresso[],
+  pedido: string | null | undefined,
+  doLink: TipoIngresso | null,
+  hoje: string,
+  inscritos: number
+): { tipos: TipoIngresso[]; selecionado: string | null; recusa: RecusaLink | null } {
+  if (!pedido) return { tipos: publicos, selecionado: null, recusa: null }
+  if (!doLink) return { tipos: publicos, selecionado: null, recusa: 'inexistente' }
+  if (!disponibilidadeDoTipo(doLink, hoje, inscritos).disponivel) {
+    return { tipos: publicos, selecionado: null, recusa: 'indisponivel' }
+  }
+  // Tipo público linkado (ex.: ?tipo=lote-1) já está na vitrine: só pré-seleciona.
+  const jaNaVitrine = publicos.some((t) => t.tipo_id === doLink.tipo_id)
+  const tipos = jaNaVitrine ? publicos : [...publicos, doLink].sort((a, b) => a.ordem - b.ordem || a.id - b.id)
+  return { tipos, selecionado: doLink.tipo_id, recusa: null }
 }
 
 /** Inscritos (paid+pending, sem teste) por tipo_ingresso de um produto — pra lotação. */

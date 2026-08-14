@@ -1,13 +1,14 @@
 import { listarTipos, type TipoIngresso } from '@/lib/tipos-ingresso'
-import { labelProduto } from '@/lib/admin-queries'
+import { labelProduto, CHECKOUT_URL } from '@/lib/admin-queries'
 import IngressosManager from './IngressosManager'
 
 export const dynamic = 'force-dynamic'
 
-// Produtos cujo checkout consome o catálogo de tipos.
-const PRODUTOS_COM_TIPOS: Array<{ slug: string; nome: string }> = [
-  { slug: 'dss-2026', nome: labelProduto('dss-2026') },
-  { slug: 'gubigdata-2026-07', nome: labelProduto('gubigdata-2026-07') },
+// Produtos cujo checkout consome o catálogo de tipos. O `checkout` é a base do
+// link `?tipo=` dos ingressos ocultos.
+const PRODUTOS_COM_TIPOS: Array<{ slug: string; nome: string; checkout: string }> = [
+  { slug: 'dss-2026', nome: labelProduto('dss-2026'), checkout: CHECKOUT_URL['dss-2026'] },
+  { slug: 'gubigdata-2026-07', nome: labelProduto('gubigdata-2026-07'), checkout: CHECKOUT_URL['gubigdata-2026-07'] },
 ]
 
 export default async function IngressosPage() {
@@ -26,7 +27,8 @@ export default async function IngressosPage() {
         <p className="mt-1 text-sm text-[var(--text-muted)]">
           Cadastre as variantes de um produto (ex.: Estudante, Profissional, VIP, Gratuito). Os checkouts (DSSBR, GU BigData)
           mostram os tipos <strong>ativos</strong> e cobram o valor que você definir aqui. Preço R$ 0,00 = ingresso gratuito
-          (só cadastra, sem cobrança). Sem nenhum tipo, o checkout usa o preço único padrão.
+          (só cadastra, sem cobrança). Sem nenhum tipo, o checkout usa o preço único padrão. Tipo{' '}
+          <strong>oculto</strong> não aparece na lista: só compra quem recebe o link.
         </p>
       </div>
 
