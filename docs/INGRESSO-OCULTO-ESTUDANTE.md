@@ -64,6 +64,20 @@ distribuídos.
 | prazo | nenhum |
 | link | `https://azuris.com.br/dssbr-2026/inscricao?tipo=estudante` |
 
+## Vender na mão (cobrança avulsa)
+
+O seletor de `/admin/cobranca` lista **produtos + tipos de ingresso**: cada tipo ativo
+do catálogo aparece logo abaixo do produto dele (“Ingresso DSS — Estudante”), com o
+preço do catálogo já sugerido. Tipo novo em `/admin/ingressos` aparece lá **sem deploy**.
+
+- Ingresso **oculto entra na lista** — vender na mão é justamente o caso dele.
+- **Gratuito não entra**: cobrança de R$ 0 não existe.
+- A venda nasce com `tipo_ingresso` carimbado, então cai no breakdown “Por tipo” do
+  painel **e ocupa uma vaga** da lotação (as 50 do Estudante).
+- A API confere o tipo contra o banco (`getTipo`, tem que ser do mesmo produto), mas
+  **não checa prazo nem lotação**: venda manual é decisão sua, inclusive depois de
+  esgotado. O valor segue livre, como sempre.
+
 ## Armadilhas
 
 - **O link não é segredo.** Quem adivinhar `?tipo=estudante` compra pelo mesmo preço —

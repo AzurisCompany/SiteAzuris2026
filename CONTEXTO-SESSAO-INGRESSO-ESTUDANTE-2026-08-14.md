@@ -1,9 +1,9 @@
 # Sessão 2026-08-14 — ingresso de estudante do DSS (R$ 400), só por link
 
 **Tipo:** releitura do projeto + produto novo (variante de ingresso do DSS 2026).
-**Estado do repo ao fim:** `main` = `f6bdefe` + o commit deste doc. Working tree limpa.
-**Deploy:** 1, **verificado no ar**. Migração de prod rodada (43/43; era 42 antes da coluna nova).
-**Testes:** 191 passando (19 arquivos), eram 184. Build ok.
+**Estado do repo ao fim:** `main` = `1ca4a58` (ingresso oculto `f6bdefe` + cobrança avulsa) + o commit deste doc. Working tree limpa.
+**Deploys:** **2**, ambos verificados no ar. Migração de prod rodada (43/43; era 42 antes da coluna nova).
+**Testes:** 197 passando (19 arquivos), eram 184. Build ok.
 
 Doc de referência: [`docs/INGRESSO-OCULTO-ESTUDANTE.md`](./docs/INGRESSO-OCULTO-ESTUDANTE.md).
 
@@ -48,7 +48,24 @@ Verificado no ar: vitrine mostra só Lote 1 (570/820, **nenhum 400 na página**)
 link aparecem os dois cards e o botão já nasce **"Gerar PIX de R$ 400,00"** · `?tipo=estudantee`
 cai na tarja "não existe mais" · landing `/dssbr-2026` não vazou o preço de estudante.
 
-## 5. Armadilhas
+## 5. Onda 2 — o seletor da cobrança avulsa (`?` → deploy 2)
+
+Binhara foi vender na mão e **o ingresso não estava lá**: `/admin/cobranca` listava só
+*produtos*, e tipo de ingresso é outra coisa. Escolher "Ingresso DSS" e digitar R$400
+funcionaria, mas a venda nasceria **sem `tipo_ingresso`** — fora da lotação das 50
+vagas e fora do breakdown "Por tipo".
+
+Agora cada tipo ATIVO do catálogo vira opção logo abaixo do produto dele, com preço
+sugerido do catálogo. Tipo novo em `/admin/ingressos` aparece lá **sem deploy**.
+Oculto entra (vender na mão é o caso dele); gratuito não (cobrança de R$ 0 não existe).
+A opção passou a ser identificada por `slug:tipo`. A API confere o tipo contra o banco
+e carimba na venda — mas **não** checa prazo nem lotação: venda manual é decisão do admin.
+
+Verificado no ar: seletor traz "Ingresso DSS — Lote 1", "Ingresso DSS — Estudante" e
+"Ingresso GU — Geral"; o Associado (grátis) ficou de fora. Tipo inexistente e tipo de
+outro produto → **400 antes de qualquer cobrança nascer**.
+
+## 6. Armadilhas
 
 - **O link não é segredo.** Quem adivinhar `?tipo=estudante` compra a R$ 400 — não há
   assinatura HMAC como nos cupons. A barreira real é o comprovante na entrada. Se doer,
