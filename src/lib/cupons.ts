@@ -16,6 +16,18 @@ import { lerCupom, aplicarDesconto, normalizarCodigo, codigoValido, CUPOM_PCT_MA
 
 export type TipoCupom = 'vendedora' | 'parceiro'
 
+/**
+ * O tipo do cupom é gravado em `inscricoes.utm_source` na hora da venda
+ * ([[checkout-produto]]) — é por isso que ele também é a origem das abas de
+ * `/admin/vendas`. Uma lista só: se um tipo novo surgir, a aba nasce junto.
+ */
+export const TIPOS_CUPOM: TipoCupom[] = ['vendedora', 'parceiro']
+
+export const LABEL_TIPO_CUPOM: Record<TipoCupom, string> = {
+  vendedora: 'Link de vendedora',
+  parceiro: 'Parceiro',
+}
+
 export interface Cupom {
   id: number
   codigo: string

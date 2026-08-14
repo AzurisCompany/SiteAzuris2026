@@ -503,6 +503,25 @@ export async function totaisVendas(f: FiltrosVendas): Promise<TotaisVendas> {
   }
 }
 
+/**
+ * Vendas por origem (`utm_source`) com os MESMOS filtros da tela — mas **ignorando
+ * o filtro de origem**: senão, com a aba "Parceiro" aberta, as outras abas
+ * mostrariam zero e pareceriam vazias.
+ *
+ * `utm_source` do cupom = o TIPO do cupom (`vendedora` | `parceiro`), carimbado no
+ * checkout; `admin` = cobrança manual. Ver [[cupons]].
+ */
+export async function contarPorOrigem(f: FiltrosVendas): Promise<Record<string, number>> {
+  const { where, params } = construirWhere({ ...f, origem: undefined })
+  const rows = (await sql.query(
+    `SELECT utm_source, COUNT(*)::int AS qtd FROM inscricoes ${where} GROUP BY utm_source`,
+    params
+  )) as Array<{ utm_source: string | null; qtd: number }>
+  const m: Record<string, number> = {}
+  for (const r of rows) if (r.utm_source) m[r.utm_source] = Number(r.qtd)
+  return m
+}
+
 export async function emailsPorProduto(
   f: FiltrosVendas
 ): Promise<{ todos: string[]; porCurso: Record<string, string[]> }> {

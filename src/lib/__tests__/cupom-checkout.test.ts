@@ -43,6 +43,7 @@ vi.mock('@/lib/db', () => ({
 
 const { processarCheckout } = await import('@/lib/checkout-produto')
 const { criarCupom, assinarCupom } = await import('@/lib/cupom')
+const { TIPOS_CUPOM, LABEL_TIPO_CUPOM } = await import('@/lib/cupons')
 
 /** Reescreve a linha do cupom que o banco falso devolve. */
 function cupomEh(patch: Record<string, unknown> | null) {
@@ -62,6 +63,7 @@ const LOTE_1: TipoIngresso = {
   cartao_acrescimo_pct: 0,
   max_parcelas: 3,
   ativo: true,
+  oculto: false,
   ordem: 0,
   vendas_ate: null,
   limite_qtd: null,
@@ -253,5 +255,26 @@ describe('cupom desligado, esgotado e link fixo de parceiro', () => {
     await processarCheckout('dss-2026', { ...body, cupom_codigo: 'ana-paula' })
 
     expect(valorPedido()).toBe(570)
+  })
+
+  // As abas "Link de vendedora" e "Parceiro" de /admin/vendas filtram por
+  // utm_source. Se o checkout carimbar outra coisa, a aba fica muda — e ninguém
+  // descobre olhando a tela, porque "0 vendas" é um resultado plausível.
+  it('o utm_source carimbado é exatamente o valor que as abas de origem filtram', async () => {
+    for (const tipo of TIPOS_CUPOM) {
+      vi.clearAllMocks()
+      criarCobranca.mockResolvedValue({ tipo: 'criada', payment: { id: 'pay_1', invoiceUrl: 'https://asaas/x' } })
+      const codigo = `cod-${tipo}`
+      cupomEh({ codigo, tipo, validade_horas: tipo === 'parceiro' ? null : 48 })
+      const comLink =
+        tipo === 'parceiro'
+          ? { ...body, cupom_codigo: codigo.toUpperCase() }
+          : { ...body, cupom: criarCupom({ codigo, produto: 'dss-2026' }).token }
+
+      await processarCheckout('dss-2026', comLink)
+
+      expect(inscricaoGravada().utm_source, `aba "${LABEL_TIPO_CUPOM[tipo]}"`).toBe(tipo)
+      expect(inscricaoGravada().utm_content).toBe(codigo)
+    }
   })
 })

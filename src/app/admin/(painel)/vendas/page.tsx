@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {
   listarVendas,
   emailsPorProduto,
+  contarPorOrigem,
   resumoFinanceiro,
   contarTestes,
   opcoesFiltro,
@@ -17,6 +18,7 @@ import {
   type TotaisVendas,
 } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
+import { TIPOS_CUPOM, LABEL_TIPO_CUPOM } from '@/lib/cupons'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
@@ -77,9 +79,10 @@ export default async function VendasPage({
   let emailsTodos: string[] = []
   let emailsPorCurso: Record<string, string[]> = {}
   let totais: TotaisVendas | null = null
+  let porOrigem: Record<string, number> = {}
   const filtros = { curso, status, billing, tipo, pessoa, origem, de, ate, busca, mostrarTeste }
   try {
-    const [res, r, qt, op, em, tot] = await Promise.all([
+    const [res, r, qt, op, em, tot, orig] = await Promise.all([
       listarVendas({
         ...filtros,
         limit: PAGE_SIZE,
@@ -90,6 +93,7 @@ export default async function VendasPage({
       opcoesFiltro(),
       emailsPorProduto(filtros),
       totaisVendas(filtros),
+      contarPorOrigem(filtros),
     ])
     rows = res.rows
     total = res.total
@@ -99,6 +103,7 @@ export default async function VendasPage({
     emailsTodos = em.todos
     emailsPorCurso = em.porCurso
     totais = tot
+    porOrigem = orig
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -111,13 +116,14 @@ export default async function VendasPage({
     countTodos += r.criadas
   }
   // Base com todos os filtros ativos (sem curso/teste/page — esses variam por link).
-  const baseParams = () => {
+  // `semOrigem` serve às abas de origem, que são justamente quem troca esse filtro.
+  const baseParams = (opts?: { semOrigem?: boolean }) => {
     const u = new URLSearchParams()
     if (status) u.set('status', status)
     if (billing) u.set('billing', billing)
     if (tipo) u.set('tipo', tipo)
     if (pessoa) u.set('pessoa', pessoa)
-    if (origem) u.set('origem', origem)
+    if (origem && !opts?.semOrigem) u.set('origem', origem)
     if (de) u.set('de', de)
     if (ate) u.set('ate', ate)
     if (busca) u.set('busca', busca)
@@ -152,6 +158,23 @@ export default async function VendasPage({
   ]
   // Emails da aba ativa, pro botão do cabeçalho.
   const emailsAtivos = curso ? emailsPorCurso[curso] ?? [] : emailsTodos
+
+  // Abas de origem: quem vendeu pelo link com desconto (`/vendas`) e pelos cupons
+  // de parceiro. O `utm_source` da venda é o TIPO do cupom — ver [[cupons]].
+  const abasOrigem = [
+    { valor: '', label: 'Todas as origens', count: null as number | null },
+    ...TIPOS_CUPOM.map((t) => ({ valor: t as string, label: LABEL_TIPO_CUPOM[t], count: porOrigem[t] ?? 0 })),
+  ]
+  const origemHref = (valor: string) => {
+    const u = baseParams({ semOrigem: true })
+    if (curso) u.set('curso', curso)
+    if (valor) u.set('origem', valor)
+    if (mostrarTeste) u.set('teste', '1')
+    const s = u.toString()
+    return s ? `?${s}` : '/admin/vendas'
+  }
+  /** Nas abas de cupom, o código é a informação que falta na tabela: quem vendeu. */
+  const mostrarCupom = TIPOS_CUPOM.includes(origem as (typeof TIPOS_CUPOM)[number])
 
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
   const qs = (p: number) => {
@@ -244,6 +267,38 @@ export default async function VendasPage({
         })}
       </div>
 
+      {/* Abas de origem — cruzam com a aba de produto acima (as duas valem juntas) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Origem</span>
+        {abasOrigem.map((o) => {
+          const ativa = origem === o.valor
+          return (
+            <Link
+              key={o.valor || 'todas'}
+              href={origemHref(o.valor)}
+              className={`rounded-full border px-3 py-1 text-sm font-semibold transition-colors ${
+                ativa
+                  ? 'border-[var(--accent-emerald)]/50 bg-[var(--accent-emerald)]/10 text-[var(--accent-emerald)]'
+                  : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {o.label}
+              {o.count != null && (
+                <span className="ml-2 rounded-full bg-[var(--azuris-surface)]/60 px-1.5 py-0.5 text-xs">{o.count}</span>
+              )}
+            </Link>
+          )
+        })}
+        {mostrarCupom && (
+          <span className="text-xs text-[var(--text-muted)]">
+            · o código do cupom diz quem vendeu — a régua de cada um está em{' '}
+            <Link href="/admin/cupons" className="text-[var(--azuris-cyan)] hover:underline">
+              Cupons
+            </Link>
+          </span>
+        )}
+      </div>
+
       {/* Filtros — aplicam sozinhos (selects na hora, busca com debounce) */}
       <Filtros
         curso={curso}
@@ -270,6 +325,7 @@ export default async function VendasPage({
             <tr>
               <th className="px-4 py-3 align-top">Cliente</th>
               <th className="px-4 py-3 align-top">Produto</th>
+              {mostrarCupom && <th className="px-4 py-3 align-top">Cupom</th>}
               <th className="px-4 py-3 align-top">
                 Valor
                 <SomaColuna centavos={totais?.valor_centavos} />
@@ -319,6 +375,17 @@ export default async function VendasPage({
                   {labelProduto(r.curso_slug)}
                   {r.tipo_ingresso && <div className="text-xs text-[var(--text-muted)]">{r.tipo_ingresso}</div>}
                 </td>
+                {mostrarCupom && (
+                  <td className="px-4 py-3">
+                    {r.utm_content ? (
+                      <code className="text-xs font-semibold uppercase text-[var(--accent-emerald)]">
+                        {r.utm_content}
+                      </code>
+                    ) : (
+                      <span className="text-[var(--text-muted)]">—</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-4 py-3">
                   {brl(r.valor_centavos)}
                   {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}
@@ -366,8 +433,10 @@ export default async function VendasPage({
             ))}
             {rows.length === 0 && !erro && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-[var(--text-muted)]">
-                  Nenhuma venda encontrada com esses filtros.
+                <td colSpan={mostrarCupom ? 10 : 9} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                  {mostrarCupom
+                    ? `Nenhuma venda ${origem === 'parceiro' ? 'por cupom de parceiro' : 'por link de vendedora'} ainda — a aba acende sozinha na primeira.`
+                    : 'Nenhuma venda encontrada com esses filtros.'}
                 </td>
               </tr>
             )}
