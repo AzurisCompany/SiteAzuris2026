@@ -27,6 +27,12 @@ export function descricaoManual(comoConheceu: string | null): string | null {
 export interface OpcaoCobranca {
   /** curso_slug gravado na venda — é o que joga a linha na aba certa do painel */
   slug: string
+  /**
+   * Variante do produto (`tipos_ingresso.tipo_id`), quando a opção é um ingresso
+   * específico — ex.: `estudante` do DSS. Gravada em `inscricoes.tipo_ingresso`,
+   * que é o que acende o breakdown "Por tipo" do painel.
+   */
+  tipo_ingresso?: string | null
   /** rótulo do botão no seletor */
   label: string
   /** descrição sugerida (vai pra fatura do cliente); vazia = admin escreve */
@@ -86,8 +92,60 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
   },
 ]
 
-export function getOpcaoCobranca(slug: string): OpcaoCobranca | null {
-  return OPCOES_COBRANCA.find((o) => o.slug === slug) ?? null
+/** Chave da opção no seletor: slug sozinho deixou de bastar quando os tipos entraram. */
+export function opcaoId(o: Pick<OpcaoCobranca, 'slug' | 'tipo_ingresso'>): string {
+  return o.tipo_ingresso ? `${o.slug}:${o.tipo_ingresso}` : o.slug
+}
+
+export function getOpcaoCobranca(id: string, opcoes: OpcaoCobranca[] = OPCOES_COBRANCA): OpcaoCobranca | null {
+  return opcoes.find((o) => opcaoId(o) === id) ?? null
+}
+
+/** O que a cobrança manual precisa saber de um tipo de ingresso cadastrado. */
+export interface TipoParaCobranca {
+  produto_slug: string
+  tipo_id: string
+  nome: string
+  preco_centavos: number
+  oculto: boolean
+}
+
+/**
+ * Enfia cada tipo de ingresso cadastrado logo abaixo do produto dele (regra PURA).
+ *
+ * Sem isso, vender na mão um ingresso que só existe no catálogo do banco — o
+ * Estudante do DSS, por exemplo — obrigaria a escolher "Ingresso DSS" e digitar
+ * o valor de cabeça, e a venda nasceria **sem `tipo_ingresso`**: fora da lotação
+ * do lote e fora do breakdown por tipo. Gratuitos ficam de fora: cobrança de R$ 0
+ * não existe.
+ */
+export function opcoesComTipos(base: OpcaoCobranca[], tipos: TipoParaCobranca[]): OpcaoCobranca[] {
+  return base.flatMap((o) => {
+    const doProduto = tipos.filter((t) => t.produto_slug === o.slug && t.preco_centavos > 0)
+    return [
+      o,
+      ...doProduto.map((t) => ({
+        slug: o.slug,
+        tipo_ingresso: t.tipo_id,
+        label: `${o.label} — ${t.nome}`,
+        descricaoPadrao: `${o.descricaoPadrao} — ${t.nome}`,
+        enderecoObrigatorioPJ: o.enderecoObrigatorioPJ,
+      })),
+    ]
+  })
+}
+
+/** Preço sugerido de cada tipo — o do catálogo. O admin edita como sempre. */
+export function precosDosTipos(tipos: TipoParaCobranca[]): PrecosSugeridos {
+  const m: PrecosSugeridos = {}
+  for (const t of tipos) {
+    if (t.preco_centavos <= 0) continue
+    m[`${t.produto_slug}:${t.tipo_id}`] = {
+      centavos: t.preco_centavos,
+      dica: t.oculto ? 'tipo oculto (só por link) · /admin/ingressos' : 'tipo cadastrado em /admin/ingressos',
+    }
+  }
+  return m
 }
 
 /** Preço de tabela sugerido no form. Sugestão — o admin edita (lote corporativo, desconto). */

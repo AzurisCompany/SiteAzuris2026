@@ -8,6 +8,7 @@ import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/compo
 import {
   OPCOES_COBRANCA,
   getOpcaoCobranca,
+  opcaoId,
   PROPOSTA_SLUG,
   type OpcaoCobranca,
   type PrecosSugeridos,
@@ -45,9 +46,10 @@ interface Resultado {
   billing_type: 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'
 }
 
-/** Preço de tabela → texto do campo de valor ("47000" → "470,00"). Vazio = sem sugestão. */
-function prefillValor(precos: PrecosSugeridos, slug: string): string {
-  const p = precos[slug]
+/** Preço de tabela → texto do campo de valor ("47000" → "470,00"). Vazio = sem sugestão.
+ *  A chave é o id da OPÇÃO (`dss-2026:estudante`), não só o produto. */
+function prefillValor(precos: PrecosSugeridos, id: string): string {
+  const p = precos[id]
   return p ? (p.centavos / 100).toFixed(2).replace('.', ',') : ''
 }
 
@@ -65,9 +67,19 @@ export interface Prefill {
   nota: NotaValue
 }
 
-export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeridos; prefill?: Prefill }) {
+export default function CobrancaForm({
+  precos,
+  prefill,
+  opcoes = OPCOES_COBRANCA,
+}: {
+  precos: PrecosSugeridos
+  prefill?: Prefill
+  /** produtos + tipos de ingresso cadastrados (montado no server) */
+  opcoes?: OpcaoCobranca[]
+}) {
   const router = useRouter()
-  const [slug, setSlug] = useState<string>(PROPOSTA_SLUG)
+  /** id da opção escolhida: `slug` ou `slug:tipo_ingresso` */
+  const [opId, setOpId] = useState<string>(PROPOSTA_SLUG)
   const [nome, setNome] = useState(prefill?.nome ?? '')
   const [email, setEmail] = useState(prefill?.email ?? '')
   const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>(prefill?.pessoaTipo ?? 'PF')
@@ -88,8 +100,8 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const [copiado, setCopiado] = useState<'link' | 'msg' | null>(null)
 
-  const opcao = getOpcaoCobranca(slug) ?? OPCOES_COBRANCA[OPCOES_COBRANCA.length - 1]
-  const precoSugerido = precos[slug] ?? null
+  const opcao = getOpcaoCobranca(opId, opcoes) ?? opcoes[opcoes.length - 1]
+  const precoSugerido = precos[opId] ?? null
 
   const valorReais = useMemo(() => parseValor(valorRaw), [valorRaw])
 
@@ -99,9 +111,9 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
     const anterior = opcao
     setDescricao((d) => (d === '' || d === anterior.descricaoPadrao ? nova.descricaoPadrao : d))
     setValorRaw((v) =>
-      v === '' || v === prefillValor(precos, anterior.slug) ? prefillValor(precos, nova.slug) : v,
+      v === '' || v === prefillValor(precos, opcaoId(anterior)) ? prefillValor(precos, opcaoId(nova)) : v,
     )
-    setSlug(nova.slug)
+    setOpId(opcaoId(nova))
   }
 
   // 1 meio marcado = método fixo; 2+ = UNDEFINED (cliente escolhe na fatura Asaas).
@@ -143,7 +155,8 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
           email,
           cpf_cnpj: cpf,
           telefone,
-          curso_slug: slug,
+          curso_slug: opcao.slug,
+          tipo_ingresso: opcao.tipo_ingresso ?? null,
           descricao,
           valor_reais: valorReais,
           billing_type: billingType,
@@ -211,7 +224,7 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
     setResultado(null)
     setErro(null)
     // Volta pro produto atual em branco — mantém o balde, limpa os dados do cliente.
-    setValorRaw(prefillValor(precos, slug))
+    setValorRaw(prefillValor(precos, opId))
     setDescricao(opcao.descricaoPadrao)
     setNome('')
     setEmail('')
@@ -312,15 +325,15 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
         </label>
         <select
           id="produto-cobranca"
-          value={slug}
+          value={opId}
           onChange={(e) => {
-            const o = getOpcaoCobranca(e.target.value)
+            const o = getOpcaoCobranca(e.target.value, opcoes)
             if (o) trocarProduto(o)
           }}
           className={campo}
         >
-          {OPCOES_COBRANCA.map((o) => (
-            <option key={o.slug} value={o.slug}>
+          {opcoes.map((o) => (
+            <option key={opcaoId(o)} value={opcaoId(o)}>
               {o.label}
             </option>
           ))}
@@ -328,6 +341,13 @@ export default function CobrancaForm({ precos, prefill }: { precos: PrecosSugeri
         <p className="mt-1 text-xs text-[var(--text-muted)]">
           Define em qual aba do painel a venda entra (é o mesmo <code>?curso=</code> dos filtros de vendas). O valor é
           sempre o que você digitar.
+          {opcao.tipo_ingresso && (
+            <>
+              {' '}
+              Esta venda entra como <strong>{opcao.label}</strong> e <strong>ocupa uma vaga</strong> da lotação desse
+              ingresso.
+            </>
+          )}
         </p>
       </div>
 

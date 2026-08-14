@@ -13,6 +13,7 @@ import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, VALOR_MINIMO_REAIS } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
+import { getTipo } from '@/lib/tipos-ingresso'
 import {
   getOpcaoCobranca,
   ORIGEM_ADMIN,
@@ -30,6 +31,8 @@ interface RequestBody extends ExtrasInput {
   cpf_cnpj?: string
   telefone?: string
   curso_slug?: string
+  /** variante do produto (tipos_ingresso.tipo_id); opcional */
+  tipo_ingresso?: string | null
   descricao?: string
   valor_reais?: number
   billing_type?: BillingType
@@ -93,6 +96,16 @@ export async function POST(request: Request) {
   const error = validate(body, opcao)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
+  // Tipo de ingresso: confere contra o catálogo do banco, que é a fonte da verdade.
+  // Diferente do checkout público, aqui NÃO se checa prazo nem lotação — venda na
+  // mão é decisão sua; ela só passa a ocupar vaga depois de gravada.
+  let tipoIngresso: string | null = null
+  if (body.tipo_ingresso) {
+    const tipo = await getTipo(opcao.slug, body.tipo_ingresso)
+    if (!tipo) return NextResponse.json({ error: 'Tipo de ingresso inválido pra esse produto' }, { status: 400 })
+    tipoIngresso = tipo.tipo_id
+  }
+
   const billing_type = body.billing_type as AsaasBillingType
   const valorBaseReais = Number(body.valor_reais!.toFixed(2))
   const installments =
@@ -119,9 +132,10 @@ export async function POST(request: Request) {
   const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
-    dedupe: { curso_slug: opcao.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos },
+    dedupe: { curso_slug: opcao.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos, tipo_ingresso: tipoIngresso },
     inscricao: {
       curso_slug: opcao.slug,
+      tipo_ingresso: tipoIngresso,
       // Cobrança manual não é venda de lote: fica fora da contagem de vagas do
       // Lakehouse (v_vagas_por_lote conta lote1/lote2).
       lote: 'unico',
@@ -158,7 +172,7 @@ export async function POST(request: Request) {
       billingType: billing_type,
       valueReais: valorCobradoReais,
       description: descricao,
-      externalReference: (id) => `${opcao.slug}:${id}`,
+      externalReference: (id) => `${opcao.slug}${tipoIngresso ? `:${tipoIngresso}` : ''}:${id}`,
       dueDate: todayPlusDays(dueDays),
       installmentCount: parcelado ? installments : undefined,
       // Com juros: parcela pré-fixada (Price). Sem juros: manda o total, Asaas divide.

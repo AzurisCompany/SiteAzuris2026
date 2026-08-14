@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { getInscricao, listarVendas, precosSugeridosCobranca } from '@/lib/admin-queries'
+import { listarTipos } from '@/lib/tipos-ingresso'
+import { OPCOES_COBRANCA, opcoesComTipos, precosDosTipos, type OpcaoCobranca } from '@/lib/cobranca-manual'
 import { notaInicial } from '@/components/checkout/DadosNota'
 import type { InscricaoRow } from '@/lib/db'
 import CobrancaForm, { type Prefill } from './CobrancaForm'
@@ -52,6 +54,19 @@ export default async function CobrancaPage({
   let rows: InscricaoRow[] = []
   let total = 0
   let erro: string | null = null
+
+  // Tipos de ingresso ATIVOS viram opções do seletor (inclusive os ocultos — vender
+  // na mão é justamente o caso deles). Banco fora do ar → só a lista fixa de produtos.
+  let opcoes: OpcaoCobranca[] = OPCOES_COBRANCA
+  let precos = precosSugeridosCobranca()
+  try {
+    const tipos = (await listarTipos()).filter((t) => t.ativo)
+    opcoes = opcoesComTipos(OPCOES_COBRANCA, tipos)
+    precos = { ...precos, ...precosDosTipos(tipos) }
+  } catch {
+    /* sem catálogo: segue com os produtos do registry */
+  }
+
   try {
     // manual: cobrança gerada aqui, em qualquer produto (não só as 'proposta' antigas).
     const res = await listarVendas({ manual: true, limit: 30 })
@@ -82,7 +97,7 @@ export default async function CobrancaPage({
         </div>
       )}
 
-      <CobrancaForm key={copiado?.id ?? 'novo'} precos={precosSugeridosCobranca()} prefill={copiado?.prefill} />
+      <CobrancaForm key={copiado?.id ?? 'novo'} opcoes={opcoes} precos={precos} prefill={copiado?.prefill} />
 
       {erro ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>

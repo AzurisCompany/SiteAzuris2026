@@ -2,9 +2,13 @@ import { describe, it, expect } from 'vitest'
 import {
   OPCOES_COBRANCA,
   getOpcaoCobranca,
+  opcaoId,
+  opcoesComTipos,
+  precosDosTipos,
   descricaoManual,
   PREFIXO_MANUAL,
   PROPOSTA_SLUG,
+  type TipoParaCobranca,
 } from '@/lib/cobranca-manual'
 import { precosSugeridosCobranca, PRODUTO_TAB } from '@/lib/admin-queries'
 import { PRODUTOS } from '@/lib/produtos'
@@ -70,6 +74,51 @@ describe('descricaoManual', () => {
     expect(descricaoManual('Indicação de um amigo')).toBeNull()
     expect(descricaoManual(null)).toBeNull()
     expect(descricaoManual('')).toBeNull()
+  })
+})
+
+// Sem isto, vender o Estudante na mão obrigava a escolher "Ingresso DSS", digitar
+// R$400 de cabeça, e a venda nascia sem tipo — fora da lotação e do breakdown.
+describe('opcoesComTipos (tipos de ingresso no seletor da cobrança avulsa)', () => {
+  const tipos: TipoParaCobranca[] = [
+    { produto_slug: 'dss-2026', tipo_id: 'lote-1', nome: 'Lote 1', preco_centavos: 57000, oculto: false },
+    { produto_slug: 'dss-2026', tipo_id: 'estudante', nome: 'Estudante', preco_centavos: 40000, oculto: true },
+    { produto_slug: 'gubigdata-2026-07', tipo_id: 'associado', nome: 'Associado', preco_centavos: 0, oculto: false },
+  ]
+  const opcoes = opcoesComTipos(OPCOES_COBRANCA, tipos)
+
+  it('cada tipo entra logo abaixo do produto dele, sem tirar ninguém da lista', () => {
+    const ids = opcoes.map(opcaoId)
+    expect(ids).toContain('dss-2026')
+    expect(ids.indexOf('dss-2026:estudante')).toBe(ids.indexOf('dss-2026') + 2) // depois do lote-1
+    expect(opcoes.length).toBe(OPCOES_COBRANCA.length + 2) // o gratuito do GU não entra
+  })
+
+  it('ingresso oculto aparece aqui — vender na mão é justamente o caso dele', () => {
+    expect(getOpcaoCobranca('dss-2026:estudante', opcoes)?.label).toBe('Ingresso DSS — Estudante')
+  })
+
+  it('gratuito fica de fora: cobrança de R$ 0 não existe', () => {
+    expect(getOpcaoCobranca('gubigdata-2026-07:associado', opcoes)).toBeNull()
+  })
+
+  it('o tipo herda produto e regra de endereço de PJ — a venda cai na mesma aba', () => {
+    const est = getOpcaoCobranca('dss-2026:estudante', opcoes)!
+    expect(est.slug).toBe('dss-2026')
+    expect(est.tipo_ingresso).toBe('estudante')
+    expect(est.enderecoObrigatorioPJ).toBe(getOpcaoCobranca('dss-2026')!.enderecoObrigatorioPJ)
+    expect(est.descricaoPadrao).toContain('Estudante')
+  })
+
+  it('preço sugerido vem do catálogo, e a dica avisa quando é ingresso oculto', () => {
+    const precos = precosDosTipos(tipos)
+    expect(precos['dss-2026:estudante'].centavos).toBe(40000)
+    expect(precos['dss-2026:estudante'].dica).toContain('oculto')
+    expect(precos['gubigdata-2026-07:associado']).toBeUndefined()
+  })
+
+  it('produto sem tipo cadastrado continua com id simples (nada quebra)', () => {
+    expect(opcaoId(getOpcaoCobranca(PROPOSTA_SLUG, opcoes)!)).toBe(PROPOSTA_SLUG)
   })
 })
 
