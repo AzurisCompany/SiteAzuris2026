@@ -100,10 +100,17 @@ Regra prática: **desconto grande e público definido** (estudante, R$ 570 → R
 oculto. **Comissão e campanha** (vendedora, parceiro) → cupom. Ver
 [INGRESSO-OCULTO-ESTUDANTE.md](./INGRESSO-OCULTO-ESTUDANTE.md).
 
-## 6. O que está à venda — snapshot de 2026-08-14
+## 6. O que está à venda — snapshot de 2026-08-20
 
 ⚠️ **Isto é uma foto, não a verdade.** A verdade vive em `/admin/ingressos`, `/admin/cupons` e
 no registry. Se esta seção divergir do painel, o painel está certo.
+
+**Encontro GU BigData 26/08** (tipos, `/admin/ingressos`)
+
+| tipo | preço | parcelas | vagas | prazo |
+|---|---|---|---|---|
+| Geral | R$ 30 | 3x | sem limite | sem prazo |
+| Associado IEP / GU / DSSBR | grátis | — | sem limite | sem prazo |
 
 **DSS 2026** (tipos, `/admin/ingressos`)
 
@@ -119,7 +126,7 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | One Day | R$ 247 | escada 247 → 297 → 357 **duplicada** em `one-day/page.tsx:13`, sem teste |
 | One Day + portal do curso | R$ 360 | sem âncora; **fulfillment do portal é manual** |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
-| GU BigData | R$ 30 / grátis | evento **já aconteceu** (30/07); tipos seguem ativos com prazo vencido |
+| GU BigData | R$ 30 / grátis | encontro em cartaz é **26/08** (`gubigdata-2026-08`); os tipos vivem no catálogo, o registry é só fallback. O de 30/07 é evento passado — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |
 | Lakehouse | R$ 550 membro · R$ 750 não-membro | lote próprio em `db.ts` |
 
@@ -172,4 +179,4 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-08-14**.
+Última revisão: **2026-08-20**.
