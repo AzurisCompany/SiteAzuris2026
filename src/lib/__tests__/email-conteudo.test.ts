@@ -33,6 +33,7 @@ describe('conteudoCompraConfirmada', () => {
       'dss-2026',
       'dss-one-day-2026',
       'dss-one-day-curso-2026',
+      'gubigdata-2026-08',
       'gubigdata-2026-07',
       'lakehouse-comunidade',
     ]

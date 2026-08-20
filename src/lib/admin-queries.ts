@@ -2,6 +2,7 @@
 import { sql, PRECO_POR_PERFIL, type InscricaoRow } from '@/lib/db'
 import { PRODUTOS } from '@/lib/produtos'
 import { ORIGEM_ADMIN, PROPOSTA_SLUG, type PrecosSugeridos } from '@/lib/cobranca-manual'
+import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 import { toISODate } from '@/lib/format'
 
 export const PRODUTO_LABEL: Record<string, string> = {
@@ -9,6 +10,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-one-day-2026': 'DSS 2026 — Passe One Day',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
+  'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
   'ett-adesao': 'English Talk Time — Adesão',
   'ett-assinatura': 'ETT — Trilha de Dedicação',
@@ -27,7 +29,8 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-one-day-2026': 'One Day DSS',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
-  'gubigdata-2026-07': 'GU BigData',
+  'gubigdata-2026-08': 'GU BigData 26/08',
+  'gubigdata-2026-07': 'GU BigData 30/07',
   'ett-adesao': 'ETT Adesão',
   'ett-assinatura': 'ETT Assinatura', // ciclos da Trilha de Dedicação ([[ett]])
   'preparatorio-dados': 'Preparatório',
@@ -52,11 +55,19 @@ export const CHECKOUT_URL: Record<string, string> = {
   'dss-2026': '/dssbr-2026/inscricao',
   'dss-one-day-2026': '/dssbr-2026/one-day',
   'dss-one-day-curso-2026': '/dssbr-2026/one-day-curso',
-  'gubigdata-2026-07': '/gubigdata/inscricao',
+  'gubigdata-2026-08': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'ett-adesao': '/ett/adesao',
   'ett-assinatura': '/ett/assinatura',
   'preparatorio-dados': '/preparatorio-dados/reserva',
 }
+
+/**
+ * Produtos que não têm mais onde comprar — encontro do GU que já aconteceu, e o que
+ * mais vier. Continuam no registry e nos mapas de rótulo (o histórico de vendas
+ * precisa saber o nome do que foi vendido), mas ficam FORA do CHECKOUT_URL: apontar
+ * /gubigdata pro encontro de julho mandaria o admin pra página de outro evento.
+ */
+export const PRODUTOS_ENCERRADOS = new Set<string>(['gubigdata-2026-07'])
 
 /** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).
  *  Prefixa 55 (Brasil) se vier com 10/11 dígitos. Null se não der pra montar. */
@@ -98,7 +109,7 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
   const dss = PRODUTOS['dss-2026']
   const oneDay = PRODUTOS['dss-one-day-2026']
   const oneDayCurso = PRODUTOS['dss-one-day-curso-2026']
-  const gu = PRODUTOS['gubigdata-2026-07']
+  const gu = PRODUTOS[EVENTO_GU_SLUG]
   return {
     'lakehouse-comunidade': {
       centavos: PRECO_POR_PERFIL['nao-membro'].preco_centavos,
@@ -116,7 +127,7 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
       centavos: oneDayCurso.precoCentavos,
       dica: 'combo: One Day + portal do curso Pipeline',
     },
-    'gubigdata-2026-07': {
+    [EVENTO_GU_SLUG]: {
       centavos: gu.precoCentavos,
       dica: 'ingresso Geral (associado é gratuito)',
     },

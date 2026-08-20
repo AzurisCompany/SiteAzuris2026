@@ -3,6 +3,7 @@
 // valor é SEMPRE digitado pelo admin — o produto escolhido só decide o balde
 // (curso_slug), a descrição sugerida e se PJ precisa de endereço pra nota.
 import { PRODUTOS } from '@/lib/produtos'
+import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 
 /** Slug das cobranças sem produto — aparece como "Proposta customizada" no admin. */
 export const PROPOSTA_SLUG = 'proposta'
@@ -70,11 +71,13 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-one-day-curso-2026'].enderecoObrigatorioPJ,
   },
   {
-    slug: 'gubigdata-2026-07',
+    // Encontro CORRENTE do GU ([[gubigdata/evento]]): encontro passado sai do seletor
+    // junto com a página — cobrança manual de evento que já aconteceu não existe.
+    slug: EVENTO_GU_SLUG,
     label: 'Ingresso GU',
-    descricaoPadrao: PRODUTOS['gubigdata-2026-07'].asaasDescricao,
+    descricaoPadrao: PRODUTOS[EVENTO_GU_SLUG].asaasDescricao,
     // false, como no checkout do GU: evento de comunidade de R$30 não trava por endereço.
-    enderecoObrigatorioPJ: PRODUTOS['gubigdata-2026-07'].enderecoObrigatorioPJ,
+    enderecoObrigatorioPJ: PRODUTOS[EVENTO_GU_SLUG].enderecoObrigatorioPJ,
   },
   {
     slug: 'ett-adesao',

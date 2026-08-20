@@ -12,6 +12,7 @@ import {
 } from '@/lib/cobranca-manual'
 import { precosSugeridosCobranca, PRODUTO_TAB } from '@/lib/admin-queries'
 import { PRODUTOS } from '@/lib/produtos'
+import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 
 describe('OPCOES_COBRANCA', () => {
   it('cobre os baldes: curso, DSS (full + One Day), GU, ETT e customizado', () => {
@@ -20,7 +21,7 @@ describe('OPCOES_COBRANCA', () => {
       'dss-2026',
       'dss-one-day-2026',
       'dss-one-day-curso-2026',
-      'gubigdata-2026-07',
+      EVENTO_GU_SLUG,
       'ett-adesao',
       PROPOSTA_SLUG,
     ])
@@ -37,7 +38,7 @@ describe('OPCOES_COBRANCA', () => {
       PRODUTOS['dss-2026'].enderecoObrigatorioPJ,
     )
     // GU é a exceção documentada: evento de comunidade de R$30 não trava por endereço.
-    expect(getOpcaoCobranca('gubigdata-2026-07')?.enderecoObrigatorioPJ).toBe(false)
+    expect(getOpcaoCobranca(EVENTO_GU_SLUG)?.enderecoObrigatorioPJ).toBe(false)
     // Proposta corporativa é o caminho de PJ que mais vira nota.
     expect(getOpcaoCobranca(PROPOSTA_SLUG)?.enderecoObrigatorioPJ).toBe(true)
   })
@@ -127,7 +128,7 @@ describe('precosSugeridosCobranca', () => {
 
   it('sugere o preço de tabela de cada produto real', () => {
     expect(precos['dss-2026'].centavos).toBe(PRODUTOS['dss-2026'].precoCentavos)
-    expect(precos['gubigdata-2026-07'].centavos).toBe(PRODUTOS['gubigdata-2026-07'].precoCentavos)
+    expect(precos[EVENTO_GU_SLUG].centavos).toBe(PRODUTOS[EVENTO_GU_SLUG].precoCentavos)
     expect(precos['lakehouse-comunidade'].centavos).toBe(75000) // não-membro
   })
 

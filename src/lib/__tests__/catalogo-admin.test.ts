@@ -1,12 +1,23 @@
 import { describe, it, expect } from 'vitest'
-import { CHECKOUT_URL, PRODUTO_TAB, PRODUTO_LABEL, labelProduto } from '@/lib/admin-queries'
+import { CHECKOUT_URL, PRODUTO_TAB, PRODUTO_LABEL, PRODUTOS_ENCERRADOS, labelProduto } from '@/lib/admin-queries'
 import { PRODUTOS } from '@/lib/produtos'
 import { ETT_ASSINATURA_SLUG } from '@/lib/ett'
 
 describe('catálogo do painel', () => {
   it('todo produto do registry tem checkout mapeado — senão some da Visão geral até a 1ª venda', () => {
     for (const slug of Object.keys(PRODUTOS)) {
+      if (PRODUTOS_ENCERRADOS.has(slug)) continue
       expect(CHECKOUT_URL[slug], `${slug} sem CHECKOUT_URL`).toBeTruthy()
+    }
+  })
+
+  // Evento que já aconteceu sai do CHECKOUT_URL, mas as vendas dele continuam na
+  // lista: sem rótulo, a aba do encontro passado viraria slug cru na tela.
+  it('produto encerrado perde o link de compra, nunca o nome', () => {
+    for (const slug of PRODUTOS_ENCERRADOS) {
+      expect(CHECKOUT_URL[slug], `${slug} encerrado mas ainda oferece checkout`).toBeUndefined()
+      expect(PRODUTO_LABEL[slug], `${slug} sem PRODUTO_LABEL`).toBeTruthy()
+      expect(PRODUTO_TAB[slug], `${slug} sem PRODUTO_TAB`).toBeTruthy()
     }
   })
 

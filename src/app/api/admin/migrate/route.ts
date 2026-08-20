@@ -105,6 +105,14 @@ const STATEMENTS: string[] = [
      ('gubigdata-2026-07', 'geral', 'Geral', 'Aberto ao público', 3000, 3, 0, DATE '2026-07-29', NULL),
      ('gubigdata-2026-07', 'associado', 'Associado IEP, GU BigData e Participante DSS', 'Gratuito — confirmação na entrada', 0, 1, 1, DATE '2026-07-29', NULL)
    ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
+  // Seed do encontro GU BigData 26/08 (idempotente; NÃO sobrescreve edições do admin).
+  // vendas_ate NULL de propósito: desde 01/08 nada expira sozinho — foi uma data digitada
+  // aqui que fechou o checkout do GU na cara do público no dia do evento de 30/07.
+  `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+   VALUES
+     ('gubigdata-2026-08', 'geral', 'Geral', 'Aberto ao público', 3000, 3, 0, NULL, NULL),
+     ('gubigdata-2026-08', 'associado', 'Associado IEP, GU BigData e Participante DSSBR', 'Gratuito — confirmação na entrada', 0, 1, 1, NULL, NULL)
+   ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
   // Seed da reserva do curso preparatório (idempotente; NÃO sobrescreve edições do admin).
   `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
    VALUES

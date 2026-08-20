@@ -10,38 +10,29 @@ import {
   precosDoTipo,
   ehGratuito,
 } from '@/lib/tipos-ingresso'
+import { EVENTO_GU } from './evento'
 import TicketBox, { type TicketOption } from './TicketBox'
 
 // Página de evento no padrão de marketplace (banner → título/data/local →
 // descrição à esquerda + card de ingressos sticky à direita). Tema CLARO de
 // propósito — é a cara de página de venda de ingresso que o público já conhece.
-const PRODUTO = getProduto('gubigdata-2026-07')
-
-const TITULO = 'Encontro Presencial GU Big Data & IA – 30 de julho: conhecimento como ativo e IA como infraestrutura'
+// O conteúdo do encontro corrente mora em ./evento.ts.
+const PRODUTO = getProduto(EVENTO_GU.slug)
 
 export const metadata: Metadata = {
-  title: `${TITULO} | Eventos GU BigData & IA`,
+  title: `${EVENTO_GU.titulo} | Eventos GU BigData & IA`,
   description:
-    'Dia 30/07 às 18h30 no IEP, Curitiba: palestras de Tatiana Cruz e Maicon Wendhausem, networking e comunidade. Ingresso Geral R$ 30 · gratuito para associados IEP, GU BigData e participantes DSS.',
+    'Dia 26/08 às 18h30 no IEP, Curitiba: demonstração do sistema de transmissão do DSSBR com Alessandro Binhara e Process Mining na saúde com Marcelo Dallagassa. Ingresso Geral R$ 30 · gratuito para associados IEP, GU BigData e participantes DSSBR.',
   openGraph: {
-    title: TITULO,
-    description: 'Palestras, troca de experiências e networking — 30/07, 18h30, IEP Curitiba.',
+    title: EVENTO_GU.titulo,
+    description: 'DSSBR ao Vivo e Process Mining na Saúde — 26/08, 18h30, IEP Curitiba.',
     type: 'website',
-    images: [{ url: '/gubigdata/banner-julho.png', width: 1731, height: 909 }],
+    images: [{ url: EVENTO_GU.banner.src, width: EVENTO_GU.banner.largura, height: EVENTO_GU.banner.altura }],
   },
   alternates: { canonical: '/gubigdata' },
 }
 
 export const dynamic = 'force-dynamic'
-
-const AGENDA: Array<{ hora: string; item: string }> = [
-  { hora: '18h30', item: 'Credenciamento e networking' },
-  { hora: '19h00', item: 'Abertura — GU Big Data & IA' },
-  { hora: '19h15', item: 'Palestra: Como transformar conhecimento em ativos de alto valor na era da IA — Tatiana Cruz' },
-  { hora: '20h00', item: 'Palestra: O Servidor de IA Corporativo — IA como infraestrutura, não promessa — Maicon Wendhausem' },
-  { hora: '21h00', item: 'Encerramento, networking e fotos' },
-  { hora: '21h20', item: 'Jantar opcional' },
-]
 
 export default async function EventoGuPage() {
   let tickets: TicketOption[] = []
@@ -87,10 +78,10 @@ export default async function EventoGuPage() {
         {/* Banner */}
         <div className="overflow-hidden rounded-xl shadow-sm">
           <Image
-            src="/gubigdata/banner-julho.png"
-            alt="Encontro Presencial GU Big Data & IA — 30 de julho"
-            width={1731}
-            height={909}
+            src={EVENTO_GU.banner.src}
+            alt={EVENTO_GU.banner.alt}
+            width={EVENTO_GU.banner.largura}
+            height={EVENTO_GU.banner.altura}
             priority
             className="h-auto w-full"
           />
@@ -98,19 +89,25 @@ export default async function EventoGuPage() {
 
         {/* Título / data / local */}
         <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h1 className="text-xl font-bold leading-snug sm:text-2xl">{TITULO}</h1>
+          {EVENTO_GU.novaData && (
+            <span className="mb-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700">
+              Nova data
+            </span>
+          )}
+          <h1 className="text-xl font-bold leading-snug sm:text-2xl">{EVENTO_GU.titulo}</h1>
           <div className="mt-4 flex flex-col gap-2 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-4 shrink-0 text-emerald-600" />
               <span>
-                <strong className="font-semibold text-slate-800">30 de julho de 2026, quinta</strong> · 18h30 às 21h20
+                <strong className="font-semibold text-slate-800">{EVENTO_GU.dataLonga}</strong>
+                {` · ${EVENTO_GU.horario}`}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="size-4 shrink-0 text-emerald-600" />
               <span>
-                <strong className="font-semibold text-slate-800">IEP — Instituto de Engenharia do Paraná</strong> · Rua
-                Emiliano Perneta, 174 · Centro, Curitiba/PR
+                <strong className="font-semibold text-slate-800">{EVENTO_GU.local.nome}</strong>
+                {` · ${EVENTO_GU.local.endereco}`}
               </span>
             </div>
           </div>
@@ -128,72 +125,42 @@ export default async function EventoGuPage() {
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-bold">Descrição do evento</h2>
               <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-slate-700">
-                <p>
-                  O encontro de 30 de julho coloca lado a lado duas visões complementares de geração de valor na era da
-                  IA: como transformar o que você sabe em ativos de alto valor — e como transformar a IA em
-                  infraestrutura corporativa de verdade, com segurança, controle de custos e escala.
-                </p>
-                <p>
-                  Na primeira palestra, <strong>Tatiana Cruz</strong> mostra como converter experiência, conhecimento e
-                  repertório profissional em algo estruturado, escalável e relevante — usando a IA como parceira pra
-                  organizar insights, ganhar autoridade e acelerar a criação de soluções.
-                </p>
-                <p>
-                  Na segunda, <strong>Maicon Wendhausem</strong> apresenta o Servidor de IA Corporativo: acesso
-                  centralizado a modelos, governança de custos, gestão de usuários, segurança e o caminho de
-                  implantação de uma infraestrutura de IA segura, controlada e escalável.
-                </p>
-                <p>
-                  Como todo encontro do GU, o formato é conteúdo + troca de experiências + networking com líderes,
-                  especialistas e a comunidade de dados de Curitiba.
-                </p>
+                {EVENTO_GU.descricao.map((p) => (
+                  <p key={p.slice(0, 40)}>{p}</p>
+                ))}
               </div>
 
               <h3 className="mt-6 text-base font-bold">Programação</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                {AGENDA.map((a) => (
+                {EVENTO_GU.agenda.map((a) => (
                   <li key={a.hora} className="flex gap-3">
                     <span className="w-12 shrink-0 font-semibold text-emerald-700">{a.hora}</span>
                     <span>{a.item}</span>
                   </li>
                 ))}
               </ul>
+              <p className="mt-3 text-xs text-slate-500">Horários sujeitos a pequenos ajustes.</p>
             </section>
 
             {/* Palestrantes */}
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold">Palestrantes</h2>
+              <h2 className="text-lg font-bold">Quem apresenta</h2>
               <div className="mt-4 grid gap-5 sm:grid-cols-2">
-                <div className="flex items-start gap-4">
-                  <Image
-                    src="/gubigdata/tatiana.jpeg"
-                    alt="Tatiana Cruz"
-                    width={64}
-                    height={64}
-                    className="size-16 shrink-0 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold">Tatiana Cruz</div>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Como transformar conhecimento em ativos de alto valor na era da IA.
-                    </p>
+                {EVENTO_GU.palestrantes.map((p) => (
+                  <div key={p.nome} className="flex items-start gap-4">
+                    <Image
+                      src={p.foto}
+                      alt={p.nome}
+                      width={64}
+                      height={64}
+                      className="size-16 shrink-0 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-semibold">{p.nome}</div>
+                      <p className="mt-1 text-sm text-slate-600">{p.tema}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <Image
-                    src="/gubigdata/maicon.jpeg"
-                    alt="Maicon Wendhausem"
-                    width={64}
-                    height={64}
-                    className="size-16 shrink-0 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="font-semibold">Maicon Wendhausem</div>
-                    <p className="mt-1 text-sm text-slate-600">
-                      O Servidor de IA Corporativo — IA como infraestrutura, não promessa.
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </section>
 
@@ -201,12 +168,14 @@ export default async function EventoGuPage() {
             <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-bold">Local</h2>
               <p className="mt-2 text-sm text-slate-700">
-                <strong>IEP — Instituto de Engenharia do Paraná</strong>
+                <strong>{EVENTO_GU.local.nome}</strong>
                 <br />
-                Rua Emiliano Perneta, 174 — Centro, Curitiba/PR
+                {EVENTO_GU.local.detalhe}
+                <br />
+                {EVENTO_GU.local.endereco}
               </p>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=IEP+Instituto+de+Engenharia+do+Paran%C3%A1+Rua+Emiliano+Perneta+174+Curitiba"
+                href={EVENTO_GU.local.mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 inline-block text-sm font-semibold text-emerald-700 hover:underline"
@@ -225,7 +194,7 @@ export default async function EventoGuPage() {
                 </span>
                 <p className="min-w-0 text-sm text-slate-600">
                   O <strong>GU Big Data &amp; IA</strong>
-                  {' é o grupo de usuários de dados e inteligência artificial de Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas. Realização deste encontro: GU Big Data & IA · Rede Sol · SUCESU Paraná. '}
+                  {` é o grupo de usuários de dados e inteligência artificial de Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas. ${EVENTO_GU.realizacao} `}
                   <a href="https://gubigdata.com.br" className="font-semibold text-emerald-700 hover:underline">
                     gubigdata.com.br
                   </a>

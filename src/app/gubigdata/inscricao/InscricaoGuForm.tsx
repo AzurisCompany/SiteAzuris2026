@@ -6,9 +6,10 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
 import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/components/checkout/DadosNota'
+import { EVENTO_GU } from '../evento'
 
 // Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a
-// inscrição por endereço. Espelha PRODUTOS['gubigdata-2026-07'].
+// inscrição por endereço. Espelha PRODUTOS[EVENTO_GU.slug].
 const ENDERECO_OBRIGATORIO_PJ = false
 
 /** Opção de tipo de ingresso já com disponibilidade resolvida no servidor. */
@@ -114,8 +115,8 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
           payment_type: billingType,
           items: [
             {
-              item_id: 'gubigdata-2026-07',
-              item_name: 'Encontro Presencial GU BigData & IA — 30/07',
+              item_id: EVENTO_GU.slug,
+              item_name: `Encontro Presencial GU BigData & IA — ${EVENTO_GU.dataCurta}`,
               item_variant: sel.tipo_id,
               price: valorCobradoReais,
               quantity: 1,
@@ -143,7 +144,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
         <p className="mt-2 text-sm text-slate-700">
           {confirmado.duplicada
             ? 'Já existe uma inscrição com esse e-mail pra esse evento — não precisa fazer de novo.'
-            : 'Te esperamos dia 30/07 a partir das 18h30 no IEP (Rua Emiliano Perneta, 174 — Centro, Curitiba).'}
+            : `Te esperamos dia ${EVENTO_GU.dataCurta} a partir das ${EVENTO_GU.inicio} no ${EVENTO_GU.local.sigla} (${EVENTO_GU.local.endereco}).`}
         </p>
         <p className="mt-3 text-xs text-slate-500">
           Sua condição de associado/participante será conferida no credenciamento.

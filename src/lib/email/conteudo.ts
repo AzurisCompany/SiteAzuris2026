@@ -111,6 +111,8 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
+    // Encontros do GU: o texto não cita data, então serve pro corrente e pros passados.
+    case 'gubigdata-2026-08':
     case 'gubigdata-2026-07':
       return {
         assunto: 'Inscrição confirmada — GU BigData & IA',

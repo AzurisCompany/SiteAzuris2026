@@ -1,5 +1,6 @@
 import { listarTipos, type TipoIngresso } from '@/lib/tipos-ingresso'
 import { labelProduto, CHECKOUT_URL } from '@/lib/admin-queries'
+import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 import IngressosManager from './IngressosManager'
 
 export const dynamic = 'force-dynamic'
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic'
 // link `?tipo=` dos ingressos ocultos.
 const PRODUTOS_COM_TIPOS: Array<{ slug: string; nome: string; checkout: string }> = [
   { slug: 'dss-2026', nome: labelProduto('dss-2026'), checkout: CHECKOUT_URL['dss-2026'] },
-  { slug: 'gubigdata-2026-07', nome: labelProduto('gubigdata-2026-07'), checkout: CHECKOUT_URL['gubigdata-2026-07'] },
+  { slug: EVENTO_GU_SLUG, nome: labelProduto(EVENTO_GU_SLUG), checkout: CHECKOUT_URL[EVENTO_GU_SLUG] },
 ]
 
 export default async function IngressosPage() {

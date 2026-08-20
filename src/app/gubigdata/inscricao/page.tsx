@@ -11,16 +11,18 @@ import {
   precosDoTipo,
   ehGratuito,
 } from '@/lib/tipos-ingresso'
+import { EVENTO_GU } from '../evento'
 import InscricaoGuForm, { type TipoGuOption } from './InscricaoGuForm'
 
 // Checkout do encontro GU BigData — mesmo tema CLARO da página do evento
 // (/gubigdata), pra experiência de marketplace seguir até o pagamento.
-const PRODUTO = getProduto('gubigdata-2026-07')
+// Qual encontro está em cartaz é decisão de ../evento.ts.
+const PRODUTO = getProduto(EVENTO_GU.slug)
 
 export const metadata: Metadata = {
-  title: 'Inscrição — Encontro Presencial GU BigData & IA · 30 de julho',
+  title: `Inscrição — Encontro Presencial GU BigData & IA · ${EVENTO_GU.dataCurta}`,
   description:
-    'Encontro presencial do GU BigData & IA em 30/07 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para associados.',
+    'Encontro presencial do GU BigData & IA em 26/08 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para associados.',
   robots: { index: false, follow: false }, // página de checkout; a página do evento é a indexável
 }
 
@@ -93,17 +95,17 @@ export default async function InscricaoGuPage({
         {/* Resumo do evento */}
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h1 className="text-xl font-bold leading-snug sm:text-2xl">
-            Encontro Presencial GU Big Data &amp; IA — 30 de julho
+            Encontro Presencial GU Big Data &amp; IA — {EVENTO_GU.dataTitulo}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">Conhecimento como ativo e IA como infraestrutura corporativa.</p>
+          <p className="mt-1 text-sm text-slate-600">{EVENTO_GU.chamada}</p>
           <div className="mt-3 flex flex-col gap-1.5 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <CalendarDays className="size-4 shrink-0 text-emerald-600" />
-              30 de julho de 2026, quinta · a partir das 18h30
+              {`${EVENTO_GU.dataLonga} · a partir das ${EVENTO_GU.inicio}`}
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="size-4 shrink-0 text-emerald-600" />
-              IEP — Rua Emiliano Perneta, 174 · Centro, Curitiba/PR
+              {`${EVENTO_GU.local.sigla} — ${EVENTO_GU.local.endereco}`}
             </div>
           </div>
         </div>

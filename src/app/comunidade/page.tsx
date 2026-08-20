@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageHeader } from "@/components/PageHeader";
 import { Cta } from "@/components/sections/Cta";
+import { EVENTO_GU } from "@/app/gubigdata/evento";
 
 export const metadata: Metadata = {
   title: "Comunidade — Como a Azuris apoia o software brasileiro",
@@ -123,12 +124,12 @@ export default function ComunidadePage() {
                   Próximo encontro presencial · GU BigData &amp; IA
                 </div>
                 <h2 className="mt-1 text-xl font-semibold">
-                  30 de julho, 18h30 — conhecimento como ativo e IA como
-                  infraestrutura corporativa
+                  {`${EVENTO_GU.dataTitulo}, ${EVENTO_GU.inicio} — DSSBR ao Vivo e Process Mining na Saúde`}
                 </h2>
                 <p className="mt-1 text-sm text-foam/70">
-                  IEP, Curitiba · palestras de Tatiana Cruz e Maicon Wendhausem ·
-                  gratuito para associados, R$ 30 no geral.
+                  {`${EVENTO_GU.local.sigla}, Curitiba · ${EVENTO_GU.palestrantes
+                    .map((p) => p.nome)
+                    .join(" e ")} · gratuito para associados, R$ 30 no geral.`}
                 </p>
               </div>
             </div>
