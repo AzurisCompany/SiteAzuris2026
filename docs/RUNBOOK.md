@@ -75,7 +75,8 @@ gera o link. Escolher o tipo é o que faz a venda contar no relatório por tipo 
 Cobrança manual **não** checa prazo nem lotação, de propósito.
 
 ### Cobrar de novo o mesmo cliente
-No detalhe da venda, **copiar dados do cliente** → `/admin/cobranca?de=<id>`. Copia só o cadastro;
+No detalhe da venda, **nova cobrança com estes dados** (nas listas, o link `nova cobrança`) →
+`/admin/cobranca?de=<id>`. Copia só o cadastro;
 produto, valor e descrição ficam em branco de propósito. A venda antiga não é tocada — se tiver que
 morrer, é o botão cancelar, decisão separada.
 

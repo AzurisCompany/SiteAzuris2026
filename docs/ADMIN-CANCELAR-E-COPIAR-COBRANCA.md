@@ -82,9 +82,14 @@ consultável entre as duas.
 
 ### Onde aparece
 
-- `/admin/vendas` — link `copiar dados` em toda linha.
-- `/admin/cobranca` — link `copiar dados` em toda linha.
+- `/admin/vendas` — link `nova cobrança` em toda linha.
+- `/admin/cobranca` — link `nova cobrança` em toda linha.
 - `/admin/vendas/[id]` — botão *"nova cobrança com estes dados"*.
+
+> **Rótulo mudou em 2026-08-21** (`96e4c50`): era `copiar dados` nas duas listas. Passou a
+> conviver com o botão de **copiar os dados do cliente pro clipboard** (ao lado do nome), e
+> dois "copiar dados" na mesma linha fazendo coisas diferentes era armadilha. Ver
+> [ADMIN-COPIAR-DADOS-CLIENTE.md](./ADMIN-COPIAR-DADOS-CLIENTE.md).
 
 Entradas inválidas (`?de=9999`, `?de=abc`) caem no formulário vazio, sem erro.
 
