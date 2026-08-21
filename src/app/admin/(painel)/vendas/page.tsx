@@ -19,11 +19,13 @@ import {
 } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
 import { TIPOS_CUPOM, LABEL_TIPO_CUPOM } from '@/lib/cupons'
+import { dadosClienteTexto } from '@/lib/dados-cliente'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
 import CancelarButton from './CancelarButton'
 import CopiarEmailsButton from './CopiarEmailsButton'
+import CopiarClienteButton from './CopiarClienteButton'
 import BaixarCsvLink from './BaixarCsvLink'
 
 export const dynamic = 'force-dynamic'
@@ -351,6 +353,7 @@ export default async function VendasPage({
                   <Link href={`/admin/vendas/${r.id}`} className="font-medium hover:text-[var(--azuris-cyan)]">
                     {r.nome}
                   </Link>
+                  <CopiarClienteButton nome={r.nome} texto={dadosClienteTexto(r)} />
                   {r.is_teste && (
                     <span className="ml-2 inline-flex rounded-full bg-amber-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
                       teste
@@ -411,7 +414,7 @@ export default async function VendasPage({
                       title="Nova cobrança reaproveitando os dados deste cliente"
                       className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
                     >
-                      copiar dados
+                      nova cobrança
                     </Link>
                     <TesteButton id={r.id} isTeste={r.is_teste} />
                     {(r.status === 'pending' || r.status === 'overdue') && (

@@ -2,9 +2,11 @@ import Link from 'next/link'
 import { brl, whatsappUrl, tabProduto, STATUS_LABEL, STATUS_COR } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
 import { descricaoManual } from '@/lib/cobranca-manual'
+import { dadosClienteTexto } from '@/lib/dados-cliente'
 import type { InscricaoRow } from '@/lib/db'
 import SyncRowButton from './SyncRowButton'
 import CancelarButton from '../vendas/CancelarButton'
+import CopiarClienteButton from '../vendas/CopiarClienteButton'
 
 function descricao(insc: InscricaoRow): string {
   return descricaoManual(insc.como_conheceu) || insc.como_conheceu || '—'
@@ -51,6 +53,7 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                   <Link href={`/admin/vendas/${r.id}`} className="font-medium hover:text-[var(--azuris-cyan)]">
                     {r.nome}
                   </Link>
+                  <CopiarClienteButton nome={r.nome} texto={dadosClienteTexto(r)} />
                   {r.is_teste && (
                     <span className="ml-2 inline-flex rounded-full bg-amber-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
                       teste
@@ -102,7 +105,7 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                       title="Nova cobrança reaproveitando os dados deste cliente"
                       className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
                     >
-                      copiar dados
+                      nova cobrança
                     </Link>
                     <SyncRowButton id={r.id} />
                     {/* Renegociar valor/descrição e cancelar só fazem sentido enquanto não pagou. */}
