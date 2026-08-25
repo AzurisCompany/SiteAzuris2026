@@ -59,7 +59,7 @@ Duas garantias que valem lembrar:
 ## Texto por produto
 
 `conteudoCompraConfirmada()` troca o texto por `curso_slug`. Não é firula: onde o
-acesso é liberado **na mão** (ETT adesão, One Day + curso, Lakehouse), o e-mail
+acesso é liberado **na mão** (ETT adesão, FullPass + curso, Lakehouse), o e-mail
 promete "em até 1 dia útil" em vez de mandar a pessoa procurar um login que ainda
 não existe. Produto sem texto próprio cai num genérico curto — melhor dizer pouco
 e certo do que prometer fulfillment que não existe.

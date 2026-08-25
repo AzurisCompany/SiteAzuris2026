@@ -64,7 +64,8 @@ Mapa completo — institucional, checkout e admin — em
 /produtos  /produtos/[slug]    Ecossistema (7 produtos)
 /comunidade                    Hadoop.com.br, GU BigData, grupo de estudos
 /dssbr-2026 + /inscricao       DSS 2026 — landing e checkout (dinâmicos)
-/dssbr-2026/one-day[-curso]    Passe de 1 dia e combo com o curso
+/dssbr-2026/one-day            Passe de 1 dia (Lote 2, R$ 290)
+/dssbr-2026/fullpass-curso     Combo FullPass + portal do curso (R$ 750)
 /gubigdata  /ett  /preparatorio-dados  /lakehouse-comunidade   Outros checkouts
 /vendas                        Vendedora gera o link de desconto dela
 /admin/*                       Painel financeiro e operacional (senha única)
@@ -116,7 +117,7 @@ uma faz — e **o que quebra sem ela** — está em
 ## Testes
 
 ```bash
-npx vitest run     # 19 arquivos, ~198 testes de regra pura (sem banco, sem rede)
+npx vitest run     # 24 arquivos, 237 testes de regra pura (sem banco, sem rede)
 ```
 
 ## Deploy

@@ -37,7 +37,7 @@ tipos_ingresso ──┬──> /dssbr-2026 (landing, "a partir de")
                  ├──> /preparatorio-dados/reserva
                  └──> /admin/cobranca (opções + preço sugerido)
 
-produtos.ts ─────┬──> /dssbr-2026/one-day · /one-day-curso · /ett/adesao (preço único)
+produtos.ts ─────┬──> /dssbr-2026/one-day · /fullpass-curso · /ett/adesao (preço único)
                  └──> fallback de qualquer checkout quando não há tipo
 
 db.ts (lotes) ───────> /lakehouse-comunidade/inscricao
@@ -100,7 +100,7 @@ Regra prática: **desconto grande e público definido** (estudante, R$ 570 → R
 oculto. **Comissão e campanha** (vendedora, parceiro) → cupom. Ver
 [INGRESSO-OCULTO-ESTUDANTE.md](./INGRESSO-OCULTO-ESTUDANTE.md).
 
-## 6. O que está à venda — snapshot de 2026-08-20
+## 6. O que está à venda — snapshot de 2026-08-25
 
 ⚠️ **Isto é uma foto, não a verdade.** A verdade vive em `/admin/ingressos`, `/admin/cupons` e
 no registry. Se esta seção divergir do painel, o painel está certo.
@@ -116,19 +116,21 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 
 | tipo | preço | âncora | parcelas | vagas | onde aparece |
 |---|---|---|---|---|---|
-| Lote 1 | R$ 570 | R$ 820 | 3x | 100 | vitrine do checkout |
-| Estudante | R$ 400 | R$ 570 | 3x | **50** | só por `?tipo=estudante` |
+| Lote 2 | R$ 670 | R$ 820 | 3x | 100 | vitrine do checkout |
+| Estudante | R$ 400 | R$ 670 | 3x | **50** | só por `?tipo=estudante` |
+| ~~Lote 1~~ | ~~R$ 570~~ | | | | **desativado em 25/08/2026** — fica no cadastro pro histórico saber o nome do que vendeu |
 
 **Preço único (registry, exige deploy pra mudar)**
 
 | produto | preço | observação |
 |---|---|---|
-| One Day | R$ 247 | escada 247 → 297 → 357 **duplicada** em `one-day/page.tsx:13`, sem teste |
-| One Day + portal do curso | R$ 360 | sem âncora; **fulfillment do portal é manual** |
+| One Day | R$ 290 | Lote 2; escada 247 → 290 → 357 mora em `one-day/lotes.ts` (um dono só, lida pela landing e pelo checkout) e tem canário em `precos-one-day.test.ts` |
+| FullPass + portal do curso | R$ 750 | combo vigente; sem âncora; **fulfillment do portal é manual**. O FullPass sozinho é R$ 670 — o portal entra por R$ 80 |
+| ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
 | GU BigData | R$ 30 / grátis | encontro em cartaz é **26/08** (`gubigdata-2026-08`); os tipos vivem no catálogo, o registry é só fallback. O de 30/07 é evento passado — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |
-| Lakehouse | R$ 550 membro · R$ 750 não-membro | lote próprio em `db.ts` |
+| Lakehouse | R$ 750 | **preço único desde 25/08/2026** — acabaram o preço de comunidade (R$ 550) e o bônus do ingresso do DSSBR incluso. O perfil membro/não-membro sobrou só pra segmentar vaga e histórico. Canário: `precos-lakehouse.test.ts` |
 
 **Cupons ativos** (`/admin/cupons`)
 
@@ -141,12 +143,43 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 
 | quero… | onde | precisa deploy? |
 |---|---|---|
-| virar o lote do DSS | `/admin/ingressos`: cria o tipo novo, desliga o velho | não — **mas** atualize `produtos.ts` + `precos-dss.test.ts` no próximo deploy |
+| virar o lote do DSS | `/admin/ingressos`: cria o tipo novo, **desliga** o velho (nunca apaga — ver escada abaixo) | não — **mas** atualize `produtos.ts` + `precos-dss.test.ts` no próximo deploy |
 | criar ingresso reservado | `/admin/ingressos` com **oculto** marcado | não |
 | dar desconto pra alguém vender | `/admin/cupons` (vendedora tem prazo; parceiro é link fixo) | não |
 | revogar um link | desligar o cupom **ou** o tipo (`ativo=false`) — mata o que já circula | não |
-| mudar preço do One Day/combo/ETT | `produtos.ts` (e a escada em `one-day/page.tsx`) | **sim** |
+| virar o lote do One Day | `produtos.ts` (`precoCentavos`) **e** o `atual` em `one-day/lotes.ts` — o canário reprova se discordarem | **sim** |
+| mudar preço do combo/ETT | `produtos.ts` | **sim** |
+| mudar preço do curso Lakehouse | `PRECO_POR_PERFIL` em `db.ts` **e** os dois HTMLs de `public/lakehouse-comunidade/` — o canário varre a página estática | **sim** |
+| tirar um produto de cartaz | `PRODUTOS_ENCERRADOS` + apaga a rota de API + a página vira `permanentRedirect` pro sucessor. Fica no registry: o histórico precisa do nome e do preço | **sim** |
 | cobrar valor negociado | `/admin/cobranca` — escolha produto **ou tipo**, digite o valor | não |
+
+## 7.1 A escada de lotes do checkout
+
+O checkout do DSS mostra, acima do seletor, de onde o preço veio e pra onde vai:
+
+```
+  Lote 1          Lote 2            No dia
+  R̶$̶ ̶5̶7̶0̶          R$ 670            R$ 820
+  encerrado    vendendo agora
+```
+
+Ela é **derivada do catálogo** ([`escada-lotes.ts`](../src/lib/escada-lotes.ts)), não de
+texto fixo: o degrau riscado é o tipo antigo que continua cadastrado com `ativo=false`, e o
+último degrau é a âncora (`preco_de_centavos`) do lote vigente. Consequências práticas:
+
+- **Apagar o tipo do lote encerrado apaga o degrau riscado.** Desligue, não delete — é o
+  mesmo motivo de sempre (o histórico precisa do nome), agora com efeito visível na página.
+- **Inativo mais barato que o vigente = "encerrado"; mais caro = "em breve".** A escada
+  não olha data nenhuma, só preço.
+- **Ingresso oculto não é degrau.** O Estudante ficaria à vista na vitrine — exatamente o
+  que o link discreto evita.
+- Um lote sozinho e sem âncora não vira escada: renderizar um degrau só é ruído.
+- Com link de desconto, o degrau vigente mostra o preço de tabela riscado e o do cupom
+  embaixo. Os outros degraus seguem em preço de tabela — são momentos da venda, não ofertas.
+
+O **One Day** tem escada própria e fixa em [`one-day/lotes.ts`](../src/app/dssbr-2026/one-day/lotes.ts):
+ele não tem tipos cadastrados, então não há catálogo de onde derivar. Canário
+`precos-one-day.test.ts` amarra o `atual` de lá ao `precoCentavos` do registry.
 
 ## 8. Armadilhas registradas
 
@@ -179,4 +212,4 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-08-20**.
+Última revisão: **2026-08-25**.
