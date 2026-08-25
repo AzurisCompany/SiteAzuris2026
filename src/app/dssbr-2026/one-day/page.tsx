@@ -2,19 +2,13 @@ import type { Metadata } from 'next'
 import { getProduto } from '@/lib/produtos'
 import PasseCheckout from '../PasseCheckout'
 import { dssMetadata } from '../metadata'
+import { LOTES_ONE_DAY, LOTE_ONEDAY_ATUAL } from './lotes'
 
 // Passe One Day — 1 dia do DSS 2026. Lote gerido no preço do registry (sem tipos):
-// vende Lote 1 (R$247) com âncora do lote final (R$357) riscada. Corpo do checkout
+// vende Lote 2 (R$290) com âncora do lote final (R$357) riscada. Corpo do checkout
 // vem do PasseCheckout compartilhado; aqui só a config específica do produto.
+// A escada (e o nome do lote em cartaz) vem de ./lotes — a landing lê o mesmo módulo.
 const PRODUTO = getProduto('dss-one-day-2026')
-
-// Escada de lotes só pra exibição — a fonte da verdade do preço é o registry
-// (precoCentavos). Ao virar o lote, ajusta ambos: o registry e o `atual` daqui.
-const LOTES = [
-  { nome: 'Lote 1', valor: 247, atual: true },
-  { nome: 'Lote 2', valor: 297, atual: false },
-  { nome: 'Lote 3', valor: 357, atual: false },
-]
 
 const INCLUI = ['1 dia de evento', 'Plenária Principal', 'Auditório Secundário', 'Área de exposição', 'Coffee Break']
 
@@ -22,7 +16,7 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/one-day',
   title: 'Passe One Day — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 1 a partir de R$ 247 no PIX ou cartão em até 3x.',
+    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 2 a partir de R$ 290 no PIX ou cartão em até 3x.',
   noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
 })
 
@@ -45,8 +39,8 @@ export default function OneDayPage() {
           Inscrição individual.
         </>
       }
-      resumoLabel="Lote 1 · a partir de"
-      lotes={LOTES}
+      resumoLabel={`${LOTE_ONEDAY_ATUAL.nome} · a partir de`}
+      lotes={LOTES_ONE_DAY}
       inclui={INCLUI}
       waContexto="Oi! Estava no checkout do Passe One Day (DSS 2026) e quero saber sobre os pacotes para grupos / compras corporativas."
     />

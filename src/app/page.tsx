@@ -24,13 +24,13 @@ export default function HomePage() {
               Curso · turma de lançamento · Lote 1 aberto
             </div>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight max-w-3xl">
-              Lakehouse: Pipeline na Prática — do zero ao dashboard em 5 semanas
+              Lakehouse: Pipeline na Prática — do zero ao dashboard, no seu ritmo
             </h2>
             <p className="mt-4 text-lg text-foam/60 max-w-2xl">
-              Aulas ao vivo construindo um pipeline completo com MinIO, Apache Iceberg,
-              Spark, Airflow e Superset. <strong className="text-foam">R$ 550</strong> —
-              Pix à vista R$ 522,50 (5% off) ou até 5x no cartão — com ingresso do DSSBR
-              2026 incluso.
+              Aulas gravadas construindo um pipeline completo com MinIO, Apache Iceberg,
+              Spark, Airflow e Superset, mais encontros ao vivo e mentorias 1:1.{' '}
+              <strong className="text-foam">R$ 750</strong> — Pix à vista R$ 712,50 (5% off)
+              ou até 5x no cartão.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <a

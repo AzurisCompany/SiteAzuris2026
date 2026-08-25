@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Users, BadgePercent, Clock } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import {
+  listarTipos,
   listarTiposPublicos,
   getTipo,
   contarInscritosPorTipo,
@@ -9,6 +10,7 @@ import {
   precosDoTipo,
   type RecusaLink,
 } from '@/lib/tipos-ingresso'
+import { montarEscada, type DegrauLote } from '@/lib/escada-lotes'
 import { hojeBRT } from '@/lib/format'
 import { formatarValidade } from '@/lib/cupom'
 import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
@@ -60,6 +62,8 @@ export default async function InscricaoPage({
   /** tipo que o link `?tipo=` pré-seleciona (ingresso reservado, ex.: Estudante) */
   let tipoDoLink: string | null = null
   let recusaLink: RecusaLink | null = null
+  /** Escada de lotes (encerrado · vendendo agora · no dia) — [[escada-lotes]]. */
+  let escada: DegrauLote[] = []
   try {
     const publicos = await listarTiposPublicos(PRODUTO.slug)
     // Busca DIRETA, não um find() na vitrine: o tipo do link pode ser oculto, e
@@ -73,6 +77,13 @@ export default async function InscricaoPage({
     // Âncora da tarja de cupom: sempre o 1º tipo da VITRINE (o lote vigente) —
     // não o ingresso reservado, que faria a comparação mentir.
     if (publicos[0]) precoCheioCentavos = publicos[0].preco_centavos
+    // Escada montada com o catálogo INTEIRO (o lote encerrado continua cadastrado, só
+    // que inativo — é ele que vira o degrau riscado). Ocultos ficam de fora lá dentro.
+    if (publicos[0]) {
+      escada = montarEscada(await listarTipos(PRODUTO.slug), {
+        atualComCupomCentavos: cupom ? comDesconto(publicos[0].preco_centavos) : null,
+      })
+    }
     tipoOptions = link.tipos.map((t) => {
       const p = precosDoTipo({ ...t, preco_centavos: comDesconto(t.preco_centavos) })
       return {
@@ -262,6 +273,7 @@ export default async function InscricaoPage({
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={PRODUTO.maxParcelas}
           tipos={tipoOptions}
+          escada={escada}
           defaultTipo={tipoDoLink}
           cupom={cupom && sp.d ? sp.d : undefined}
           cupomCodigo={cupom && !sp.d ? cupom.codigo : undefined}

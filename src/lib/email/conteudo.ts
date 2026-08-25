@@ -98,6 +98,21 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
+    // Combo vigente: FullPass + portal do curso. O One Day + curso foi encerrado em
+    // 25/08/2026, mas o case continua aqui — quem comprou antes ainda recebe e-mail.
+    case 'dss-fullpass-curso-2026':
+      return {
+        assunto: 'FullPass + curso confirmados — DSS 2026',
+        titulo: `Tudo certo, ${nome}!`,
+        destaque: `Recebemos ${valor} do combo FullPass + portal do curso.`,
+        paragrafos: [
+          `O congresso é de ${DSS_LOCAL}, e seu FullPass vale pelos 3 dias de evento.`,
+          'O acesso ao portal do curso "Lakehouse: Pipeline na Prática" é liberado por nós, na mão — chega no seu e-mail em até 1 dia útil.',
+          'Se em 1 dia útil o acesso não tiver chegado, responde este e-mail que a gente destrava.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+
     case 'dss-one-day-curso-2026':
       return {
         assunto: 'One Day + curso confirmados — DSS 2026',

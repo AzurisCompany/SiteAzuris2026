@@ -1,5 +1,5 @@
-// POST /api/dss-one-day-curso/inscricao
-// Checkout do combo One Day + portal do curso Pipeline. Mesma lógica compartilhada
+// POST /api/dss-fullpass-curso/inscricao
+// Checkout do combo FullPass + portal do curso Pipeline. Mesma lógica compartilhada
 // de [[checkout-produto]] — só muda o slug do produto no registry [[produtos]].
 import { NextResponse } from 'next/server'
 import { processarCheckout, type CheckoutBody } from '@/lib/checkout-produto'
@@ -14,6 +14,6 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
-  const r = await processarCheckout('dss-one-day-curso-2026', body)
+  const r = await processarCheckout('dss-fullpass-curso-2026', body)
   return NextResponse.json(r.body, { status: r.status })
 }

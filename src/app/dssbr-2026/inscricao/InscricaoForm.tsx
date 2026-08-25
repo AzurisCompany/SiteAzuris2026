@@ -5,6 +5,7 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
+import type { DegrauLote } from '@/lib/escada-lotes'
 
 /** Default: espelha PRODUTOS['dss-2026'].enderecoObrigatorioPJ — ingresso corporativo vira nota.
  *  Produtos de pessoa física (ex.: adesão do ETT) passam `enderecoObrigatorioPJ={false}`. */
@@ -31,6 +32,8 @@ interface Props {
   maxParcelas: number
   /** tipos de ingresso cadastrados; se não-vazio, mostra o seletor e ignora os preços únicos acima */
   tipos?: TipoOption[]
+  /** escada de lotes (encerrado · vendendo agora · no dia) — vazia = não renderiza */
+  escada?: DegrauLote[]
   /** tipo_id que já vem selecionado (quem chegou por link de ingresso reservado) */
   defaultTipo?: string | null
   /** token do link de vendedora ([[cupom]]) — vai junto no POST pro servidor revalidar */
@@ -59,6 +62,7 @@ export default function InscricaoForm({
   precoCartaoBaseReais: baseCartao,
   maxParcelas: baseMax,
   tipos,
+  escada,
   defaultTipo,
   cupom,
   cupomCodigo,
@@ -182,6 +186,58 @@ export default function InscricaoForm({
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+      {/* Escada de lotes: de onde o preço veio e pra onde vai. O lote encerrado fica
+          à vista, riscado — sem ele, quem chega agora vê um preço solto, sem régua. */}
+      {escada && escada.length > 0 && (
+        <div className="space-y-2">
+          <div
+            className="grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${escada.length}, minmax(0, 1fr))` }}
+          >
+            {escada.map((d) => (
+              <div
+                key={d.nome}
+                className={`rounded-xl border-2 p-3 text-center ${
+                  d.estado === 'atual'
+                    ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/5'
+                    : d.estado === 'encerrado'
+                      ? 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] opacity-50'
+                      : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)]'
+                }`}
+              >
+                <div className="text-[11px] font-semibold text-[var(--text-muted)]">{d.nome}</div>
+                {d.valorComCupom != null ? (
+                  <>
+                    <div className="text-xs text-[var(--text-muted)] line-through">R$ {d.valor}</div>
+                    <div className="text-lg font-black text-[var(--accent-emerald)]">R$ {d.valorComCupom}</div>
+                  </>
+                ) : (
+                  <div className={`text-lg font-black ${d.estado === 'encerrado' ? 'line-through' : ''}`}>
+                    R$ {d.valor}
+                  </div>
+                )}
+                <div
+                  className={`mt-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                    d.estado === 'atual' ? 'text-[var(--azuris-cyan)]' : 'text-[var(--text-muted)]'
+                  }`}
+                >
+                  {d.estado === 'atual'
+                    ? 'vendendo agora'
+                    : d.estado === 'encerrado'
+                      ? 'encerrado'
+                      : d.estado === 'proximo'
+                        ? 'em breve'
+                        : 'no dia'}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-[var(--text-muted)]">
+            O preço sobe a cada lote — o valor de hoje é o menor que ainda existe.
+          </p>
+        </div>
+      )}
+
       {/* Tipo de ingresso (só quando há catálogo cadastrado) */}
       {temTipos && (
         <div className="space-y-3">

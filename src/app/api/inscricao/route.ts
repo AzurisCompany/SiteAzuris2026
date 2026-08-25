@@ -63,7 +63,8 @@ export async function POST(request: Request) {
   const error = validate(body)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
-  // Preço por perfil auto-declarado (membro GU/DSSBR → R$550 / não-membro → R$750).
+  // Preço por perfil auto-declarado. Desde 25/08/2026 os dois pagam R$750 — o perfil
+  // segue segmentando vagas e histórico, não preço ([[db]] PRECO_POR_PERFIL).
   // Derivado 100% no servidor — o cliente só informa qual perfil, nunca o valor.
   const perfil = normalizarPerfil(body.perfil)
   const { lote, vagasRestantes, preco_centavos: precoBaseCentavos } = await determinarLotePorPerfil(perfil)

@@ -8,6 +8,7 @@ import { toISODate } from '@/lib/format'
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
   'dss-one-day-2026': 'DSS 2026 — Passe One Day',
+  'dss-fullpass-curso-2026': 'DSS 2026 — FullPass + Portal do Curso',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
@@ -27,6 +28,7 @@ export function labelProduto(slug: string): string {
 export const PRODUTO_TAB: Record<string, string> = {
   'dss-2026': 'Ingressos DSS',
   'dss-one-day-2026': 'One Day DSS',
+  'dss-fullpass-curso-2026': 'FullPass + Curso',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'gubigdata-2026-08': 'GU BigData 26/08',
@@ -54,7 +56,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'lakehouse-comunidade': '/lakehouse-comunidade/inscricao',
   'dss-2026': '/dssbr-2026/inscricao',
   'dss-one-day-2026': '/dssbr-2026/one-day',
-  'dss-one-day-curso-2026': '/dssbr-2026/one-day-curso',
+  'dss-fullpass-curso-2026': '/dssbr-2026/fullpass-curso',
   'gubigdata-2026-08': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'ett-adesao': '/ett/adesao',
   'ett-assinatura': '/ett/assinatura',
@@ -67,7 +69,12 @@ export const CHECKOUT_URL: Record<string, string> = {
  * precisa saber o nome do que foi vendido), mas ficam FORA do CHECKOUT_URL: apontar
  * /gubigdata pro encontro de julho mandaria o admin pra página de outro evento.
  */
-export const PRODUTOS_ENCERRADOS = new Set<string>(['gubigdata-2026-07'])
+export const PRODUTOS_ENCERRADOS = new Set<string>([
+  'gubigdata-2026-07',
+  // Combo One Day + curso (R$360), encerrado em 25/08/2026: o combo com curso passou
+  // a existir só no FullPass ('dss-fullpass-curso-2026').
+  'dss-one-day-curso-2026',
+])
 
 /** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).
  *  Prefixa 55 (Brasil) se vier com 10/11 dígitos. Null se não der pra montar. */
@@ -108,24 +115,24 @@ export function brl(centavos: number | null | undefined): string {
 export function precosSugeridosCobranca(): PrecosSugeridos {
   const dss = PRODUTOS['dss-2026']
   const oneDay = PRODUTOS['dss-one-day-2026']
-  const oneDayCurso = PRODUTOS['dss-one-day-curso-2026']
+  const fullCurso = PRODUTOS['dss-fullpass-curso-2026']
   const gu = PRODUTOS[EVENTO_GU_SLUG]
   return {
     'lakehouse-comunidade': {
       centavos: PRECO_POR_PERFIL['nao-membro'].preco_centavos,
-      dica: `não-membro · membro ${brl(PRECO_POR_PERFIL.membro.preco_centavos)}`,
+      dica: 'curso completo · preço único (o de comunidade acabou em 25/08)',
     },
     'dss-2026': {
       centavos: dss.precoCentavos,
-      dica: `Lote 1 (FullPass) · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
+      dica: `Lote 2 (FullPass) · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
     },
     'dss-one-day-2026': {
       centavos: oneDay.precoCentavos,
-      dica: `Lote 1 (1 dia) · lote final ${brl(oneDay.precoDeVendaCentavos)}`,
+      dica: `Lote 2 (1 dia) · lote final ${brl(oneDay.precoDeVendaCentavos)}`,
     },
-    'dss-one-day-curso-2026': {
-      centavos: oneDayCurso.precoCentavos,
-      dica: 'combo: One Day + portal do curso Pipeline',
+    'dss-fullpass-curso-2026': {
+      centavos: fullCurso.precoCentavos,
+      dica: 'combo: FullPass (3 dias) + portal do curso Pipeline',
     },
     [EVENTO_GU_SLUG]: {
       centavos: gu.precoCentavos,

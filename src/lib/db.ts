@@ -138,7 +138,7 @@ export async function determinarLoteAtivo(): Promise<{
     return {
       lote: 'lote1',
       vagasRestantes: LOTE_CAPACIDADE.lote1 - reservadasLote1,
-      preco_centavos: 55000, // R$ 550,00
+      preco_centavos: 75000, // R$ 750,00
     }
   }
 
@@ -151,9 +151,11 @@ export async function determinarLoteAtivo(): Promise<{
 }
 
 /**
- * Modelo por AUDIENCIA (não por esgotamento):
- * - membro do GU BigData IA / ex-participante do DSSBR → lote1, R$ 550
- * - não-membro → lote2, R$ 750
+ * Modelo por AUDIENCIA (não por esgotamento). Desde 25/08/2026 o PREÇO é o mesmo nos
+ * dois — R$ 750, único: o preço de comunidade (R$ 550) foi encerrado junto com o bônus
+ * do ingresso do DSSBR. O perfil continua existindo por dois motivos: ele grava
+ * `tipo_ingresso` (quem veio da comunidade x quem veio de fora) e escolhe o balde de
+ * vagas. Quem quer curso + congresso agora compra o combo 'dss-fullpass-curso-2026'.
  */
 export type PerfilLakehouse = 'membro' | 'nao-membro'
 
@@ -161,7 +163,7 @@ export const PRECO_POR_PERFIL: Record<
   PerfilLakehouse,
   { lote: 'lote1' | 'lote2'; preco_centavos: number }
 > = {
-  membro: { lote: 'lote1', preco_centavos: 55000 }, // R$ 550,00
+  membro: { lote: 'lote1', preco_centavos: 75000 }, // R$ 750,00 — preço único desde 25/08/2026
   'nao-membro': { lote: 'lote2', preco_centavos: 75000 }, // R$ 750,00
 }
 

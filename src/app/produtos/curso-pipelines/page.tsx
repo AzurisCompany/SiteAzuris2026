@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Lakehouse: Pipeline na Prática — Curso online autoguiado",
     description:
-      "MinIO + Iceberg + Spark + Airflow + Superset. Curso em andamento — entre quando quiser. Aulas gravadas + encontros ao vivo + mentorias 1:1 · bônus DSSBR exclusivo.",
+      "MinIO + Iceberg + Spark + Airflow + Superset. Curso em andamento — entre quando quiser. Aulas gravadas + encontros ao vivo + mentorias 1:1.",
     type: "website",
   },
   // Página-teaser: o conteúdo completo (e canônico) vive na landing.

@@ -4,6 +4,7 @@ import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { listarTiposPublicos, precosDoTipo } from '@/lib/tipos-ingresso'
 import { dssMetadata } from './metadata'
+import { LOTE_ONEDAY_ATUAL } from './one-day/lotes'
 
 const DSS = 'https://dssbr.com.br'
 const UTM = 'utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
@@ -18,15 +19,15 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
 const brl = (v: number) => v.toFixed(2).replace('.', ',')
 
 // Landing lê o preço vigente dos MESMOS lugares que o checkout, pra nunca desincronizar:
-// FullPass vem do tipo de ingresso ATIVO no admin (Lote 1 R$570 hoje); One Day vem do
+// FullPass vem do tipo de ingresso ATIVO no admin (Lote 2 R$670 hoje); One Day vem do
 // registry (Lote gerido no código). force-dynamic (igual ao checkout) garante que o
 // preço mostrado é sempre o preço cobrado — sem risco de fallback velho no build.
 export const dynamic = 'force-dynamic'
 
 const PRODUTO_FULL = getProduto('dss-2026')
 const PRODUTO_ONEDAY = getProduto('dss-one-day-2026')
-const PRODUTO_ONEDAY_CURSO = getProduto('dss-one-day-curso-2026')
-const CHECKOUT_ONEDAY_CURSO = `/dssbr-2026/one-day-curso?${UTM}`
+const PRODUTO_FULLPASS_CURSO = getProduto('dss-fullpass-curso-2026')
+const CHECKOUT_FULLPASS_CURSO = `/dssbr-2026/fullpass-curso?${UTM}`
 
 interface Pass {
   id: string
@@ -51,7 +52,7 @@ async function passFullPass(): Promise<Pass> {
   let deVenda = PRODUTO_FULL.precoDeVendaCentavos / 100
   let cartao = pix
   let maxParcelas = PRODUTO_FULL.maxParcelas
-  let lote = 'Lote 1'
+  let lote = 'Lote 2'
   try {
     const tipos = await listarTiposPublicos(PRODUTO_FULL.slug)
     if (tipos.length > 0) {
@@ -89,7 +90,7 @@ async function passFullPass(): Promise<Pass> {
   }
 }
 
-/** One Day: preço do registry (Lote 1 R$247, âncora R$357). */
+/** One Day: preço do registry (Lote 2 R$290, âncora R$357). */
 function passOneDay(): Pass {
   const pix = Number((PRODUTO_ONEDAY.precoCentavos / 100).toFixed(2))
   const deVenda = PRODUTO_ONEDAY.precoDeVendaCentavos / 100
@@ -98,7 +99,7 @@ function passOneDay(): Pass {
     id: 'oneday',
     nome: 'One Day · 1 dia',
     subtitulo: 'Um dia de evento à sua escolha',
-    lote: 'Lote 1',
+    lote: LOTE_ONEDAY_ATUAL.nome,
     pix,
     deVenda,
     cartao: pix,
@@ -111,29 +112,29 @@ function passOneDay(): Pass {
   }
 }
 
-/** Combo (cross-sell): One Day + portal do curso Pipeline. Preço fixo R$360, sem âncora. */
-function passOneDayCurso(): Pass {
-  const pix = Number((PRODUTO_ONEDAY_CURSO.precoCentavos / 100).toFixed(2))
-  const deVenda = PRODUTO_ONEDAY_CURSO.precoDeVendaCentavos / 100
+/** Combo (cross-sell): FullPass + portal do curso Pipeline. Preço fixo R$750, sem âncora. */
+function passFullPassCurso(): Pass {
+  const pix = Number((PRODUTO_FULLPASS_CURSO.precoCentavos / 100).toFixed(2))
+  const deVenda = PRODUTO_FULLPASS_CURSO.precoDeVendaCentavos / 100
   const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
   return {
-    id: 'oneday-curso',
-    nome: 'One Day + Curso',
-    subtitulo: '1 dia + portal do curso Pipeline de Dados',
+    id: 'fullpass-curso',
+    nome: 'FullPass + Curso',
+    subtitulo: '3 dias + portal do curso Pipeline de Dados',
     lote: 'Combo',
     pix,
     deVenda,
     cartao: pix,
-    maxParcelas: PRODUTO_ONEDAY_CURSO.maxParcelas,
+    maxParcelas: PRODUTO_FULLPASS_CURSO.maxParcelas,
     desconto,
     destaque: false,
     badge: 'Leva o curso junto',
-    checkout: CHECKOUT_ONEDAY_CURSO,
+    checkout: CHECKOUT_FULLPASS_CURSO,
     cta: 'Garantir combo',
     inclui: [
-      '1 dia de evento (One Day)',
-      'Plenária, Auditório e Área de exposição',
-      'Coffee Break',
+      'Acesso aos 3 dias de evento',
+      'Workshops hands-on, keynotes e tracks',
+      'Rodada de negócios e networking',
       'Portal do curso Lakehouse: Pipeline na Prática',
     ],
   }
@@ -143,9 +144,9 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 247.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 290.',
   ogDescription:
-    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 247.',
+    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 290.',
 })
 
 const STATS = [
@@ -270,8 +271,8 @@ function IngressoCard({ p }: { p: Pass }) {
 export default async function DssbrLandingPage() {
   const full = await passFullPass()
   const oneday = passOneDay()
-  const onedayCurso = passOneDayCurso()
-  const PASSES: Pass[] = [full, oneday, onedayCurso]
+  const fullCurso = passFullPassCurso()
+  const PASSES: Pass[] = [full, oneday, fullCurso]
 
   return (
     <main className="min-h-screen bg-ink text-foam">
@@ -327,8 +328,8 @@ export default async function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            FullPass 3 dias R$ {brl(full.pix)} · One Day (1 dia) a partir de R$ {oneday.pix.toFixed(0)} · combo One Day
-            + curso R$ {onedayCurso.pix.toFixed(0)} · PIX ou cartão em até {full.maxParcelas}x.
+            FullPass 3 dias R$ {brl(full.pix)} · One Day (1 dia) a partir de R$ {oneday.pix.toFixed(0)} · combo
+            FullPass + curso R$ {fullCurso.pix.toFixed(0)} · PIX ou cartão em até {full.maxParcelas}x.
           </p>
 
           {/* GRUPOS & CORPORATIVO */}

@@ -138,7 +138,7 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
         <div>
           <h2 className="text-lg font-bold">Seu perfil</h2>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            O preço de R$ 550 é exclusivo para membros do GU BigData IA e ex-participantes do DSSBR. Não é membro? O investimento é R$ 750.
+            O investimento é R$ 750 pra todo mundo. Isto aqui é só pra sabermos de onde você vem — não muda o preço.
           </p>
         </div>
 
@@ -168,9 +168,6 @@ export default function InscricaoForm({ perfilInicial, precos }: Props) {
                     R$ {precos[p].base.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
-                {p === 'membro' && (
-                  <div className="mt-1 text-xs text-[var(--accent-emerald)]">Preço de comunidade</div>
-                )}
               </label>
             )
           })}

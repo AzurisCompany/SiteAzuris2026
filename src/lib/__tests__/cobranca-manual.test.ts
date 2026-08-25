@@ -137,7 +137,7 @@ describe('precosSugeridosCobranca', () => {
   })
 
   it('a dica diz de onde veio o número', () => {
-    expect(precos['lakehouse-comunidade'].dica).toContain('550') // preço de membro
+    expect(precos['lakehouse-comunidade'].dica).toContain('preço único') // não há mais faixa de comunidade
     expect(precos['dss-2026'].dica).toContain('820') // âncora do preço cheio
   })
 })
