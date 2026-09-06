@@ -1,5 +1,6 @@
 "use client";
 
+import { ROTAS_EVENTO } from "@/lib/eventos/rotas";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,7 +16,7 @@ import { gaEvent } from "@/lib/gtag";
  */
 
 const KEY = "course_floating_dismissed";
-const HIDE_PREFIXES = ["/lakehouse-comunidade", "/produtos/curso-pipelines", "/azuriz", "/admin", "/gubigdata"];
+const HIDE_PREFIXES = ["/lakehouse-comunidade", "/produtos/curso-pipelines", "/azuriz", "/admin", ...ROTAS_EVENTO];
 
 export function CourseFloatingBanner() {
   const pathname = usePathname();

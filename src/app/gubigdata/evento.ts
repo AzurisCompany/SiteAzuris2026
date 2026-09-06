@@ -6,21 +6,27 @@
 // os dois tipos de ingresso (`geral` pago, `associado` grátis) em /admin/ingressos.
 // O encontro anterior sai do ar junto: /gubigdata é sempre o próximo, nunca um arquivo.
 
+import type { EventoPresencial, MarcaEvento } from '@/lib/eventos/tipos'
+
 export const EVENTO_GU_SLUG = 'gubigdata-2026-09'
 
-export interface ItemAgenda {
-  hora: string
-  item: string
-}
-
-export interface Palestrante {
-  nome: string
-  foto: string
-  tema: string
+/** Quem assina o evento: o grupo de usuários, não a Azuris (que só processa a inscrição). */
+export const MARCA_GU: MarcaEvento = {
+  nome: 'GU Big Data & IA',
+  logo: '/gubigdata/logo-gu-bigdata.svg',
+  corHeader: '#0A0F1C', // azul-marinho do site do GU — o logo tem traços brancos
+  site: 'https://gubigdata.com.br',
+  siteRotulo: 'site do GU BigData',
+  etiqueta: 'Eventos da comunidade',
+  sobre:
+    'é o grupo de usuários de dados e inteligência artificial de Curitiba: encontros mensais, grupos de estudo e networking entre profissionais e entusiastas.',
 }
 
 export const EVENTO_GU = {
   slug: EVENTO_GU_SLUG,
+  baseUrl: '/gubigdata',
+  apiUrl: '/api/gubigdata/inscricao',
+  tituloCurto: 'Encontro Presencial GU Big Data & IA',
   titulo:
     'Encontro Presencial GU Big Data & IA – 24 de setembro: Churn Antes que Aconteça, o case Onetopia + Tecnofit',
   chamada: 'Um case real de Advanced Analytics e IA em produção, contado por quem construiu.',
@@ -71,7 +77,7 @@ export const EVENTO_GU = {
     },
     { hora: '20h15', item: 'Perguntas e troca de experiências (painel)' },
     { hora: '21h00', item: 'Encerramento e networking' },
-  ] satisfies ItemAgenda[],
+  ],
   palestrantes: [
     {
       nome: 'Marcio Viana',
@@ -83,7 +89,11 @@ export const EVENTO_GU = {
       foto: '/gubigdata/leandro-krukoski.jpg',
       tema: 'Os desafios técnicos: construção da solução analítica, integração ao ambiente da Tecnofit e a entrada em produção. Líder de Dados, Tecnologia e Transformação Digital na Onetopia.',
     },
-  ] satisfies Palestrante[],
+  ],
   realizacao:
     'Realização: IEP — Instituto de Engenharia do Paraná · Organização: GU Big Data & IA, Rede Sol e SUCESU PR.',
-} as const
+  associacoes: ['Associado IEP', 'Membro GU BigData & IA', 'Participante DSSBR'],
+  // Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a inscrição
+  // por endereço. Espelha PRODUTOS[EVENTO_GU_SLUG] — o form não pode discordar do servidor.
+  enderecoObrigatorioPJ: false,
+} as const satisfies EventoPresencial

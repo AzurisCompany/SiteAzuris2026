@@ -3,6 +3,7 @@ import { sql, PRECO_POR_PERFIL, type InscricaoRow } from '@/lib/db'
 import { PRODUTOS } from '@/lib/produtos'
 import { ORIGEM_ADMIN, PROPOSTA_SLUG, type PrecosSugeridos } from '@/lib/cobranca-manual'
 import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
+import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 import { toISODate } from '@/lib/format'
 
 export const PRODUTO_LABEL: Record<string, string> = {
@@ -11,6 +12,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-fullpass-curso-2026': 'DSS 2026 — FullPass + Portal do Curso',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
+  'cafe-networking-2026-10': 'DSSBR — Café de Networking 06/10',
   'gubigdata-2026-09': 'GU BigData — Encontro 24/09',
   'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
@@ -32,6 +34,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-fullpass-curso-2026': 'FullPass + Curso',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
+  'cafe-networking-2026-10': 'Café DSSBR 06/10',
   'gubigdata-2026-09': 'GU BigData 24/09',
   'gubigdata-2026-08': 'GU BigData 26/08',
   'gubigdata-2026-07': 'GU BigData 30/07',
@@ -60,6 +63,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'dss-one-day-2026': '/dssbr-2026/one-day',
   'dss-fullpass-curso-2026': '/dssbr-2026/fullpass-curso',
   'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
+  'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
   'ett-adesao': '/ett/adesao',
   'ett-assinatura': '/ett/assinatura',
   'preparatorio-dados': '/preparatorio-dados/reserva',
@@ -120,6 +124,7 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
   const oneDay = PRODUTOS['dss-one-day-2026']
   const fullCurso = PRODUTOS['dss-fullpass-curso-2026']
   const gu = PRODUTOS[EVENTO_GU_SLUG]
+  const cafe = PRODUTOS[CAFE_SLUG]
   return {
     'lakehouse-comunidade': {
       centavos: PRECO_POR_PERFIL['nao-membro'].preco_centavos,
@@ -140,6 +145,10 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     [EVENTO_GU_SLUG]: {
       centavos: gu.precoCentavos,
       dica: 'ingresso Geral (associado é gratuito)',
+    },
+    [CAFE_SLUG]: {
+      centavos: cafe.precoCentavos,
+      dica: 'ingresso Geral (convidado é gratuito)',
     },
   }
 }

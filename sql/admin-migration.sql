@@ -139,6 +139,14 @@ VALUES
   ('gubigdata-2026-09', 'associado', 'Associado IEP, GU BigData e Participante DSSBR', 'Gratuito — confirmação na entrada', 0, 1, 1, NULL, NULL)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
 
+-- Seed do café de networking do DSSBR 06/10 (idempotente; NÃO sobrescreve edições do admin).
+-- vendas_ate NULL: nada expira sozinho — ver o incidente de 30/07 acima.
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('cafe-networking-2026-10', 'geral', 'Geral', 'Aberto ao público', 3000, 3, 0, NULL, NULL),
+  ('cafe-networking-2026-10', 'convidado', 'Convidado e associado', 'Gratuito — confirmação na entrada', 0, 1, 1, NULL, NULL)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
 -- Seed da reserva do curso preparatório (idempotente; NÃO sobrescreve edições do admin).
 INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
 VALUES

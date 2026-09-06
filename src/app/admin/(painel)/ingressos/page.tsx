@@ -1,6 +1,7 @@
 import { listarTipos, type TipoIngresso } from '@/lib/tipos-ingresso'
 import { labelProduto, CHECKOUT_URL } from '@/lib/admin-queries'
 import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
+import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 import IngressosManager from './IngressosManager'
 
 export const dynamic = 'force-dynamic'
@@ -10,6 +11,7 @@ export const dynamic = 'force-dynamic'
 const PRODUTOS_COM_TIPOS: Array<{ slug: string; nome: string; checkout: string }> = [
   { slug: 'dss-2026', nome: labelProduto('dss-2026'), checkout: CHECKOUT_URL['dss-2026'] },
   { slug: EVENTO_GU_SLUG, nome: labelProduto(EVENTO_GU_SLUG), checkout: CHECKOUT_URL[EVENTO_GU_SLUG] },
+  { slug: CAFE_SLUG, nome: labelProduto(CAFE_SLUG), checkout: CHECKOUT_URL[CAFE_SLUG] },
 ]
 
 export default async function IngressosPage() {

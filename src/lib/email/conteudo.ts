@@ -126,6 +126,15 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
+    // Cafés de networking do DSSBR: o texto não cita data, serve pra toda edição.
+    case 'cafe-networking-2026-10':
+      return {
+        assunto: 'Inscrição confirmada — Café de Networking do DSSBR',
+        titulo: `Inscrição confirmada, ${nome}!`,
+        destaque: `Recebemos ${valor} da sua inscrição no café de networking do DSSBR.`,
+        paragrafos: ['Apresente este e-mail na entrada. A gente se vê lá.'],
+      }
+
     // Encontros do GU: o texto não cita data, então serve pro corrente e pros passados.
     case 'gubigdata-2026-09':
     case 'gubigdata-2026-08':

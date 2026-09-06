@@ -4,6 +4,7 @@
 // (curso_slug), a descrição sugerida e se PJ precisa de endereço pra nota.
 import { PRODUTOS } from '@/lib/produtos'
 import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
+import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 
 /** Slug das cobranças sem produto — aparece como "Proposta customizada" no admin. */
 export const PROPOSTA_SLUG = 'proposta'
@@ -78,6 +79,14 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     descricaoPadrao: PRODUTOS[EVENTO_GU_SLUG].asaasDescricao,
     // false, como no checkout do GU: evento de comunidade de R$30 não trava por endereço.
     enderecoObrigatorioPJ: PRODUTOS[EVENTO_GU_SLUG].enderecoObrigatorioPJ,
+  },
+  {
+    // Edição CORRENTE do café do DSSBR ([[cafe-networking/evento]]): edição passada
+    // sai do seletor junto com a página, como no GU.
+    slug: CAFE_SLUG,
+    label: 'Café DSSBR',
+    descricaoPadrao: PRODUTOS[CAFE_SLUG].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS[CAFE_SLUG].enderecoObrigatorioPJ,
   },
   {
     slug: 'ett-adesao',

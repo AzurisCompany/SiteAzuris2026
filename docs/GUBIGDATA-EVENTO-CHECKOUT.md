@@ -1,5 +1,10 @@
 # GU BigData — Página de evento + checkout
 
+> **A mecânica agora é compartilhada.** Desde 2026-09-05 a página e o checkout servem também
+> o café do DSSBR (`/cafe-networking`): contrato, componentes, receita de troca de edição e
+> gotchas estão em **[EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md)**. Este documento
+> guarda o que é específico do GU — e o histórico dos incidentes que geraram as regras.
+
 Página de evento estilo marketplace (Sympla-like) + checkout com ingresso pago e gratuito
 pros encontros presenciais do **GU Big Data & IA** (18h30, IEP, Curitiba). Evento do grupo
 de usuários (GU + Rede Sol + SUCESU PR) — a Azuris só processa a inscrição e aparece

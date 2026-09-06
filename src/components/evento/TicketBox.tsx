@@ -22,7 +22,10 @@ const brl = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`
 // stepper −/0/+ à direita, botão verde embaixo. A inscrição é individual
 // (1 ingresso por pessoa), então o stepper vai de 0 a 1 e selecionar um tipo
 // zera o outro — quem quiser mais de um repete o processo.
-export default function TicketBox({ tickets }: { tickets: TicketOption[] }) {
+//
+// Compartilhado por todo evento presencial ([[eventos/tipos]]): quem diz pra onde o
+// botão leva é o `checkoutUrl`, nunca uma rota escrita aqui dentro.
+export default function TicketBox({ tickets, checkoutUrl }: { tickets: TicketOption[]; checkoutUrl: string }) {
   const router = useRouter()
   const [selecionado, setSelecionado] = useState<string | null>(null)
 
@@ -38,7 +41,7 @@ export default function TicketBox({ tickets }: { tickets: TicketOption[] }) {
 
   function comprar() {
     if (!sel) return
-    router.push(`/gubigdata/inscricao?tipo=${encodeURIComponent(sel.tipo_id)}`)
+    router.push(`${checkoutUrl}?tipo=${encodeURIComponent(sel.tipo_id)}`)
   }
 
   if (tickets.length === 0) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { ehRotaDeEvento } from "@/lib/eventos/rotas";
 import posthog from "posthog-js";
 import { usePathname } from "next/navigation";
 import { gaEvent } from "@/lib/gtag";
@@ -10,8 +11,9 @@ const HREF = `https://wa.me/${PHONE}?text=${encodeURIComponent(PREFILL)}`;
 
 export function WhatsAppFab() {
   const pathname = usePathname();
-  // /gubigdata é página de evento da comunidade (cara de marketplace) — sem widgets Azuris.
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/gubigdata")) return null;
+  // Página de evento presencial tem cara de marketplace do produtor — sem widgets
+  // Azuris por cima ([[eventos/rotas]]).
+  if (pathname?.startsWith("/admin") || ehRotaDeEvento(pathname)) return null;
 
   const onClick = () => {
     gaEvent("generate_lead", { method: "whatsapp", source: window.location.pathname });

@@ -182,6 +182,26 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     // inscrição por endereço. Quem for PJ e quiser nota preenche por opção.
     enderecoObrigatorioPJ: false,
   },
+  // Café da manhã de networking do DSSBR no IEP ([[cafe-networking/evento]]). Mesma
+  // arquitetura dos encontros do GU: cada edição é um slug próprio
+  // (`cafe-networking-AAAA-MM`), e `/cafe-networking` é sempre a corrente.
+  'cafe-networking-2026-10': {
+    slug: 'cafe-networking-2026-10',
+    nome: 'Café da Manhã de Networking do DSSBR — 6 de outubro',
+    descricao: '6 de outubro · 8h às 10h30 · IEP, Curitiba',
+    precoCentavos: 3000, // R$ 30,00 — ingresso Geral (fallback se não houver tipos)
+    precoDeVendaCentavos: 0, // sem âncora — evento de relacionamento, preço é o preço
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Ingresso — Café de Networking DSSBR 06/10 (IEP, Curitiba)',
+    voltarUrl: '/cafe-networking',
+    voltarLabel: '← voltar pra página do evento',
+    telefoneObrigatorio: true,
+    // Café de R$30: mostra PF/PJ, mas não trava a inscrição por endereço (mesma
+    // regra do GU — o atrito custa mais que a nota).
+    enderecoObrigatorioPJ: false,
+  },
   // Adesão do English Talk Time ([[project_ecosystem]]). Cobrada UMA VEZ — não vira
   // mensalidade. Dá 2 encontros individuais de 1h, material personalizado, entrada nos
   // encontros de conversação, conta no ETT Player/Speak e os 30 primeiros dias de

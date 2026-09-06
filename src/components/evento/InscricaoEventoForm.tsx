@@ -6,11 +6,7 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
 import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/components/checkout/DadosNota'
-import { EVENTO_GU } from '../evento'
-
-// Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a
-// inscrição por endereço. Espelha PRODUTOS[EVENTO_GU.slug].
-const ENDERECO_OBRIGATORIO_PJ = false
+import type { EventoPresencial } from '@/lib/eventos/tipos'
 
 /** Opção de tipo de ingresso já com disponibilidade resolvida no servidor. */
 export interface TipoGuOption {
@@ -29,8 +25,6 @@ export interface TipoGuOption {
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
 
-const ASSOCIACOES = ['Associado IEP', 'Membro GU BigData & IA', 'Participante DSSBR'] as const
-
 const brl = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`
 
 function maskPhone(v: string): string {
@@ -39,7 +33,18 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuOption[]; defaultTipo?: string | null }) {
+// Checkout de qualquer evento presencial ([[eventos/tipos]]): o formulário não sabe
+// QUAL evento é — recebe o objeto. Endpoint, regra de endereço de PJ e a lista de
+// associações vêm de lá, nunca de constante local.
+export default function InscricaoEventoForm({
+  evento,
+  tipos,
+  defaultTipo,
+}: {
+  evento: EventoPresencial
+  tipos: TipoGuOption[]
+  defaultTipo?: string | null
+}) {
   // Pré-seleção vinda da página do evento (?tipo=...), senão o primeiro disponível.
   const inicial = useMemo(() => {
     const pre = tipos.findIndex((t) => t.tipo_id === defaultTipo && t.disponivel)
@@ -53,7 +58,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
   const [pessoaTipo, setPessoaTipo] = useState<PessoaTipo>('PF')
   const [cpfCnpj, setCpfCnpj] = useState('')
   const [nota, setNota] = useState<NotaValue>(notaInicial)
-  const [associacao, setAssociacao] = useState<string>(ASSOCIACOES[0])
+  const [associacao, setAssociacao] = useState<string>(evento.associacoes[0] ?? '')
   const [billingType, setBillingType] = useState<BillingType>('PIX')
   const [installments, setInstallments] = useState(1)
   const [consent, setConsent] = useState(false)
@@ -75,7 +80,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
     setSubmitting(true)
 
     try {
-      const res = await fetch('/api/gubigdata/inscricao', {
+      const res = await fetch(evento.apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +95,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
                 cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
                 billing_type: billingType,
                 installments: billingType === 'CREDIT_CARD' ? parcelas : 1,
-                ...notaParaPayload(nota, pessoaTipo, ENDERECO_OBRIGATORIO_PJ),
+                ...notaParaPayload(nota, pessoaTipo, evento.enderecoObrigatorioPJ),
               }),
         }),
       })
@@ -115,8 +120,8 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
           payment_type: billingType,
           items: [
             {
-              item_id: EVENTO_GU.slug,
-              item_name: `Encontro Presencial GU BigData & IA — ${EVENTO_GU.dataCurta}`,
+              item_id: evento.slug,
+              item_name: `${evento.titulo} — ${evento.dataCurta}`,
               item_variant: sel.tipo_id,
               price: valorCobradoReais,
               quantity: 1,
@@ -144,7 +149,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
         <p className="mt-2 text-sm text-slate-700">
           {confirmado.duplicada
             ? 'Já existe uma inscrição com esse e-mail pra esse evento — não precisa fazer de novo.'
-            : `Te esperamos dia ${EVENTO_GU.dataCurta} a partir das ${EVENTO_GU.inicio} no ${EVENTO_GU.local.sigla} (${EVENTO_GU.local.endereco}).`}
+            : `Te esperamos dia ${evento.dataCurta} a partir das ${evento.inicio} no ${evento.local.sigla} (${evento.local.endereco}).`}
         </p>
         <p className="mt-3 text-xs text-slate-500">
           Sua condição de associado/participante será conferida no credenciamento.
@@ -240,7 +245,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">Sou associado/participante de</label>
             <select value={associacao} onChange={(e) => setAssociacao(e.target.value)} className={campo}>
-              {ASSOCIACOES.map((a) => (
+              {evento.associacoes.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
             </select>
@@ -261,7 +266,7 @@ export default function InscricaoGuForm({ tipos, defaultTipo }: { tipos: TipoGuO
               value={nota}
               onChange={setNota}
               pessoaTipo={pessoaTipo}
-              enderecoObrigatorioPJ={ENDERECO_OBRIGATORIO_PJ}
+              enderecoObrigatorioPJ={evento.enderecoObrigatorioPJ}
             />
           </>
         )}
