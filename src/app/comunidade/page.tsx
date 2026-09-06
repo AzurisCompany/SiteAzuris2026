@@ -124,7 +124,7 @@ export default function ComunidadePage() {
                   Próximo encontro presencial · GU BigData &amp; IA
                 </div>
                 <h2 className="mt-1 text-xl font-semibold">
-                  {`${EVENTO_GU.dataTitulo}, ${EVENTO_GU.inicio} — DSSBR ao Vivo e Process Mining na Saúde`}
+                  {`${EVENTO_GU.dataTitulo}, ${EVENTO_GU.inicio} — ${EVENTO_GU.tema}`}
                 </h2>
                 <p className="mt-1 text-sm text-foam/70">
                   {`${EVENTO_GU.local.sigla}, Curitiba · ${EVENTO_GU.palestrantes

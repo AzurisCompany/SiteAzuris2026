@@ -64,6 +64,24 @@ describe('encontro corrente do GU BigData', () => {
     }
   })
 
+  // As páginas do GU não podem ter data escrita à mão: em 26/08 as duas `description`
+  // de metadata ficaram falando do encontro de agosto depois da troca (SEO e link
+  // compartilhado anunciando evento errado, sem quebrar build nenhum). Quem diz a data
+  // é o evento.ts — aqui a gente reprova qualquer dd/mm solto nos arquivos da rota.
+  it('nenhuma página do GU carrega data de encontro escrita à mão', () => {
+    const paginas = [
+      'src/app/gubigdata/page.tsx',
+      'src/app/gubigdata/inscricao/page.tsx',
+      'src/app/gubigdata/inscricao/InscricaoGuForm.tsx',
+      'src/app/gubigdata/TicketBox.tsx',
+    ]
+    for (const p of paginas) {
+      const fonte = readFileSync(join(RAIZ, p), 'utf8')
+      const datas = fonte.match(/\b\d{2}\/\d{2}\b/g) ?? []
+      expect(datas, `${p} tem data fixa (${datas.join(', ')}) — use EVENTO_GU`).toEqual([])
+    }
+  })
+
   it('as imagens que a página do evento referencia existem no public/', () => {
     const arquivos = [EVENTO_GU.banner.src, ...EVENTO_GU.palestrantes.map((p) => p.foto)]
     for (const a of arquivos) {

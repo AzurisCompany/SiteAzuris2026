@@ -21,8 +21,7 @@ const PRODUTO = getProduto(EVENTO_GU.slug)
 
 export const metadata: Metadata = {
   title: `Inscrição — Encontro Presencial GU BigData & IA · ${EVENTO_GU.dataCurta}`,
-  description:
-    'Encontro presencial do GU BigData & IA em 26/08 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para associados.',
+  description: EVENTO_GU.checkoutDescricao,
   robots: { index: false, follow: false }, // página de checkout; a página do evento é a indexável
 }
 

@@ -11,6 +11,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-fullpass-curso-2026': 'DSS 2026 — FullPass + Portal do Curso',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
+  'gubigdata-2026-09': 'GU BigData — Encontro 24/09',
   'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
   'ett-adesao': 'English Talk Time — Adesão',
@@ -31,6 +32,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-fullpass-curso-2026': 'FullPass + Curso',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
+  'gubigdata-2026-09': 'GU BigData 24/09',
   'gubigdata-2026-08': 'GU BigData 26/08',
   'gubigdata-2026-07': 'GU BigData 30/07',
   'ett-adesao': 'ETT Adesão',
@@ -57,7 +59,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'dss-2026': '/dssbr-2026/inscricao',
   'dss-one-day-2026': '/dssbr-2026/one-day',
   'dss-fullpass-curso-2026': '/dssbr-2026/fullpass-curso',
-  'gubigdata-2026-08': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
+  'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'ett-adesao': '/ett/adesao',
   'ett-assinatura': '/ett/assinatura',
   'preparatorio-dados': '/preparatorio-dados/reserva',
@@ -70,6 +72,7 @@ export const CHECKOUT_URL: Record<string, string> = {
  * /gubigdata pro encontro de julho mandaria o admin pra página de outro evento.
  */
 export const PRODUTOS_ENCERRADOS = new Set<string>([
+  'gubigdata-2026-08',
   'gubigdata-2026-07',
   // Combo One Day + curso (R$360), encerrado em 25/08/2026: o combo com curso passou
   // a existir só no FullPass ('dss-fullpass-curso-2026').

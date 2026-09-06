@@ -131,6 +131,23 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   // encontro corrente é EVENTO_GU_SLUG em [[gubigdata/evento]] — as páginas e a
   // rota de API leem de lá, não daqui. Encontro passado fica neste registry só pra
   // o histórico continuar sabendo o nome do que foi vendido.
+  'gubigdata-2026-09': {
+    slug: 'gubigdata-2026-09',
+    nome: 'Encontro Presencial GU BigData & IA — 24 de setembro',
+    descricao: '24 de setembro · 18h30 · IEP, Curitiba',
+    precoCentavos: 3000, // R$ 30,00 — ingresso Geral (fallback se não houver tipos)
+    precoDeVendaCentavos: 0, // sem âncora — evento de comunidade, preço é o preço
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Ingresso — Encontro GU BigData & IA 24/09 (IEP, Curitiba)',
+    voltarUrl: '/gubigdata',
+    voltarLabel: '← voltar pra página do evento',
+    telefoneObrigatorio: true,
+    // Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a
+    // inscrição por endereço. Quem for PJ e quiser nota preenche por opção.
+    enderecoObrigatorioPJ: false,
+  },
   'gubigdata-2026-08': {
     slug: 'gubigdata-2026-08',
     nome: 'Encontro Presencial GU BigData & IA — 26 de agosto',

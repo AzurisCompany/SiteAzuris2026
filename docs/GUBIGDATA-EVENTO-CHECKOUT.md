@@ -5,8 +5,8 @@ pros encontros presenciais do **GU Big Data & IA** (18h30, IEP, Curitiba). Event
 de usuários (GU + Rede Sol + SUCESU PR) — a Azuris só processa a inscrição e aparece
 discretamente no rodapé. Em produção desde 2026-07-11.
 
-**Encontro em cartaz: 26 de agosto de 2026** — DSSBR ao Vivo (Alessandro Binhara) e Process
-Mining na Saúde (Marcelo Dallagassa). Geral R$ 30 · associado grátis.
+**Encontro em cartaz: 24 de setembro de 2026** — "Churn Antes que Aconteça", o case
+Onetopia + Tecnofit (Marcio Viana e Leandro Krukoski). Geral R$ 30 · associado grátis.
 
 ## Um encontro, um produto
 
@@ -32,6 +32,12 @@ da `/comunidade` leem de lá — nenhum deles tem data escrita à mão.
    **sem `vendas_ate`** — ver o incidente de 30/07 mais abaixo. Rodar `POST /api/admin/migrate`
    depois do deploy.
 6. Banner e fotos em `public/gubigdata/` (o canário do teste reprova caminho que não existe).
+7. **Desligar os tipos do encontro que saiu** em `/admin/ingressos` (`ativo=false`) — o seed
+   novo não desliga o velho, e tipo ativo de evento passado continua vendendo.
+
+Passos 1–6 são deploy; o 7 é banco, e **os dois precisam acontecer**: só o deploy troca a
+página mas deixa o ingresso velho comprável; só o banco tira o ingresso mas deixa a página
+anunciando o evento que já foi.
 
 O canário `src/lib/__tests__/gubigdata-evento.test.ts` cobre os passos 1–6: esquecer um deles
 não quebra build nenhum — o site sobe bonito e a venda cai no balde errado.
@@ -130,4 +136,20 @@ de vendas (`lib/vigilancia.ts`) existe por causa desse incidente.
 - Screenshots desktop/mobile (playwright-core, receita na memória) — página e checkout ok.
 - Fluxo PAGO ainda sem exercício real contra o Asaas (mesmo pipeline do DSSBR; falta 1 PIX de R$ 30).
 
-Última revisão: **2026-08-20**.
+## Troca de 26/08 → 24/09 (2026-09-05)
+
+Feita pela receita acima, com duas correções de rota:
+
+- **As duas `description` de metadata tinham a data escrita à mão** (`'Dia 26/08 às 18h30…'`
+  e `'…em 26/08 no IEP…'`), apesar de o doc afirmar que nenhuma página tem data fixa. Depois
+  da troca de agosto elas ficaram anunciando o encontro errado pro Google e pro preview de
+  link — sem quebrar build nenhum. Agora vêm de `EVENTO_GU.metaDescricao` /
+  `EVENTO_GU.checkoutDescricao`, e há canário reprovando qualquer `dd/mm` solto nos arquivos
+  de `src/app/gubigdata/`.
+- **O card da `/comunidade` citava os temas de agosto em texto fixo** ("DSSBR ao Vivo e
+  Process Mining na Saúde"). Virou `EVENTO_GU.tema`.
+- Campos novos no `EVENTO_GU`: `tema`, `metaDescricao`, `checkoutDescricao`.
+- O encontro de 26/08 ficou **10 dias vendendo depois de acontecer** (tipos ativos, sem
+  `vendas_ate`, que é a política da casa). O passo 7 da receita existe por causa disso.
+
+Última revisão: **2026-09-05**.

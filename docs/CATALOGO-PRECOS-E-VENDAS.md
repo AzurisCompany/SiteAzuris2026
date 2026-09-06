@@ -105,7 +105,7 @@ oculto. **Comissão e campanha** (vendedora, parceiro) → cupom. Ver
 ⚠️ **Isto é uma foto, não a verdade.** A verdade vive em `/admin/ingressos`, `/admin/cupons` e
 no registry. Se esta seção divergir do painel, o painel está certo.
 
-**Encontro GU BigData 26/08** (tipos, `/admin/ingressos`)
+**Encontro GU BigData 24/09** (tipos, `/admin/ingressos`)
 
 | tipo | preço | parcelas | vagas | prazo |
 |---|---|---|---|---|
@@ -128,7 +128,7 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | FullPass + portal do curso | R$ 750 | combo vigente; sem âncora; **fulfillment do portal é manual**. O FullPass sozinho é R$ 670 — o portal entra por R$ 80 |
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
-| GU BigData | R$ 30 / grátis | encontro em cartaz é **26/08** (`gubigdata-2026-08`); os tipos vivem no catálogo, o registry é só fallback. O de 30/07 é evento passado — ver `PRODUTOS_ENCERRADOS` |
+| GU BigData | R$ 30 / grátis | encontro em cartaz é **24/09** (`gubigdata-2026-09`); os tipos vivem no catálogo, o registry é só fallback. Os de 30/07 e 26/08 são eventos passados — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |
 | Lakehouse | R$ 750 | **preço único desde 25/08/2026** — acabaram o preço de comunidade (R$ 550) e o bônus do ingresso do DSSBR incluso. O perfil membro/não-membro sobrou só pra segmentar vaga e histórico. Canário: `precos-lakehouse.test.ts` |
 
@@ -183,8 +183,12 @@ ele não tem tipos cadastrados, então não há catálogo de onde derivar. Caná
 
 ## 8. Armadilhas registradas
 
-- **Nada expira sozinho.** Política do Binhara desde 01/08: `vendas_ate` vazio ao cadastrar tipo.
-  Já fechou o checkout do GU na cara do público no dia do evento.
+- **Nada expira sozinho — o que também significa que nada FECHA sozinho.** Política do Binhara
+  desde 01/08: `vendas_ate` vazio ao cadastrar tipo, porque uma data digitada já fechou o
+  checkout do GU na cara do público no dia do evento. O preço a pagar é o outro lado: o
+  encontro de 26/08 continuou comprável por **10 dias depois de acontecer**. Trocar de evento
+  inclui **desligar o tipo do anterior** (`ativo=false`) — passo 7 da receita em
+  [GUBIGDATA-EVENTO-CHECKOUT.md](./GUBIGDATA-EVENTO-CHECKOUT.md).
 - **`tipo_id` e código de cupom são chaves lógicas.** Trocar quebra links distribuídos e
   desliga o histórico — as vendas antigas ficam com o valor velho gravado. Aconteceu: a venda
   paga de 14/08 aponta pro cupom `nil-2026`, que **não existe mais** no cadastro; ela some do
@@ -212,4 +216,4 @@ ele não tem tipos cadastrados, então não há catálogo de onde derivar. Caná
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-08-25**.
+Última revisão: **2026-09-05**.

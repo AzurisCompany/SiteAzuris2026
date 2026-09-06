@@ -21,11 +21,10 @@ const PRODUTO = getProduto(EVENTO_GU.slug)
 
 export const metadata: Metadata = {
   title: `${EVENTO_GU.titulo} | Eventos GU BigData & IA`,
-  description:
-    'Dia 26/08 às 18h30 no IEP, Curitiba: demonstração do sistema de transmissão do DSSBR com Alessandro Binhara e Process Mining na saúde com Marcelo Dallagassa. Ingresso Geral R$ 30 · gratuito para associados IEP, GU BigData e participantes DSSBR.',
+  description: EVENTO_GU.metaDescricao,
   openGraph: {
     title: EVENTO_GU.titulo,
-    description: 'DSSBR ao Vivo e Process Mining na Saúde — 26/08, 18h30, IEP Curitiba.',
+    description: `${EVENTO_GU.tema} — ${EVENTO_GU.dataCurta}, ${EVENTO_GU.inicio}, ${EVENTO_GU.local.sigla} Curitiba.`,
     type: 'website',
     images: [{ url: EVENTO_GU.banner.src, width: EVENTO_GU.banner.largura, height: EVENTO_GU.banner.altura }],
   },

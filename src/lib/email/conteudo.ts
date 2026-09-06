@@ -127,6 +127,7 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
       }
 
     // Encontros do GU: o texto não cita data, então serve pro corrente e pros passados.
+    case 'gubigdata-2026-09':
     case 'gubigdata-2026-08':
     case 'gubigdata-2026-07':
       return {
