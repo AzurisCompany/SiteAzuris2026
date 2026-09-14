@@ -63,6 +63,31 @@ cliente"), e com ponto/barra o Excel mantém como texto. 4 testes novos (259 no 
 migração. Deploy + push feitos. **Não conferido no arquivo de prod**: o curl do export é
 bloqueado pelo classificador (dados pessoais) — conferência é baixar pelo `/admin/vendas`.
 
+## 7. Ingressos VIP e Business com lote que vira por quantidade (`a825797`)
+
+Pedido: *"VIP 10 primeiros R$957, depois 15 a R$1275 e último lote 15 a 1657; Business 10 a
+R$757, 10 a R$984 e 10 a R$1279 — crie os checkout"*.
+
+- `/dssbr-2026/vip` e `/dssbr-2026/business`, produtos `dss-vip-2026` / `dss-business-2026`.
+- Os 3 lotes de cada um são tipos **ativos ao mesmo tempo** com `limite_qtd`, semeados pela
+  migração (49/49). `lib/lotes-quantidade.ts` escolhe o primeiro com vaga; o servidor
+  (`tipoObrigatorio`) só vende esse — sem tipo 400, lote que fechou 409 com o nome do novo.
+- Benefícios copiados dos cards do dssbr.com.br + "tudo do FullPass" (**suposição, a confirmar**).
+- Escada do checkout passou a formatar milhar (`1.275`) sem quebrar linha — vale pro FullPass.
+
+**Prod:** antes 176 inscrições / 12 tipos → depois 176 / **18**. Entre deploy e migração as
+páginas mostraram "As vendas abrem em instantes" (esperado). Conferido no ar: VIP R$ 957 e
+Business R$ 757, "restam 10", lotes 2 e 3 "em breve"; POST sem tipo 400, lote-2 409, lote-1 passa
+do portão (parou no CPF inválido de propósito — nenhuma cobrança gerada). FullPass sem regressão.
+
+**Armadilha:** `limite_qtd = 0` no admin vira **sem limite** (a API grava `null`). Pra fechar um
+lote, desligue — não zere.
+
+**Em aberto:** Business soma **30**, o card do dssbr.com.br diz "Apenas 40" · confirmar "tudo do
+FullPass" · botões "Lista de espera" do dssbr.com.br (`pipeline-azuris.vercel.app/lp/vip` e
+`/lp/bussiness`) precisam apontar pros checkouts novos · nenhum PIX real ainda · pendente segura
+vaga até 3 dias.
+
 ## Fica pendente
 
 - ~~Push~~ feito: `origin/main` == `HEAD`.
