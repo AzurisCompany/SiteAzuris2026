@@ -85,6 +85,32 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
+    case 'dss-vip-2026':
+      return {
+        assunto: 'Ingresso VIP confirmado — DSS 2026',
+        titulo: `Ingresso VIP garantido, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu ingresso VIP do Data Science Summit Brasil 2026.`,
+        paragrafos: [
+          `O congresso é de ${DSS_LOCAL}. Seu ingresso VIP dá acesso aos três dias, ao Jantar Oficial, ao roundtable C-level e às áreas VIP.`,
+          'Perto do evento mandamos credenciamento, grade e os detalhes do jantar e do roundtable.',
+          'Guarde este e-mail: ele é o seu comprovante.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+
+    case 'dss-business-2026':
+      return {
+        assunto: 'Ingresso Business confirmado — DSS 2026',
+        titulo: `Ingresso Business garantido, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu ingresso Business do Data Science Summit Brasil 2026.`,
+        paragrafos: [
+          `O congresso é de ${DSS_LOCAL}. Seu ingresso Business dá acesso aos três dias, ao Coffee Break Premium e à área de coworking.`,
+          'Perto do evento mandamos credenciamento, grade e tudo o que você precisa saber pra chegar.',
+          'Guarde este e-mail: ele é o seu comprovante.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+
     case 'dss-one-day-2026':
       return {
         assunto: 'Passe One Day confirmado — DSS 2026',

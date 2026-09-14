@@ -175,3 +175,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_cupons_codigo ON cupons(codigo);
 -- Quando o ingresso foi gerado (NULL = ainda não). Marcação manual na lista de vendas.
 -- Aditiva e nullable: nenhuma linha existente muda.
 ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS ingresso_gerado_em TIMESTAMPTZ;
+
+-- Lotes VIP e Business do DSS 2026 (idempotente; NÃO sobrescreve edições do admin).
+-- Os três lotes nascem ativos, cada um com limite_qtd: o checkout vende o primeiro com
+-- vaga e vira sozinho quando ele fecha (lib/lotes-quantidade.ts).
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('dss-vip-2026', 'lote-1', 'Lote 1', 'Os 10 primeiros ingressos VIP', 95700, 3, 0, NULL, 10),
+  ('dss-vip-2026', 'lote-2', 'Lote 2', '15 ingressos VIP', 127500, 3, 1, NULL, 15),
+  ('dss-vip-2026', 'lote-3', 'Lote 3', 'Últimos 15 ingressos VIP', 165700, 3, 2, NULL, 15)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('dss-business-2026', 'lote-1', 'Lote 1', 'Os 10 primeiros ingressos Business', 75700, 3, 0, NULL, 10),
+  ('dss-business-2026', 'lote-2', 'Lote 2', '10 ingressos Business', 98400, 3, 1, NULL, 10),
+  ('dss-business-2026', 'lote-3', 'Lote 3', 'Últimos 10 ingressos Business', 127900, 3, 2, NULL, 10)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;

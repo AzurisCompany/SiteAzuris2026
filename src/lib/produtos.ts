@@ -32,6 +32,12 @@ export interface ProdutoConfig {
    * (evento de comunidade barato, onde o atrito custa mais que a nota).
    */
   enderecoObrigatorioPJ: boolean
+  /**
+   * Só vende COM tipo de ingresso, e só o lote vigente por quantidade
+   * ([[lotes-quantidade]]). Sem isto, um POST sem `tipo` cairia no `precoCentavos`
+   * deste registry — o preço do Lote 1 — mesmo com o Lote 1 esgotado.
+   */
+  tipoObrigatorio?: boolean
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
@@ -121,6 +127,43 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     voltarLabel: '← voltar pro DSS 2026',
     telefoneObrigatorio: true,
     enderecoObrigatorioPJ: true, // combo corporativo quase sempre vira nota
+  },
+  // VIP e Business do DSS 2026 — lotes que viram SOZINHOS por quantidade
+  // ([[lotes-quantidade]]). Os três lotes de cada um são tipos de ingresso ativos ao
+  // mesmo tempo, com `limite_qtd` (semeados pela migração); o checkout vende o primeiro
+  // com vaga. O preço daqui NUNCA é cobrado (`tipoObrigatorio`) — é só o "a partir de"
+  // de quando o banco não responde, e por isso é o do Lote 1.
+  'dss-vip-2026': {
+    slug: 'dss-vip-2026',
+    nome: 'DSS 2026 — Ingresso VIP',
+    descricao: 'VIP · 3 dias · 27 a 29 de outubro · IEP, Curitiba',
+    precoCentavos: 95700, // R$ 957,00 — Lote 1 (10 ingressos); 1.275 (15) e 1.657 (15) depois
+    precoDeVendaCentavos: 0, // a régua é a escada de lotes, não uma âncora riscada
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros (mesma regra do FullPass)
+    asaasDescricao: 'Ingresso DSS 2026 — VIP (3 dias)',
+    voltarUrl: '/dssbr-2026',
+    voltarLabel: '← voltar pro DSS 2026',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
+    tipoObrigatorio: true,
+  },
+  'dss-business-2026': {
+    slug: 'dss-business-2026',
+    nome: 'DSS 2026 — Ingresso Business',
+    descricao: 'Business · 3 dias · 27 a 29 de outubro · IEP, Curitiba',
+    precoCentavos: 75700, // R$ 757,00 — Lote 1 (10 ingressos); 984 (10) e 1.279 (10) depois
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3,
+    asaasDescricao: 'Ingresso DSS 2026 — Business (3 dias)',
+    voltarUrl: '/dssbr-2026',
+    voltarLabel: '← voltar pro DSS 2026',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: true,
+    tipoObrigatorio: true,
   },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados

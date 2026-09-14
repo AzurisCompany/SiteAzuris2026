@@ -10,6 +10,8 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
   'dss-one-day-2026': 'DSS 2026 — Passe One Day',
   'dss-fullpass-curso-2026': 'DSS 2026 — FullPass + Portal do Curso',
+  'dss-vip-2026': 'DSS 2026 — Ingresso VIP',
+  'dss-business-2026': 'DSS 2026 — Ingresso Business',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'cafe-networking-2026-10': 'DSSBR — Café de Networking 06/10',
@@ -32,6 +34,8 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-2026': 'Ingressos DSS',
   'dss-one-day-2026': 'One Day DSS',
   'dss-fullpass-curso-2026': 'FullPass + Curso',
+  'dss-vip-2026': 'VIP DSS',
+  'dss-business-2026': 'Business DSS',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'cafe-networking-2026-10': 'Café DSSBR 06/10',
@@ -62,6 +66,8 @@ export const CHECKOUT_URL: Record<string, string> = {
   'dss-2026': '/dssbr-2026/inscricao',
   'dss-one-day-2026': '/dssbr-2026/one-day',
   'dss-fullpass-curso-2026': '/dssbr-2026/fullpass-curso',
+  'dss-vip-2026': '/dssbr-2026/vip',
+  'dss-business-2026': '/dssbr-2026/business',
   'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
   'ett-adesao': '/ett/adesao',
@@ -141,6 +147,16 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     'dss-fullpass-curso-2026': {
       centavos: fullCurso.precoCentavos,
       dica: 'combo: FullPass (3 dias) + portal do curso Pipeline',
+    },
+    // Lote vira por quantidade: o sugerido é o Lote 1. Cobrança manual NÃO confere o
+    // lote vigente — escolher o tipo (lote) no seletor é o que ocupa a vaga certa.
+    'dss-vip-2026': {
+      centavos: PRODUTOS['dss-vip-2026'].precoCentavos,
+      dica: 'Lote 1 do VIP · 1.275 e 1.657 nos lotes seguintes — confira o vigente em /admin/ingressos',
+    },
+    'dss-business-2026': {
+      centavos: PRODUTOS['dss-business-2026'].precoCentavos,
+      dica: 'Lote 1 do Business · 984 e 1.279 nos lotes seguintes — confira o vigente em /admin/ingressos',
     },
     [EVENTO_GU_SLUG]: {
       centavos: gu.precoCentavos,

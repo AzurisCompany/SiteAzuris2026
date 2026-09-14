@@ -121,6 +121,15 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | Estudante | R$ 400 | R$ 670 | 3x | **50** | só por `?tipo=estudante` |
 | ~~Lote 1~~ | ~~R$ 570~~ | | | | **desativado em 25/08/2026** — fica no cadastro pro histórico saber o nome do que vendeu |
 
+**DSS 2026 — VIP e Business** (tipos, `/admin/ingressos`; **lote vira sozinho por quantidade**, desde 14/09)
+
+| produto | checkout | Lote 1 | Lote 2 | Lote 3 | total |
+|---|---|---|---|---|---|
+| VIP (`dss-vip-2026`) | `/dssbr-2026/vip` | 10 × R$ 957 | 15 × R$ 1.275 | 15 × R$ 1.657 | 40 |
+| Business (`dss-business-2026`) | `/dssbr-2026/business` | 10 × R$ 757 | 10 × R$ 984 | 10 × R$ 1.279 | 30 |
+
+3x no cartão, sem âncora, sem prazo. Ver §7.2.
+
 **Preço único (registry, exige deploy pra mudar)**
 
 | produto | preço | observação |
@@ -182,6 +191,25 @@ texto fixo: o degrau riscado é o tipo antigo que continua cadastrado com `ativo
 O **One Day** tem escada própria e fixa em [`one-day/lotes.ts`](../src/app/dssbr-2026/one-day/lotes.ts):
 ele não tem tipos cadastrados, então não há catálogo de onde derivar. Canário
 `precos-one-day.test.ts` amarra o `atual` de lá ao `precoCentavos` do registry.
+
+## 7.2 Lote que vira por quantidade (VIP e Business)
+
+O FullPass vira de lote **na mão** (desliga um, liga o outro). VIP e Business não: os três
+lotes de cada um ficam **ativos ao mesmo tempo**, cada um com `limite_qtd`, e
+[`lotes-quantidade.ts`](../src/lib/lotes-quantidade.ts) escolhe o vigente — o primeiro, por
+`ordem`, que ainda tem vaga. Fechou o 10º do Lote 1, a página e o servidor passam a vender o
+Lote 2 sem ninguém mexer.
+
+- **O servidor só aceita o lote vigente** (`tipoObrigatorio` no registry). POST sem `tipo` →
+  400 (o fallback do registry é o preço do Lote 1). POST com lote que fechou enquanto a pessoa
+  preenchia → 409 "o lote mudou — agora é Lote 2, recarregue".
+- **Lotação conta pendente.** PIX gerado e não pago segura a vaga até vencer (3 dias) — pode
+  empurrar alguém pro lote seguinte antes do lote fechar de verdade.
+- **Pular um lote:** desligue ele no admin (`ativo=false`); some da escada.
+- **Mudar vagas ou preço:** edite o tipo no admin — sem deploy. **Não use limite 0** pra
+  "fechar" um lote: o admin grava 0 como *sem limite*. Pra fechar, desligue.
+- **Cobrança avulsa não confere o lote vigente** — escolher o lote certo no seletor é o que
+  ocupa a vaga certa.
 
 ## 8. Armadilhas registradas
 

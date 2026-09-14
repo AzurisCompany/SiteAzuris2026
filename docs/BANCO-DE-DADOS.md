@@ -101,7 +101,7 @@ do `sql/admin-migration.sql`, toda em `ADD COLUMN IF NOT EXISTS` / `CREATE TABLE
 - Seeds (tipos do GU, reserva do preparatório) usam `ON CONFLICT DO NOTHING`: **não** sobrescrevem
   o que você editou no admin.
 
-Hoje são **47 statements**. Os scripts em `sql/` (`run-migration.mjs`, `run-schema.mjs`,
+Hoje são **49 statements**. Os scripts em `sql/` (`run-migration.mjs`, `run-schema.mjs`,
 `check-asaas-prod.mjs`, `ga4-poll.mjs`) são ferramentas locais, não fazem parte do deploy.
 
 ## 6. Cuidados

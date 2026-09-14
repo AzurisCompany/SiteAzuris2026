@@ -19,8 +19,10 @@ import {
   ehGratuito,
   disponibilidadeDoTipo,
   contarInscritosPorTipo,
+  listarTipos,
   type TipoIngresso,
 } from '@/lib/tipos-ingresso'
+import { escadaPorQuantidade } from '@/lib/lotes-quantidade'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
 import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 
@@ -69,6 +71,22 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     return erro(400, 'Telefone inválido (DDD + número, 10 ou 11 dígitos)')
   }
   if (body.consentimento !== true) return erro(400, 'É necessário aceitar os termos de uso dos dados (LGPD)')
+
+  // Produto de lote por quantidade (VIP/Business): sem tipo não vende — o fallback do
+  // registry é o preço do Lote 1 — e com tipo, só o lote vigente. Página aberta há
+  // horas com o Lote 1 que acabou de fechar recebe o motivo, não um "indisponível" seco.
+  if (PRODUTO.tipoObrigatorio) {
+    if (!body.tipo) return erro(400, 'Tipo de ingresso obrigatório')
+    const escada = escadaPorQuantidade(
+      await listarTipos(PRODUTO.slug),
+      await contarInscritosPorTipo(PRODUTO.slug),
+      hojeBRT()
+    )
+    if (!escada.vigente) return erro(409, 'Ingressos esgotados')
+    if (escada.vigente.tipo_id !== body.tipo) {
+      return erro(409, `O lote mudou enquanto você preenchia — agora é ${escada.vigente.nome}. Recarregue a página pra ver o valor.`)
+    }
+  }
 
   // Tipo de ingresso (se veio) + janela de vendas + lotação.
   let tipo: TipoIngresso | null = null

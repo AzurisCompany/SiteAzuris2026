@@ -50,6 +50,11 @@ interface Props {
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
 
+/** Degrau da escada: "1.275" com milhar, sem centavos quando inteiro — cabe em 3 colunas no celular. */
+function reaisEscada(v: number): string {
+  return v.toLocaleString('pt-BR', { maximumFractionDigits: 2 })
+}
+
 function maskPhone(v: string): string {
   const d = v.replace(/\D/g, '').slice(0, 11)
   if (d.length <= 10) return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
@@ -208,12 +213,16 @@ export default function InscricaoForm({
                 <div className="text-[11px] font-semibold text-[var(--text-muted)]">{d.nome}</div>
                 {d.valorComCupom != null ? (
                   <>
-                    <div className="text-xs text-[var(--text-muted)] line-through">R$ {d.valor}</div>
-                    <div className="text-lg font-black text-[var(--accent-emerald)]">R$ {d.valorComCupom}</div>
+                    <div className="text-xs text-[var(--text-muted)] line-through">R$ {reaisEscada(d.valor)}</div>
+                    <div className="whitespace-nowrap text-base font-black text-[var(--accent-emerald)] sm:text-lg">
+                      R$ {reaisEscada(d.valorComCupom)}
+                    </div>
                   </>
                 ) : (
-                  <div className={`text-lg font-black ${d.estado === 'encerrado' ? 'line-through' : ''}`}>
-                    R$ {d.valor}
+                  <div
+                    className={`whitespace-nowrap text-base font-black sm:text-lg ${d.estado === 'encerrado' ? 'line-through' : ''}`}
+                  >
+                    R$ {reaisEscada(d.valor)}
                   </div>
                 )}
                 <div
