@@ -52,9 +52,21 @@ Conferido no ar: marcar e desmarcar a venda **123** (já `is_teste`, paga) → d
   e subiram **dois deploys idênticos** do mesmo commit. Conferir com `vercel ls --prod` antes de
   repetir.
 
+## 6. Depois: o CNPJ que virava 8,72889E+13 no CSV
+
+O Binhara abriu o CSV de contatos do DSS no Excel e o `documento` de PJ veio `8,72889E+13`.
+CNPJ cru (14 dígitos) o Excel lê como número — e guarda só 15 dígitos de precisão, então **os
+arquivos já baixados perderam dígitos de vez**. CPF com zero à esquerda perdia o zero.
+
+Fix `edc42a3`: a coluna sai formatada via `documentoTexto` (o mesmo do "copiar dados do
+cliente"), e com ponto/barra o Excel mantém como texto. 4 testes novos (259 no total), sem
+migração. Deploy + push feitos. **Não conferido no arquivo de prod**: o curl do export é
+bloqueado pelo classificador (dados pessoais) — conferência é baixar pelo `/admin/vendas`.
+
 ## Fica pendente
 
-- **Push:** `origin/main` segue em `620fb02` — agora **8 commits** só local + prod.
+- ~~Push~~ feito: `origin/main` == `HEAD`.
+- **Baixar de novo o CSV do DSS** — os arquivos antigos têm CNPJ truncado.
 - Filtro "ingresso gerado / não gerado" na lista — não feito. Se entrar, a query passa a
   depender da coluna: ajustar o canário e só deployar **com a migração já rodada**.
 - `tsc` acusa erro antigo em `checkout-produto.test.ts` (fixture sem `oculto`) — não afeta build.
