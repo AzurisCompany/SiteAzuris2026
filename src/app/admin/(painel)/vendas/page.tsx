@@ -23,6 +23,7 @@ import { dadosClienteTexto } from '@/lib/dados-cliente'
 import type { InscricaoRow } from '@/lib/db'
 import Filtros from './Filtros'
 import TesteButton from './TesteButton'
+import IngressoGeradoButton from './IngressoGeradoButton'
 import CancelarButton from './CancelarButton'
 import CopiarEmailsButton from './CopiarEmailsButton'
 import CopiarClienteButton from './CopiarClienteButton'
@@ -416,6 +417,11 @@ export default async function VendasPage({
                     >
                       nova cobrança
                     </Link>
+                    {/* Só venda paga (inclui inscrição gratuita) gera ingresso; a marca continua
+                        visível se a venda for estornada depois — é o aviso pra revogar. */}
+                    {(r.status === 'paid' || r.ingresso_gerado_em) && (
+                      <IngressoGeradoButton id={r.id} geradoEm={r.ingresso_gerado_em} />
+                    )}
                     <TesteButton id={r.id} isTeste={r.is_teste} />
                     {(r.status === 'pending' || r.status === 'overdue') && (
                       <>

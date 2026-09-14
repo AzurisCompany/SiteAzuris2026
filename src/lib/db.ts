@@ -80,6 +80,8 @@ export interface InscricaoRow {
   last_synced_at: string | null
   // --- marcação manual ---
   is_teste: boolean // registro de teste/sandbox: some da lista e dos KPIs por padrão
+  /** quando o ingresso foi gerado; NULL = não gerado. Opcional: não existe antes da migração. */
+  ingresso_gerado_em?: string | null
   // --- e-mail transacional ---
   email_confirmacao_em: string | null // quando a confirmação de pagamento foi enviada
   // --- Nota Fiscal (Asaas NFS-e) ---
@@ -555,6 +557,21 @@ export async function marcarTeste(id: number, teste: boolean): Promise<Inscricao
   const rows = (await sql`
     UPDATE inscricoes
        SET is_teste = ${teste},
+           updated_at = NOW()
+     WHERE id = ${id}
+    RETURNING *
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/**
+ * Marca/desmarca o ingresso da inscrição como gerado. Remarcar mantém a data da
+ * primeira marcação (COALESCE) — clique duplo não reescreve quando foi gerado.
+ */
+export async function marcarIngressoGerado(id: number, gerado: boolean): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET ingresso_gerado_em = CASE WHEN ${gerado} THEN COALESCE(ingresso_gerado_em, NOW()) ELSE NULL END,
            updated_at = NOW()
      WHERE id = ${id}
     RETURNING *

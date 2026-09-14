@@ -32,7 +32,7 @@ colunas, por função:
 | nota fiscal | `nf_id`, `nf_status`, `nf_numero`, `nf_pdf_url`, `nf_xml_url`, `nf_endereco` (JSONB) | emissão via Asaas |
 | origem | `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` | URL, cupom ou `admin` |
 | LGPD | `consentimento_lgpd`, `consentimento_em` | checkbox do checkout |
-| operação | `status`, `is_teste`, `como_conheceu`, `email_confirmacao_em`, `created_at`, `updated_at` | painel e webhook |
+| operação | `status`, `is_teste`, `ingresso_gerado_em`, `como_conheceu`, `email_confirmacao_em`, `created_at`, `updated_at` | painel e webhook |
 
 **Três colunas que fazem mais do que parecem:**
 
@@ -42,6 +42,11 @@ colunas, por função:
   cupom) ou `admin` (cobrança manual).
 - **`is_teste`** — esconde a linha de listas e KPIs **sem apagar**. É o jeito certo de fazer teste
   em produção.
+- **`ingresso_gerado_em`** — marcação manual do botão "marcar gerado" na coluna Ação de
+  `/admin/vendas` (e no detalhe). `NULL` = não gerado; remarcar preserva a primeira data. Aparece
+  só em venda `paid` (gratuito incluso) ou já marcada — marca em venda estornada é o aviso pra
+  revogar. **Nenhuma query filtra por ela** (canário em `ingresso-gerado.test.ts`): a lista segue
+  de pé entre o deploy e a migração, e o botão responde 503 "rode a migração" nessa janela.
 
 `status`: `pending` → `paid` (webhook) · `canceled` · `refunded`. Gratuitos entram já confirmados,
 sem passar pelo Asaas.
@@ -96,7 +101,7 @@ do `sql/admin-migration.sql`, toda em `ADD COLUMN IF NOT EXISTS` / `CREATE TABLE
 - Seeds (tipos do GU, reserva do preparatório) usam `ON CONFLICT DO NOTHING`: **não** sobrescrevem
   o que você editou no admin.
 
-Hoje são **43 statements**. Os scripts em `sql/` (`run-migration.mjs`, `run-schema.mjs`,
+Hoje são **47 statements**. Os scripts em `sql/` (`run-migration.mjs`, `run-schema.mjs`,
 `check-asaas-prod.mjs`, `ga4-poll.mjs`) são ferramentas locais, não fazem parte do deploy.
 
 ## 6. Cuidados

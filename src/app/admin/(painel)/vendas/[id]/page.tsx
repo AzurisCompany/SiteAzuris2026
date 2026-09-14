@@ -13,6 +13,7 @@ import { labelBilling } from '@/lib/billing'
 import { descricaoManual } from '@/lib/cobranca-manual'
 import SyncButton from './SyncButton'
 import TesteButton from '../TesteButton'
+import IngressoGeradoButton from '../IngressoGeradoButton'
 import CancelarButton from '../CancelarButton'
 import AcoesCobranca from './AcoesCobranca'
 import NotaFiscal from './NotaFiscal'
@@ -89,6 +90,9 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
       <div className="flex flex-wrap items-center gap-3">
         <SyncButton id={insc.id} />
         <TesteButton id={insc.id} isTeste={insc.is_teste} />
+        {(insc.status === 'paid' || insc.ingresso_gerado_em) && (
+          <IngressoGeradoButton id={insc.id} geradoEm={insc.ingresso_gerado_em} />
+        )}
         {/* Mesmo cliente, outro produto: leva os dados dele pra cobrança avulsa. */}
         <Link
           href={`/admin/cobranca?de=${insc.id}`}

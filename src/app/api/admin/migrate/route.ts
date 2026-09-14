@@ -157,6 +157,10 @@ const STATEMENTS: string[] = [
      updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
    )`,
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_cupons_codigo ON cupons(codigo)`,
+  // Quando o ingresso foi gerado (NULL = ainda não). Marcação manual na lista de vendas.
+  // Aditiva e nullable: nenhuma linha existente muda, e o código lê via SELECT * — antes
+  // da migração o campo só vem undefined e a lista mostra "não gerado".
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS ingresso_gerado_em TIMESTAMPTZ`,
 ]
 
 export async function POST() {
@@ -214,6 +218,7 @@ async function snapshotIntegridade() {
     asaas_eventos,
     tipos_ingresso, // null antes da migração; número (0+) depois
     tem_coluna_tipo_ingresso: cols.includes('tipo_ingresso'),
+    tem_coluna_ingresso_gerado_em: cols.includes('ingresso_gerado_em'), // false antes, true depois
     total_colunas_inscricoes: cols.length,
   }
 }
