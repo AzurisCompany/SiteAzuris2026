@@ -68,7 +68,7 @@ no browser.
 | 9 | `valor` | reais com vírgula decimal (`570,00`) |
 | 10 | `meio_pagamento` | `labelBilling` |
 | 11 | `parcelas` | |
-| 12 | `documento` | CPF/CNPJ |
+| 12 | `documento` | CPF/CNPJ **formatado** (`000.000.000-00` / `00.000.000/0000-00`). Cru, o Excel lia o CNPJ como número e mostrava `8,72889E+13`, perdendo dígitos pra sempre (corrigido em 14/09). |
 | 13 | `pessoa` | `PF`/`PJ` |
 | 14 | `empresa` | |
 | 15 | `cargo` | |

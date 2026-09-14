@@ -113,6 +113,28 @@ describe('montarCsvContatos', () => {
   })
 })
 
+describe('montarCsvContatos — documento', () => {
+  const coluna = (csv: string) => corpo(csv)[0].split(';')[11]
+
+  it('CNPJ sai formatado — cru, o Excel mostra 8,72889E+13 e come dígitos', () => {
+    expect(coluna(montarCsvContatos([linha({ cpf_cnpj: '87288900000123', pessoa_tipo: 'PJ' })]))).toBe(
+      '87.288.900/0001-23'
+    )
+  })
+
+  it('CPF com zero à esquerda mantém o zero', () => {
+    expect(coluna(montarCsvContatos([linha({ cpf_cnpj: '01234567890' })]))).toBe('012.345.678-90')
+  })
+
+  it('documento já mascarado no banco não é mascarado de novo', () => {
+    expect(coluna(montarCsvContatos([linha({ cpf_cnpj: '012.345.678-90' })]))).toBe('012.345.678-90')
+  })
+
+  it('sem documento (inscrição gratuita) fica vazio', () => {
+    expect(coluna(montarCsvContatos([linha({ cpf_cnpj: '' })]))).toBe('')
+  })
+})
+
 describe('nomeArquivoCsv', () => {
   it('usa o slug do produto e a data', () => {
     expect(nomeArquivoCsv('dss-2026', '2026-07-30')).toBe('contatos-dss-2026-2026-07-30.csv')

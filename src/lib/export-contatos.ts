@@ -11,6 +11,7 @@
 import type { InscricaoRow } from '@/lib/db'
 import { labelProduto, labelTipo, whatsappUrl, STATUS_LABEL } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
+import { documentoTexto } from '@/lib/dados-cliente'
 import { TZ_BR } from '@/lib/format'
 
 /**
@@ -127,7 +128,10 @@ export function montarCsvContatos(rows: InscricaoRow[]): string {
     reais(r.valor_centavos),
     labelBilling(r.billing_type),
     r.installments ?? 1,
-    r.cpf_cnpj ?? '',
+    // Formatado, não cru: 14 dígitos puros o Excel lê como número e mostra 8,72889E+13 —
+    // e perde os últimos dígitos pra sempre (15 de precisão). CPF com zero à esquerda
+    // perdia o zero. Com ponto e barra o Excel mantém como texto.
+    documentoTexto(r.cpf_cnpj)?.valor ?? '',
     r.pessoa_tipo ?? '',
     r.empresa ?? '',
     r.cargo ?? '',
