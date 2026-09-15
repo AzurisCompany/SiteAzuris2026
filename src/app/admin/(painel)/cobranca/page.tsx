@@ -30,6 +30,9 @@ async function copiarDadosDe(id: number): Promise<{ prefill: Prefill; nome: stri
       pessoaTipo: v.pessoa_tipo === 'PJ' ? 'PJ' : 'PF',
       nota: {
         ...notaInicial,
+        // Sem isso, a cópia de um PF que pediu nota esconde o endereço e a cobrança nova
+        // sai sem ele — o pedido de nota se perderia na cópia.
+        querNf: Object.values(e).some((x) => typeof x === 'string' && x.trim() !== ''),
         razaoSocial: v.razao_social ?? '',
         cep: e.cep ?? '',
         logradouro: e.logradouro ?? '',

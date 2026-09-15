@@ -17,6 +17,9 @@ import IngressoGeradoButton from '../IngressoGeradoButton'
 import CancelarButton from '../CancelarButton'
 import AcoesCobranca from './AcoesCobranca'
 import NotaFiscal from './NotaFiscal'
+import NotaEmitidaButton from '../NotaEmitidaButton'
+import NotaBadge from '../NotaBadge'
+import { motivoPedidoNota } from '@/lib/nota-fiscal'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +73,10 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
 
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{insc.nome}</h1>
+          <h1 className="text-2xl font-bold">
+            {insc.nome}
+            <NotaBadge venda={insc} />
+          </h1>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
             {labelProduto(insc.curso_slug)} · #{insc.id}
           </p>
@@ -92,6 +98,11 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
         <TesteButton id={insc.id} isTeste={insc.is_teste} />
         {(insc.status === 'paid' || insc.ingresso_gerado_em) && (
           <IngressoGeradoButton id={insc.id} geradoEm={insc.ingresso_gerado_em} />
+        )}
+        {/* Aqui aparece em toda venda paga, pediu ou não: nota pedida depois, por WhatsApp,
+            também precisa de marca. Na lista, só pra quem pediu no checkout. */}
+        {insc.nf_status !== 'AUTHORIZED' && ((insc.status === 'paid' && insc.valor_centavos > 0) || insc.nf_emitida_em) && (
+          <NotaEmitidaButton id={insc.id} emitidaEm={insc.nf_emitida_em} />
         )}
         {/* Mesmo cliente, outro produto: leva os dados dele pra cobrança avulsa. */}
         <Link
@@ -126,6 +137,13 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
           <Linha rotulo="Empresa">{insc.empresa ?? '—'}</Linha>
           <Linha rotulo="Cargo">{insc.cargo ?? '—'}</Linha>
           <Linha rotulo="Tipo">{insc.pessoa_tipo ?? '—'}</Linha>
+          <Linha rotulo="Pediu nota fiscal">
+            {motivoPedidoNota(insc) === 'cnpj'
+              ? 'Sim · comprou com CNPJ'
+              : motivoPedidoNota(insc) === 'endereco'
+                ? 'Sim · marcou "Preciso de nota fiscal"'
+                : 'Não'}
+          </Linha>
           {insc.razao_social && <Linha rotulo="Razão social">{insc.razao_social}</Linha>}
           {endStr && <Linha rotulo="Endereço NF">{endStr}</Linha>}
           <Linha rotulo="Como conheceu">{insc.como_conheceu ?? '—'}</Linha>

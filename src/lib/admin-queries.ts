@@ -5,6 +5,7 @@ import { ORIGEM_ADMIN, PROPOSTA_SLUG, type PrecosSugeridos } from '@/lib/cobranc
 import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 import { toISODate } from '@/lib/format'
+import { isFiltroNota, SQL_NOTA } from '@/lib/nota-fiscal'
 
 export const PRODUTO_LABEL: Record<string, string> = {
   'dss-2026': 'DSSBR 2026',
@@ -391,6 +392,7 @@ export interface FiltrosVendas {
   billing?: string
   tipo?: string
   pessoa?: string // 'PF' | 'PJ'
+  nf?: string // FiltroNota: 'pediu' | 'a_emitir' | 'emitida' | 'nao_pediu'
   origem?: string // utm_source
   /** só cobranças nascidas no admin (qualquer produto), incluindo as antigas sem utm_source */
   manual?: boolean
@@ -428,6 +430,9 @@ function construirWhere(f: FiltrosVendas): { where: string; params: unknown[] } 
   if (f.pessoa) {
     params.push(f.pessoa)
     cond.push(`pessoa_tipo = $${params.length}`)
+  }
+  if (isFiltroNota(f.nf)) {
+    cond.push(SQL_NOTA[f.nf])
   }
   if (f.origem) {
     params.push(f.origem)
@@ -622,6 +627,24 @@ export async function vendasParaExport(f: FiltrosVendas): Promise<InscricaoRow[]
     `SELECT * FROM inscricoes ${fullWhere} ORDER BY created_at DESC LIMIT ${EXPORT_MAX_LINHAS}`,
     params
   )) as InscricaoRow[]
+}
+
+/**
+ * Quantas vendas pagas pediram nota e ainda não têm nota, com os MESMOS filtros da tela
+ * menos o de nota (senão o atalho mostraria zero com outro filtro de nota aberto).
+ *
+ * Antes da migração a coluna `nf_emitida_em` não existe e a query cai: devolve null e a
+ * lista segue de pé — o atalho só não aparece.
+ */
+export async function contarNotasAEmitir(f: FiltrosVendas): Promise<number | null> {
+  const { where, params } = construirWhere({ ...f, nf: 'a_emitir' })
+  try {
+    const rows = (await sql.query(`SELECT COUNT(*) AS c FROM inscricoes ${where}`, params)) as Array<{ c: string }>
+    return Number(rows[0]?.c ?? 0)
+  } catch (e) {
+    if (e instanceof Error && e.message.includes('nf_emitida_em')) return null
+    throw e
+  }
 }
 
 /** Quantos registros estão marcados como teste (pra rótulo do toggle "ver testes"). */

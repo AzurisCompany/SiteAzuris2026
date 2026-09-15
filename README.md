@@ -121,7 +121,7 @@ uma faz — e **o que quebra sem ela** — está em
 ## Testes
 
 ```bash
-npx vitest run     # 24 arquivos, 237 testes de regra pura (sem banco, sem rede)
+npx vitest run     # 27 arquivos, 293 testes de regra pura (sem banco, sem rede)
 ```
 
 ## Deploy

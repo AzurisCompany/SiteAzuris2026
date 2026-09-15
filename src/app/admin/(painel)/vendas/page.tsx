@@ -7,6 +7,7 @@ import {
   contarTestes,
   opcoesFiltro,
   totaisVendas,
+  contarNotasAEmitir,
   labelProduto,
   tabProduto,
   brl,
@@ -28,6 +29,9 @@ import CancelarButton from './CancelarButton'
 import CopiarEmailsButton from './CopiarEmailsButton'
 import CopiarClienteButton from './CopiarClienteButton'
 import BaixarCsvLink from './BaixarCsvLink'
+import NotaEmitidaButton from './NotaEmitidaButton'
+import NotaBadge from './NotaBadge'
+import { isFiltroNota, notaEmitida, pediuNota } from '@/lib/nota-fiscal'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,6 +70,7 @@ export default async function VendasPage({
   const billing = sp.billing || ''
   const tipo = sp.tipo || ''
   const pessoa = sp.pessoa || ''
+  const nf = isFiltroNota(sp.nf) ? sp.nf : ''
   const origem = sp.origem || ''
   const de = sp.de || ''
   const ate = sp.ate || ''
@@ -83,9 +88,10 @@ export default async function VendasPage({
   let emailsPorCurso: Record<string, string[]> = {}
   let totais: TotaisVendas | null = null
   let porOrigem: Record<string, number> = {}
-  const filtros = { curso, status, billing, tipo, pessoa, origem, de, ate, busca, mostrarTeste }
+  let notasAEmitir: number | null = null
+  const filtros = { curso, status, billing, tipo, pessoa, nf, origem, de, ate, busca, mostrarTeste }
   try {
-    const [res, r, qt, op, em, tot, orig] = await Promise.all([
+    const [res, r, qt, op, em, tot, orig, nfs] = await Promise.all([
       listarVendas({
         ...filtros,
         limit: PAGE_SIZE,
@@ -97,6 +103,7 @@ export default async function VendasPage({
       emailsPorProduto(filtros),
       totaisVendas(filtros),
       contarPorOrigem(filtros),
+      contarNotasAEmitir(filtros),
     ])
     rows = res.rows
     total = res.total
@@ -107,6 +114,7 @@ export default async function VendasPage({
     emailsPorCurso = em.porCurso
     totais = tot
     porOrigem = orig
+    notasAEmitir = nfs
   } catch (e) {
     erro = e instanceof Error ? e.message : 'Erro ao consultar o banco.'
   }
@@ -120,12 +128,13 @@ export default async function VendasPage({
   }
   // Base com todos os filtros ativos (sem curso/teste/page — esses variam por link).
   // `semOrigem` serve às abas de origem, que são justamente quem troca esse filtro.
-  const baseParams = (opts?: { semOrigem?: boolean }) => {
+  const baseParams = (opts?: { semOrigem?: boolean; semNf?: boolean }) => {
     const u = new URLSearchParams()
     if (status) u.set('status', status)
     if (billing) u.set('billing', billing)
     if (tipo) u.set('tipo', tipo)
     if (pessoa) u.set('pessoa', pessoa)
+    if (nf && !opts?.semNf) u.set('nf', nf)
     if (origem && !opts?.semOrigem) u.set('origem', origem)
     if (de) u.set('de', de)
     if (ate) u.set('ate', ate)
@@ -179,6 +188,16 @@ export default async function VendasPage({
   /** Nas abas de cupom, o código é a informação que falta na tabela: quem vendeu. */
   const mostrarCupom = TIPOS_CUPOM.includes(origem as (typeof TIPOS_CUPOM)[number])
 
+  // Atalho "NF a emitir": liga/desliga o filtro de nota mantendo os outros.
+  const notaHref = (() => {
+    const u = baseParams({ semNf: true })
+    if (curso) u.set('curso', curso)
+    if (nf !== 'a_emitir') u.set('nf', 'a_emitir')
+    if (mostrarTeste) u.set('teste', '1')
+    const s = u.toString()
+    return s ? `?${s}` : '/admin/vendas'
+  })()
+
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1)
   const qs = (p: number) => {
     const u = baseParams()
@@ -217,6 +236,22 @@ export default async function VendasPage({
           </p>
         </div>
         <div className="flex items-center gap-2">
+        {/* null = migração da nf_emitida_em ainda não rodou: o atalho some, a lista fica. */}
+        {notasAEmitir != null && (
+          <Link
+            href={notaHref}
+            title="Vendas pagas que pediram nota fiscal (CNPJ ou caixinha marcada) e ainda não têm nota"
+            className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              nf === 'a_emitir'
+                ? 'border-amber-400/40 bg-amber-400/10 text-amber-300'
+                : notasAEmitir > 0
+                  ? 'border-amber-400/40 text-amber-300 hover:bg-amber-400/10'
+                  : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {nf === 'a_emitir' ? '← todas as vendas' : `NF a emitir (${notasAEmitir})`}
+          </Link>
+        )}
         <CopiarEmailsButton emails={emailsAtivos} />
         <BaixarCsvLink
           href={exportHref(curso)}
@@ -309,6 +344,7 @@ export default async function VendasPage({
         billing={billing}
         tipo={tipo}
         pessoa={pessoa}
+        nf={nf}
         origem={origem}
         de={de}
         ate={ate}
@@ -355,6 +391,7 @@ export default async function VendasPage({
                     {r.nome}
                   </Link>
                   <CopiarClienteButton nome={r.nome} texto={dadosClienteTexto(r)} />
+                  <NotaBadge venda={r} />
                   {r.is_teste && (
                     <span className="ml-2 inline-flex rounded-full bg-amber-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
                       teste
@@ -422,6 +459,13 @@ export default async function VendasPage({
                     {(r.status === 'paid' || r.ingresso_gerado_em) && (
                       <IngressoGeradoButton id={r.id} geradoEm={r.ingresso_gerado_em} />
                     )}
+                    {/* Nota: só quem pediu e já pagou (ou já está marcada). Nota pedida depois,
+                        fora do checkout, marca-se no detalhe da venda. Pago pelo Asaas não
+                        precisa de marca: o selo já diz "NF emitida". */}
+                    {r.nf_status !== 'AUTHORIZED' &&
+                      (r.nf_emitida_em || (pediuNota(r) && r.status === 'paid' && r.valor_centavos > 0)) && (
+                        <NotaEmitidaButton id={r.id} emitidaEm={r.nf_emitida_em} />
+                      )}
                     <TesteButton id={r.id} isTeste={r.is_teste} />
                     {(r.status === 'pending' || r.status === 'overdue') && (
                       <>

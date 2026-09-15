@@ -27,6 +27,7 @@ export async function GET(request: Request) {
     billing: sp.get('billing') || '',
     tipo: sp.get('tipo') || '',
     pessoa: sp.get('pessoa') || '',
+    nf: sp.get('nf') || '',
     origem: sp.get('origem') || '',
     de: sp.get('de') || '',
     ate: sp.get('ate') || '',

@@ -175,6 +175,57 @@ a vaga certa. Ver [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-
 
 ---
 
+## Onda F — nota fiscal na lista de vendas (2026-09-15)
+
+*"Eu não consigo visualizar quem solicitou nota fiscal ou não e também não consigo filtrar por quem
+preciso gerar as notas fiscais."*
+
+### O que o banco guardava (e o que não)
+**Não existe coluna "quer nota".** A caixinha "Preciso de nota fiscal" do checkout
+(`DadosNota.tsx`, `querNf`) nunca vai pro servidor: ela só decide se o endereço aparece e é
+enviado. O pedido fica gravado **no rastro**, e é isso que a regra lê (`lib/nota-fiscal.ts`):
+
+| sinal gravado | significa | por quê |
+|---|---|---|
+| documento com 14 dígitos (ou `pessoa_tipo = 'PJ'`) | pediu | decisão de 15/07: CNPJ implica nota. Lê o documento, porque venda PJ anterior a 17/07 gravou `pessoa_tipo` NULL |
+| `nf_endereco` com algum campo | pediu | PF só envia endereço marcando a caixinha |
+| nenhum dos dois | não pediu | |
+
+**Nenhuma venda perdeu o pedido de nota**, e a regra vale pro histórico inteiro sem backfill.
+
+**Emitida** vem de duas fontes: a marcação manual nova (`nf_emitida_em`, pra nota emitida fora do
+sistema, que é como sai hoje) ou `nf_status = 'AUTHORIZED'` (botão "Emitir NF" do detalhe via
+Asaas, que nunca rodou em prod: configuração fiscal vazia).
+
+Situação da venda (`situacaoNota`): **emitida** › **não pediu** › **a emitir** (pediu + `paid` +
+valor > 0) › **pediu, aguardando pagamento**. Nota de venda gratuita não entra em "a emitir".
+
+### Na tela
+- **Selo** ao lado do nome: `NF A EMITIR` (âmbar), `PEDIU NF` (cinza, ainda não pagou), `NF EMITIDA`
+  (verde). Tooltip diz o motivo (CNPJ ou caixinha). Quem não pediu não tem selo.
+- **Filtro "Nota fiscal"**: todas · pediu · a emitir · emitida · não pediu. Vale junto com os
+  outros e **passa pro CSV** (`?nf=`).
+- **Atalho `NF a emitir (N)`** no cabeçalho, contando com os filtros da tela (menos o de nota).
+- **Botão "marcar NF emitida"** na coluna Ação, só pra quem pediu e pagou (ou já marcada). Vira
+  **"✓ NF dd/mm"**. No detalhe, aparece em **toda venda paga**: nota pedida depois, por WhatsApp,
+  também se marca. Não aparece quando o Asaas já autorizou a nota.
+- Detalhe ganhou a linha **"Pediu nota fiscal: Sim · comprou com CNPJ / marcou a caixinha / Não"**.
+- Conserto junto: `/admin/cobranca?de=<id>` de um PF que pediu nota agora **liga a caixinha**. Antes
+  o endereço vinha preenchido, mas escondido, e não ia pra cobrança nova.
+
+### Migração
+`inscricoes.nf_emitida_em TIMESTAMPTZ`, aditiva e nullable. `POST /api/admin/inscricoes/nota-emitida`
+`{ id, emitida }` (503 "rode a migração" antes dela). `GET /api/admin/migrate` ganhou
+`tem_coluna_nf_emitida_em`.
+
+**Diferente do ingresso gerado, aqui o filtro depende da coluna.** Entre o deploy e a migração:
+a lista abre normal e o atalho some (`contarNotasAEmitir` devolve null), mas **escolher um filtro de
+nota mostra o erro "column nf_emitida_em does not exist"**. Por isso: deploy e migração em sequência.
+Canário em `nota-fiscal.test.ts` (lista sem filtro não toca a coluna, contador engole só esse erro).
+Paridade SQL × TS conferida no banco de dev (17 linhas, os 4 filtros batendo).
+
+---
+
 ## Fluxo de uso (pós-deploy)
 
 1. `cd web && npx vercel --prod --yes`

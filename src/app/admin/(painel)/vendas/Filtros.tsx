@@ -25,6 +25,14 @@ const PESSOA: ReadonlyArray<readonly [string, string]> = [
   ['PJ', 'Pessoa jurídica'],
 ]
 
+const NOTA: ReadonlyArray<readonly [string, string]> = [
+  ['', 'Nota fiscal: todas'],
+  ['pediu', 'Pediu nota fiscal'],
+  ['a_emitir', 'NF a emitir (pagas, sem nota)'],
+  ['emitida', 'NF emitida'],
+  ['nao_pediu', 'Não pediu nota'],
+]
+
 const campo =
   'rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm focus:border-[var(--azuris-cyan)] focus:outline-none'
 
@@ -33,6 +41,7 @@ interface FiltrosState {
   billing?: string
   tipo?: string
   pessoa?: string
+  nf?: string
   origem?: string
   de?: string
   ate?: string
@@ -45,6 +54,7 @@ export default function Filtros({
   billing,
   tipo,
   pessoa,
+  nf,
   origem,
   de,
   ate,
@@ -57,6 +67,7 @@ export default function Filtros({
   billing: string
   tipo: string
   pessoa: string
+  nf: string
   origem: string
   de: string
   ate: string
@@ -79,6 +90,7 @@ export default function Filtros({
     set('billing', billing)
     set('tipo', tipo)
     set('pessoa', pessoa)
+    set('nf', nf)
     set('origem', origem)
     set('de', de)
     set('ate', ate)
@@ -120,7 +132,7 @@ export default function Filtros({
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {tipos.length > 0 && (
             <select value={tipo} onChange={(e) => aplicar({ tipo: e.target.value })} className={campo}>
               <option value="">Todos os tipos</option>
@@ -131,6 +143,11 @@ export default function Filtros({
           )}
           <select value={pessoa} onChange={(e) => aplicar({ pessoa: e.target.value })} className={campo}>
             {PESSOA.map(([v, label]) => (
+              <option key={v} value={v}>{label}</option>
+            ))}
+          </select>
+          <select value={nf} onChange={(e) => aplicar({ nf: e.target.value })} className={campo}>
+            {NOTA.map(([v, label]) => (
               <option key={v} value={v}>{label}</option>
             ))}
           </select>

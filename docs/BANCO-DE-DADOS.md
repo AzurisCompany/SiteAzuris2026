@@ -29,7 +29,7 @@ colunas, por função:
 | pessoa | `nome`, `email`, `cpf_cnpj`, `telefone`, `pessoa_tipo`, `razao_social`, `empresa`, `cargo` | o formulário |
 | dinheiro | `billing_type`, `valor_centavos`, `installments`, `valor_liquido_centavos`, `taxa_centavos` | checkout + sync com o Asaas |
 | Asaas | `asaas_customer_id`, `asaas_payment_id`, `asaas_invoice_url`, `asaas_status`, `due_date`, `pago_em`, `last_synced_at` | pipeline e webhook |
-| nota fiscal | `nf_id`, `nf_status`, `nf_numero`, `nf_pdf_url`, `nf_xml_url`, `nf_endereco` (JSONB) | emissão via Asaas |
+| nota fiscal | `nf_id`, `nf_status`, `nf_numero`, `nf_pdf_url`, `nf_xml_url`, `nf_endereco` (JSONB), `nf_emitida_em` | emissão via Asaas + marcação manual |
 | origem | `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` | URL, cupom ou `admin` |
 | LGPD | `consentimento_lgpd`, `consentimento_em` | checkbox do checkout |
 | operação | `status`, `is_teste`, `ingresso_gerado_em`, `como_conheceu`, `email_confirmacao_em`, `created_at`, `updated_at` | painel e webhook |
@@ -47,6 +47,11 @@ colunas, por função:
   só em venda `paid` (gratuito incluso) ou já marcada — marca em venda estornada é o aviso pra
   revogar. **Nenhuma query filtra por ela** (canário em `ingresso-gerado.test.ts`): a lista segue
   de pé entre o deploy e a migração, e o botão responde 503 "rode a migração" nessa janela.
+- **"Pediu nota fiscal" não é coluna.** É derivado: CNPJ (14 dígitos no `cpf_cnpj`) **ou**
+  `nf_endereco` preenchido. A caixinha do checkout não é gravada; ela só controla o envio do
+  endereço. **`nf_emitida_em`** é a marca manual de nota emitida fora do sistema; emitida =
+  ela **ou** `nf_status = 'AUTHORIZED'`. Regra em `lib/nota-fiscal.ts`, com espelho SQL pro filtro
+  (que, esse sim, depende da coluna). Ver [ADMIN-VENDAS… Onda F](./ADMIN-VENDAS-COBRANCA-INGRESSOS.md).
 
 `status`: `pending` → `paid` (webhook) · `canceled` · `refunded`. Gratuitos entram já confirmados,
 sem passar pelo Asaas.

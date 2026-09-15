@@ -177,6 +177,10 @@ const STATEMENTS: string[] = [
   // Aditiva e nullable: nenhuma linha existente muda, e o código lê via SELECT * — antes
   // da migração o campo só vem undefined e a lista mostra "não gerado".
   `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS ingresso_gerado_em TIMESTAMPTZ`,
+  // Quando a nota fiscal foi emitida FORA do sistema (NULL = não marcada). Marcação manual
+  // na lista de vendas, mesmo desenho do ingresso_gerado_em: aditiva, nullable, SELECT *.
+  // Nota emitida pelo Asaas continua em nf_status — ver lib/nota-fiscal.ts.
+  `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_emitida_em TIMESTAMPTZ`,
 ]
 
 export async function POST() {
@@ -235,6 +239,7 @@ async function snapshotIntegridade() {
     tipos_ingresso, // null antes da migração; número (0+) depois
     tem_coluna_tipo_ingresso: cols.includes('tipo_ingresso'),
     tem_coluna_ingresso_gerado_em: cols.includes('ingresso_gerado_em'), // false antes, true depois
+    tem_coluna_nf_emitida_em: cols.includes('nf_emitida_em'), // false antes, true depois
     total_colunas_inscricoes: cols.length,
   }
 }

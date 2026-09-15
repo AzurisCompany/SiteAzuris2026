@@ -82,6 +82,8 @@ export interface InscricaoRow {
   is_teste: boolean // registro de teste/sandbox: some da lista e dos KPIs por padrão
   /** quando o ingresso foi gerado; NULL = não gerado. Opcional: não existe antes da migração. */
   ingresso_gerado_em?: string | null
+  /** quando a NF foi marcada como emitida à mão; NULL = não. Opcional: não existe antes da migração. */
+  nf_emitida_em?: string | null
   // --- e-mail transacional ---
   email_confirmacao_em: string | null // quando a confirmação de pagamento foi enviada
   // --- Nota Fiscal (Asaas NFS-e) ---
@@ -572,6 +574,21 @@ export async function marcarIngressoGerado(id: number, gerado: boolean): Promise
   const rows = (await sql`
     UPDATE inscricoes
        SET ingresso_gerado_em = CASE WHEN ${gerado} THEN COALESCE(ingresso_gerado_em, NOW()) ELSE NULL END,
+           updated_at = NOW()
+     WHERE id = ${id}
+    RETURNING *
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/**
+ * Marca/desmarca a nota fiscal da inscrição como emitida (fora do sistema). Mesmo
+ * desenho do [[marcarIngressoGerado]]: remarcar preserva a data da primeira marcação.
+ */
+export async function marcarNotaEmitida(id: number, emitida: boolean): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    UPDATE inscricoes
+       SET nf_emitida_em = CASE WHEN ${emitida} THEN COALESCE(nf_emitida_em, NOW()) ELSE NULL END,
            updated_at = NOW()
      WHERE id = ${id}
     RETURNING *
