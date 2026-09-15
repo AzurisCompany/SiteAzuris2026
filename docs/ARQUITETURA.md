@@ -57,7 +57,7 @@ linhas e delega pra `processarCheckout()`; a regra que importa (preço, cupom, l
 `/comunidade` · `/contato` · `/azuriz`
 
 **Venda:** `/dssbr-2026` · `/dssbr-2026/inscricao` (+ `/obrigado`) · `/dssbr-2026/one-day` ·
-`/dssbr-2026/fullpass-curso` · `/gubigdata` (+ `/inscricao`) · `/ett/adesao` · `/ett/assinatura` ·
+`/dssbr-2026/fullpass-curso` · `/dssbr-2026/vip` · `/dssbr-2026/business` · `/gubigdata` (+ `/inscricao`) · `/ett/adesao` · `/ett/assinatura` ·
 `/lakehouse-comunidade/inscricao` (+ `/obrigado`) · `/preparatorio-dados/reserva` · `/vendas`
 (gerador de link da vendedora)
 
@@ -68,7 +68,7 @@ cupons · ingressos · assinaturas · conciliação · financeiro · importar ·
 
 | grupo | rotas |
 |---|---|
-| checkout | `/api/inscricao` (Lakehouse) · `/api/dssbr-2026/inscricao` · `/api/dss-one-day/inscricao` · `/api/dss-fullpass-curso/inscricao` · `/api/gubigdata/inscricao` · `/api/ett/adesao/inscricao` · `/api/ett/assinatura` · `/api/preparatorio-dados/inscricao` |
+| checkout | `/api/inscricao` (Lakehouse) · `/api/dssbr-2026/inscricao` · `/api/dss-one-day/inscricao` · `/api/dss-fullpass-curso/inscricao` · `/api/dss-vip/inscricao` · `/api/dss-business/inscricao` · `/api/gubigdata/inscricao` · `/api/ett/adesao/inscricao` · `/api/ett/assinatura` · `/api/preparatorio-dados/inscricao` |
 | venda | `/api/vendas/link` (gera o link assinado da vendedora) |
 | Asaas | `/api/webhook/asaas` (idempotente; fecha status) |
 | admin | `login` · `migrate` · `sync` · `cobranca` (+ `atualizar`, `cancelar`, `trocar-meio`) · `importar-cobranca` · `ingressos` · `cupons` · `assinatura` · `nf` · `config` · `exportar` · `inscricoes/teste` · `email-teste` |

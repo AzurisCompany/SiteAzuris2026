@@ -30,6 +30,7 @@ em `/admin`. O mapa disso está em
 - [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./docs/CHECKOUT-PF-PJ-NOTA-FISCAL.md) — PF/PJ, endereço e nota
 - [CUPONS-DESCONTO.md](./docs/CUPONS-DESCONTO.md) — link de vendedora e cupom de parceiro
 - [INGRESSO-OCULTO-ESTUDANTE.md](./docs/INGRESSO-OCULTO-ESTUDANTE.md) — ingresso reservado, só por link
+- [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./docs/DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md) — VIP e Business, lote que vira sozinho por quantidade
 - [EVENTOS-PRESENCIAIS.md](./docs/EVENTOS-PRESENCIAIS.md) — a página de evento que serve o GU e o café do DSSBR
 - [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
 
@@ -67,6 +68,7 @@ Mapa completo — institucional, checkout e admin — em
 /dssbr-2026 + /inscricao       DSS 2026 — landing e checkout (dinâmicos)
 /dssbr-2026/one-day            Passe de 1 dia (Lote 2, R$ 290)
 /dssbr-2026/fullpass-curso     Combo FullPass + portal do curso (R$ 750)
+/dssbr-2026/vip  /business      VIP e Business — lote vira sozinho por quantidade
 /gubigdata  /cafe-networking       Eventos presenciais no IEP (GU e DSSBR)
 /ett  /preparatorio-dados  /lakehouse-comunidade      Outros checkouts
 /vendas                        Vendedora gera o link de desconto dela

@@ -27,6 +27,11 @@ curl -s -b cookies.txt -X POST https://azuris.com.br/api/admin/migrate
 Entre o deploy e a migração, o checkout do produto afetado usa o preço-fallback do código. Por
 isso o fallback tem que acompanhar o lote vigente.
 
+**Não repita o deploy só porque a saída pareceu falhar.** Com `| tail` sobra só o JSON de dicas
+do fim da CLI e parece erro. Confira com `npx vercel ls --prod` (em 14/09 isso gerou dois deploys
+idênticos do mesmo commit). Depois do deploy, **`git push`**: o deploy é pela CLI e não passa pelo
+GitHub. Entre 25/08 e 14/09, 8 commits ficaram só na máquina e em prod.
+
 **Sempre confira no HTML público** antes de dar por resolvido: o admin pode ter salvo e a página
 ainda mostrar outra coisa.
 
@@ -54,6 +59,12 @@ Apague o `cookies.txt` no fim.
 `/admin/ingressos` → cadastre o tipo novo (deixe **Vendas até** vazio) → desligue o velho. Vale na
 hora, sem deploy. No próximo deploy, atualize o fallback em `produtos.ts` **e** a constante do
 teste `precos-dss.test.ts`, que quebra de propósito se os dois desencontrarem.
+
+### Lote que vira por quantidade (VIP, Business)
+Não se vira na mão: os três lotes ficam ativos e o checkout vende o primeiro com vaga. Mudar
+preço ou vagas = editar o tipo em `/admin/ingressos`. **Pra fechar um lote, desligue. Não zere as
+vagas:** `limite_qtd = 0` é gravado como *sem limite*. Ver
+[DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
 ### Criar um ingresso reservado (só por link)
 `/admin/ingressos` → marque **oculto** → copie o link que o painel mostra
@@ -90,6 +101,9 @@ morrer, é o botão cancelar, decisão separada.
 | "vendas encerradas" indevido | `/api/cron/vigia-vendas?seco=1` logado, ou `/admin/ingressos`: prazo vencido ou lotação cheia |
 | preço estranho na página | tipo ativo no admin × fallback no código — os dois lugares |
 | e-mail não chegou | `POST /api/admin/email-teste`; confira `RESEND_API_KEY` e o domínio verificado |
+| login da API do admin diz "Senha incorreta." com a senha certa | o campo é `senha`, não `password` |
+| CNPJ `8,72889E+13` no Excel | CSV baixado antes de 14/09: baixe de novo (o antigo perdeu dígitos) |
+| VIP/Business "As vendas abrem em instantes" | sem lotes no banco (migração não rodou) ou banco fora |
 | aba Tráfego em 403 | não é código: projeto do Google Cloud ≠ projeto da credencial |
 
 ## 5. Testar em produção sem sujar os números
@@ -113,4 +127,4 @@ abre direto no Excel pt-BR.
 - **Nada pode expirar sozinho:** ao cadastrar tipo, `vendas_ate` vazio. Um prazo esquecido já
   fechou o checkout do GU na cara do público no dia do evento.
 
-Última revisão: **2026-08-14**.
+Última revisão: **2026-09-14**.

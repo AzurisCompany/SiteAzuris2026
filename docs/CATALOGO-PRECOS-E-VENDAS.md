@@ -128,7 +128,7 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | VIP (`dss-vip-2026`) | `/dssbr-2026/vip` | 10 × R$ 957 | 15 × R$ 1.275 | 15 × R$ 1.657 | 40 |
 | Business (`dss-business-2026`) | `/dssbr-2026/business` | 10 × R$ 757 | 10 × R$ 984 | 10 × R$ 1.279 | 30 |
 
-3x no cartão, sem âncora, sem prazo. Ver §7.2.
+3x no cartão, sem âncora, sem prazo. Ver §7.2 e [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
 **Preço único (registry, exige deploy pra mudar)**
 
@@ -243,7 +243,8 @@ Lote 2 sem ninguém mexer.
 | [ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./ADMIN-FINANCEIRO-ONDAS-2026-07-09.md) | recebíveis, DRE, conciliação, NF, assinaturas |
 | [CUPONS-DESCONTO.md](./CUPONS-DESCONTO.md) | link de vendedora e cupom de parceiro |
 | [INGRESSO-OCULTO-ESTUDANTE.md](./INGRESSO-OCULTO-ESTUDANTE.md) | ingresso reservado, só por link |
+| [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md) | VIP e Business, lote por quantidade |
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-09-05**.
+Última revisão: **2026-09-14**.

@@ -148,6 +148,33 @@ e CSV já seguiam os filtros: valem por aba.
 
 ---
 
+## Onda E — o que mudou em 2026-09-14
+
+### 1. Marcar ingresso como gerado (`d47732d`)
+Botão **"marcar gerado"** na coluna Ação de `/admin/vendas` e no detalhe da venda
+(`IngressoGeradoButton.tsx`). Grava `inscricoes.ingresso_gerado_em` (NULL = não gerado) via
+`POST /api/admin/inscricoes/ingresso-gerado` `{ id, gerado }`. Marcado, vira **"✓ ingresso
+dd/mm"**, com a hora no tooltip. Remarcar preserva a primeira data (`COALESCE`); desmarcar pede
+confirmação.
+
+- Aparece só em venda **paga** (gratuito incluso) **ou já marcada**. Marca em venda estornada é o
+  aviso pra revogar o ingresso.
+- **Nenhuma query filtra pela coluna** (canário `ingresso-gerado.test.ts`): a lista funcionou entre
+  o deploy e a migração, e o botão responde 503 "rode a migração" nessa janela. **Um filtro
+  "gerado / não gerado" muda isso:** só deployar com a migração já rodada, e ajustar o canário.
+
+### 2. CSV de contatos: documento formatado (`edc42a3`)
+A coluna `documento` sai `00.000.000/0000-00` / `000.000.000-00`. Crua, o Excel mostrava o CNPJ
+como `8,72889E+13` e **perdia dígitos** (CSVs baixados antes de 14/09 estão corrompidos nessa
+coluna). Ver [ADMIN-EXPORT-CSV-CONTATOS.md](./ADMIN-EXPORT-CSV-CONTATOS.md).
+
+### 3. VIP e Business na cobrança avulsa e nas abas (`a825797`)
+Opções "Ingresso DSS VIP" e "Ingresso DSS Business", com os lotes no seletor. O preço sugerido é
+o do Lote 1. **A cobrança avulsa não confere o lote vigente**: escolher o lote certo é o que ocupa
+a vaga certa. Ver [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
+
+---
+
 ## Fluxo de uso (pós-deploy)
 
 1. `cd web && npx vercel --prod --yes`
