@@ -66,6 +66,29 @@ Passos 1–6 são deploy; o **7 é banco**, e os dois precisam acontecer:
 > mas ninguém desligou o tipo velho. Deploy sem o passo 7 deixa o ingresso do evento passado à
 > venda; passo 7 sem deploy deixa a página anunciando um evento que já foi.
 
+## Trocar a apresentação da MESMA edição (mesmo dia e local)
+
+Nem toda mudança é edição nova. Quando o produtor troca quem apresenta, mas mantém data e local
+(caso do café de 06/10, que passou da Arlequim pra Bindflow em 18/09), a receita é outra:
+
+1. **Contar as inscrições do produto** antes de decidir:
+   `/admin/vendas?curso=<slug>`. O parâmetro é `curso`: com `produto`, a lista ignora o filtro e
+   mostra todas as vendas.
+   - **Zero inscrições** → troque só o conteúdo (passos 2–4). Produto, tipos, URL e endpoint
+     continuam os mesmos.
+   - **Já tem inscrito** → essas pessoas compraram pra ver outra apresentação. Decida com o
+     Binhara: ou avisa os inscritos e troca o conteúdo, ou trata como edição nova (receita dos 7
+     passos acima).
+2. `app/<evento>/evento.ts`: título, chamada, tema, horário, metas, descrição, agenda,
+   palestrantes, realização e a opção "Convidado da <empresa>" em `associacoes`.
+3. `lib/produtos.ts`: a `descricao` do registry, se o horário mudou.
+4. Assets com **nome novo** (`banner-<empresa>-<mês>.jpg`), com `git rm` no antigo. Com o mesmo
+   nome, o cache do otimizador de imagem e dos crawlers de OG segue servindo a arte velha. Foto de
+   palestrante: recortar no rosto em 400×400, porque o componente mostra 64px em círculo.
+
+Não mexe em banco, em migração nem no e-mail (o texto do e-mail não cita empresa nem data).
+**Até o deploy subir, a página no ar continua com a apresentação antiga.**
+
 ## Rotas
 
 | Rota | O quê |
@@ -133,5 +156,7 @@ Os tipos por evento hoje:
   **Bindflow** com Lucas Moraes (AtendeVet), 8h às 10h. **Mesmo produto** (`cafe-networking-2026-10`),
   mesmos tipos e mesma URL — era o mesmo dia e local, e havia **zero inscrições** no produto, então
   não havia comprador a migrar. Trocar só o conteúdo de `evento.ts` + assets; nada no banco.
+  Virou a receita "Trocar a apresentação da MESMA edição". Contexto:
+  [`CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md`](../CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md).
 
 Última revisão: **2026-09-18**.

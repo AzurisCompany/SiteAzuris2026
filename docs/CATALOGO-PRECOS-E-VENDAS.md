@@ -138,7 +138,7 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 | FullPass + portal do curso | R$ 750 | combo vigente; sem âncora; **fulfillment do portal é manual**. O FullPass sozinho é R$ 670 — o portal entra por R$ 80 |
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
-| Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10** (`cafe-networking-2026-10`); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
+| Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10**, com a Bindflow (`cafe-networking-2026-10`; até 18/09 era a Arlequim, mesmo produto); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
 | GU BigData | R$ 30 / grátis | encontro em cartaz é **24/09** (`gubigdata-2026-09`); os tipos vivem no catálogo, o registry é só fallback. Os de 30/07 e 26/08 são eventos passados — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |
 | Lakehouse | R$ 750 | **preço único desde 25/08/2026** — acabaram o preço de comunidade (R$ 550) e o bônus do ingresso do DSSBR incluso. O perfil membro/não-membro sobrou só pra segmentar vaga e histórico. Canário: `precos-lakehouse.test.ts` |
