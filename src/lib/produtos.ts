@@ -231,7 +231,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   'cafe-networking-2026-10': {
     slug: 'cafe-networking-2026-10',
     nome: 'Café da Manhã de Networking do DSSBR — 6 de outubro',
-    descricao: '6 de outubro · 8h às 10h30 · IEP, Curitiba',
+    descricao: '6 de outubro · 8h às 10h · IEP, Curitiba',
     precoCentavos: 3000, // R$ 30,00 — ingresso Geral (fallback se não houver tipos)
     precoDeVendaCentavos: 0, // sem âncora — evento de relacionamento, preço é o preço
     pixDescontoPct: 0,

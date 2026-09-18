@@ -34,20 +34,20 @@ export const EVENTO_CAFE = {
   apiUrl: '/api/cafe-networking/inscricao',
   tituloCurto: 'Café da Manhã de Networking do DSSBR',
   titulo:
-    'Café da Manhã de Networking do DSSBR – 6 de outubro: computadores virtuais de alta performance para Arquitetura e Engenharia, com a Arlequim',
-  chamada: 'Café da manhã, um case de Desktop as a Service e networking antes do expediente.',
+    'Último Café de Networking antes do DSSBR – 6 de outubro: telemedicina veterinária com IA, com Lucas Moraes (Bindflow)',
+  chamada: 'Café da manhã, o AtendeVet da Bindflow e networking antes do expediente — o último café antes do DSSBR 2026.',
   /** Tema curto — compartilhamento e cards. */
-  tema: 'Computadores virtuais de alta performance para Arquitetura e Engenharia',
+  tema: 'AtendeVet: gestão e teleatendimento veterinário com IA em uma única jornada',
   novaData: false,
   dataTitulo: '6 de outubro',
   dataLonga: '6 de outubro de 2026, terça',
   dataCurta: '06/10',
   inicio: '8h',
-  horario: '8h às 10h30',
+  horario: '8h às 10h',
   metaDescricao:
-    'Dia 06/10 das 8h às 10h30 no IEP, Curitiba: café da manhã de networking do DSSBR com a Arlequim apresentando Desktop as a Service e um case de Arquitetura e Engenharia. Ingresso Geral R$ 30 · gratuito para convidados e associados IEP.',
+    'Dia 06/10 das 8h às 10h no IEP, Curitiba: último café de networking antes do DSSBR 2026, com Lucas Moraes (Bindflow) apresentando o AtendeVet — telemedicina veterinária com IA. Ingresso Geral R$ 30 · gratuito para convidados e associados.',
   checkoutDescricao:
-    'Café da manhã de networking do DSSBR em 06/10 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para convidados e associados.',
+    'Último café de networking do DSSBR antes do congresso, em 06/10 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para convidados e associados.',
   local: {
     sigla: 'IEP',
     nome: 'IEP — Instituto de Engenharia do Paraná',
@@ -57,35 +57,38 @@ export const EVENTO_CAFE = {
       'https://www.google.com/maps/search/?api=1&query=IEP+Instituto+de+Engenharia+do+Paran%C3%A1+Rua+Emiliano+Perneta+174+Curitiba',
   },
   banner: {
-    src: '/cafe-networking/banner-outubro.jpg',
-    largura: 1920,
-    altura: 1080,
-    alt: 'Café da Manhã de Networking do DSSBR — 6 de outubro, com a Arlequim: computadores virtuais de alta performance',
+    src: '/cafe-networking/banner-bindflow-outubro.jpg',
+    largura: 1600,
+    altura: 900,
+    alt: 'Café de Networking — último café antes do DSSBR, 6 de outubro, 8h às 10h, IEP: AtendeVet, com Lucas Moraes, Chief Innovation Officer da Bindflow',
   },
   /** Parágrafos da "Descrição do evento" — texto puro (ver gotcha do SSR com <strong>). */
   descricao: [
-    'No dia 6 de outubro, o DSSBR e o Instituto de Engenharia do Paraná realizam uma nova edição do Café da Manhã de Networking, em Curitiba. O encontro terá a participação da Arlequim, empresa brasileira especializada em computadores virtuais de alta performance, que apresentará sua tecnologia e um case voltado aos setores de Arquitetura e Engenharia.',
-    'Projetos em BIM, CAD, modelagem 3D, simulação e renderização exigem máquinas cada vez mais potentes — o que gera custo alto de aquisição, atualização e manutenção de workstations. Na palestra "Seu Projeto Precisa de Mais Potência, Não de Outro Computador", a Arlequim mostra como o Desktop as a Service (DaaS) permite acessar computadores de alto desempenho pela nuvem, usando os notebooks e equipamentos que a empresa já tem.',
-    'O processamento acontece em servidores remotos, o que permite trabalhar com projetos complexos sem depender da capacidade do computador local, e aumentar ou reduzir recursos conforme a demanda de cada projeto.',
-    'O case aplicado cobre projetos BIM e CAD 3D, renderização e modelagem, simulações de engenharia, acesso remoto aos projetos, padronização dos ambientes de trabalho, redução da dependência de workstations físicas e escalabilidade conforme a demanda. É a oportunidade de entender quando contratar capacidade computacional sai melhor do que comprar equipamento novo.',
-    'Entre um café e outro, o encontro é para ampliar a rede de contatos com profissionais de Arquitetura, Engenharia, Dados, Tecnologia e Inovação. Vagas limitadas.',
+    'No dia 6 de outubro acontece o último Café de Networking antes do DSSBR 2026, no Instituto de Engenharia do Paraná, em Curitiba. A manhã reúne profissionais de tecnologia, dados, inteligência artificial, saúde animal, gestão pública e inovação para uma conversa sobre como a telemedicina veterinária pode ampliar o acesso aos serviços e, ao mesmo tempo, produzir registros confiáveis para apoiar a gestão.',
+    'A telemedicina veterinária está regulamentada pelo Conselho Federal de Medicina Veterinária e pode ampliar o alcance dos serviços públicos de saúde animal — castração, vacinação, controle de zoonoses, triagem e atendimento clínico —, especialmente onde há poucos médicos-veterinários. Mas o atendimento a distância só gera valor para o gestor quando vira registro: prontuário, receita válida, histórico clínico e dados para acompanhar os animais e planejar as políticas públicas.',
+    'Na palestra "AtendeVet: gestão e teleatendimento veterinário com IA em uma única jornada", Lucas Moraes, Chief Innovation Officer da Bindflow, apresenta uma plataforma já usada no mercado privado e em operação em 26 estados: prontuário eletrônico, teleconsulta integrada ao registro clínico, assinatura digital ICP-Brasil, receituário (inclusive de controlados), histórico de atendimentos, API de integração e recursos de IA aplicados à jornada de atendimento.',
+    'Tomando como referência um credenciamento público real de 2025, a apresentação compara essa estrutura com as necessidades da gestão pública em três pontos: o que a plataforma já tem, o que ainda precisa ser desenvolvido e qual instrumento contratual separa um projeto-piloto de uma política pública estruturada.',
+    'O encontro é para profissionais de tecnologia, dados e IA, médicos-veterinários e gestores de clínicas, gestores públicos, universidades, startups e participantes do DSSBR 2026 — que acontece nos dias 27, 28 e 29 de outubro, no mesmo IEP. Vagas limitadas pela capacidade do espaço.',
   ],
   agenda: [
-    { hora: '08h00', item: 'Café da manhã e networking' },
-    { hora: '08h30', item: 'Abertura' },
+    { hora: '08h00', item: 'Recepção, café da manhã e networking' },
+    { hora: '08h30', item: 'Abertura do encontro' },
     {
       hora: '08h40',
-      item: 'Apresentação da Arlequim: Seu Projeto Precisa de Mais Potência, Não de Outro Computador',
+      item: 'Palestra com Lucas Moraes, da Bindflow: AtendeVet — gestão e teleatendimento veterinário com IA em uma única jornada',
     },
-    { hora: '09h20', item: 'Case de Arquitetura e Engenharia' },
-    { hora: '10h00', item: 'Perguntas e networking' },
-    { hora: '10h30', item: 'Encerramento' },
+    { hora: '09h30', item: 'Perguntas, conexões e networking aberto' },
+    { hora: '10h00', item: 'Encerramento' },
   ],
-  // A peça do DSSBR anuncia a EMPRESA, não pessoas: sem foto e sem nome de quem
-  // sobe ao palco. A seção "Quem apresenta" some sozinha quando a lista é vazia.
-  palestrantes: [],
-  realizacao: 'Realização: DSSBR e IEP — Instituto de Engenharia do Paraná · Apresentação: Arlequim.',
-  associacoes: ['Convidado da Arlequim', 'Associado IEP', 'Participante DSSBR', 'Membro GU BigData & IA'],
+  palestrantes: [
+    {
+      nome: 'Lucas Moraes',
+      foto: '/cafe-networking/lucas-moraes.jpg',
+      tema: 'Chief Innovation Officer da Bindflow, onde desenvolve soluções digitais de integração de processos, atendimento, gestão e IA. Apresenta o AtendeVet e os aprendizados de construir uma jornada digital completa para o atendimento veterinário.',
+    },
+  ],
+  realizacao: 'Realização: DSSBR e IEP — Instituto de Engenharia do Paraná · Apresentação: Bindflow.',
+  associacoes: ['Convidado da Bindflow', 'Associado IEP', 'Participante DSSBR', 'Membro GU BigData & IA'],
   // Café de R$30: mostra PF/PJ mas não trava por endereço, como o GU.
   // Espelha PRODUTOS[CAFE_SLUG] — o form não pode discordar do servidor.
   enderecoObrigatorioPJ: false,

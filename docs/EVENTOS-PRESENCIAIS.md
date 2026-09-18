@@ -6,7 +6,7 @@ Hoje serve **dois** eventos, com a mesma estrutura e marcas diferentes:
 | rota | evento | produtor | em cartaz |
 |---|---|---|---|
 | `/gubigdata` | Encontro presencial do GU Big Data & IA | GU Big Data & IA | **24/09/2026** — Churn Antes que Aconteça (Onetopia + Tecnofit) |
-| `/cafe-networking` | Café da manhã de networking do DSSBR | Data Science Summit Brasil | **06/10/2026** — Arlequim, DaaS para Arquitetura e Engenharia |
+| `/cafe-networking` | Café da manhã de networking do DSSBR | Data Science Summit Brasil | **06/10/2026** — Bindflow (Lucas Moraes), AtendeVet: telemedicina veterinária com IA |
 
 Em produção: GU desde 2026-07-11, café desde 2026-09-05.
 
@@ -43,8 +43,8 @@ O canário `lib/__tests__/eventos-presenciais.test.ts` reprova rota escrita nos 
 produtor. É o que faz a mesma página parecer do GU numa rota e do DSSBR na outra. Header
 sempre escuro — os dois logos têm traços claros e sumiriam num fundo branco.
 
-**Palestrante é opcional.** O café anuncia a *empresa* (Arlequim), não pessoas: `palestrantes`
-vazio faz a seção "Quem apresenta" sumir sozinha.
+**Palestrante é opcional.** Quando a peça anuncia só a *empresa* (a Arlequim, na primeira versão
+do café de 06/10), `palestrantes` vazio faz a seção "Quem apresenta" sumir sozinha.
 
 ## Trocar de edição (a receita, 7 passos)
 
@@ -129,5 +129,9 @@ Os tipos por evento hoje:
 - **2026-09-05** — encontro de 24/09 entra e o de 26/08 sai (10 dias tarde); duas `description`
   de metadata com data fixa consertadas; **café do DSSBR criado** e a página vira componente
   compartilhado.
+- **2026-09-18** — o café de 06/10 troca de apresentação: sai a Arlequim (DaaS), entra a
+  **Bindflow** com Lucas Moraes (AtendeVet), 8h às 10h. **Mesmo produto** (`cafe-networking-2026-10`),
+  mesmos tipos e mesma URL — era o mesmo dia e local, e havia **zero inscrições** no produto, então
+  não havia comprador a migrar. Trocar só o conteúdo de `evento.ts` + assets; nada no banco.
 
-Última revisão: **2026-09-05**.
+Última revisão: **2026-09-18**.
