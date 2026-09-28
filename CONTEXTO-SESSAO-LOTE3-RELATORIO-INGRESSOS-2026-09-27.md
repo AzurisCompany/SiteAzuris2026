@@ -12,12 +12,9 @@ virada de preço do FullPass, do One Day e do combo pro último lote.
 | *(este)* | docs: contexto de 27/09 + catálogo de preços no Lote 3 |
 
 **Banco de prod:** mudou pela API do admin (FullPass Lote 3; ver §3). **Migração:** nenhuma.
-**Deploy:** ⏳ **pendente.** O modo automático nega `vercel --prod`. Até rodar o deploy, o One Day
-continua cobrando R$ 290 e o combo continua em R$ 750:
-
-```
-! cd /mnt/d/2026/siteAzuris2026/web && npx vercel --prod --yes
-```
+**Deploy:** ✅ `site-azuris-2026-633lf1c1k` (autorizado pelo Binhara, rodado por mim). Verificado no ar:
+One Day cobra R$ 357 (PIX e cartão; 247 e 290 só aparecem riscados na escada), combo R$ 850 com a nota
+nova, landing "a partir de R$ 357", FullPass R$ 887. **Push feito** (`c9dd35e..fa23ccd`).
 
 **Testes:** 293/293 (27 arquivos). Build de prod limpo. Os erros de lint e tsc que aparecem já existiam
 (`dssbr-2026/page.tsx:506` `<a href="/">`, `checkout-produto.test.ts` sem `oculto`) e não vêm
@@ -153,14 +150,13 @@ escada §7.1).
 ## Fica pendente
 
 **Desta sessão:**
-- **Deploy** (comando no topo). Depois, conferir no ar: `/dssbr-2026/one-day` com R$ 357 e sem 290;
-  `/dssbr-2026/fullpass-curso` com R$ 850; landing com "a partir de R$ 357".
 - **dssbr.com.br:** atualizar os cards pra FullPass R$ 887, One Day R$ 357 e combo R$ 850.
   O `DSS-2026-LINKS-CHECKOUT-VIP-BUSINESS.md` (na raiz, fora do repo) já foi anotado.
 - As cobranças manuais em aberto continuam com o valor antigo. Só as novas usam o preço novo.
 - Relatório: número de ingressos do patrocínio · se 35/105 são o mesmo pedido · se 237 é duplicata do 209.
-- **Desligar os tipos 35/36 do GU de 24/09** (continua vendendo).
-- `git push` (6 commits).
+- **Desligar os tipos 35/36 do GU de 24/09** (continua vendendo). Tentei no "atualiza tudo", mas o
+  modo automático negou ("Modify Shared Resources"). Fica com o Binhara: `/admin/ingressos` →
+  `gubigdata-2026-09` → desligar Geral e Associado.
 
 **Herdado:** colar o link do café no post do DSSBR · marcar as NFs emitidas · Business 30 × 40 ·
 VIP/Business incluem FullPass? · café 06/10 → desligar os tipos 50/51 depois · DSS **27–29/10**.
