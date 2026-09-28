@@ -19,7 +19,7 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
 const brl = (v: number) => v.toFixed(2).replace('.', ',')
 
 // Landing lê o preço vigente dos MESMOS lugares que o checkout, pra nunca desincronizar:
-// FullPass vem do tipo de ingresso ATIVO no admin (Lote 2 R$670 hoje); One Day vem do
+// FullPass vem do tipo de ingresso ATIVO no admin (Lote 3 R$887 hoje); One Day vem do
 // registry (Lote gerido no código). force-dynamic (igual ao checkout) garante que o
 // preço mostrado é sempre o preço cobrado — sem risco de fallback velho no build.
 export const dynamic = 'force-dynamic'
@@ -90,7 +90,7 @@ async function passFullPass(): Promise<Pass> {
   }
 }
 
-/** One Day: preço do registry (Lote 2 R$290, âncora R$357). */
+/** One Day: preço do registry (Lote 3 R$357, sem âncora). */
 function passOneDay(): Pass {
   const pix = Number((PRODUTO_ONEDAY.precoCentavos / 100).toFixed(2))
   const deVenda = PRODUTO_ONEDAY.precoDeVendaCentavos / 100
@@ -112,7 +112,7 @@ function passOneDay(): Pass {
   }
 }
 
-/** Combo (cross-sell): FullPass + portal do curso Pipeline. Preço fixo R$750, sem âncora. */
+/** Combo (cross-sell): FullPass + portal do curso Pipeline. Preço fixo R$850, sem âncora. */
 function passFullPassCurso(): Pass {
   const pix = Number((PRODUTO_FULLPASS_CURSO.precoCentavos / 100).toFixed(2))
   const deVenda = PRODUTO_FULLPASS_CURSO.precoDeVendaCentavos / 100
@@ -144,9 +144,9 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 290.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 357.',
   ogDescription:
-    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 290.',
+    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 357.',
 })
 
 const STATS = [

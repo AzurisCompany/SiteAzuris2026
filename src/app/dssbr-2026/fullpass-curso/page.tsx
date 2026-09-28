@@ -4,7 +4,7 @@ import PasseCheckout from '../PasseCheckout'
 import { dssMetadata } from '../metadata'
 
 // Combo vigente (cross-sell): FullPass (3 dias) + acesso ao portal do curso
-// "Lakehouse: Pipeline na Prática". Preço fixo R$750, sem lote/âncora. Substituiu o
+// "Lakehouse: Pipeline na Prática". Preço fixo R$850, sem lote/âncora. Substituiu o
 // combo One Day + curso (R$360), encerrado em 25/08/2026. Fulfillment do curso é
 // MANUAL (a compra registra a inscrição; liberar o portal é passo operacional).
 const PRODUTO = getProduto('dss-fullpass-curso-2026')
@@ -20,7 +20,7 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/fullpass-curso',
   title: 'FullPass + Portal do Curso — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Combo do DSS 2026: FullPass dos 3 dias + acesso ao portal do curso Lakehouse: Pipeline na Prática por R$ 750. PIX ou cartão em até 3x.',
+    'Combo do DSS 2026: FullPass dos 3 dias + acesso ao portal do curso Lakehouse: Pipeline na Prática por R$ 850. PIX ou cartão em até 3x.',
   noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
 })
 
@@ -49,7 +49,7 @@ export default function FullPassCursoPage() {
       notaValor={
         <>
           O FullPass sozinho sai por{' '}
-          <strong className="text-[var(--text-primary)]">R$&nbsp;670</strong> — aqui o portal do curso entra por R$ 80.
+          <strong className="text-[var(--text-primary)]">R$&nbsp;887</strong> — no combo, com o portal do curso junto, fica R$ 850.
         </>
       }
     />

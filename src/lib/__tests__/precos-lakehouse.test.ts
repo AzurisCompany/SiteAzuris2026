@@ -47,10 +47,13 @@ describe('preço do curso Lakehouse', () => {
 
 // O caminho de quem quer curso + congresso agora é o combo, não o brinde.
 describe('combo FullPass + curso', () => {
-  it('custa o mesmo que o curso avulso — o congresso é o que entra por cima', () => {
+  // Desde 27/09/2026 (FullPass no Lote 3, R$887) o combo sai R$850 — ABAIXO do
+  // ingresso sozinho, por decisão do Binhara. Se o combo voltar a ficar acima, a nota
+  // da página /dssbr-2026/fullpass-curso ("fica R$ 850") precisa ser reescrita.
+  it('sai por R$ 850, abaixo do FullPass sozinho', () => {
     const combo = PRODUTOS['dss-fullpass-curso-2026'].precoCentavos
     const fullpass = PRODUTOS['dss-2026'].precoCentavos
-    expect(combo).toBeGreaterThan(fullpass)
-    expect(combo).toBe(75000)
+    expect(combo).toBeLessThan(fullpass)
+    expect(combo).toBe(85000)
   })
 })

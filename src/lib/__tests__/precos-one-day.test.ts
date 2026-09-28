@@ -20,10 +20,14 @@ describe('preço do Passe One Day', () => {
     expect(LOTES_ONE_DAY.filter((l) => l.atual)).toHaveLength(1)
   })
 
-  it('a âncora riscada é o lote final, e é maior que o preço praticado', () => {
+  it('a âncora riscada é o lote final acima do atual — e no último lote não há âncora', () => {
     const maiorDaEscada = Math.max(...LOTES_ONE_DAY.map((l) => l.valor))
-    expect(PRODUTO.precoDeVendaCentavos).toBe(maiorDaEscada * 100)
-    expect(PRODUTO.precoDeVendaCentavos).toBeGreaterThan(PRODUTO.precoCentavos)
+    if (maiorDaEscada * 100 === PRODUTO.precoCentavos) {
+      expect(PRODUTO.precoDeVendaCentavos).toBe(0)
+    } else {
+      expect(PRODUTO.precoDeVendaCentavos).toBe(maiorDaEscada * 100)
+      expect(PRODUTO.precoDeVendaCentavos).toBeGreaterThan(PRODUTO.precoCentavos)
+    }
   })
 
   it('a cobrança avulsa sugere o mesmo número que o checkout cobra', () => {

@@ -139,11 +139,11 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     },
     'dss-2026': {
       centavos: dss.precoCentavos,
-      dica: `Lote 2 (FullPass) · preço cheio ${brl(dss.precoDeVendaCentavos)}`,
+      dica: 'Lote 3 (FullPass) · último lote, sem âncora — confira o vigente em /admin/ingressos',
     },
     'dss-one-day-2026': {
       centavos: oneDay.precoCentavos,
-      dica: `Lote 2 (1 dia) · lote final ${brl(oneDay.precoDeVendaCentavos)}`,
+      dica: 'Lote 3 (1 dia) · último lote, sem âncora',
     },
     'dss-fullpass-curso-2026': {
       centavos: fullCurso.precoCentavos,

@@ -5,7 +5,7 @@ import { dssMetadata } from '../metadata'
 import { LOTES_ONE_DAY, LOTE_ONEDAY_ATUAL } from './lotes'
 
 // Passe One Day — 1 dia do DSS 2026. Lote gerido no preço do registry (sem tipos):
-// vende Lote 2 (R$290) com âncora do lote final (R$357) riscada. Corpo do checkout
+// vende o Lote 3 (R$357), o último, sem âncora. Corpo do checkout
 // vem do PasseCheckout compartilhado; aqui só a config específica do produto.
 // A escada (e o nome do lote em cartaz) vem de ./lotes — a landing lê o mesmo módulo.
 const PRODUTO = getProduto('dss-one-day-2026')
@@ -16,7 +16,7 @@ export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/one-day',
   title: 'Passe One Day — DSS 2026 · Data Science Summit Brasil',
   description:
-    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 2 a partir de R$ 290 no PIX ou cartão em até 3x.',
+    'Passe de 1 dia do DSS 2026 (27–29 de outubro, IEP Curitiba). Lote 3 por R$ 357 no PIX ou cartão em até 3x.',
   noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
 })
 

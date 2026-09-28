@@ -7,7 +7,7 @@ import { precosSugeridosCobranca } from '@/lib/admin-queries'
 // responde, prefill da cobrança avulsa e descrição que vai pro Asaas/nota). Eles já
 // se desencontraram uma vez — o registry ficou em R$470 de pré-venda por 3 semanas
 // enquanto o checkout cobrava R$570.
-const LOTE_VIGENTE_CENTAVOS = 67000 // Lote 2 · R$ 670,00 — espelha o tipo ativo no admin
+const LOTE_VIGENTE_CENTAVOS = 88700 // Lote 3 · R$ 887,00 — espelha o tipo ativo no admin
 
 describe('preço do FullPass do DSS', () => {
   it('o fallback do registry é o preço do lote que está vendendo', () => {
@@ -21,9 +21,9 @@ describe('preço do FullPass do DSS', () => {
     expect(precosSugeridosCobranca()['dss-2026'].centavos).toBe(LOTE_VIGENTE_CENTAVOS)
   })
 
-  it('a âncora riscada é maior que o preço praticado', () => {
+  it('a âncora riscada, se houver, é maior que o preço praticado', () => {
     const p = PRODUTOS['dss-2026']
-    expect(p.precoDeVendaCentavos).toBeGreaterThan(p.precoCentavos)
+    if (p.precoDeVendaCentavos > 0) expect(p.precoDeVendaCentavos).toBeGreaterThan(p.precoCentavos)
   })
 })
 

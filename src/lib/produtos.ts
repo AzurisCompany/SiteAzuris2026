@@ -47,12 +47,14 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     // Sem nome de lote aqui: quem diz o lote é o tipo de ingresso escolhido no
     // checkout. Rótulo fixo de lote nesta linha vira mentira na virada do lote.
     descricao: '27 a 29 de outubro · IEP, Curitiba',
-    // O preço que VENDE vem do tipo de ingresso ativo em /admin/ingressos (Lote 2,
-    // R$670 hoje). Este número é o FALLBACK de quando o banco não responde — e por
+    // O preço que VENDE vem do tipo de ingresso ativo em /admin/ingressos (Lote 3,
+    // R$887 hoje). Este número é o FALLBACK de quando o banco não responde — e por
     // isso tem que acompanhar o lote vigente: fallback velho mostra um preço que
-    // ninguém mais pratica. O Lote 1 (R$570) encerrou em 25/08/2026.
-    precoCentavos: 67000, // R$ 670,00 — Lote 2 (o que se paga, PIX ou cartão 1x)
-    precoDeVendaCentavos: 82000, // R$ 820,00 — preço cheio de venda (âncora riscada)
+    // ninguém mais pratica. Lote 1 (R$570) encerrou em 25/08/2026; Lote 2 (R$670),
+    // em 27/09/2026.
+    precoCentavos: 88700, // R$ 887,00 — Lote 3 (o que se paga, PIX ou cartão 1x)
+    // Sem âncora desde o Lote 3: o "no dia" era R$820, abaixo do preço praticado.
+    precoDeVendaCentavos: 0,
     pixDescontoPct: 0, // o preço do lote é o preço; sem off adicional no PIX
     cartaoAcrescimoPct: 0, // cartão = preço do lote; só juros no parcelamento (2x–3x)
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
@@ -63,16 +65,16 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
   },
   // Passe de 1 dia do DSS 2026 (o full são 3 dias — ver 'dss-2026'). Lote é gerido
-  // AQUI, no preço: hoje vende Lote 2 (R$290) com âncora do Lote 3 (R$357) riscada.
-  // Quando o lote virar, sobe precoCentavos (Lote 3 = 35700) e o `atual` da escada em
+  // AQUI, no preço: desde 27/09/2026 vende o Lote 3 (R$357), o último — sem âncora.
+  // Virar o lote = subir precoCentavos e mover o `atual` da escada em
   // one-day/lotes.ts — o canário `precos-one-day.test.ts` reprova se desencontrarem.
   // Sem tipos cadastrados → o checkout usa o preço único deste registry.
   'dss-one-day-2026': {
     slug: 'dss-one-day-2026',
     nome: 'DSS 2026 — Passe One Day',
     descricao: 'Passe de 1 dia · 27 a 29 de outubro · IEP, Curitiba',
-    precoCentavos: 29000, // R$ 290,00 — Lote 2 (o que se paga agora, PIX ou cartão 1x)
-    precoDeVendaCentavos: 35700, // R$ 357,00 — Lote 3 / final (âncora "de" riscada)
+    precoCentavos: 35700, // R$ 357,00 — Lote 3 / final (o que se paga, PIX ou cartão 1x)
+    precoDeVendaCentavos: 0, // último lote: não há preço acima pra riscar
     pixDescontoPct: 0, // sem off no PIX; o preço do lote é o preço
     cartaoAcrescimoPct: 0, // cartão = preço do lote; só juros no parcelamento (2x–3x)
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
@@ -103,8 +105,9 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: true,
   },
   // Combo vigente (cross-sell): FullPass (3 dias) + acesso ao portal do curso
-  // "Lakehouse: Pipeline na Prática" ([[project_curso_lakehouse_pages]]). R$750 fixo:
-  // o FullPass sozinho é R$670, então o portal do curso sai por R$80.
+  // "Lakehouse: Pipeline na Prática" ([[project_curso_lakehouse_pages]]). R$850 desde
+  // 27/09/2026 (era R$750). Decisão do Binhara: com o FullPass no Lote 3 (R$887), o
+  // combo fica ABAIXO do ingresso sozinho — o curso vira o empurrão pro combo.
   //
   // Sem âncora riscada de propósito. Somar 670 + 750 e riscar R$1.420 seria
   // superpromessa: o combo dá o PORTAL (conteúdo on-demand), não o pacote completo do
@@ -116,7 +119,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     slug: 'dss-fullpass-curso-2026',
     nome: 'DSS FullPass + Portal do Curso Pipeline',
     descricao: '3 dias de evento + portal do curso · 27 a 29 de outubro · IEP, Curitiba',
-    precoCentavos: 75000, // R$ 750,00 — combo (o que se paga, PIX ou cartão 1x)
+    precoCentavos: 85000, // R$ 850,00 — combo (o que se paga, PIX ou cartão 1x)
     precoDeVendaCentavos: 0, // sem âncora riscada (ver comentário acima)
     pixDescontoPct: 0,
     cartaoAcrescimoPct: 0,

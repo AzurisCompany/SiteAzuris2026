@@ -12,8 +12,8 @@ import type { LoteExibicao } from '../PasseCheckout'
 // `precos-one-day.test.ts` reprova se os dois discordarem.
 export const LOTES_ONE_DAY: LoteExibicao[] = [
   { nome: 'Lote 1', valor: 247, atual: false }, // encerrado em 25/08/2026
-  { nome: 'Lote 2', valor: 290, atual: true },
-  { nome: 'Lote 3', valor: 357, atual: false },
+  { nome: 'Lote 2', valor: 290, atual: false }, // encerrado em 27/09/2026
+  { nome: 'Lote 3', valor: 357, atual: true },
 ]
 
 /** Lote que está vendendo — rótulo do card na landing e no resumo do checkout. */
