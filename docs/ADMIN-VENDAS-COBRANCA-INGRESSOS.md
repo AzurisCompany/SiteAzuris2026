@@ -226,6 +226,25 @@ Paridade SQL × TS conferida no banco de dev (17 linhas, os 4 filtros batendo).
 
 ---
 
+## Relatório de ingressos por tipo (pago × em aberto): como montar
+
+Não existe tela pronta pra isso, e o CSV de contatos tem dado pessoal demais pra uma contagem.
+A receita usada em 27/09/2026 (resultado e decisões em
+[`CONTEXTO-SESSAO-LOTE3-RELATORIO-INGRESSOS-2026-09-27.md`](../CONTEXTO-SESSAO-LOTE3-RELATORIO-INGRESSOS-2026-09-27.md)):
+
+1. **Vendas do site, por produto:** `/admin/vendas?curso=<slug>&page=N` para `dss-2026`,
+   `dss-one-day-2026`, `dss-vip-2026`, `dss-business-2026` e `dss-fullpass-curso-2026`. A coluna
+   Produto traz o tipo (`lote-1`, `lote-2`, `estudante`…). Status: **Pago** · **Pendente** (a vencer)
+   · **Vencido** · Cancelado/Estornado (fica fora). Confira a soma contra o "N registros" da página.
+2. **Uma linha pode ser mais de um ingresso.** Deduza pelo valor (ex.: R$ 2.166 = 4 × 570 × 0,95).
+3. **Cobranças a empresas:** `?curso=proposta` (**`?manual=1` não filtra**). A quantidade está na
+   descrição, que só aparece no detalhe `/admin/vendas/<id>`, na linha "Como conheceu". Cobrança
+   manual com produto escolhido (DSS, VIP…) cai no slug do produto e já entrou no passo 1.
+4. **Bônus do curso:** quem comprou o Lakehouse (`lakehouse-comunidade`) **antes de 25/08/2026**
+   ganhou 1 FullPass. Depois disso, não ganha mais.
+5. **Vencido não é venda perdida:** muitas vezes a cobrança foi refeita e paga. Mostre numa coluna
+   separada.
+
 ## Fluxo de uso (pós-deploy)
 
 1. `cd web && npx vercel --prod --yes`

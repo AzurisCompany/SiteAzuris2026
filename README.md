@@ -65,9 +65,9 @@ Mapa completo — institucional, checkout e admin — em
 /servicos + 5 landings         Serviços
 /produtos  /produtos/[slug]    Ecossistema (7 produtos)
 /comunidade                    Hadoop.com.br, GU BigData, grupo de estudos
-/dssbr-2026 + /inscricao       DSS 2026 — landing e checkout (dinâmicos)
-/dssbr-2026/one-day            Passe de 1 dia (Lote 2, R$ 290)
-/dssbr-2026/fullpass-curso     Combo FullPass + portal do curso (R$ 750)
+/dssbr-2026 + /inscricao       DSS 2026 — landing e checkout do FullPass (Lote 3, R$ 887)
+/dssbr-2026/one-day            Passe de 1 dia (Lote 3, R$ 357)
+/dssbr-2026/fullpass-curso     Combo FullPass + portal do curso (R$ 850)
 /dssbr-2026/vip  /business      VIP e Business — lote vira sozinho por quantidade
 /gubigdata  /cafe-networking       Eventos presenciais no IEP (GU e DSSBR)
 /ett  /preparatorio-dados  /lakehouse-comunidade      Outros checkouts
