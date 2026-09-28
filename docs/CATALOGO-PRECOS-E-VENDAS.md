@@ -117,9 +117,13 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 
 | tipo | preço | âncora | parcelas | vagas | onde aparece |
 |---|---|---|---|---|---|
-| Lote 2 | R$ 670 | R$ 820 | 3x | 100 | vitrine do checkout |
-| Estudante | R$ 400 | R$ 670 | 3x | **50** | só por `?tipo=estudante` |
+| Lote 3 | R$ 887 | — | 3x | sem limite | vitrine do checkout — **último lote, desde 27/09/2026** |
+| Estudante | R$ 400 | R$ 887 | 3x | **50** | só por `?tipo=estudante` (âncora subiu de 670 → 887 junto com a virada) |
+| ~~Lote 2~~ | ~~R$ 670~~ | R$ 820 | | 100 | **desativado em 27/09/2026** |
 | ~~Lote 1~~ | ~~R$ 570~~ | | | | **desativado em 25/08/2026** — fica no cadastro pro histórico saber o nome do que vendeu |
+
+O Lote 3 **não tem âncora**: o "no dia" do Lote 2 era R$ 820, menor que o preço novo. Riscar
+um valor abaixo do cobrado seria propaganda ao contrário.
 
 **DSS 2026 — VIP e Business** (tipos, `/admin/ingressos`; **lote vira sozinho por quantidade**, desde 14/09)
 
@@ -134,8 +138,8 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 
 | produto | preço | observação |
 |---|---|---|
-| One Day | R$ 290 | Lote 2; escada 247 → 290 → 357 mora em `one-day/lotes.ts` (um dono só, lida pela landing e pelo checkout) e tem canário em `precos-one-day.test.ts` |
-| FullPass + portal do curso | R$ 750 | combo vigente; sem âncora; **fulfillment do portal é manual**. O FullPass sozinho é R$ 670 — o portal entra por R$ 80 |
+| One Day | R$ 357 | **Lote 3 (último) desde 27/09/2026, sem âncora**; escada 247 → 290 → 357 mora em `one-day/lotes.ts` (um dono só, lida pela landing e pelo checkout) e tem canário em `precos-one-day.test.ts` |
+| FullPass + portal do curso | R$ 850 | combo vigente desde 27/09/2026 (era R$ 750); sem âncora; **fulfillment do portal é manual**. ⚠️ Fica **abaixo** do FullPass sozinho (R$ 887) — decisão do Binhara; o canário `precos-lakehouse.test.ts` trava esse fato e a nota da página diz "no combo, com o portal do curso junto, fica R$ 850" |
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
 | Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10**, com a Bindflow (`cafe-networking-2026-10`; até 18/09 era a Arlequim, mesmo produto); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
@@ -169,9 +173,12 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 O checkout do DSS mostra, acima do seletor, de onde o preço veio e pra onde vai:
 
 ```
-  Lote 1          Lote 2            No dia
-  R̶$̶ ̶5̶7̶0̶          R$ 670            R$ 820
-  encerrado    vendendo agora
+  Lote 1       Lote 2        Lote 3
+  R̶$̶ ̶5̶7̶0̶       R̶$̶ ̶6̶7̶0̶        R$ 887
+  encerrado    encerrado    vendendo agora
+
+  (até 26/09 era: Lote 1 riscado · Lote 2 R$ 670 · "No dia" R$ 820 — o degrau
+   "No dia" some quando o lote vigente não tem âncora)
 ```
 
 Ela é **derivada do catálogo** ([`escada-lotes.ts`](../src/lib/escada-lotes.ts)), não de
@@ -247,4 +254,4 @@ Lote 2 sem ninguém mexer.
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-09-14**.
+Última revisão: **2026-09-27** (virada pro Lote 3).
