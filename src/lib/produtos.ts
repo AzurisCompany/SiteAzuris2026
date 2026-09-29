@@ -175,7 +175,7 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     tipoObrigatorio: true,
   },
   // Camiseta oficial do DSS 2026 — valor de PALESTRANTE (R$55), vendida só pelo link
-  // direto /dssbr-2026/camiseta (noindex, fora da landing). Cada tamanho (P, M, G, GG) é
+  // direto /dssbr-2026/camiseta (noindex, fora da landing). Cada tamanho (P, M, G, GG, XGG) é
   // um tipo em /admin/ingressos — o preço que vale é o de lá; este é o fallback. Um
   // pedido = um tamanho × quantidade; tamanhos diferentes = pedidos separados.
   // Retirada no credenciamento do congresso: não há frete nem endereço de entrega.

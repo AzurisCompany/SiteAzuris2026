@@ -192,7 +192,8 @@ const STATEMENTS: string[] = [
      ('camiseta-dss-2026', 'p', 'P', 'Tamanho P', 5500, 3, 0, NULL, NULL),
      ('camiseta-dss-2026', 'm', 'M', 'Tamanho M', 5500, 3, 1, NULL, NULL),
      ('camiseta-dss-2026', 'g', 'G', 'Tamanho G', 5500, 3, 2, NULL, NULL),
-     ('camiseta-dss-2026', 'gg', 'GG', 'Tamanho GG', 5500, 3, 3, NULL, NULL)
+     ('camiseta-dss-2026', 'gg', 'GG', 'Tamanho GG', 5500, 3, 3, NULL, NULL),
+     ('camiseta-dss-2026', 'xgg', 'XGG', 'Tamanho XGG', 5500, 3, 4, NULL, NULL)
    ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
 ]
 

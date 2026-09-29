@@ -265,7 +265,8 @@ export default function InscricaoForm({
         <div className="space-y-4">
           <div className="space-y-3">
             <h2 className="text-lg font-bold">{rotuloTipo}</h2>
-            <div className="grid grid-cols-4 gap-2">
+            {/* Uma coluna por tamanho cadastrado: incluir um tamanho no admin não quebra a linha. */}
+            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${tipos!.length}, minmax(0, 1fr))` }}>
               {tipos!.map((t, i) => {
                 const ativo = i === Math.min(tipoIdx, tipos!.length - 1)
                 return (
