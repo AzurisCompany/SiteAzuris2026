@@ -10,6 +10,9 @@ pra esses ingressos."*
 
 ---
 
+> **Estado em 29/09:** o **Business está no Lote 2 (R$ 984)**. O Lote 1 (id 73) foi desligado a
+> pedido do Binhara, antes de esgotar (ver §9). O VIP continua na virada por quantidade.
+
 ## 1. Links e lotes
 
 | produto | slug | checkout | API |
@@ -149,4 +152,18 @@ do servidor.
   estão na landing** `/dssbr-2026`: a vitrine é o dssbr.com.br.
 - Zero pagamento real.
 
-Última revisão: **2026-09-14**.
+## 9. Pular lote na mão (Business, 29/09)
+
+Pedido: *"muda no checkout o preço do business para o lote 2"*.
+
+- Feito pela API do admin de prod: `POST /api/admin/ingressos` com o registro do `lote-1`
+  (id 73) **inteiro** e só `ativo:false` (o upsert troca o registro todo). Sem deploy, sem migração.
+- Conferido no ar: `/dssbr-2026/business` mostra **R$ 984,00** "vendendo agora", "restam 10",
+  Lote 3 "em breve". O Lote 1 some da escada (desligado não aparece como "encerrado").
+- **As vagas do Lote 2 começam cheias (10).** As vendas do Lote 1 contam só pro Lote 1, e o Lote 2 vira
+  pro 3 depois de 10 vendas **nele**.
+- Cobranças pendentes que já tinham sido geradas no Lote 1 continuam valendo R$ 757.
+- Pra desfazer: religar o Lote 1 em `/admin/ingressos` → `dss-business-2026`.
+- O card do dssbr.com.br, se disser "a partir de R$ 757", ficou errado.
+
+Última revisão: **2026-09-29**.

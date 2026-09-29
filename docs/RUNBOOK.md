@@ -63,7 +63,9 @@ teste `precos-dss.test.ts`, que quebra de propósito se os dois desencontrarem.
 ### Lote que vira por quantidade (VIP, Business)
 Não se vira na mão: os três lotes ficam ativos e o checkout vende o primeiro com vaga. Mudar
 preço ou vagas = editar o tipo em `/admin/ingressos`. **Pra fechar um lote, desligue. Não zere as
-vagas:** `limite_qtd = 0` é gravado como *sem limite*. Ver
+vagas:** `limite_qtd = 0` é gravado como *sem limite*. **Pra pular pro lote seguinte antes de
+esgotar** (feito no Business em 29/09), desligue o lote atual: o próximo vira vigente na hora,
+com as vagas dele inteiras. Ver
 [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
 ### Criar um ingresso reservado (só por link)
