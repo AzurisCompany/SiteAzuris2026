@@ -7,7 +7,7 @@
 //    único) → criarCobranca (pipeline Asaas comum) → { invoiceUrl }.
 //  - GRATUITO (tipo com preço R$ 0): sem CPF e sem Asaas — dedupe por email e
 //    cadastro direto confirmado → { gratuito: true }.
-import { type BillingType, buscarInscricaoGratuita, confirmarInscricaoGratuita, criarInscricaoPendente } from '@/lib/db'
+import { type BillingType, buscarInscricaoGratuita, confirmarInscricaoGratuita, criarInscricaoPendente, gravarQuantidade } from '@/lib/db'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, hojeBRT } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
@@ -38,6 +38,8 @@ export interface CheckoutBody extends ExtrasInput {
   cupom?: string
   /** código puro do cupom de parceiro (?c=), sem prazo — validado em [[cupons]] */
   cupom_codigo?: string
+  /** unidades (só produto com `quantidadeMax`, a camiseta); ausente = 1 */
+  quantidade?: number
   /** ignorado no fluxo gratuito */
   billing_type?: BillingType
   installments?: number
@@ -86,6 +88,18 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     if (escada.vigente.tipo_id !== body.tipo) {
       return erro(409, `O lote mudou enquanto você preenchia — agora é ${escada.vigente.nome}. Recarregue a página pra ver o valor.`)
     }
+  }
+
+  // Produto vendido em unidades (a camiseta): o tipo é o tamanho, e a quantidade
+  // multiplica o preço do tipo. Nada disso vem do client além do número de unidades.
+  let quantidade = 1
+  if (PRODUTO.quantidadeMax) {
+    if (!body.tipo) return erro(400, 'Escolha o tamanho')
+    const q = body.quantidade ?? 1
+    if (!Number.isInteger(q) || q < 1 || q > PRODUTO.quantidadeMax) {
+      return erro(400, `Quantidade inválida (1 a ${PRODUTO.quantidadeMax})`)
+    }
+    quantidade = q
   }
 
   // Tipo de ingresso (se veio) + janela de vendas + lotação.
@@ -187,13 +201,20 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   if (tipo) {
     // O desconto do cupom entra no PREÇO DO INGRESSO, antes das regras de PIX e
     // parcelamento — assim os juros de 2x-3x incidem sobre o valor já com desconto.
-    const tipoEfetivo = cupom ? { ...tipo, preco_centavos: aplicarDesconto(tipo.preco_centavos, cupom.pct) } : tipo
+    const unitario = cupom ? { ...tipo, preco_centavos: aplicarDesconto(tipo.preco_centavos, cupom.pct) } : tipo
+    // Quantidade entra no preço-base, antes do parcelamento: os juros incidem no total.
+    const tipoEfetivo =
+      quantidade > 1
+        ? { ...unitario, preco_centavos: unitario.preco_centavos * quantidade, preco_de_centavos: unitario.preco_de_centavos * quantidade }
+        : unitario
     const cobrado = valorCobradoDoTipo(tipoEfetivo, billing, body.installments ?? 1)
     installments = cobrado.installments
     installmentValueReais = cobrado.installmentValueReais
     valorCobradoReais = cobrado.valorReais
     tipoIngresso = tipo.tipo_id
-    descricaoAsaas = `${PRODUTO.asaasDescricao} — ${tipo.nome}`
+    descricaoAsaas = PRODUTO.quantidadeMax
+      ? `${PRODUTO.asaasDescricao} — tamanho ${tipo.nome} × ${quantidade}`
+      : `${PRODUTO.asaasDescricao} — ${tipo.nome}`
     externalRef = `${PRODUTO.slug}:${tipo.tipo_id}`
   } else {
     const precoBaseReais = (cupom ? aplicarDesconto(PRODUTO.precoCentavos, cupom.pct) : PRODUTO.precoCentavos) / 100
@@ -269,6 +290,16 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   }
   if (resultado.tipo === 'erro_db') return erro(500, 'Falha ao registrar inscrição. Tenta de novo.')
   if (resultado.tipo === 'erro_asaas') return erro(502, `Falha ao criar cobrança: ${resultado.mensagem}`)
+
+  // A cobrança já existe: falhar aqui não pode derrubar a venda. Se a coluna ainda
+  // não existe (migração não rodada), a quantidade continua na descrição do Asaas.
+  if (PRODUTO.quantidadeMax) {
+    try {
+      await gravarQuantidade(resultado.inscricaoId, quantidade)
+    } catch (e) {
+      console.error(`Falha ao gravar quantidade ${quantidade} da inscrição ${resultado.inscricaoId}:`, e)
+    }
+  }
 
   return {
     status: 200,

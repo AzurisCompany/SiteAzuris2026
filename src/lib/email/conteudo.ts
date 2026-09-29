@@ -11,8 +11,10 @@ export interface DadosCompra {
   /** curso_slug da inscrição */
   produtoSlug: string
   valorCentavos: number
-  /** tipo de ingresso, quando o produto tem catálogo (ex.: 'lote-1') */
+  /** tipo de ingresso, quando o produto tem catálogo (ex.: 'lote-1'; na camiseta, o tamanho) */
   tipoIngresso?: string | null
+  /** unidades compradas (só a camiseta); ausente = 1 */
+  quantidade?: number | null
 }
 
 export interface ConteudoEmail {
@@ -110,6 +112,22 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         ],
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
+
+    case 'camiseta-dss-2026': {
+      const qtd = d.quantidade && d.quantidade > 1 ? d.quantidade : 1
+      const tamanho = d.tipoIngresso ? ` tamanho ${d.tipoIngresso.toUpperCase()}` : ''
+      const itens = qtd > 1 ? `${qtd} camisetas oficiais` : 'camiseta oficial'
+      return {
+        assunto: 'Camiseta oficial confirmada — DSS 2026',
+        titulo: `Pedido confirmado, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu pedido: ${itens} do DSSBR 2026,${tamanho}.`,
+        paragrafos: [
+          `A retirada é no credenciamento do congresso, de ${DSS_LOCAL}.`,
+          'Guarde este e-mail: ele é o seu comprovante na hora da retirada.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+    }
 
     case 'dss-one-day-2026':
       return {

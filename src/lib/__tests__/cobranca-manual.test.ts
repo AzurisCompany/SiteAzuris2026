@@ -16,13 +16,14 @@ import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 
 describe('OPCOES_COBRANCA', () => {
-  it('cobre os baldes: curso, DSS (full, One Day, VIP, Business), GU, café, ETT e customizado', () => {
+  it('cobre os baldes: curso, DSS (full, One Day, VIP, Business, camiseta), GU, café, ETT e customizado', () => {
     expect(OPCOES_COBRANCA.map((o) => o.slug)).toEqual([
       'lakehouse-comunidade',
       'dss-2026',
       'dss-one-day-2026',
       'dss-vip-2026',
       'dss-business-2026',
+      'camiseta-dss-2026',
       'dss-one-day-curso-2026',
       EVENTO_GU_SLUG,
       CAFE_SLUG,

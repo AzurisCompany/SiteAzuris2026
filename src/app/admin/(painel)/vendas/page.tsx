@@ -414,7 +414,12 @@ export default async function VendasPage({
                 </td>
                 <td className="px-4 py-3 text-[var(--text-secondary)]">
                   {labelProduto(r.curso_slug)}
-                  {r.tipo_ingresso && <div className="text-xs text-[var(--text-muted)]">{r.tipo_ingresso}</div>}
+                  {r.tipo_ingresso && (
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {r.tipo_ingresso}
+                      {r.quantidade && r.quantidade > 1 ? ` × ${r.quantidade}` : ''}
+                    </div>
+                  )}
                 </td>
                 {mostrarCupom && (
                   <td className="px-4 py-3">

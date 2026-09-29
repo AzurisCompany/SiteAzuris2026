@@ -137,6 +137,21 @@ vagas ainda abertas; ele some da escada e o checkout vende R$ 984.
 
 3x no cartão, sem âncora, sem prazo. Ver §7.2 e [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
+**DSS 2026 — Camiseta oficial, valor de palestrante** (tipos, `/admin/ingressos`; desde 29/09)
+
+| produto | checkout | tamanhos (tipos) | preço | quantidade |
+|---|---|---|---|---|
+| Camiseta (`camiseta-dss-2026`) | `/dssbr-2026/camiseta` (link direto, `noindex`) | `p` · `m` · `g` · `gg` | R$ 55 **por unidade** | 1 a 10 por pedido |
+
+Único produto vendido em **unidades**: o registry marca `quantidadeMax`, o checkout exige o
+tamanho (o tipo) e cobra **preço do tipo × quantidade**, no servidor, antes do parcelamento.
+Um pedido = um tamanho; tamanhos diferentes = pedidos separados. A quantidade fica na coluna
+`inscricoes.quantidade` (gravada num UPDATE depois da cobrança, pra não arriscar o INSERT
+comum a todos os checkouts) **e** na descrição da cobrança no Asaas (`tamanho M × 2`). O "Por
+tipo" do painel conta **pedidos** por tamanho, não unidades — a grade de produção soma a
+quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor digitado é o
+**total** do pedido.
+
 **Preço único (registry, exige deploy pra mudar)**
 
 | produto | preço | observação |

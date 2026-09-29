@@ -34,6 +34,7 @@ describe('conteudoCompraConfirmada', () => {
       'dss-one-day-2026',
       'dss-vip-2026',
       'dss-business-2026',
+      'camiseta-dss-2026',
       'dss-one-day-curso-2026',
       'gubigdata-2026-08',
       'gubigdata-2026-07',
@@ -73,5 +74,22 @@ describe('conteudoCompraConfirmada', () => {
     const texto = conteudoCompraConfirmada({ ...base, produtoSlug: 'ett-assinatura' }).paragrafos.join(' ')
     expect(texto).toContain('renovação')
     expect(texto).toContain('cancelar')
+  })
+})
+
+describe('camiseta do DSS 2026', () => {
+  const base = { nome: 'Ana Souza', produtoSlug: 'camiseta-dss-2026', valorCentavos: 11000 }
+
+  it('diz tamanho e quantidade — é o comprovante na retirada', () => {
+    const c = conteudoCompraConfirmada({ ...base, tipoIngresso: 'gg', quantidade: 2 })
+    expect(c.destaque).toContain('2 camisetas')
+    expect(c.destaque).toContain('tamanho GG')
+    expect(c.destaque).toContain('R$ 110,00')
+  })
+
+  it('sem quantidade gravada (migração não rodada) cai em 1 unidade, sem inventar número', () => {
+    const c = conteudoCompraConfirmada({ ...base, valorCentavos: 5500, tipoIngresso: 'm' })
+    expect(c.destaque).toContain('camiseta oficial')
+    expect(c.destaque).not.toMatch(/\d+ camisetas/)
   })
 })

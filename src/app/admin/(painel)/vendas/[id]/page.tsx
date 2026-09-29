@@ -153,6 +153,8 @@ export default async function VendaDetalhePage({ params }: { params: Promise<{ i
         </Bloco>
 
         <Bloco titulo="Pagamento">
+          {insc.tipo_ingresso && <Linha rotulo="Ingresso / tamanho">{insc.tipo_ingresso}</Linha>}
+          {insc.quantidade != null && <Linha rotulo="Quantidade">{insc.quantidade}</Linha>}
           <Linha rotulo="Forma">{labelBilling(insc.billing_type)}</Linha>
           <Linha rotulo="Parcelas">{insc.installments}x</Linha>
           <Linha rotulo="Valor cobrado (bruto)">{brl(insc.valor_centavos)}</Linha>

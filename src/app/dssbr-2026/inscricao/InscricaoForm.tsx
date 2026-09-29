@@ -46,6 +46,11 @@ interface Props {
   gaItem?: { id: string; name: string }
   /** PJ só fecha com endereço completo (default: true, como no DSS). Espelha o registry. */
   enderecoObrigatorioPJ?: boolean
+  /** produto vendido em unidades (a camiseta): mostra o seletor de quantidade até este teto
+   *  e os tipos viram botões compactos (o tamanho). Espelha `quantidadeMax` do registry. */
+  quantidadeMax?: number
+  /** título do seletor de tipos (default: "Tipo de ingresso"; na camiseta, "Tamanho") */
+  rotuloTipo?: string
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -74,6 +79,8 @@ export default function InscricaoForm({
   endpoint = '/api/dssbr-2026/inscricao',
   gaItem = { id: 'dss-2026', name: 'Data Science Summit Brasil 2026' },
   enderecoObrigatorioPJ = ENDERECO_OBRIGATORIO_PJ_PADRAO,
+  quantidadeMax,
+  rotuloTipo = 'Tipo de ingresso',
 }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -88,6 +95,7 @@ export default function InscricaoForm({
     const i = tipos?.findIndex((t) => t.tipo_id === defaultTipo) ?? -1
     return i >= 0 ? i : 0
   })
+  const [quantidade, setQuantidade] = useState(1)
   const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -97,9 +105,13 @@ export default function InscricaoForm({
   // Preços efetivos: do tipo selecionado (se houver catálogo) ou o preço único.
   const temTipos = !!tipos && tipos.length > 0
   const sel = temTipos ? tipos![Math.min(tipoIdx, tipos!.length - 1)] : null
-  const precoDeVendaReais = sel ? sel.precoDeVendaReais : baseDeVenda
-  const precoPixReais = sel ? sel.precoPixReais : basePix
-  const precoCartaoBaseReais = sel ? sel.precoCartaoBaseReais : baseCartao
+  // Com quantidade, os preços da tela são do PEDIDO (unitário × unidades) — o servidor
+  // multiplica do mesmo jeito, antes do parcelamento ([[checkout-produto]]).
+  const q = quantidadeMax ? quantidade : 1
+  const vezes = (v: number) => Number((v * q).toFixed(2))
+  const precoDeVendaReais = vezes(sel ? sel.precoDeVendaReais : baseDeVenda)
+  const precoPixReais = vezes(sel ? sel.precoPixReais : basePix)
+  const precoCartaoBaseReais = vezes(sel ? sel.precoCartaoBaseReais : baseCartao)
   const maxParcelas = sel ? sel.maxParcelas : baseMax
 
   // Se trocar de tipo pra um com menos parcelas, corrige a seleção.
@@ -146,6 +158,7 @@ export default function InscricaoForm({
           cpf_cnpj: cpfCnpj.replace(/\D/g, ''),
           telefone: telefone.replace(/\D/g, ''),
           tipo: sel?.tipo_id,
+          quantidade: quantidadeMax ? quantidade : undefined,
           cupom,
           cupom_codigo: cupomCodigo,
           billing_type: billingType,
@@ -173,12 +186,12 @@ export default function InscricaoForm({
               item_id: gaItem.id,
               item_name: gaItem.name,
               item_variant: sel?.tipo_id,
-              price: valorCobradoReais,
-              quantity: 1,
+              price: Number((valorCobradoReais / q).toFixed(2)),
+              quantity: q,
             },
           ],
         })
-        window.location.href = data.invoiceUrl
+        window.location.assign(data.invoiceUrl)
       } else {
         setErro('Resposta inesperada do servidor.')
         setSubmitting(false)
@@ -247,8 +260,67 @@ export default function InscricaoForm({
         </div>
       )}
 
+      {/* Produto em unidades (camiseta): tamanho em botões compactos + quantidade */}
+      {temTipos && quantidadeMax && (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold">{rotuloTipo}</h2>
+            <div className="grid grid-cols-4 gap-2">
+              {tipos!.map((t, i) => {
+                const ativo = i === Math.min(tipoIdx, tipos!.length - 1)
+                return (
+                  <label
+                    key={t.tipo_id}
+                    className={`cursor-pointer rounded-xl border-2 py-3 text-center text-lg font-black transition-all ${
+                      ativo
+                        ? 'border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/5'
+                        : 'border-[var(--azuris-surface)] bg-[var(--azuris-ink)] hover:border-[var(--azuris-mist)]/50'
+                    }`}
+                  >
+                    <input type="radio" name="tipo" checked={ativo} onChange={() => setTipoIdx(i)} className="sr-only" />
+                    {t.nome}
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-lg font-bold">Quantidade</h2>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Diminuir quantidade"
+                onClick={() => setQuantidade((n) => Math.max(1, n - 1))}
+                disabled={quantidade <= 1}
+                className="size-11 rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] text-xl font-bold disabled:opacity-40"
+              >
+                −
+              </button>
+              <span className="w-10 text-center text-2xl font-black" aria-live="polite">
+                {quantidade}
+              </span>
+              <button
+                type="button"
+                aria-label="Aumentar quantidade"
+                onClick={() => setQuantidade((n) => Math.min(quantidadeMax, n + 1))}
+                disabled={quantidade >= quantidadeMax}
+                className="size-11 rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] text-xl font-bold disabled:opacity-40"
+              >
+                +
+              </button>
+              <span className="text-sm text-[var(--text-muted)]">
+                × R$ {(sel?.precoPixReais ?? basePix).toFixed(2).replace('.', ',')}
+              </span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)]">
+              Um tamanho por pedido. Precisa de tamanhos diferentes? Faça um pedido para cada.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Tipo de ingresso (só quando há catálogo cadastrado) */}
-      {temTipos && (
+      {temTipos && !quantidadeMax && (
         <div className="space-y-3">
           <h2 className="text-lg font-bold">Tipo de ingresso</h2>
           <div className="grid gap-3 sm:grid-cols-2">

@@ -38,6 +38,12 @@ export interface ProdutoConfig {
    * deste registry — o preço do Lote 1 — mesmo com o Lote 1 esgotado.
    */
   tipoObrigatorio?: boolean
+  /**
+   * Produto vendido em UNIDADES (a camiseta), não em ingresso: o checkout aceita
+   * `quantidade` de 1 até este teto, exige tipo (o tamanho) e cobra preço do tipo ×
+   * quantidade. Ausente = uma unidade por venda, como todo ingresso.
+   */
+  quantidadeMax?: number
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
@@ -167,6 +173,27 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     telefoneObrigatorio: true,
     enderecoObrigatorioPJ: true,
     tipoObrigatorio: true,
+  },
+  // Camiseta oficial do DSS 2026 — valor de PALESTRANTE (R$55), vendida só pelo link
+  // direto /dssbr-2026/camiseta (noindex, fora da landing). Cada tamanho (P, M, G, GG) é
+  // um tipo em /admin/ingressos — o preço que vale é o de lá; este é o fallback. Um
+  // pedido = um tamanho × quantidade; tamanhos diferentes = pedidos separados.
+  // Retirada no credenciamento do congresso: não há frete nem endereço de entrega.
+  'camiseta-dss-2026': {
+    slug: 'camiseta-dss-2026',
+    nome: 'Camiseta oficial DSSBR 2026 — palestrantes',
+    descricao: 'Camiseta dry fit · retirada no credenciamento · 27 a 29 de outubro',
+    precoCentavos: 5500, // R$ 55,00 por unidade (fallback; o preço vive nos tipos)
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Camiseta oficial DSSBR 2026 (palestrante)',
+    voltarUrl: '/dssbr-2026',
+    voltarLabel: '← voltar pro DSS 2026',
+    telefoneObrigatorio: true, // é por WhatsApp que se combina a retirada
+    enderecoObrigatorioPJ: false, // compra pessoal de R$55: não trava por endereço
+    quantidadeMax: 10,
   },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados

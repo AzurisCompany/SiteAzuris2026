@@ -78,6 +78,14 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-business-2026'].enderecoObrigatorioPJ,
   },
   {
+    // Camiseta do DSS 2026 (palestrante): o tamanho vai no tipo, e o valor digitado é o
+    // TOTAL do pedido — a cobrança avulsa não multiplica pela quantidade.
+    slug: 'camiseta-dss-2026',
+    label: 'Camiseta DSS',
+    descricaoPadrao: PRODUTOS['camiseta-dss-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['camiseta-dss-2026'].enderecoObrigatorioPJ,
+  },
+  {
     slug: 'dss-one-day-curso-2026',
     label: 'DSS One Day + Curso',
     descricaoPadrao: PRODUTOS['dss-one-day-curso-2026'].asaasDescricao,

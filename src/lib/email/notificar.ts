@@ -27,6 +27,7 @@ export async function notificarPagamentoConfirmado(row: InscricaoRow): Promise<v
         produtoSlug: row.curso_slug,
         valorCentavos: row.valor_centavos,
         tipoIngresso: row.tipo_ingresso,
+        quantidade: row.quantidade,
       }),
     })
 

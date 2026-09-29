@@ -84,6 +84,8 @@ export interface InscricaoRow {
   ingresso_gerado_em?: string | null
   /** quando a NF foi marcada como emitida à mão; NULL = não. Opcional: não existe antes da migração. */
   nf_emitida_em?: string | null
+  /** unidades da venda (NULL/undefined = 1) — só a camiseta vende mais de uma; ver [[produtos]] quantidadeMax */
+  quantidade?: number | null
   // --- e-mail transacional ---
   email_confirmacao_em: string | null // quando a confirmação de pagamento foi enviada
   // --- Nota Fiscal (Asaas NFS-e) ---
@@ -315,6 +317,19 @@ export async function confirmarInscricaoGratuita(id: number): Promise<void> {
   await sql`
     UPDATE inscricoes
        SET status = 'paid', pago_em = NOW(), paid_at = NOW(), updated_at = NOW()
+     WHERE id = ${id}
+  `
+}
+
+/**
+ * Grava a quantidade de unidades de uma venda (a camiseta). UPDATE separado do INSERT
+ * de propósito: a coluna nasce por migração, e se o INSERT comum a todos os checkouts
+ * citasse `quantidade`, qualquer venda falharia entre o deploy e a migração.
+ */
+export async function gravarQuantidade(id: number, quantidade: number): Promise<void> {
+  await sql`
+    UPDATE inscricoes
+       SET quantidade = ${quantidade}, updated_at = NOW()
      WHERE id = ${id}
   `
 }

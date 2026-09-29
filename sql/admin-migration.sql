@@ -196,3 +196,17 @@ VALUES
   ('dss-business-2026', 'lote-2', 'Lote 2', '10 ingressos Business', 98400, 3, 1, NULL, 10),
   ('dss-business-2026', 'lote-3', 'Lote 3', 'Últimos 10 ingressos Business', 127900, 3, 2, NULL, 10)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
+-- Quantidade de unidades da venda (NULL = 1). Só a camiseta do DSS 2026 vende mais de uma
+-- unidade por pedido; aditiva e nullable, nenhuma linha existente muda.
+ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS quantidade INTEGER;
+
+-- Camiseta oficial do DSS 2026 — valor de palestrante (idempotente; NÃO sobrescreve edições
+-- do admin). Cada TAMANHO é um tipo: o "Por tipo" do painel vira a grade de produção.
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('camiseta-dss-2026', 'p', 'P', 'Tamanho P', 5500, 3, 0, NULL, NULL),
+  ('camiseta-dss-2026', 'm', 'M', 'Tamanho M', 5500, 3, 1, NULL, NULL),
+  ('camiseta-dss-2026', 'g', 'G', 'Tamanho G', 5500, 3, 2, NULL, NULL),
+  ('camiseta-dss-2026', 'gg', 'GG', 'Tamanho GG', 5500, 3, 3, NULL, NULL)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
