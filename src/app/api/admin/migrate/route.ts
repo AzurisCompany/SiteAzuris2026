@@ -195,6 +195,16 @@ const STATEMENTS: string[] = [
      ('camiseta-dss-2026', 'gg', 'GG', 'Tamanho GG', 5500, 3, 3, NULL, NULL),
      ('camiseta-dss-2026', 'xgg', 'XGG', 'Tamanho XGG', 5500, 3, 4, NULL, NULL)
    ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
+  // A mesma camiseta, valor de congressista: R$70 antecipada, até 20/10 (uma semana antes
+  // do DSS). No dia ela custa R$100 no credenciamento, fora do site. Idempotente, como acima.
+  `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+   VALUES
+     ('camiseta-congressista-dss-2026', 'p', 'P', 'Tamanho P', 7000, 3, 0, '2026-10-20', NULL),
+     ('camiseta-congressista-dss-2026', 'm', 'M', 'Tamanho M', 7000, 3, 1, '2026-10-20', NULL),
+     ('camiseta-congressista-dss-2026', 'g', 'G', 'Tamanho G', 7000, 3, 2, '2026-10-20', NULL),
+     ('camiseta-congressista-dss-2026', 'gg', 'GG', 'Tamanho GG', 7000, 3, 3, '2026-10-20', NULL),
+     ('camiseta-congressista-dss-2026', 'xgg', 'XGG', 'Tamanho XGG', 7000, 3, 4, '2026-10-20', NULL)
+   ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
 ]
 
 export async function POST() {

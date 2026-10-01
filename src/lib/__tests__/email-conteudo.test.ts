@@ -35,6 +35,7 @@ describe('conteudoCompraConfirmada', () => {
       'dss-vip-2026',
       'dss-business-2026',
       'camiseta-dss-2026',
+      'camiseta-congressista-dss-2026',
       'dss-one-day-curso-2026',
       'gubigdata-2026-08',
       'gubigdata-2026-07',
@@ -91,5 +92,21 @@ describe('camiseta do DSS 2026', () => {
     const c = conteudoCompraConfirmada({ ...base, valorCentavos: 5500, tipoIngresso: 'm' })
     expect(c.destaque).toContain('camiseta oficial')
     expect(c.destaque).not.toMatch(/\d+ camisetas/)
+  })
+})
+
+describe('camiseta do DSS 2026 — congressista', () => {
+  it('usa o mesmo comprovante da de palestrante: tamanho, quantidade e retirada', () => {
+    const c = conteudoCompraConfirmada({
+      nome: 'Ana Souza',
+      produtoSlug: 'camiseta-congressista-dss-2026',
+      valorCentavos: 14000,
+      tipoIngresso: 'g',
+      quantidade: 2,
+    })
+    expect(c.destaque).toContain('2 camisetas')
+    expect(c.destaque).toContain('tamanho G')
+    expect(c.destaque).toContain('R$ 140,00')
+    expect(c.paragrafos.join(' ')).toContain('credenciamento')
   })
 })

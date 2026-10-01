@@ -195,6 +195,27 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: false, // compra pessoal de R$55: não trava por endereço
     quantidadeMax: 10,
   },
+  // A MESMA camiseta, no valor de CONGRESSISTA: R$70 na compra antecipada, que vai até
+  // uma semana antes do evento (vendas_ate = 20/10 nos tipos, editável em /admin/ingressos).
+  // No dia do evento ela custa R$100 e é vendida no credenciamento — não por aqui: passado
+  // o prazo, a página /dssbr-2026/camiseta-congressista avisa isso em vez do formulário.
+  // Mesmo desenho da de palestrante: tamanho = tipo, preço × quantidade no servidor.
+  'camiseta-congressista-dss-2026': {
+    slug: 'camiseta-congressista-dss-2026',
+    nome: 'Camiseta oficial DSSBR 2026 — congressistas',
+    descricao: 'Camiseta dry fit · compra antecipada · retirada no credenciamento · 27 a 29 de outubro',
+    precoCentavos: 7000, // R$ 70,00 por unidade, antecipada (fallback; o preço vive nos tipos)
+    precoDeVendaCentavos: 0, // o R$100 do dia é texto da página, não âncora riscada
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Camiseta oficial DSSBR 2026 (congressista, compra antecipada)',
+    voltarUrl: '/dssbr-2026',
+    voltarLabel: '← voltar pro DSS 2026',
+    telefoneObrigatorio: true, // é por WhatsApp que se combina a retirada
+    enderecoObrigatorioPJ: false, // compra pessoal de R$70: não trava por endereço
+    quantidadeMax: 10,
+  },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
   // no admin (geral R$30 / associado grátis); este registro é o fallback e a config.

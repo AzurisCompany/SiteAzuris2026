@@ -142,6 +142,7 @@ vagas ainda abertas; ele some da escada e o checkout vende R$ 984.
 | produto | checkout | tamanhos (tipos) | preço | quantidade |
 |---|---|---|---|---|
 | Camiseta (`camiseta-dss-2026`) | `/dssbr-2026/camiseta` (link direto, `noindex`) | `p` · `m` · `g` · `gg` · `xgg` | R$ 55 **por unidade** | 1 a 10 por pedido |
+| Camiseta congressista (`camiseta-congressista-dss-2026`) | `/dssbr-2026/camiseta-congressista` (indexável, fora da landing) | `p` · `m` · `g` · `gg` · `xgg`, `vendas_ate` 20/10 | R$ 70 **por unidade**, antecipada · R$ 100 no dia, **no credenciamento, fora do site** | 1 a 10 por pedido |
 
 Único produto vendido em **unidades**: o registry marca `quantidadeMax`, o checkout exige o
 tamanho (o tipo) e cobra **preço do tipo × quantidade**, no servidor, antes do parcelamento.

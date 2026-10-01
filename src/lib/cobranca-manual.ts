@@ -86,6 +86,13 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['camiseta-dss-2026'].enderecoObrigatorioPJ,
   },
   {
+    // A mesma camiseta, valor de congressista. Valor digitado = TOTAL, como acima.
+    slug: 'camiseta-congressista-dss-2026',
+    label: 'Camiseta Congressista',
+    descricaoPadrao: PRODUTOS['camiseta-congressista-dss-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['camiseta-congressista-dss-2026'].enderecoObrigatorioPJ,
+  },
+  {
     slug: 'dss-one-day-curso-2026',
     label: 'DSS One Day + Curso',
     descricaoPadrao: PRODUTOS['dss-one-day-curso-2026'].asaasDescricao,

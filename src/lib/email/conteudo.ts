@@ -113,7 +113,8 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
-    case 'camiseta-dss-2026': {
+    case 'camiseta-dss-2026':
+    case 'camiseta-congressista-dss-2026': {
       const qtd = d.quantidade && d.quantidade > 1 ? d.quantidade : 1
       const tamanho = d.tipoIngresso ? ` tamanho ${d.tipoIngresso.toUpperCase()}` : ''
       const itens = qtd > 1 ? `${qtd} camisetas oficiais` : 'camiseta oficial'
