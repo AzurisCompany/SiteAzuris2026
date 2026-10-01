@@ -8,14 +8,11 @@
 import { NextResponse } from 'next/server'
 import { getCupom } from '@/lib/cupons'
 import { criarCupom, formatarValidade, VALIDADE_HORAS_PADRAO } from '@/lib/cupom'
+import { produtoComCupom } from '@/lib/cupom-produtos'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const CAMINHO_POR_PRODUTO: Record<string, string> = {
-  'dss-2026': '/dssbr-2026/inscricao',
-  'dss-one-day-2026': '/dssbr-2026/one-day',
-}
 
 /** Atrasa a resposta de erro — encarece brute force no código sem incomodar quem acerta. */
 const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -42,22 +39,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Código não confere. Confere com o Binhara.' }, { status: 401 })
   }
 
-  const caminho = CAMINHO_POR_PRODUTO[cupom.produto_slug]
-  if (!caminho) {
+  // Um link por ingresso em que o cupom vale: o token assina o produto, então o
+  // link do One Day não abre desconto no VIP. Todos com o MESMO prazo.
+  const produtos = cupom.produtos.map(produtoComCupom).filter((p) => p != null)
+  if (produtos.length === 0) {
     return NextResponse.json({ error: 'Cupom cadastrado num produto sem página de checkout.' }, { status: 500 })
   }
 
-  let token: string
+  const agora = Date.now()
+  let links: Array<{ produto: string; nome: string; caminho: string; token: string }>
   let exp: number
   try {
-    const c = criarCupom({
-      codigo: cupom.codigo,
-      produto: cupom.produto_slug,
-      pct: cupom.pct,
-      horas: cupom.validade_horas ?? VALIDADE_HORAS_PADRAO,
-    })
-    token = c.token
-    exp = c.cupom.exp
+    links = produtos.map((p) => ({
+      produto: p.slug,
+      nome: p.nome,
+      caminho: p.caminho,
+      token: criarCupom(
+        {
+          codigo: cupom.codigo,
+          produto: p.slug,
+          pct: cupom.pct,
+          horas: cupom.validade_horas ?? VALIDADE_HORAS_PADRAO,
+        },
+        agora,
+      ).token,
+    }))
+    exp = agora + (cupom.validade_horas ?? VALIDADE_HORAS_PADRAO) * 60 * 60 * 1000
   } catch (e) {
     // Só acontece se faltar segredo de assinatura no ambiente.
     console.error('Falha ao assinar cupom de vendedora:', e)
@@ -68,8 +75,7 @@ export async function POST(request: Request) {
     ok: true,
     vendedora: { nome: cupom.nome, slug: cupom.codigo },
     cliente: (body.cliente ?? '').trim().slice(0, 60) || null,
-    caminho,
-    token,
+    links,
     utm: { source: 'vendedora', medium: 'link', content: cupom.codigo },
     pct: cupom.pct,
     horas: cupom.validade_horas ?? VALIDADE_HORAS_PADRAO,

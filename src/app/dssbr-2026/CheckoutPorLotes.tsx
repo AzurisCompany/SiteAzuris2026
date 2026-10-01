@@ -4,7 +4,9 @@ import type { ProdutoConfig } from '@/lib/produtos'
 import { listarTipos, contarInscritosPorTipo, precosDoTipo } from '@/lib/tipos-ingresso'
 import { escadaPorQuantidade, type EscadaQuantidade } from '@/lib/lotes-quantidade'
 import { hojeBRT } from '@/lib/format'
+import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm from './inscricao/InscricaoForm'
+import CupomAviso, { type EntradaCupom } from './CupomAviso'
 
 // Corpo dos checkouts VIP e Business do DSS 2026: lote que vira sozinho por
 // quantidade ([[lotes-quantidade]]). A página mostra a escada e vende SÓ o lote
@@ -24,6 +26,8 @@ interface Props {
   inclui: string[]
   /** contexto pra prefill do WhatsApp (grupo, esgotado, dúvida) */
   waContexto: string
+  /** `?d=`/`?c=` da URL — link de vendedora ou de parceiro ([[cupons]]) */
+  cupomEntrada?: EntradaCupom
 }
 
 const brl = (reais: number) => reais.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -37,7 +41,12 @@ export default async function CheckoutPorLotes({
   resumoLabel,
   inclui,
   waContexto,
+  cupomEntrada,
 }: Props) {
+  const { aplicado: cupom, recusa } = await resolverDesconto(
+    { token: cupomEntrada?.d, codigo: cupomEntrada?.c },
+    produto.slug,
+  )
   let escada: EscadaQuantidade | null = null
   try {
     const [tipos, inscritos] = await Promise.all([listarTipos(produto.slug), contarInscritosPorTipo(produto.slug)])
@@ -49,7 +58,10 @@ export default async function CheckoutPorLotes({
   }
 
   const vigente = escada?.vigente ?? null
-  const precos = vigente ? precosDoTipo(vigente) : null
+  // Desconto sobre o lote vigente; o servidor aplica o mesmo % no POST.
+  const precos = vigente
+    ? precosDoTipo(cupom ? { ...vigente, preco_centavos: aplicarDesconto(vigente.preco_centavos, cupom.pct) } : vigente)
+    : null
   const waUrl = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(waContexto)}`
 
   return (
@@ -64,6 +76,8 @@ export default async function CheckoutPorLotes({
 
         <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">{h1}</h1>
         <p className="mt-3 text-sm text-[var(--text-secondary)]">{subtitulo}</p>
+
+        <CupomAviso cupom={cupom} morto={recusa !== null} precoCheioCentavos={vigente?.preco_centavos ?? produto.precoCentavos} />
 
         {/* Compras corporativas / em grupo */}
         <div className="mt-6 flex flex-col gap-3 rounded-xl border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -135,9 +149,16 @@ export default async function CheckoutPorLotes({
                 maxParcelas: precos.maxParcelas,
               },
             ]}
-            escada={escada?.degraus ?? []}
+            // Com cupom, o degrau "vendendo agora" mostra o de-por, como no FullPass.
+            escada={(escada?.degraus ?? []).map((d) =>
+              cupom && d.estado === 'atual'
+                ? { ...d, valorComCupom: aplicarDesconto(Math.round(d.valor * 100), cupom.pct) / 100 }
+                : d,
+            )}
             endpoint={endpoint}
             gaItem={gaItem}
+            cupom={cupom && cupomEntrada?.d ? cupomEntrada.d : undefined}
+            cupomCodigo={cupom && !cupomEntrada?.d ? cupom.codigo : undefined}
             enderecoObrigatorioPJ={produto.enderecoObrigatorioPJ}
           />
         ) : (

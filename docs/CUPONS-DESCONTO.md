@@ -102,11 +102,21 @@ gravadas com o código velho. Renomeie o `nome` à vontade; o código, não.
 | `codigo` | normalizado em minúsculas; é a chave lógica |
 | `nome` | quem é (aparece na aba, não no link) |
 | `tipo` | `vendedora` \| `parceiro` |
-| `produto_slug` | um cupom vale pra **um** produto |
+| `produto_slug` | o 1º produto de `produtos` (coluna antiga, mantida `NOT NULL`) |
+| `produtos` | `TEXT[]`, **em quais ingressos o cupom vale** (desde 01/10/2026). `NULL` = só o `produto_slug`, como era antes |
 | `pct` | desconto inteiro, teto de 20 |
 | `validade_horas` | `NULL` = link sem prazo |
 | `limite_usos` | `NULL` = ilimitado |
 | `ativo` | **o botão de matar** |
+
+**Vários ingressos por cupom (01/10/2026).** No admin, "Vale para" são caixinhas, uma por
+ingresso de `PRODUTOS_COM_CUPOM` (`src/lib/cupom-produtos.ts`): FullPass, One Day, VIP,
+Business e FullPass + Curso. O parceiro ganha **um link fixo por ingresso marcado**, cada um
+apontando pro checkout daquele ingresso. A vendedora digita a senha em `/vendas` e recebe
+**um link por ingresso**: o token assina o produto, então o link do One Day não desconta no VIP.
+Todas as páginas desses ingressos leem `?c=`/`?d=` (`PasseCheckout`, `CheckoutPorLotes` e a
+inscrição do FullPass, com a tarja em `CupomAviso.tsx`). Até 01/10, só a inscrição do FullPass
+lia cupom: um cupom de One Day caía no preço cheio.
 
 Migração aditiva e idempotente, em `sql/admin-migration.sql` e espelhada em
 `POST /api/admin/migrate` (é por essa rota que roda em produção).
@@ -122,9 +132,9 @@ curl -s -c /tmp/cj -X POST localhost:3111/api/admin/login \
 curl -s -b /tmp/cj -X POST localhost:3111/api/admin/migrate    # cria a tabela
 
 curl -s -b /tmp/cj -X POST localhost:3111/api/admin/cupons -H 'Content-Type: application/json' \
-  -d '{"nome":"Celeste","codigo":"CEL01","tipo":"vendedora","produto_slug":"dss-2026","pct":10,"validade_horas":48}'
+  -d '{"nome":"Celeste","codigo":"CEL01","tipo":"vendedora","produtos":["dss-2026","dss-one-day-2026"],"pct":10,"validade_horas":48}'
 curl -s -b /tmp/cj -X POST localhost:3111/api/admin/cupons -H 'Content-Type: application/json' \
-  -d '{"nome":"Parceiro X","codigo":"PARC15","tipo":"parceiro","produto_slug":"dss-2026","pct":15,"validade_horas":null}'
+  -d '{"nome":"Parceiro X","codigo":"PARC15","tipo":"parceiro","produtos":["dss-2026","dss-vip-2026"],"pct":15,"validade_horas":null}'
 
 curl -s -X POST localhost:3111/api/vendas/link -H 'Content-Type: application/json' -d '{"codigo":"CEL01"}'
 

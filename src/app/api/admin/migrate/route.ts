@@ -181,6 +181,9 @@ const STATEMENTS: string[] = [
   // na lista de vendas, mesmo desenho do ingresso_gerado_em: aditiva, nullable, SELECT *.
   // Nota emitida pelo Asaas continua em nf_status — ver lib/nota-fiscal.ts.
   `ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS nf_emitida_em TIMESTAMPTZ`,
+  // Cupom em VÁRIOS produtos (FullPass, One Day, VIP…). NULL = só o produto_slug, como
+  // antes; nenhum cupom existente muda. O admin grava os dois (produto_slug = o 1º).
+  `ALTER TABLE cupons ADD COLUMN IF NOT EXISTS produtos TEXT[]`,
   // Quantidade de unidades da venda (NULL = 1). Só a camiseta do DSS 2026 vende mais de
   // uma unidade por pedido. Gravada num UPDATE separado do INSERT (ver checkout-produto):
   // antes desta migração, só a camiseta falha — os outros checkouts nem tocam a coluna.

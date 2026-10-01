@@ -28,9 +28,14 @@ export const metadata: Metadata = dssMetadata({
 
 export const dynamic = 'force-dynamic'
 
-export default function VipPage() {
+export default async function VipPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ d?: string; c?: string }>
+}) {
   return (
     <CheckoutPorLotes
+      cupomEntrada={await searchParams}
       produto={PRODUTO}
       endpoint="/api/dss-vip/inscricao"
       gaItem={{ id: 'dss-vip-2026', name: 'DSS 2026 — Ingresso VIP' }}

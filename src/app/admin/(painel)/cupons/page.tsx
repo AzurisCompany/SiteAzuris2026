@@ -1,16 +1,9 @@
 import { listarCuponsComUso, type CupomComUso } from '@/lib/cupons'
 import { CUPOM_PCT_MAX } from '@/lib/cupom'
-import { labelProduto } from '@/lib/admin-queries'
-import CuponsManager, { type ProdutoOpcao } from './CuponsManager'
+import { PRODUTOS_COM_CUPOM } from '@/lib/cupom-produtos'
+import CuponsManager from './CuponsManager'
 
 export const dynamic = 'force-dynamic'
-
-// Produtos que aceitam cupom. O caminho é o do checkout — é dele que sai o link
-// fixo do parceiro (`?c=CODIGO`).
-const PRODUTOS: ProdutoOpcao[] = [
-  { slug: 'dss-2026', nome: `${labelProduto('dss-2026')} (FullPass)`, caminho: '/dssbr-2026/inscricao' },
-  { slug: 'dss-one-day-2026', nome: labelProduto('dss-one-day-2026'), caminho: '/dssbr-2026/one-day' },
-]
 
 export default async function CuponsPage() {
   let cupons: CupomComUso[] = []
@@ -40,7 +33,7 @@ export default async function CuponsPage() {
         </div>
       )}
 
-      <CuponsManager cuponsIniciais={cupons} produtos={PRODUTOS} pctMax={CUPOM_PCT_MAX} />
+      <CuponsManager cuponsIniciais={cupons} produtos={PRODUTOS_COM_CUPOM} pctMax={CUPOM_PCT_MAX} />
     </div>
   )
 }

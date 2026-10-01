@@ -4,13 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Copy, Check, Trash2, Power, Plus, Shuffle, Pencil, X } from 'lucide-react'
 import type { CupomComUso, TipoCupom } from '@/lib/cupons'
+import { PRODUTOS_COM_CUPOM, type ProdutoComCupom } from '@/lib/cupom-produtos'
 
-export interface ProdutoOpcao {
-  slug: string
-  nome: string
-  /** caminho do checkout, pra montar o link do parceiro */
-  caminho: string
-}
+type ProdutoOpcao = ProdutoComCupom
+
+/** slug → nome curto, pra lista "vale para" de cada cupom */
+const NOMES: Record<string, string> = Object.fromEntries(PRODUTOS_COM_CUPOM.map((p) => [p.slug, p.nome]))
 
 interface Props {
   cuponsIniciais: CupomComUso[]
@@ -38,7 +37,7 @@ interface Formulario {
   nome: string
   codigo: string
   tipo: TipoCupom
-  produto_slug: string
+  produtos: string[]
   pct: string
   validade_horas: string
   limite_usos: string
@@ -49,7 +48,7 @@ function formVazio(tipo: TipoCupom, produtoSlug: string): Formulario {
     nome: '',
     codigo: sortearCodigo(),
     tipo,
-    produto_slug: produtoSlug,
+    produtos: produtoSlug ? [produtoSlug] : [],
     pct: tipo === 'parceiro' ? '15' : '10',
     validade_horas: tipo === 'parceiro' ? '' : '48',
     limite_usos: '',
@@ -77,7 +76,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
       nome: c.nome,
       codigo: c.codigo,
       tipo: c.tipo,
-      produto_slug: c.produto_slug,
+      produtos: c.produtos,
       pct: String(c.pct),
       validade_horas: c.validade_horas == null ? '' : String(c.validade_horas),
       limite_usos: c.limite_usos == null ? '' : String(c.limite_usos),
@@ -114,7 +113,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
       nome: form.nome,
       codigo: form.codigo,
       tipo: form.tipo,
-      produto_slug: form.produto_slug,
+      produtos: form.produtos,
       pct: Number(form.pct),
       validade_horas: form.validade_horas ? Number(form.validade_horas) : null,
       limite_usos: form.limite_usos ? Number(form.limite_usos) : null,
@@ -132,11 +131,18 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
     await chamar('DELETE', { id: c.id })
   }
 
-  function linkDoCupom(c: CupomComUso): string | null {
-    if (c.validade_horas != null) return null // vendedora: link é gerado em /vendas
-    const p = produtos.find((x) => x.slug === c.produto_slug)
-    if (!p) return null
-    return `${window.location.origin}${p.caminho}?c=${c.codigo}`
+  /** Um link fixo por produto do cupom. Vendedora não tem: o link dela é gerado em /vendas. */
+  function linksDoCupom(c: CupomComUso): LinkProduto[] {
+    if (c.validade_horas != null) return []
+    return produtos
+      .filter((p) => c.produtos.includes(p.slug))
+      .map((p) => ({ nome: p.nome, url: `${window.location.origin}${p.caminho}?c=${c.codigo}` }))
+  }
+
+  function alternarProduto(slug: string) {
+    if (!form) return
+    const marcado = form.produtos.includes(slug)
+    set({ produtos: marcado ? form.produtos.filter((s) => s !== slug) : [...form.produtos, slug] })
   }
 
   async function copiar(texto: string, chave: string) {
@@ -215,19 +221,31 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
               <p className="mt-1 text-xs text-[var(--text-muted)]">Máximo permitido: {pctMax}%.</p>
             </div>
 
-            <div>
-              <label className={rotulo}>Produto</label>
-              <select
-                value={form.produto_slug}
-                onChange={(e) => set({ produto_slug: e.target.value })}
-                className={campo}
-              >
+            <div className="sm:row-span-2">
+              <label className={rotulo}>Vale para</label>
+              <div className="space-y-1.5">
                 {produtos.map((p) => (
-                  <option key={p.slug} value={p.slug}>
+                  <label
+                    key={p.slug}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2 text-sm hover:border-[var(--azuris-cyan)]/50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.produtos.includes(p.slug)}
+                      onChange={() => alternarProduto(p.slug)}
+                      className="size-4 accent-[var(--azuris-cyan)]"
+                    />
                     {p.nome}
-                  </option>
+                  </label>
                 ))}
-              </select>
+              </div>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                {form.produtos.length === 0
+                  ? 'Marca ao menos um.'
+                  : form.tipo === 'parceiro'
+                    ? 'Sai um link fixo por ingresso marcado.'
+                    : 'Em /vendas ela recebe um link por ingresso marcado.'}
+              </p>
             </div>
 
             <div>
@@ -263,7 +281,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
 
           <button
             onClick={salvar}
-            disabled={salvando}
+            disabled={salvando || form.produtos.length === 0}
             className="mt-5 w-full rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-6 py-3.5 text-base font-bold text-white disabled:opacity-60"
           >
             {salvando ? 'Salvando…' : form.id ? 'Salvar alterações' : 'Cadastrar'}
@@ -299,7 +317,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
               <Linha
                 key={c.id}
                 c={c}
-                link={null}
+                links={[]}
                 copiado={copiado}
                 onCopiar={copiar}
                 onEditar={abrirEdicao}
@@ -340,7 +358,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
               <Linha
                 key={c.id}
                 c={c}
-                link={linkDoCupom(c)}
+                links={linksDoCupom(c)}
                 copiado={copiado}
                 onCopiar={copiar}
                 onEditar={abrirEdicao}
@@ -356,9 +374,14 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
   )
 }
 
+interface LinkProduto {
+  nome: string
+  url: string
+}
+
 function Linha({
   c,
-  link,
+  links,
   copiado,
   onCopiar,
   onEditar,
@@ -367,7 +390,7 @@ function Linha({
   ocupado,
 }: {
   c: CupomComUso
-  link: string | null
+  links: LinkProduto[]
   copiado: string | null
   onCopiar: (texto: string, chave: string) => void
   onEditar: (c: CupomComUso) => void
@@ -400,6 +423,9 @@ function Linha({
           </div>
           <div className="mt-1 font-mono text-sm text-[var(--azuris-cyan)]">{c.codigo}</div>
           <div className="mt-1 text-xs text-[var(--text-muted)]">
+            {c.produtos.map((s) => NOMES[s] ?? s).join(' · ')}
+          </div>
+          <div className="mt-0.5 text-xs text-[var(--text-muted)]">
             {c.validade_horas != null ? `link vale ${c.validade_horas}h` : 'link sem prazo'}
             {c.limite_usos != null && ` · limite de ${c.limite_usos}`}
           </div>
@@ -413,20 +439,26 @@ function Linha({
         </div>
       </div>
 
-      {link && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <code className="min-w-0 flex-1 truncate rounded-lg bg-[var(--azuris-ink)] px-3 py-2 text-xs text-[var(--text-secondary)]">
-            {link}
-          </code>
-          <button
-            onClick={() => onCopiar(link, `link-${c.id}`)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-bold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20"
-          >
-            {copiado === `link-${c.id}` ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copiado === `link-${c.id}` ? 'copiado' : 'copiar link'}
-          </button>
-        </div>
-      )}
+      {links.map((l) => {
+        const chave = `link-${c.id}-${l.url}`
+        return (
+          <div key={l.url} className="mt-3">
+            <div className="mb-1 text-xs font-semibold text-[var(--text-secondary)]">{l.nome}</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <code className="min-w-0 flex-1 truncate rounded-lg bg-[var(--azuris-ink)] px-3 py-2 text-xs text-[var(--text-secondary)]">
+                {l.url}
+              </code>
+              <button
+                onClick={() => onCopiar(l.url, chave)}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-cyan)]/10 px-3 py-2 text-xs font-bold text-[var(--azuris-cyan)] hover:bg-[var(--azuris-cyan)]/20"
+              >
+                {copiado === chave ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                {copiado === chave ? 'copiado' : 'copiar link'}
+              </button>
+            </div>
+          </div>
+        )
+      })}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button

@@ -1,5 +1,5 @@
-// /vendas — a página das vendedoras. Elas geram sozinhas o link com desconto do
-// FullPass do DSS ([[cupom]]); ninguém do time precisa entrar no admin.
+// /vendas — a página das vendedoras. Elas geram sozinhas o link com desconto dos
+// ingressos do DSS ([[cupom]]); ninguém do time precisa entrar no admin.
 //
 // noindex + fora do menu: não é página de público, é ferramenta interna. O que
 // protege é o código, não o segredo da URL.
@@ -19,7 +19,7 @@ export default function VendasPage() {
       <div className="mx-auto max-w-lg px-4 py-12 sm:py-16">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--azuris-cyan)]">
           <Ticket className="size-4" />
-          DSS 2026 · FullPass
+          DSS 2026 · ingressos
         </div>
 
         <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">

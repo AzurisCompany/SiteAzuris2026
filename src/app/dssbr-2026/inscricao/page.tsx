@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Users, BadgePercent, Clock } from 'lucide-react'
+import { Users, Clock } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import {
   listarTipos,
@@ -12,10 +12,10 @@ import {
 } from '@/lib/tipos-ingresso'
 import { montarEscada, type DegrauLote } from '@/lib/escada-lotes'
 import { hojeBRT } from '@/lib/format'
-import { formatarValidade } from '@/lib/cupom'
 import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm, { type TipoOption } from './InscricaoForm'
 import { dssMetadata } from '../metadata'
+import CupomAviso from '../CupomAviso'
 
 const PRODUTO = getProduto('dss-2026')
 
@@ -122,17 +122,7 @@ export default async function InscricaoPage({
 
         {/* Link vencido não vira página de erro: a inscrição segue, no preço normal.
             Perder a venda porque o cupom expirou seria o pior desfecho possível. */}
-        {cupomMorto && (
-          <div className="mt-6 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
-            <p className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
-              <Clock className="mt-0.5 size-4 shrink-0 text-[var(--text-muted)]" />
-              <span>
-                O link de desconto que você usou <strong className="text-[var(--text-primary)]">expirou</strong> — os
-                valores abaixo são os normais. Se alguém do time te enviou esse link, peça um novo.
-              </span>
-            </p>
-          </div>
-        )}
+        <CupomAviso cupom={cupom} morto={cupomMorto} precoCheioCentavos={precoCheioCentavos} />
 
         {/* Link de ingresso reservado que não vale mais: mesma filosofia do cupom
             vencido — a inscrição segue, no preço da vitrine, com o motivo à vista. */}
@@ -154,36 +144,6 @@ export default async function InscricaoPage({
                 )}
               </span>
             </p>
-          </div>
-        )}
-
-        {/* Link de vendedora: preço já sai com desconto nos cards abaixo — esta tarja
-            só explica POR QUE está mais barato e até quando vale. */}
-        {cupom && (
-          <div className="mt-6 rounded-xl border border-[var(--accent-emerald)]/40 bg-[var(--accent-emerald)]/10 p-4">
-            <div className="flex items-start gap-3">
-              <BadgePercent className="mt-0.5 size-5 shrink-0 text-[var(--accent-emerald)]" />
-              <div>
-                <p className="text-sm font-bold text-[var(--text-primary)]">
-                  Desconto de {cupom.pct}% aplicado nesta página
-                </p>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                  <span className="text-[var(--text-muted)] line-through">
-                    R$ {(precoCheioCentavos / 100).toFixed(2).replace('.', ',')}
-                  </span>{' '}
-                  <strong className="text-[var(--accent-emerald)]">
-                    R$ {(aplicarDesconto(precoCheioCentavos, cupom.pct) / 100).toFixed(2).replace('.', ',')}
-                  </strong>{' '}
-                  — o desconto já está nos valores abaixo.
-                </p>
-                {cupom.exp != null && (
-                  <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                    <Clock className="size-3.5" />
-                    Este link vale até {formatarValidade(cupom.exp)}.
-                  </p>
-                )}
-              </div>
-            </div>
           </div>
         )}
 

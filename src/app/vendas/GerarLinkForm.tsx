@@ -6,8 +6,8 @@ import { Copy, Check, Link2, Clock, MessageCircle } from 'lucide-react'
 interface Resposta {
   vendedora: { nome: string; slug: string }
   cliente: string | null
-  caminho: string
-  token: string
+  /** um por ingresso em que o código dela vale */
+  links: Array<{ produto: string; nome: string; caminho: string; token: string }>
   utm: { source: string; medium: string; content: string }
   pct: number
   horas: number
@@ -23,19 +23,19 @@ const campo =
  * As utm_* vão na URL pro GA4 enxergar; a atribuição que conta pra comissão é
  * carimbada no servidor, a partir do token.
  */
-function montarLink(r: Resposta): string {
-  const u = new URL(r.caminho, window.location.origin)
-  u.searchParams.set('d', r.token)
+function montarLink(r: Resposta, l: Resposta['links'][number]): string {
+  const u = new URL(l.caminho, window.location.origin)
+  u.searchParams.set('d', l.token)
   u.searchParams.set('utm_source', r.utm.source)
   u.searchParams.set('utm_medium', r.utm.medium)
   u.searchParams.set('utm_content', r.utm.content)
   return u.toString()
 }
 
-function mensagemWhatsapp(r: Resposta, link: string): string {
+function mensagemWhatsapp(r: Resposta, ingresso: string, link: string): string {
   const saudacao = r.cliente ? `Oi, ${r.cliente}! ` : 'Oi! '
   return (
-    `${saudacao}Segue seu link com ${r.pct}% de desconto no ingresso FullPass do ` +
+    `${saudacao}Segue seu link com ${r.pct}% de desconto no ${ingresso} do ` +
     `Data Science Summit Brasil 2026 — 27 a 29 de outubro, em Curitiba.\n\n${link}\n\n` +
     `O desconto vale até ${r.expiraLabel}.`
   )
@@ -46,8 +46,10 @@ export default function GerarLinkForm() {
   const [cliente, setCliente] = useState('')
   const [gerando, setGerando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
-  const [resultado, setResultado] = useState<{ r: Resposta; link: string } | null>(null)
-  const [copiado, setCopiado] = useState(false)
+  const [resultado, setResultado] = useState<{ r: Resposta; links: Array<{ nome: string; url: string }> } | null>(
+    null,
+  )
+  const [copiado, setCopiado] = useState<string | null>(null)
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -66,8 +68,8 @@ export default function GerarLinkForm() {
         return
       }
       const r = data as Resposta
-      setResultado({ r, link: montarLink(r) })
-      setCopiado(false)
+      setResultado({ r, links: r.links.map((l) => ({ nome: l.nome, url: montarLink(r, l) })) })
+      setCopiado(null)
     } catch {
       setErro('Erro de rede. Confere a internet e tenta de novo.')
     } finally {
@@ -78,8 +80,8 @@ export default function GerarLinkForm() {
   async function copiar(link: string) {
     try {
       await navigator.clipboard.writeText(link)
-      setCopiado(true)
-      setTimeout(() => setCopiado(false), 2500)
+      setCopiado(link)
+      setTimeout(() => setCopiado(null), 2500)
     } catch {
       // Clipboard bloqueado (http, permissão negada): o link fica selecionável na tela.
       setErro('Não consegui copiar automático — segura em cima do link e copia na mão.')
@@ -87,41 +89,49 @@ export default function GerarLinkForm() {
   }
 
   if (resultado) {
-    const { r, link } = resultado
+    const { r, links } = resultado
     return (
       <div className="space-y-5">
         <div className="rounded-2xl border border-[var(--accent-emerald)]/40 bg-[var(--accent-emerald)]/10 p-5">
           <p className="text-sm text-[var(--text-secondary)]">
-            Link de <strong className="text-[var(--text-primary)]">{r.vendedora.nome}</strong>
+            {links.length > 1 ? 'Links' : 'Link'} de <strong className="text-[var(--text-primary)]">{r.vendedora.nome}</strong>
             {r.cliente && <> pra {r.cliente}</>} — <strong className="text-[var(--accent-emerald)]">{r.pct}% off</strong>
           </p>
           <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--text-primary)]">
             <Clock className="size-4 text-[var(--accent-emerald)]" />
             Vale até {r.expiraLabel}
           </p>
-          <p className="mt-3 break-all rounded-lg bg-[var(--azuris-ink)] p-3 font-mono text-xs text-[var(--text-secondary)] select-all">
-            {link}
-          </p>
+          {links.length > 1 && (
+            <p className="mt-2 text-xs text-[var(--text-muted)]">Um link por ingresso: mande o do ingresso que o cliente quer.</p>
+          )}
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button
-            onClick={() => copiar(link)}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 px-5 py-4 text-base font-bold text-[var(--azuris-cyan)] transition-all hover:bg-[var(--azuris-cyan)]/20"
-          >
-            {copiado ? <Check className="size-5" /> : <Copy className="size-5" />}
-            {copiado ? 'Copiado!' : 'Copiar link'}
-          </button>
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(mensagemWhatsapp(r, link))}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-4 text-base font-bold text-white transition-all hover:-translate-y-0.5"
-          >
-            <MessageCircle className="size-5" />
-            Enviar no WhatsApp
-          </a>
-        </div>
+        {links.map((l) => (
+          <div key={l.url} className="space-y-3 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
+            <p className="text-sm font-bold text-[var(--text-primary)]">{l.nome}</p>
+            <p className="break-all rounded-lg bg-[var(--azuris-ink)] p-3 font-mono text-xs text-[var(--text-secondary)] select-all">
+              {l.url}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => copiar(l.url)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-[var(--azuris-cyan)] bg-[var(--azuris-cyan)]/10 px-5 py-3.5 text-base font-bold text-[var(--azuris-cyan)] transition-all hover:bg-[var(--azuris-cyan)]/20"
+              >
+                {copiado === l.url ? <Check className="size-5" /> : <Copy className="size-5" />}
+                {copiado === l.url ? 'Copiado!' : 'Copiar link'}
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(mensagemWhatsapp(r, l.nome, l.url))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3.5 text-base font-bold text-white transition-all hover:-translate-y-0.5"
+              >
+                <MessageCircle className="size-5" />
+                Enviar no WhatsApp
+              </a>
+            </div>
+          </div>
+        ))}
 
         {erro && (
           <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>
@@ -139,7 +149,7 @@ export default function GerarLinkForm() {
         </button>
 
         <p className="text-center text-xs text-[var(--text-muted)]">
-          Cada cliente pode ter o seu link. Depois de {r.expiraLabel} esse aqui para de dar desconto sozinho — e o
+          Cada cliente pode ter o seu link. Depois de {r.expiraLabel} {links.length > 1 ? 'esses aqui param' : 'esse aqui para'} de dar desconto sozinho — e o
           checkout volta ao preço normal.
         </p>
       </div>

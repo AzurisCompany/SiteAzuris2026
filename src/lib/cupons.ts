@@ -33,7 +33,10 @@ export interface Cupom {
   codigo: string
   nome: string
   tipo: TipoCupom
+  /** o primeiro de `produtos` — coluna antiga, mantida NOT NULL */
   produto_slug: string
+  /** produtos em que o cupom vale (FullPass, One Day, VIP…). Nunca vazio. */
+  produtos: string[]
   pct: number
   /** null = link sem prazo (parceiro) */
   validade_horas: number | null
@@ -55,6 +58,10 @@ function mapRow(r: Record<string, unknown>): Cupom {
     nome: String(r.nome),
     tipo: r.tipo === 'parceiro' ? 'parceiro' : 'vendedora',
     produto_slug: String(r.produto_slug),
+    // Cupom de antes da coluna `produtos` (ou banco antes da migração): vale só pro
+    // produto_slug, exatamente como valia.
+    produtos:
+      Array.isArray(r.produtos) && r.produtos.length > 0 ? r.produtos.map(String) : [String(r.produto_slug)],
     pct: Number(r.pct),
     validade_horas: r.validade_horas == null ? null : Number(r.validade_horas),
     limite_usos: r.limite_usos == null ? null : Number(r.limite_usos),
@@ -115,7 +122,8 @@ export interface UpsertCupomInput {
   codigo: string
   nome: string
   tipo: TipoCupom
-  produto_slug: string
+  /** ao menos um; o primeiro também vai pra coluna `produto_slug` */
+  produtos: string[]
   pct: number
   validade_horas: number | null
   limite_usos: number | null
@@ -125,13 +133,14 @@ export interface UpsertCupomInput {
 /** Cria ou atualiza (chave lógica: o código). */
 export async function upsertCupom(i: UpsertCupomInput): Promise<Cupom> {
   const rows = (await sql`
-    INSERT INTO cupons (codigo, nome, tipo, produto_slug, pct, validade_horas, limite_usos, ativo)
-    VALUES (${normalizarCodigo(i.codigo)}, ${i.nome}, ${i.tipo}, ${i.produto_slug}, ${i.pct},
+    INSERT INTO cupons (codigo, nome, tipo, produto_slug, produtos, pct, validade_horas, limite_usos, ativo)
+    VALUES (${normalizarCodigo(i.codigo)}, ${i.nome}, ${i.tipo}, ${i.produtos[0]}, ${i.produtos}, ${i.pct},
             ${i.validade_horas}, ${i.limite_usos}, ${i.ativo})
     ON CONFLICT (codigo) DO UPDATE SET
       nome = EXCLUDED.nome,
       tipo = EXCLUDED.tipo,
       produto_slug = EXCLUDED.produto_slug,
+      produtos = EXCLUDED.produtos,
       pct = EXCLUDED.pct,
       validade_horas = EXCLUDED.validade_horas,
       limite_usos = EXCLUDED.limite_usos,
@@ -201,7 +210,7 @@ export async function resolverDesconto(
 
   if (!cupom) return recusar('inexistente')
   if (!cupom.ativo) return recusar('desligado')
-  if (cupom.produto_slug !== produtoSlug) return recusar('outro_produto')
+  if (!cupom.produtos.includes(produtoSlug)) return recusar('outro_produto')
 
   // Cupom com prazo só circula como link assinado. Sem esta trava, bastaria usar
   // ?c=<código da vendedora> pra ter um link permanente e furar as 48h.

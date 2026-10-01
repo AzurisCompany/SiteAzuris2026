@@ -278,3 +278,57 @@ describe('cupom desligado, esgotado e link fixo de parceiro', () => {
     }
   })
 })
+
+// Um cupom de parceiro pode valer em vários ingressos do DSS de uma vez (FullPass,
+// One Day, VIP…) — a coluna `produtos`. Cupom antigo, sem a coluna, vale só no
+// produto_slug, exatamente como antes.
+describe('cupom em vários ingressos', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getTipo.mockResolvedValue(LOTE_1)
+    estado.usos = 0
+    criarCobranca.mockResolvedValue({ tipo: 'criada', payment: { id: 'pay_1', invoiceUrl: 'https://asaas/x' } })
+  })
+
+  const parceiro = { codigo: 'gaio15', nome: 'Gaio', tipo: 'parceiro', pct: 15, validade_horas: null }
+  const semTipo = { ...body, tipo: undefined }
+
+  it('o mesmo código desconta no FullPass e no One Day quando os dois estão marcados', async () => {
+    cupomEh({ ...parceiro, produtos: ['dss-2026', 'dss-one-day-2026'] })
+
+    await processarCheckout('dss-2026', { ...body, cupom_codigo: 'gaio15' })
+    expect(valorPedido()).toBe(484.5) // 570 − 15%
+
+    criarCobranca.mockClear()
+    await processarCheckout('dss-one-day-2026', { ...semTipo, cupom_codigo: 'gaio15' })
+    expect(valorPedido()).toBe(303.45) // 357 − 15%
+  })
+
+  it('ingresso que não está marcado continua no preço cheio', async () => {
+    cupomEh({ ...parceiro, produtos: ['dss-one-day-2026'] })
+
+    await processarCheckout('dss-2026', { ...body, cupom_codigo: 'gaio15' })
+
+    expect(valorPedido()).toBe(570)
+  })
+
+  it('cupom antigo, sem a coluna produtos, vale só no produto_slug dele', async () => {
+    cupomEh({ ...parceiro, produto_slug: 'dss-2026', produtos: null })
+
+    await processarCheckout('dss-one-day-2026', { ...semTipo, cupom_codigo: 'gaio15' })
+    expect(valorPedido()).toBe(357)
+
+    criarCobranca.mockClear()
+    await processarCheckout('dss-2026', { ...body, cupom_codigo: 'gaio15' })
+    expect(valorPedido()).toBe(484.5)
+  })
+
+  it('link de vendedora é por ingresso: o token do One Day não abre desconto no FullPass', async () => {
+    cupomEh({ produtos: ['dss-2026', 'dss-one-day-2026'] })
+    const { token } = criarCupom({ codigo: 'ana-paula', produto: 'dss-one-day-2026' })
+
+    await processarCheckout('dss-2026', { ...body, cupom: token })
+
+    expect(valorPedido()).toBe(570)
+  })
+})

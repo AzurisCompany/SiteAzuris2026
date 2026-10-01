@@ -27,9 +27,14 @@ export const metadata: Metadata = dssMetadata({
 
 export const dynamic = 'force-dynamic'
 
-export default function BusinessPage() {
+export default async function BusinessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ d?: string; c?: string }>
+}) {
   return (
     <CheckoutPorLotes
+      cupomEntrada={await searchParams}
       produto={PRODUTO}
       endpoint="/api/dss-business/inscricao"
       gaItem={{ id: 'dss-business-2026', name: 'DSS 2026 — Ingresso Business' }}

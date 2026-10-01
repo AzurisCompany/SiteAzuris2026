@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server'
 import { estaLogado } from '@/lib/admin-auth'
 import { listarCuponsComUso, upsertCupom, deletarCupom, type TipoCupom } from '@/lib/cupons'
 import { normalizarCodigo, codigoValido, CUPOM_PCT_MAX } from '@/lib/cupom'
+import { normalizarProdutos } from '@/lib/cupom-produtos'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,6 +31,8 @@ export async function POST(request: Request) {
     codigo?: string
     nome?: string
     tipo?: string
+    produtos?: string[]
+    /** formato antigo (um produto só) — ainda aceito */
     produto_slug?: string
     pct?: number
     validade_horas?: number | null
@@ -57,8 +60,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Desconto tem que ser um número inteiro de 1 a ${CUPOM_PCT_MAX}.` }, { status: 400 })
   }
 
-  const produto_slug = (b.produto_slug ?? '').trim()
-  if (!produto_slug) return NextResponse.json({ error: 'Escolhe o produto.' }, { status: 400 })
+  const produtos = normalizarProdutos(b.produtos ?? (b.produto_slug ? [b.produto_slug] : []))
+  if (produtos.length === 0) {
+    return NextResponse.json({ error: 'Marca ao menos um tipo de ingresso.' }, { status: 400 })
+  }
 
   // Prazo: vendedora sempre tem (link morre sozinho); parceiro pode não ter.
   const horasNum = Number(b.validade_horas)
@@ -73,7 +78,7 @@ export async function POST(request: Request) {
       codigo,
       nome,
       tipo,
-      produto_slug,
+      produtos,
       pct,
       validade_horas,
       limite_usos,

@@ -172,6 +172,9 @@ CREATE TABLE IF NOT EXISTS cupons (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cupons_codigo ON cupons(codigo);
 
+-- Cupom em VÁRIOS produtos (FullPass, One Day, VIP…). NULL = só o produto_slug, como antes.
+ALTER TABLE cupons ADD COLUMN IF NOT EXISTS produtos TEXT[];
+
 -- Quando o ingresso foi gerado (NULL = ainda não). Marcação manual na lista de vendas.
 -- Aditiva e nullable: nenhuma linha existente muda.
 ALTER TABLE inscricoes ADD COLUMN IF NOT EXISTS ingresso_gerado_em TIMESTAMPTZ;

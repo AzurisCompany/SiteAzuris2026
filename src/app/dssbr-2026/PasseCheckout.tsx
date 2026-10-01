@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { Users } from 'lucide-react'
 import type { ProdutoConfig } from '@/lib/produtos'
+import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm from './inscricao/InscricaoForm'
+import CupomAviso, { type EntradaCupom } from './CupomAviso'
 
 // Corpo compartilhado dos checkouts single-price do DSS (One Day e o combo One Day +
 // curso). Preço SEMPRE derivado do registry do produto — o servidor recalcula de novo
@@ -31,9 +33,11 @@ interface Props {
   waContexto: string
   /** nota de valor opcional abaixo do preço (ex.: framing do combo) */
   notaValor?: ReactNode
+  /** `?d=`/`?c=` da URL — link de vendedora ou de parceiro ([[cupons]]) */
+  cupomEntrada?: EntradaCupom
 }
 
-export default function PasseCheckout({
+export default async function PasseCheckout({
   produto,
   endpoint,
   gaItem,
@@ -44,8 +48,14 @@ export default function PasseCheckout({
   inclui,
   waContexto,
   notaValor,
+  cupomEntrada,
 }: Props) {
-  const precoBaseReais = produto.precoCentavos / 100
+  // O desconto entra no preço-base; o servidor recalcula tudo de novo no POST.
+  const { aplicado: cupom, recusa } = await resolverDesconto(
+    { token: cupomEntrada?.d, codigo: cupomEntrada?.c },
+    produto.slug,
+  )
+  const precoBaseReais = (cupom ? aplicarDesconto(produto.precoCentavos, cupom.pct) : produto.precoCentavos) / 100
   const precoDeVendaReais = produto.precoDeVendaCentavos / 100
   const precoPixReais = Number((precoBaseReais * (1 - produto.pixDescontoPct)).toFixed(2))
   const precoCartaoBaseReais = Number((precoBaseReais * (1 + produto.cartaoAcrescimoPct)).toFixed(2))
@@ -68,6 +78,8 @@ export default function PasseCheckout({
         <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">{h1}</h1>
 
         <p className="mt-3 text-sm text-[var(--text-secondary)]">{subtitulo}</p>
+
+        <CupomAviso cupom={cupom} morto={recusa !== null} precoCheioCentavos={produto.precoCentavos} />
 
         {/* Compras corporativas / em grupo */}
         <div className="mt-6 flex flex-col gap-3 rounded-xl border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -154,6 +166,8 @@ export default function PasseCheckout({
           maxParcelas={produto.maxParcelas}
           endpoint={endpoint}
           gaItem={gaItem}
+          cupom={cupom && cupomEntrada?.d ? cupomEntrada.d : undefined}
+          cupomCodigo={cupom && !cupomEntrada?.d ? cupom.codigo : undefined}
         />
 
         <p className="mt-8 text-xs text-[var(--text-muted)] text-center">
