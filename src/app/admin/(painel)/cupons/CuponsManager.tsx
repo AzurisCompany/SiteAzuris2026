@@ -15,6 +15,8 @@ interface Props {
   cuponsIniciais: CupomComUso[]
   produtos: ProdutoOpcao[]
   pctMax: number
+  /** https://azuris.com.br — vem do servidor, pra montar o link do parceiro */
+  origem: string
 }
 
 const campo =
@@ -55,7 +57,7 @@ function formVazio(tipo: TipoCupom, produtoSlug: string): Formulario {
   }
 }
 
-export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Props) {
+export default function CuponsManager({ cuponsIniciais, produtos, pctMax, origem }: Props) {
   const router = useRouter()
   const [form, setForm] = useState<Formulario | null>(null)
   const [salvando, setSalvando] = useState(false)
@@ -136,7 +138,7 @@ export default function CuponsManager({ cuponsIniciais, produtos, pctMax }: Prop
     if (c.validade_horas != null) return []
     return produtos
       .filter((p) => c.produtos.includes(p.slug))
-      .map((p) => ({ nome: p.nome, url: `${window.location.origin}${p.caminho}?c=${c.codigo}` }))
+      .map((p) => ({ nome: p.nome, url: `${origem}${p.caminho}?c=${c.codigo}` }))
   }
 
   function alternarProduto(slug: string) {

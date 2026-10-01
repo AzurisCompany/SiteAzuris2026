@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { listarCuponsComUso, type CupomComUso } from '@/lib/cupons'
 import { CUPOM_PCT_MAX } from '@/lib/cupom'
 import { PRODUTOS_COM_CUPOM } from '@/lib/cupom-produtos'
@@ -6,6 +7,12 @@ import CuponsManager from './CuponsManager'
 export const dynamic = 'force-dynamic'
 
 export default async function CuponsPage() {
+  // Domínio do link do parceiro, lido no servidor: `window` não existe na renderização
+  // do servidor (derrubava a página com 500). Em preview sai o domínio do preview.
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'azuris.com.br'
+  const origem = `${h.get('x-forwarded-proto') ?? 'https'}://${host}`
+
   let cupons: CupomComUso[] = []
   let erro: string | null = null
   try {
@@ -33,7 +40,7 @@ export default async function CuponsPage() {
         </div>
       )}
 
-      <CuponsManager cuponsIniciais={cupons} produtos={PRODUTOS_COM_CUPOM} pctMax={CUPOM_PCT_MAX} />
+      <CuponsManager cuponsIniciais={cupons} produtos={PRODUTOS_COM_CUPOM} origem={origem} pctMax={CUPOM_PCT_MAX} />
     </div>
   )
 }
