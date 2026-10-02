@@ -113,7 +113,8 @@ export default function Filtros({
 
   return (
     <div className="space-y-3 rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Uma grade só: no desktop são 2 linhas de 5 (a busca vale 2). */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <select value={status} onChange={(e) => aplicar({ status: e.target.value })} className={campo}>
           {STATUS.map(([v, label]) => (
             <option key={v} value={v}>{label}</option>
@@ -128,11 +129,8 @@ export default function Filtros({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="nome, email ou CPF"
-          className={`${campo} placeholder:text-[var(--text-muted)]`}
+          className={`${campo} placeholder:text-[var(--text-muted)] sm:col-span-2 lg:col-span-1 xl:col-span-2`}
         />
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {tipos.length > 0 && (
             <select value={tipo} onChange={(e) => aplicar({ tipo: e.target.value })} className={campo}>
               <option value="">Todos os tipos</option>

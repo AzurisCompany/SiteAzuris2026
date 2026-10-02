@@ -11,9 +11,9 @@ export default async function PainelLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
       <header className="border-b border-[var(--azuris-surface)] bg-[var(--azuris-deep)]">
-        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
-          <nav className="flex items-center gap-6">
-            <span className="font-bold text-[var(--azuris-cyan)]">Azuris · Financeiro</span>
+        <div className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-4">
+          <nav className="flex min-w-0 items-center gap-6 overflow-x-auto whitespace-nowrap">
+            <span className="shrink-0 font-bold text-[var(--azuris-cyan)]">Azuris · Financeiro</span>
             <Link href="/admin" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
               Visão geral
             </Link>
@@ -48,7 +48,7 @@ export default async function PainelLayout({ children }: { children: React.React
           <LogoutButton />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
     </div>
   )
 }

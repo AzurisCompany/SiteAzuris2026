@@ -14,7 +14,16 @@ function fmtDataHora(iso: string): string {
 }
 
 /** Marca/desmarca o ingresso da inscrição como gerado. Reusado na lista e no detalhe. */
-export default function IngressoGeradoButton({ id, geradoEm }: { id: number; geradoEm: string | null | undefined }) {
+export default function IngressoGeradoButton({
+  id,
+  geradoEm,
+  curto = false,
+}: {
+  id: number
+  geradoEm: string | null | undefined
+  /** Rótulo enxuto pra caber numa linha da lista. */
+  curto?: boolean
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -53,7 +62,7 @@ export default function IngressoGeradoButton({ id, geradoEm }: { id: number; ger
             : 'border-[var(--azuris-surface)] text-[var(--text-muted)] hover:border-[var(--accent-emerald)]/40 hover:text-[var(--accent-emerald)]'
       }`}
     >
-      {loading ? '…' : erro ? '⚠ erro' : gerado ? `✓ ingresso ${fmtDataHora(geradoEm!).split(',')[0]}` : 'marcar gerado'}
+      {loading ? '…' : erro ? '⚠ erro' : gerado ? `✓ ingresso ${fmtDataHora(geradoEm!).split(',')[0]}` : curto ? '+ ingresso' : 'marcar gerado'}
     </button>
   )
 }

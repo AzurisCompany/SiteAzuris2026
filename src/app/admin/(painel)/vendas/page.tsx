@@ -31,6 +31,7 @@ import CopiarClienteButton from './CopiarClienteButton'
 import BaixarCsvLink from './BaixarCsvLink'
 import NotaEmitidaButton from './NotaEmitidaButton'
 import NotaBadge from './NotaBadge'
+import MaisAcoes from './MaisAcoes'
 import { isFiltroNota, notaEmitida, pediuNota } from '@/lib/nota-fiscal'
 
 export const dynamic = 'force-dynamic'
@@ -167,7 +168,9 @@ export default async function VendasPage({
       count: countPorCurso[slug] ?? 0,
       emails: emailsPorCurso[slug] ?? [],
     })),
-  ]
+    // Produto sem nenhuma venda não ganha aba (eram 8 de 21, empurrando a lista pra baixo).
+    // A ativa fica sempre, mesmo zerada, pra quem chega por link.
+  ].filter((aba) => aba.slug === '' || aba.count > 0 || aba.slug === curso)
   // Emails da aba ativa, pro botão do cabeçalho.
   const emailsAtivos = curso ? emailsPorCurso[curso] ?? [] : emailsTodos
 
@@ -358,7 +361,8 @@ export default async function VendasPage({
       )}
 
       {/* Tabela */}
-      <div className="overflow-x-auto rounded-xl border border-[var(--azuris-surface)]">
+      {/* overflow visível no desktop: o menu "⋯" da última linha não pode ser cortado. */}
+      <div className="overflow-x-auto rounded-xl border border-[var(--azuris-surface)] xl:overflow-visible">
         <table className="w-full text-sm">
           <thead className="bg-[var(--azuris-deep)] text-left text-xs uppercase tracking-wider text-[var(--text-muted)]">
             <tr>
@@ -372,12 +376,12 @@ export default async function VendasPage({
               <th className="px-4 py-3 align-top">
                 Líquido
                 <SomaColuna centavos={totais?.liquido_centavos} />
+                {totais?.taxa_centavos != null && (
+                  <div className="mt-0.5 whitespace-nowrap text-xs font-semibold normal-case tracking-normal text-[var(--text-muted)]">
+                    taxa Σ {brl(totais.taxa_centavos)}
+                  </div>
+                )}
               </th>
-              <th className="px-4 py-3 align-top">
-                Taxa
-                <SomaColuna centavos={totais?.taxa_centavos} />
-              </th>
-              <th className="px-4 py-3 align-top">Pgto</th>
               <th className="px-4 py-3 align-top">Status</th>
               <th className="px-4 py-3 align-top">Data</th>
               <th className="px-4 py-3 align-top text-right">Ação</th>
@@ -432,66 +436,71 @@ export default async function VendasPage({
                     )}
                   </td>
                 )}
-                <td className="px-4 py-3">
+                <td className="whitespace-nowrap px-4 py-3">
                   {brl(r.valor_centavos)}
-                  {r.installments > 1 && <span className="text-xs text-[var(--text-muted)]"> · {r.installments}x</span>}
+                  <div className="text-xs text-[var(--text-muted)]">
+                    {labelBilling(r.billing_type)}
+                    {r.installments > 1 && ` · ${r.installments}x`}
+                  </div>
                 </td>
                 {/* Líquido e taxa só existem depois do sync com o Asaas. */}
-                <td className="px-4 py-3 text-[var(--text-secondary)]">
+                <td className="whitespace-nowrap px-4 py-3 text-[var(--text-secondary)]">
                   {r.valor_liquido_centavos == null ? (
                     <span className="text-[var(--text-muted)]">—</span>
                   ) : (
                     brl(r.valor_liquido_centavos)
                   )}
+                  {r.taxa_centavos != null && (
+                    <div className="text-xs text-[var(--text-muted)]">taxa {brl(r.taxa_centavos)}</div>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-[var(--text-secondary)]">
-                  {r.taxa_centavos == null ? <span className="text-[var(--text-muted)]">—</span> : brl(r.taxa_centavos)}
-                </td>
-                <td className="px-4 py-3 text-[var(--text-secondary)]">{labelBilling(r.billing_type)}</td>
                 <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
-                <td className="px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-[var(--text-muted)]">{fmtData(r.created_at)}</td>
                 <td className="px-4 py-3 text-right">
-                  <div className="inline-flex flex-wrap justify-end gap-1.5">
-                    <Link
-                      href={`/admin/cobranca?de=${r.id}`}
-                      title="Nova cobrança reaproveitando os dados deste cliente"
-                      className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
-                    >
-                      nova cobrança
-                    </Link>
+                  {/* Na linha, só as marcas do dia a dia (ingresso, NF); o resto mora no "⋯". */}
+                  <div className="inline-flex items-center justify-end gap-1.5 whitespace-nowrap">
                     {/* Só venda paga (inclui inscrição gratuita) gera ingresso; a marca continua
                         visível se a venda for estornada depois — é o aviso pra revogar. */}
                     {(r.status === 'paid' || r.ingresso_gerado_em) && (
-                      <IngressoGeradoButton id={r.id} geradoEm={r.ingresso_gerado_em} />
+                      <IngressoGeradoButton id={r.id} geradoEm={r.ingresso_gerado_em} curto />
                     )}
                     {/* Nota: só quem pediu e já pagou (ou já está marcada). Nota pedida depois,
                         fora do checkout, marca-se no detalhe da venda. Pago pelo Asaas não
                         precisa de marca: o selo já diz "NF emitida". */}
                     {r.nf_status !== 'AUTHORIZED' &&
                       (r.nf_emitida_em || (pediuNota(r) && r.status === 'paid' && r.valor_centavos > 0)) && (
-                        <NotaEmitidaButton id={r.id} emitidaEm={r.nf_emitida_em} />
+                        <NotaEmitidaButton id={r.id} emitidaEm={r.nf_emitida_em} curto />
                       )}
-                    <TesteButton id={r.id} isTeste={r.is_teste} />
-                    {(r.status === 'pending' || r.status === 'overdue') && (
-                      <>
-                        {/* Regerar é formulário (valor/meio/parcelas/descrição) — mora no detalhe. */}
-                        <Link
-                          href={`/admin/vendas/${r.id}#regerar`}
-                          title="Cancelar esta e gerar outra com valor/descrição novos"
-                          className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
-                        >
-                          regerar
-                        </Link>
-                        <CancelarButton id={r.id} nome={r.nome} />
-                      </>
-                    )}
+                    <MaisAcoes>
+                      <Link
+                        href={`/admin/cobranca?de=${r.id}`}
+                        title="Nova cobrança reaproveitando os dados deste cliente"
+                        className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                      >
+                        nova cobrança
+                      </Link>
+                      <TesteButton id={r.id} isTeste={r.is_teste} />
+                      {(r.status === 'pending' || r.status === 'overdue') && (
+                        <>
+                          {/* Regerar é formulário (valor/meio/parcelas/descrição) — mora no detalhe. */}
+                          <Link
+                            href={`/admin/vendas/${r.id}#regerar`}
+                            title="Cancelar esta e gerar outra com valor/descrição novos"
+                            className="rounded-lg border border-[var(--azuris-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:border-[var(--azuris-cyan)]/40 hover:text-[var(--azuris-cyan)]"
+                          >
+                            regerar
+                          </Link>
+                          <CancelarButton id={r.id} nome={r.nome} />
+                        </>
+                      )}
+                    </MaisAcoes>
                   </div>
                 </td>
               </tr>
             ))}
             {rows.length === 0 && !erro && (
               <tr>
-                <td colSpan={mostrarCupom ? 10 : 9} className="px-4 py-10 text-center text-[var(--text-muted)]">
+                <td colSpan={mostrarCupom ? 8 : 7} className="px-4 py-10 text-center text-[var(--text-muted)]">
                   {mostrarCupom
                     ? `Nenhuma venda ${origem === 'parceiro' ? 'por cupom de parceiro' : 'por link de vendedora'} ainda — a aba acende sozinha na primeira.`
                     : 'Nenhuma venda encontrada com esses filtros.'}

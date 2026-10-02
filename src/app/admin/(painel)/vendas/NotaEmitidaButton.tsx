@@ -14,7 +14,16 @@ function fmtDataHora(iso: string): string {
 }
 
 /** Marca/desmarca a nota fiscal da venda como emitida. Reusado na lista e no detalhe. */
-export default function NotaEmitidaButton({ id, emitidaEm }: { id: number; emitidaEm: string | null | undefined }) {
+export default function NotaEmitidaButton({
+  id,
+  emitidaEm,
+  curto = false,
+}: {
+  id: number
+  emitidaEm: string | null | undefined
+  /** Rótulo enxuto pra caber numa linha da lista. */
+  curto?: boolean
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -53,7 +62,7 @@ export default function NotaEmitidaButton({ id, emitidaEm }: { id: number; emiti
             : 'border-amber-400/40 text-amber-300 hover:bg-amber-400/10'
       }`}
     >
-      {loading ? '…' : erro ? '⚠ erro' : emitida ? `✓ NF ${fmtDataHora(emitidaEm!).split(',')[0]}` : 'marcar NF emitida'}
+      {loading ? '…' : erro ? '⚠ erro' : emitida ? `✓ NF ${fmtDataHora(emitidaEm!).split(',')[0]}` : curto ? '+ NF' : 'marcar NF emitida'}
     </button>
   )
 }
