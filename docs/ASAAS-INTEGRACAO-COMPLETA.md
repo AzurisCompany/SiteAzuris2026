@@ -206,6 +206,15 @@ billingType ∈ 'PIX' | 'CREDIT_CARD' | 'BOLETO' | 'UNDEFINED'  // UNDEFINED = c
   (**não** `value`). O Asaas cria um **parcelamento** (`installment`) que agrupa N pagamentos.
 - Retorno essencial: `{ id, invoiceUrl, value, netValue, status, dueDate }`. Mandamos o cliente
   pro `invoiceUrl`.
+- ⚠️ **A fatura do `invoiceUrl` mostra o cabeçalho da conta Asaas:** razão social, **CNPJ**, site,
+  e-mail, telefone e endereço (vêm dos dados comerciais da conta, não do nosso código). Em
+  02/10/2026 apareceram compradores fazendo **PIX direto na chave CNPJ** em vez do QR/copia-e-cola
+  da cobrança: o dinheiro entra, mas não se liga à cobrança, o webhook não dispara e a venda fica
+  "pendente" até baixa manual (`/admin/conciliacao` ou "confirmar recebimento" no Asaas).
+  Caminhos (nenhum feito ainda): (1) ver no painel do Asaas o que dá pra ocultar da fatura; não
+  está confirmado que o CNPJ possa sair; (2) mostrar o PIX numa tela nossa com
+  `GET /payments/{id}/pixQrCode` (QR + copia-e-cola) e só mandar pro `invoiceUrl` no cartão;
+  `lib/asaas.ts` ainda não tem essa chamada.
 
 ### 6.3 Parcelamento com juros (`lib/parcelamento.ts`)
 O checkout hospedado do Asaas **não** mostra seletor de parcelas numa cobrança avulsa, então o

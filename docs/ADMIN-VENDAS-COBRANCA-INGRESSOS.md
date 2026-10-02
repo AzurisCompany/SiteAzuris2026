@@ -224,6 +224,39 @@ nota mostra o erro "column nf_emitida_em does not exist"**. Por isso: deploy e m
 Canário em `nota-fiscal.test.ts` (lista sem filtro não toca a coluna, contador engole só esse erro).
 Paridade SQL × TS conferida no banco de dev (17 linhas, os 4 filtros batendo).
 
+## Onda G — lista de vendas enxuta (2026-10-02, `b5f31e6`)
+
+Pedido: *"revise o layout da lista /admin/vendas, está bem ruim a visualização"*. Sem migração,
+sem mudança de dado. Só tela.
+
+**Diagnóstico, medido em prod a 1440px:** cada linha tinha 160 a 230px. A coluna Ação tinha 112px
+e empilhava até 6 botões (nova cobrança, marcar gerado, marcar NF emitida, marcar teste, regerar,
+cancelar). Ela ficava ainda fora da tela: tabela de 1223px num container de 1118px. A 1ª venda
+aparecia ~830px abaixo do topo (21 abas em 5 linhas + filtros em 3 linhas).
+
+| | antes | depois |
+|---|---|---|
+| altura da linha | 160–230px | 82–104px |
+| página com 50 vendas | 10.100px | 5.091px |
+| tabela | 1223px em 1118px (rola de lado) | cabe (1246px em `max-w-7xl`) |
+
+**O que mudou:**
+- **Coluna Ação:** na linha ficam só as marcas do dia a dia, com rótulo curto (prop `curto` em
+  `IngressoGeradoButton`/`NotaEmitidaButton`): `+ ingresso` / `✓ ingresso dd/mm` e `+ NF` /
+  `✓ NF dd/mm`. Nova cobrança, marcar teste, regerar e cancelar vão pro menu **⋯**
+  (`vendas/MaisAcoes.tsx`, fecha no clique fora e no Esc). No detalhe da venda e na conciliação os
+  botões continuam com o rótulo longo.
+- **Colunas:** Pgto saiu e virou linha menor embaixo do Valor (`PIX`, `Cartão · 3x`). Taxa saiu e
+  virou linha embaixo do Líquido; o cabeçalho mostra `Σ líquido` e, embaixo, `taxa Σ`.
+- **Abas de produto:** produto com 0 vendas não ganha aba (a ativa fica sempre, mesmo zerada).
+- **Filtros:** uma grade só, 2 linhas de 5 no desktop (a busca vale 2 colunas no `xl`).
+- **Layout do admin inteiro:** `max-w-6xl` → `max-w-7xl`; o menu do topo rola de lado no celular.
+- A tabela fica `overflow-visible` a partir do `xl`, senão o menu ⋯ da última linha seria cortado.
+  Abaixo disso ela rola de lado, como antes.
+
+Conferido no ar logado: 50 linhas entre 82 e 104px, menu ⋯ abre, `/admin`, `/admin/vendas/[id]` e
+`/admin/conciliacao` respondem 200.
+
 ---
 
 ## Relatório de ingressos por tipo (pago × em aberto): como montar
