@@ -10,8 +10,9 @@ pra esses ingressos."*
 
 ---
 
-> **Estado em 29/09:** o **Business está no Lote 2 (R$ 984)**. O Lote 1 (id 73) foi desligado a
-> pedido do Binhara, antes de esgotar (ver §9). O VIP continua na virada por quantidade.
+> **Estado em 02/10:** os dois estão no **Lote 2**, pulados na mão (ver §9): Business R$ 984
+> (Lote 1 id 73 desligado em 29/09) e VIP R$ 1.275 (Lote 1 id 70 desligado em 02/10). Do Lote 2
+> pro 3 a virada continua automática, por quantidade.
 
 ## 1. Links e lotes
 
@@ -166,4 +167,9 @@ Pedido: *"muda no checkout o preço do business para o lote 2"*.
 - Pra desfazer: religar o Lote 1 em `/admin/ingressos` → `dss-business-2026`.
 - O card do dssbr.com.br, se disser "a partir de R$ 757", ficou errado.
 
-Última revisão: **2026-09-29**.
+**VIP, 02/10:** pedido *"encerrar o lote 1 do VIP e habilitar o lote 2"*, valor mantido em R$ 1.275.
+Mesma receita: `lote-1` (id 70) reenviado inteiro com `ativo:false`. Conferido no ar: R$ 1.275,00
+"vendendo agora", "restam 15", Lote 3 R$ 1.657 "em breve". Backup do antes em
+`backups/prod-2026-10-02-antes-vip-lote2/`. O card do dssbr.com.br, se disser R$ 957, ficou errado.
+
+Última revisão: **2026-10-02**.

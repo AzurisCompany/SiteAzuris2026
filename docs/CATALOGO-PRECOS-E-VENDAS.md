@@ -129,11 +129,13 @@ um valor abaixo do cobrado seria propaganda ao contrário.
 
 | produto | checkout | Lote 1 | Lote 2 | Lote 3 | total |
 |---|---|---|---|---|---|
-| VIP (`dss-vip-2026`) | `/dssbr-2026/vip` | 10 × R$ 957 | 15 × R$ 1.275 | 15 × R$ 1.657 | 40 |
+| VIP (`dss-vip-2026`) | `/dssbr-2026/vip` | ~~10 × R$ 957~~ desligado | **15 × R$ 1.275 (vigente)** | 15 × R$ 1.657 | 40 |
 | Business (`dss-business-2026`) | `/dssbr-2026/business` | ~~10 × R$ 757~~ desligado | **10 × R$ 984 (vigente)** | 10 × R$ 1.279 | 30 |
 
 **29/09:** o Business pulou pro Lote 2 por decisão do Binhara. O Lote 1 (id 73) foi desligado com as
 vagas ainda abertas; ele some da escada e o checkout vende R$ 984.
+
+**02/10:** o VIP fez o mesmo: Lote 1 (id 70) desligado, checkout vende o Lote 2 a R$ 1.275 (15 vagas).
 
 3x no cartão, sem âncora, sem prazo. Ver §7.2 e [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
