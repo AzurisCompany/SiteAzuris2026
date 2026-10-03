@@ -3,8 +3,8 @@
 **Tipo:** releitura do projeto, troca de preço no banco de prod, conferência do site do evento,
 diagnóstico de PIX caindo fora da cobrança e revisão de layout do admin.
 
-**Estado do repo ao fim:** `main` = `origin/main`. **Código:** 1 commit de tela (`b5f31e6`).
-**Banco de prod:** 1 tipo alterado pela API do admin. **Deploy:** 1 (`dpl_9sMipNJJ…`, rodado pelo
+**Estado do repo ao fim:** `main` = `origin/main`. **Código:** 2 commits (`b5f31e6` tela; `88205b6` 1 por CPF/CNPJ + selo manual).
+**Banco de prod:** 1 tipo alterado pela API do admin. **Deploy:** 2 (`dpl_9sMipNJJ…` e `dpl_F9DXebKy…`, rodado pelo
 Binhara com `!`; o auto mode negou `vercel --prod` de novo). **Migração:** nenhuma.
 **Testes:** 302 passando. O erro de `tsc` em `checkout-produto.test.ts` (falta `oculto`) e o warning
 `notaEmitida` não usado em `vendas/page.tsx` já existiam.
@@ -82,10 +82,49 @@ Pedido: *"revise o layout da lista /admin/vendas, está bem ruim a visualizaçã
   telas do admin 200.
 - Detalhes: `docs/ADMIN-VENDAS-COBRANCA-INGRESSOS.md`, "Onda G".
 
+## 5. Um ingresso por CPF/CNPJ + selo "manual" (`88205b6`, EM PROD)
+
+Pedido: revisar duas vendas One Day do Fernando Roque (Pilgrims Consulting, mesmo CNPJ). Ele disse
+que comprou 3 ingressos, mas a lista mostrava só 2 linhas, uma delas de R$ 494.
+
+**Diagnóstico (admin de prod, nada mudou no banco):**
+
+| | #116 | #117 |
+|---|---|---|
+| criada | 13/08 19:22 | 13/08 19:51 |
+| origem | checkout do site (`azuris/landing/dssbr-2026`) | **cobrança manual** (`utm_source=admin`) |
+| valor | R$ 247 = 1 ingresso | **R$ 494 = 2 × 247 = 2 ingressos** |
+
+São 3 ingressos pagos. A trava de "1 por CPF/CNPJ" **não existia**: só havia a proteção contra clique
+duplo (`buscarCobrancaDuplicada`, mesma fatura em até 10 min), e a cobrança manual nem passa por ela.
+
+**Decisão do Binhara:** *"para comprar mais ingresso por cpf ou por cnpj tem que ser criar cobranca
+manual"* + *"preciso ter essa informacao de cobranca manual na lista de vendas"*.
+
+**Feito:**
+- `buscarCompraPagaDoDocumento` (`lib/db.ts`) + checagem em `processarCheckout`: documento com compra
+  **paga** do mesmo produto → 409 com mensagem apontando pro WhatsApp. Por produto (FullPass não
+  impede One Day); pendente não trava; camiseta (`quantidadeMax`) e Lakehouse (rota própria) fora.
+- Lista `/admin/vendas`: selo azul **manual** (`ehCobrancaManual` em `lib/cobranca-manual.ts`:
+  `utm_source='admin'` ou slug `proposta`), `title` com a descrição da cobrança; aba de origem
+  **"Cobrança manual"** (`?origem=admin` → filtro `manual`, sem contador); `contarPorOrigem` ignora
+  `manual`.
+- Testes: 304 passando (+2 da regra). Docs: CATALOGO §4.1 e ADMIN-VENDAS "Onda H".
+- Deploy `dpl_F9DXebKy…` rodado pelo Binhara com `!` (auto mode negou `vercel --prod` de novo).
+- **Conferido no ar:** busca "roque" → 1 selo manual (#117); aba Cobrança manual → 47 linhas, todas
+  com selo; aba vendedora 200.
+- **Não testado no ar:** o 409. Testar com documento real arriscaria gerar cobrança de verdade.
+
+**Pra operação:** Fernando tem **3 ingressos** a emitir (a #117 vale 2) e 2 NFs (R$ 247 + R$ 494).
+Avisar as vendedoras: quem quiser mais de um ingresso no mesmo documento vai cair no WhatsApp →
+gerar em `/admin/cobranca`.
+
 ## Fica pendente
 
 - **PIX na chave CNPJ:** decidir entre painel do Asaas × PIX em tela nossa; conciliar quem já pagou
   na chave.
+- Emitir os 3 ingressos e as 2 NFs do Fernando Roque (#116 + #117).
+- Testar o 409 no ar com um CPF próprio que já tenha compra paga.
 - Business 30 × 40 (texto do card ou cadastrar mais 10 vagas).
 - **Herdado:** desligar tipos 35/36 do GU 24/09 (segue vendendo); desligar 50/51 do café depois de
   06/10; prazo da camiseta congressista 20/10 × 15/10; 1 compra real de camiseta; 1 venda real com
