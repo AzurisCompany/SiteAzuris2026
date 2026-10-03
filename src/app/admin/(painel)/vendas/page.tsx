@@ -33,6 +33,7 @@ import NotaEmitidaButton from './NotaEmitidaButton'
 import NotaBadge from './NotaBadge'
 import MaisAcoes from './MaisAcoes'
 import { isFiltroNota, notaEmitida, pediuNota } from '@/lib/nota-fiscal'
+import { ORIGEM_ADMIN, descricaoManual, ehCobrancaManual } from '@/lib/cobranca-manual'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,7 +91,10 @@ export default async function VendasPage({
   let totais: TotaisVendas | null = null
   let porOrigem: Record<string, number> = {}
   let notasAEmitir: number | null = null
-  const filtros = { curso, status, billing, tipo, pessoa, nf, origem, de, ate, busca, mostrarTeste }
+  // Aba "Cobrança manual" (origem=admin) usa o filtro `manual`, que também pega as
+  // propostas antigas sem carimbo — `utm_source = 'admin'` sozinho perderia essas.
+  const manual = origem === ORIGEM_ADMIN
+  const filtros = { curso, status, billing, tipo, pessoa, nf, origem: manual ? '' : origem, manual, de, ate, busca, mostrarTeste }
   try {
     const [res, r, qt, op, em, tot, orig, nfs] = await Promise.all([
       listarVendas({
@@ -179,6 +183,8 @@ export default async function VendasPage({
   const abasOrigem = [
     { valor: '', label: 'Todas as origens', count: null as number | null },
     ...TIPOS_CUPOM.map((t) => ({ valor: t as string, label: LABEL_TIPO_CUPOM[t], count: porOrigem[t] ?? 0 })),
+    // Sem contador: porOrigem agrupa por utm_source e não enxerga as propostas antigas.
+    { valor: ORIGEM_ADMIN, label: 'Cobrança manual', count: null },
   ]
   const origemHref = (valor: string) => {
     const u = baseParams({ semOrigem: true })
@@ -396,6 +402,14 @@ export default async function VendasPage({
                   </Link>
                   <CopiarClienteButton nome={r.nome} texto={dadosClienteTexto(r)} />
                   <NotaBadge venda={r} />
+                  {ehCobrancaManual(r) && (
+                    <span
+                      title={descricaoManual(r.como_conheceu) ?? 'Cobrança gerada no admin, não no checkout do site'}
+                      className="ml-2 inline-flex rounded-full bg-sky-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sky-300"
+                    >
+                      manual
+                    </span>
+                  )}
                   {r.is_teste && (
                     <span className="ml-2 inline-flex rounded-full bg-amber-400/12 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
                       teste

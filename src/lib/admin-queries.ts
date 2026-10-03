@@ -578,7 +578,7 @@ export async function totaisVendas(f: FiltrosVendas): Promise<TotaisVendas> {
  * checkout; `admin` = cobrança manual. Ver [[cupons]].
  */
 export async function contarPorOrigem(f: FiltrosVendas): Promise<Record<string, number>> {
-  const { where, params } = construirWhere({ ...f, origem: undefined })
+  const { where, params } = construirWhere({ ...f, origem: undefined, manual: undefined })
   const rows = (await sql.query(
     `SELECT utm_source, COUNT(*)::int AS qtd FROM inscricoes ${where} GROUP BY utm_source`,
     params

@@ -30,7 +30,12 @@ export const cupomNoBanco: Record<string, unknown> | null = {
   limite_usos: null,
   ativo: true,
 }
-const estado = { cupom: { ...cupomNoBanco } as Record<string, unknown> | null, usos: 0 }
+const estado = {
+  cupom: { ...cupomNoBanco } as Record<string, unknown> | null,
+  usos: 0,
+  /** compra paga já existente pro mesmo documento (regra 1 por CPF/CNPJ) */
+  compraPaga: null as Record<string, unknown> | null,
+}
 
 vi.mock('@/lib/db', () => ({
   sql: (strings: TemplateStringsArray) => {
@@ -39,6 +44,7 @@ vi.mock('@/lib/db', () => ({
     if (q.includes('COUNT(*)::int AS n')) return Promise.resolve([{ n: estado.usos }])
     return Promise.resolve([])
   },
+  buscarCompraPagaDoDocumento: async () => estado.compraPaga,
 }))
 
 const { processarCheckout } = await import('@/lib/checkout-produto')
@@ -330,5 +336,34 @@ describe('cupom em vários ingressos', () => {
     await processarCheckout('dss-2026', { ...body, cupom: token })
 
     expect(valorPedido()).toBe(570)
+  })
+})
+
+// Regra de venda (02/10): no checkout público, 1 compra paga por CPF/CNPJ por produto.
+// Mais de um ingresso pro mesmo documento sai por cobrança manual no admin.
+describe('processarCheckout — 1 compra paga por CPF/CNPJ', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    getTipo.mockResolvedValue(LOTE_1)
+    cupomEh({})
+    estado.usos = 0
+    estado.compraPaga = null
+    criarCobranca.mockResolvedValue({ tipo: 'criada', payment: { id: 'pay_1', invoiceUrl: 'https://asaas/x' } })
+  })
+
+  it('documento sem compra paga compra normalmente', async () => {
+    const r = await processarCheckout('dss-2026', body)
+    expect(r.status).toBe(200)
+    expect(criarCobranca).toHaveBeenCalledTimes(1)
+  })
+
+  it('documento que já pagou é recusado antes de criar cobrança, e o motivo aponta pro WhatsApp', async () => {
+    estado.compraPaga = { id: 116, status: 'paid' }
+
+    const r = await processarCheckout('dss-2026', body)
+
+    expect(r.status).toBe(409)
+    expect(String(r.body.error)).toMatch(/WhatsApp/)
+    expect(criarCobranca).not.toHaveBeenCalled()
   })
 })

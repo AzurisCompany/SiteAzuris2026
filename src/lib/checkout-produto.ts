@@ -7,7 +7,7 @@
 //    único) → criarCobranca (pipeline Asaas comum) → { invoiceUrl }.
 //  - GRATUITO (tipo com preço R$ 0): sem CPF e sem Asaas — dedupe por email e
 //    cadastro direto confirmado → { gratuito: true }.
-import { type BillingType, buscarInscricaoGratuita, confirmarInscricaoGratuita, criarInscricaoPendente, gravarQuantidade } from '@/lib/db'
+import { type BillingType, buscarCompraPagaDoDocumento, buscarInscricaoGratuita, confirmarInscricaoGratuita, criarInscricaoPendente, gravarQuantidade } from '@/lib/db'
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, hojeBRT } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
@@ -182,6 +182,14 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     enderecoObrigatorioPJ: PRODUTO.enderecoObrigatorioPJ,
   })
   if (erroExtras) return erro(400, erroExtras)
+  // 1 compra paga por CPF/CNPJ por produto — mais de uma é cobrança manual no admin.
+  // A camiseta fica fora: lá a quantidade é do próprio produto.
+  if (!PRODUTO.quantidadeMax && (await buscarCompraPagaDoDocumento(PRODUTO.slug, onlyDigits(body.cpf_cnpj)))) {
+    return erro(
+      409,
+      'Este CPF/CNPJ já tem uma compra paga deste ingresso. Para comprar mais de um, fale com a gente no WhatsApp que geramos a cobrança.'
+    )
+  }
   if (body.billing_type !== 'PIX' && body.billing_type !== 'CREDIT_CARD') return erro(400, 'Forma de pagamento inválida')
   if (body.billing_type === 'CREDIT_CARD') {
     const n = body.installments ?? 1

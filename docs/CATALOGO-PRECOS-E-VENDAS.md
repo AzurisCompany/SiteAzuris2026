@@ -84,6 +84,22 @@ O que fica gravado em cada venda, e por que importa:
 | `utm_content` | código do cupom | coluna "Cupom" — quem vendeu |
 | `is_teste` | você, no painel | esconde de lista e KPIs sem apagar |
 
+### 4.1 Um ingresso por CPF/CNPJ no checkout público (desde 02/10/2026)
+
+O checkout do site recusa (409) quem já tem uma compra **paga** do mesmo produto com o mesmo
+CPF/CNPJ (`buscarCompraPagaDoDocumento`, chamado em `processarCheckout`). A mensagem manda pro
+WhatsApp. **Mais de um ingresso pro mesmo documento = cobrança manual em `/admin/cobranca`**, que
+não passa por essa trava.
+
+- É por produto: quem tem FullPass ainda compra One Day.
+- Só conta `paid`. Cobrança pendente não trava: o comprador pode trocar PIX por cartão ou deixar vencer.
+- A camiseta (`quantidadeMax`) fica fora: lá a quantidade é do próprio produto.
+- O checkout do Lakehouse (`/api/inscricao`) tem rota própria e **não** tem essa trava.
+- A proteção antiga contra clique duplo (`buscarCobrancaDuplicada`, mesma fatura em até 10 min) continua.
+
+Caso que motivou: Fernando Roque (Pilgrims), #116 no site (R$ 247) + #117 manual (R$ 494 = 2 × 247),
+3 ingressos One Day no mesmo CNPJ em 13/08. Na lista, a cobrança manual agora tem o selo **manual**.
+
 ## 5. Ingressos reservados e cupons — quando usar qual
 
 Os dois dão preço menor a um público específico, mas resolvem coisas diferentes:

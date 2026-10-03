@@ -259,6 +259,22 @@ Conferido no ar logado: 50 linhas entre 82 e 104px, menu ⋯ abre, `/admin`, `/a
 
 ---
 
+## Onda H — selo "manual" e aba "Cobrança manual" (2026-10-02)
+
+Pedido: identificar na lista as vendas que não vieram do checkout do site. Desde 02/10 o checkout
+público vende **1 por CPF/CNPJ** (ver CATALOGO §4.1), então mais de um ingresso pro mesmo documento
+sempre aparece como cobrança manual.
+
+- **Selo `manual`** (azul) ao lado do nome, quando `ehCobrancaManual(r)` (`lib/cobranca-manual.ts`):
+  `utm_source='admin'` **ou** `curso_slug='proposta'` (as propostas antigas, sem carimbo). O `title`
+  mostra a descrição digitada na cobrança.
+- **Aba de origem "Cobrança manual"** (`?origem=admin`): a página traduz pra filtro `manual`, que pega
+  também as propostas antigas. Sem contador, porque `contarPorOrigem` agrupa por `utm_source` e não
+  enxerga essas linhas. `contarPorOrigem` passou a ignorar `manual` (senão as outras abas zeravam).
+- Uma linha manual pode valer **mais de um ingresso**: deduza pelo valor (ex.: R$ 494 = 2 × R$ 247).
+
+---
+
 ## Relatório de ingressos por tipo (pago × em aberto): como montar
 
 Não existe tela pronta pra isso, e o CSV de contatos tem dado pessoal demais pra uma contagem.

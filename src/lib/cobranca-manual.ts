@@ -17,6 +17,16 @@ export const PREFIXO_MANUAL = 'Cobrança manual: '
 /** Prefixo das linhas geradas antes do seletor de produto — segue em prod. */
 const PREFIXO_LEGADO = 'Proposta customizada: '
 
+/**
+ * A venda nasceu no admin (/admin/cobranca), não no checkout do site. Mesmo critério do
+ * filtro `manual` de listarVendas: carimbo `utm_source='admin'`, ou o slug 'proposta'
+ * das linhas geradas antes do carimbo existir. É assim que se acha, na lista, quem
+ * comprou mais de um ingresso no mesmo CPF/CNPJ — o checkout público só vende um.
+ */
+export function ehCobrancaManual(r: { utm_source: string | null; curso_slug: string }): boolean {
+  return r.utm_source === ORIGEM_ADMIN || r.curso_slug === PROPOSTA_SLUG
+}
+
 /** Extrai a descrição digitada pelo admin. Null quando a venda não é manual. */
 export function descricaoManual(comoConheceu: string | null): string | null {
   const raw = comoConheceu ?? ''

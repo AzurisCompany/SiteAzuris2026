@@ -258,6 +258,25 @@ export async function criarInscricaoPendente(i: NovaInscricaoPendente): Promise<
 }
 
 /**
+ * Regra de venda: 1 compra paga por CPF/CNPJ por produto no checkout público. Mais de
+ * um ingresso pro mesmo documento sai por cobrança manual (/admin/cobranca), que não
+ * passa por aqui. Só conta 'paid': pendente ainda pode ser abandonado (trocar PIX por
+ * cartão, deixar vencer), e barrar por ele travaria o próprio comprador.
+ */
+export async function buscarCompraPagaDoDocumento(curso_slug: string, cpf_cnpj: string): Promise<InscricaoRow | null> {
+  const rows = (await sql`
+    SELECT *
+      FROM inscricoes
+     WHERE curso_slug = ${curso_slug}
+       AND cpf_cnpj = ${cpf_cnpj}
+       AND status = 'paid'
+     ORDER BY created_at DESC
+     LIMIT 1
+  `) as InscricaoRow[]
+  return rows[0] ?? null
+}
+
+/**
  * Anti-duplicação: procura uma cobrança IDÊNTICA já criada (com fatura no Asaas)
  * numa janela curta — mesmo produto, documento, valor e tipo. Serve pra barrar
  * clique/submit duplicado (2 faturas pro mesmo cliente). Ignora canceladas e
