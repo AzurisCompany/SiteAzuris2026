@@ -197,6 +197,7 @@ quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor 
 |---|---|---|
 | virar o lote do DSS | `/admin/ingressos`: cria o tipo novo, **desliga** o velho (nunca apaga — ver escada abaixo) | não — **mas** atualize `produtos.ts` + `precos-dss.test.ts` no próximo deploy |
 | criar ingresso reservado | `/admin/ingressos` com **oculto** marcado | não |
+| copiar o link de venda de um produto | `/admin/links` — todos os checkouts, com botão copiar, preço vigente e aviso "sem tipo ativo" | não (link novo: entra em `lib/links-venda.ts`, **sim**) |
 | dar desconto pra alguém vender | `/admin/cupons` (vendedora tem prazo; parceiro é link fixo) | não |
 | revogar um link | desligar o cupom **ou** o tipo (`ativo=false`) — mata o que já circula | não |
 | virar o lote do One Day | `produtos.ts` (`precoCentavos`) **e** o `atual` em `one-day/lotes.ts` — o canário reprova se discordarem | **sim** |

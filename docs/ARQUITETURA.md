@@ -62,7 +62,7 @@ linhas e delega pra `processarCheckout()`; a regra que importa (preço, cupom, l
 (gerador de link da vendedora)
 
 **Admin:** `/admin/login` e, sob `(painel)`: visão geral · vendas (+ detalhe) · cobrança ·
-cupons · ingressos · assinaturas · conciliação · financeiro · importar · saúde · tráfego
+cupons · links · ingressos · assinaturas · conciliação · financeiro · importar · saúde · tráfego
 
 ## 4. API
 
