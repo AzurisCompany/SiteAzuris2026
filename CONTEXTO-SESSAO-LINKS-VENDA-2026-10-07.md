@@ -5,10 +5,11 @@
 | o quê | estado |
 |---|---|
 | `/admin/links` (1ª versão) | **EM PROD** — deploy `dpl_9cGverFe8irQkEFQhgDo8tsgcvQ4`, rodado pelo Binhara com `!` |
-| preço do lote vigente em VIP/Business | **NÃO DEPLOYADO** — commitado; no ar ainda aparece a faixa "R$ 1.275 a R$ 1.657" |
+| preço do lote vigente em VIP/Business | **EM PROD** (subiu com o deploy do One Day, `n45w4lth9`); não visto renderizado (atrás do login) |
+| **Passe One Day encerrado** | **EM PROD** — `f10f6bc`, deploy `n45w4lth9`, push feito; verificado no ar (seção 7) |
 | tipos do café 06/10 (50, 51) e GU 24/09 (35, 36) | **AINDA LIGADOS** em prod — vendendo evento que já passou; aguardando OK do Binhara pra desligar |
 
-Pra subir a correção: `! cd /mnt/d/2026/siteAzuris2026/web && vercel --prod`
+`main` = `origin/main` = produção.
 
 ## 1. Pedido
 
@@ -54,3 +55,27 @@ Desligar = `ativo=false` em `/admin/ingressos` (ou `POST /api/admin/ingressos`, 
 
 PIX na chave CNPJ (decisão aberta) · card Business "40 ingressos" × 30 no banco · prazo camiseta
 20/10 × 15/10 · 409 de 1 ingresso por CPF não testado com POST real · ~50 NFs a emitir.
+
+## 7. One Day encerrado (fim da sessão)
+
+Pedido: "encerre as vendas do ingresso one day". Mesmo caminho do combo One Day + curso (25/08):
+
+- `/dssbr-2026/one-day` → `permanentRedirect('/dssbr-2026/inscricao')` (308 pro FullPass; o link circulou).
+- `POST /api/dss-one-day/inscricao` removido.
+- Landing: card One Day e menção no hero saíram; vitrine = FullPass + combo, `max-w-3xl` 2 colunas.
+- `dss-one-day-2026` em `PRODUTOS_ENCERRADOS`, fora do `CHECKOUT_URL`, de `links-venda.ts` e de
+  `cupom-produtos.ts`. Fica no registry (histórico) e no seletor da cobrança avulsa.
+- `one-day/lotes.ts` e `precos-one-day.test.ts` apagados (sem checkout, sem escada).
+
+Verificação: vitest 320/320, build ok. No ar: `/dssbr-2026/one-day` 308 → `/dssbr-2026/inscricao`;
+API 404; landing só com "Garantir FullPass" e "Garantir combo".
+
+Obs.: o 1º `vercel --prod` publicou (`asaeotrm5`) mas a saída truncada não mostrou; rodei de novo
+(`n45w4lth9`). Mesmo commit, sem efeito.
+
+PIX do One Day já gerado e não pago continua pagável na fatura do Asaas — webhook confirma normal.
+
+## 8. Ainda aberto
+
+- Tipos 50/51 (café 06/10) e 35/36 (GU 24/09) **ainda ativos** — perguntado de novo, sem resposta.
+- Pendências da seção 6 sem mudança.
