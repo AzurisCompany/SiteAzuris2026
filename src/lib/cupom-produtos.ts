@@ -15,7 +15,6 @@ export interface ProdutoComCupom {
 
 export const PRODUTOS_COM_CUPOM: ProdutoComCupom[] = [
   { slug: 'dss-2026', nome: 'FullPass (3 dias)', caminho: '/dssbr-2026/inscricao' },
-  { slug: 'dss-one-day-2026', nome: 'Passe One Day', caminho: '/dssbr-2026/one-day' },
   { slug: 'dss-vip-2026', nome: 'Ingresso VIP', caminho: '/dssbr-2026/vip' },
   { slug: 'dss-business-2026', nome: 'Ingresso Business', caminho: '/dssbr-2026/business' },
   { slug: 'dss-fullpass-curso-2026', nome: 'FullPass + Portal do Curso', caminho: '/dssbr-2026/fullpass-curso' },

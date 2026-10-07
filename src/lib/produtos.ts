@@ -70,11 +70,11 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     telefoneObrigatorio: true,
     enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
   },
-  // Passe de 1 dia do DSS 2026 (o full são 3 dias — ver 'dss-2026'). Lote é gerido
-  // AQUI, no preço: desde 27/09/2026 vende o Lote 3 (R$357), o último — sem âncora.
-  // Virar o lote = subir precoCentavos e mover o `atual` da escada em
-  // one-day/lotes.ts — o canário `precos-one-day.test.ts` reprova se desencontrarem.
-  // Sem tipos cadastrados → o checkout usa o preço único deste registry.
+  // ENCERRADO em 07/10/2026 — Passe de 1 dia do DSS 2026 (o full são 3 dias, ver
+  // 'dss-2026'). Fica aqui, e em PRODUTOS_ENCERRADOS, porque o histórico de vendas
+  // precisa do nome e do preço; o checkout foi removido e /dssbr-2026/one-day
+  // redireciona pro FullPass. Último preço: Lote 3, R$357, sem âncora. Continua no
+  // seletor da cobrança avulsa pra venda pontual.
   'dss-one-day-2026': {
     slug: 'dss-one-day-2026',
     nome: 'DSS 2026 — Passe One Day',

@@ -4,12 +4,10 @@ import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
 import { getProduto } from '@/lib/produtos'
 import { listarTiposPublicos, precosDoTipo } from '@/lib/tipos-ingresso'
 import { dssMetadata } from './metadata'
-import { LOTE_ONEDAY_ATUAL } from './one-day/lotes'
 
 const DSS = 'https://dssbr.com.br'
 const UTM = 'utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
 const CHECKOUT_FULL = `/dssbr-2026/inscricao?${UTM}`
-const CHECKOUT_ONEDAY = `/dssbr-2026/one-day?${UTM}`
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
 const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
@@ -19,13 +17,13 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
 const brl = (v: number) => v.toFixed(2).replace('.', ',')
 
 // Landing lê o preço vigente dos MESMOS lugares que o checkout, pra nunca desincronizar:
-// FullPass vem do tipo de ingresso ATIVO no admin (Lote 3 R$887 hoje); One Day vem do
-// registry (Lote gerido no código). force-dynamic (igual ao checkout) garante que o
-// preço mostrado é sempre o preço cobrado — sem risco de fallback velho no build.
+// FullPass vem do tipo de ingresso ATIVO no admin (Lote 3 R$887 hoje); o combo vem do
+// registry. O One Day saiu da vitrine em 07/10/2026 (vendas encerradas). force-dynamic
+// (igual ao checkout) garante que o preço mostrado é sempre o preço cobrado — sem risco
+// de fallback velho no build.
 export const dynamic = 'force-dynamic'
 
 const PRODUTO_FULL = getProduto('dss-2026')
-const PRODUTO_ONEDAY = getProduto('dss-one-day-2026')
 const PRODUTO_FULLPASS_CURSO = getProduto('dss-fullpass-curso-2026')
 const CHECKOUT_FULLPASS_CURSO = `/dssbr-2026/fullpass-curso?${UTM}`
 
@@ -87,28 +85,6 @@ async function passFullPass(): Promise<Pass> {
       'Rodada de negócios e networking',
       'Reembolso até 45 dias antes do evento',
     ],
-  }
-}
-
-/** One Day: preço do registry (Lote 3 R$357, sem âncora). */
-function passOneDay(): Pass {
-  const pix = Number((PRODUTO_ONEDAY.precoCentavos / 100).toFixed(2))
-  const deVenda = PRODUTO_ONEDAY.precoDeVendaCentavos / 100
-  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
-  return {
-    id: 'oneday',
-    nome: 'One Day · 1 dia',
-    subtitulo: 'Um dia de evento à sua escolha',
-    lote: LOTE_ONEDAY_ATUAL.nome,
-    pix,
-    deVenda,
-    cartao: pix,
-    maxParcelas: PRODUTO_ONEDAY.maxParcelas,
-    desconto,
-    destaque: false,
-    checkout: CHECKOUT_ONEDAY,
-    cta: 'Garantir One Day',
-    inclui: ['1 dia de evento', 'Plenária Principal', 'Auditório Secundário', 'Área de exposição', 'Coffee Break'],
   }
 }
 
@@ -270,9 +246,8 @@ function IngressoCard({ p }: { p: Pass }) {
 
 export default async function DssbrLandingPage() {
   const full = await passFullPass()
-  const oneday = passOneDay()
   const fullCurso = passFullPassCurso()
-  const PASSES: Pass[] = [full, oneday, fullCurso]
+  const PASSES: Pass[] = [full, fullCurso]
 
   return (
     <main className="min-h-screen bg-ink text-foam">
@@ -328,7 +303,7 @@ export default async function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            FullPass 3 dias R$ {brl(full.pix)} · One Day (1 dia) a partir de R$ {oneday.pix.toFixed(0)} · combo
+            FullPass 3 dias R$ {brl(full.pix)} · combo
             FullPass + curso R$ {fullCurso.pix.toFixed(0)} · PIX ou cartão em até {full.maxParcelas}x.
           </p>
 
@@ -491,7 +466,7 @@ export default async function DssbrLandingPage() {
             <p className="mt-4 text-foam/70">O lote atual é o melhor preço — quando ele vira, o preço sobe. Escolha o ingresso que combina com você.</p>
           </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
             {PASSES.map((p) => (
               <IngressoCard key={p.id} p={p} />
             ))}
