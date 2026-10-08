@@ -31,6 +31,7 @@ em `/admin`. O mapa disso está em
 - [CUPONS-DESCONTO.md](./docs/CUPONS-DESCONTO.md) — link de vendedora e cupom de parceiro
 - [INGRESSO-OCULTO-ESTUDANTE.md](./docs/INGRESSO-OCULTO-ESTUDANTE.md) — ingresso reservado, só por link
 - [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./docs/DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md) — VIP e Business, lote que vira sozinho por quantidade
+- [DSS-VENDAS-ENCERRADAS.md](./docs/DSS-VENDAS-ENCERRADAS.md) — One Day, FullPass, Estudante e combo fechados (07–08/10): como, por quê, receita e desfazer
 - [EVENTOS-PRESENCIAIS.md](./docs/EVENTOS-PRESENCIAIS.md) — a página de evento que serve o GU e o café do DSSBR
 - [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
 

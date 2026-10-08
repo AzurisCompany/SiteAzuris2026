@@ -110,8 +110,9 @@ gravadas com o código velho. Renomeie o `nome` à vontade; o código, não.
 | `ativo` | **o botão de matar** |
 
 **Vários ingressos por cupom (01/10/2026).** No admin, "Vale para" são caixinhas, uma por
-ingresso de `PRODUTOS_COM_CUPOM` (`src/lib/cupom-produtos.ts`): FullPass, One Day, VIP,
-Business e FullPass + Curso. O parceiro ganha **um link fixo por ingresso marcado**, cada um
+ingresso de `PRODUTOS_COM_CUPOM` (`src/lib/cupom-produtos.ts`): hoje **VIP e Business** (FullPass,
+One Day e FullPass + Curso saíram com o encerramento, 07–08/10; cupom antigo que os cite perde o
+produto na normalização). O parceiro ganha **um link fixo por ingresso marcado**, cada um
 apontando pro checkout daquele ingresso. A vendedora digita a senha em `/vendas` e recebe
 **um link por ingresso**: o token assina o produto, então o link do One Day não desconta no VIP.
 Todas as páginas desses ingressos leem `?c=`/`?d=` (`PasseCheckout`, `CheckoutPorLotes` e a
@@ -156,4 +157,4 @@ curl -s "localhost:3111/dssbr-2026/inscricao?c=PARC15"   | grep -o "484,50" | he
   `/admin/financeiro` (chave `vendedoras` da `config_financeiro`), sem revogação e sem painel.
   Foi substituído por esta tabela; a chave velha ficou órfã no banco e pode ser apagada.
 
-Última revisão: **2026-08-13**.
+Última revisão: **2026-10-08**. Os exemplos de curl com `/dssbr-2026/inscricao` são históricos: a página virou aviso em 08/10.

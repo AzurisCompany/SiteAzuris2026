@@ -3,7 +3,7 @@
 > **08/10/2026 — vendas do FullPass (+ Estudante) e do combo FullPass + curso ENCERRADAS**
 > (`e2365be`). `/dssbr-2026/inscricao` e `/fullpass-curso` mostram aviso + links pro VIP/Business;
 > os POSTs foram removidos. Desligar os tipos no banco **não** fecha o FullPass (o checkout cai no
-> preço do registry) — por isso foi código. Venda pontual: cobrança avulsa. O One Day fechou em 07/10.
+> preço do registry) — por isso foi código. Venda pontual: cobrança avulsa. O One Day fechou em 07/10. Detalhe: [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md).
 
 Mapa geral do que a Azuris vende pelo site: **onde cada número vive**, quem lê quem, e o
 caminho completo de uma venda — do link até a linha no `/admin`.
@@ -22,7 +22,7 @@ cobrava R$ 570.
 | fonte | onde | quem usa | muda com |
 |---|---|---|---|
 | **Catálogo de tipos** (`tipos_ingresso`) | banco, editável em `/admin/ingressos` | DSS 2026, GU BigData, reserva do preparatório | **sem deploy** |
-| **Registry** (`src/lib/produtos.ts`) | código | One Day, combo One Day+Curso, adesão ETT — e **fallback** de todo mundo | deploy |
+| **Registry** (`src/lib/produtos.ts`) | código | adesão ETT (One Day e combos: encerrados) — e **fallback** de todo mundo | deploy |
 | **Lote do Lakehouse** (`determinarLoteAtivo` + `PRECO_POR_PERFIL`, `src/lib/db.ts`) | código + vagas no banco | curso Lakehouse | deploy |
 
 **A regra de precedência, num produto que tem tipos:** existe tipo ativo → o preço é dele.
@@ -43,7 +43,7 @@ tipos_ingresso ──┬──> /dssbr-2026 (landing, "a partir de")
                  ├──> /preparatorio-dados/reserva
                  └──> /admin/cobranca (opções + preço sugerido)
 
-produtos.ts ─────┬──> /dssbr-2026/one-day · /fullpass-curso · /ett/adesao (preço único)
+produtos.ts ─────┬──> /ett/adesao (preço único; One Day e combo encerrados)
                  └──> fallback de qualquer checkout quando não há tipo
 
 db.ts (lotes) ───────> /lakehouse-comunidade/inscricao
@@ -138,8 +138,8 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 
 | tipo | preço | âncora | parcelas | vagas | onde aparece |
 |---|---|---|---|---|---|
-| Lote 3 | R$ 887 | — | 3x | sem limite | vitrine do checkout — **último lote, desde 27/09/2026** |
-| Estudante | R$ 400 | R$ 887 | 3x | **50** | só por `?tipo=estudante` (âncora subiu de 670 → 887 junto com a virada) |
+| Lote 3 | R$ 887 | — | 3x | sem limite | **vendas encerradas em 08/10/2026** (tipo segue ativo só pra cobrança avulsa) |
+| Estudante | R$ 400 | R$ 887 | 3x | **50** | **encerrado em 08/10/2026** junto com o FullPass (era só por `?tipo=estudante`) |
 | ~~Lote 2~~ | ~~R$ 670~~ | R$ 820 | | 100 | **desativado em 27/09/2026** |
 | ~~Lote 1~~ | ~~R$ 570~~ | | | | **desativado em 25/08/2026** — fica no cadastro pro histórico saber o nome do que vendeu |
 
@@ -181,8 +181,8 @@ quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor 
 
 | produto | preço | observação |
 |---|---|---|
-| One Day | R$ 357 | **Lote 3 (último) desde 27/09/2026, sem âncora**; escada 247 → 290 → 357 mora em `one-day/lotes.ts` (um dono só, lida pela landing e pelo checkout) e tem canário em `precos-one-day.test.ts` |
-| FullPass + portal do curso | R$ 850 | combo vigente desde 27/09/2026 (era R$ 750); sem âncora; **fulfillment do portal é manual**. ⚠️ Fica **abaixo** do FullPass sozinho (R$ 887) — decisão do Binhara; o canário `precos-lakehouse.test.ts` trava esse fato e a nota da página diz "no combo, com o portal do curso junto, fica R$ 850" |
+| ~~One Day~~ | ~~R$ 357~~ | **encerrado em 07/10/2026** (`f10f6bc`): `/dssbr-2026/one-day` → 308 → inscrição (aviso); `one-day/lotes.ts` e o canário foram apagados |
+| ~~FullPass + portal do curso~~ | ~~R$ 850~~ | **encerrado em 08/10/2026** (`e2365be`), página vira aviso. Histórico: combo desde 27/09/2026 (era R$ 750); sem âncora; **fulfillment do portal é manual**. ⚠️ Fica **abaixo** do FullPass sozinho (R$ 887) — decisão do Binhara; o canário `precos-lakehouse.test.ts` trava esse fato e a nota da página diz "no combo, com o portal do curso junto, fica R$ 850" |
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
 | Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10**, com a Bindflow (`cafe-networking-2026-10`; até 18/09 era a Arlequim, mesmo produto); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
@@ -206,10 +206,9 @@ quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor 
 | copiar o link de venda de um produto | `/admin/links` — todos os checkouts, com botão copiar, preço vigente e aviso "sem tipo ativo" | não (link novo: entra em `lib/links-venda.ts`, **sim**) |
 | dar desconto pra alguém vender | `/admin/cupons` (vendedora tem prazo; parceiro é link fixo) | não |
 | revogar um link | desligar o cupom **ou** o tipo (`ativo=false`) — mata o que já circula | não |
-| virar o lote do One Day | `produtos.ts` (`precoCentavos`) **e** o `atual` em `one-day/lotes.ts` — o canário reprova se discordarem | **sim** |
 | mudar preço do combo/ETT | `produtos.ts` | **sim** |
 | mudar preço do curso Lakehouse | `PRECO_POR_PERFIL` em `db.ts` **e** os dois HTMLs de `public/lakehouse-comunidade/` — o canário varre a página estática | **sim** |
-| tirar um produto de cartaz | `PRODUTOS_ENCERRADOS` + apaga a rota de API + a página vira `permanentRedirect` pro sucessor. Fica no registry: o histórico precisa do nome e do preço | **sim** |
+| tirar um produto de cartaz | `PRODUTOS_ENCERRADOS` + apaga a rota de API + a página vira `permanentRedirect` pro sucessor **ou** o aviso `VendasEncerradas`. Fica no registry: o histórico precisa do nome e do preço. **Desligar os tipos não basta** (cai no registry). Receita: [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md) §5 | **sim** |
 | cobrar valor negociado | `/admin/cobranca` — escolha produto **ou tipo**, digite o valor | não |
 
 ## 7.1 A escada de lotes do checkout
@@ -239,9 +238,7 @@ texto fixo: o degrau riscado é o tipo antigo que continua cadastrado com `ativo
 - Com link de desconto, o degrau vigente mostra o preço de tabela riscado e o do cupom
   embaixo. Os outros degraus seguem em preço de tabela — são momentos da venda, não ofertas.
 
-O **One Day** tem escada própria e fixa em [`one-day/lotes.ts`](../src/app/dssbr-2026/one-day/lotes.ts):
-ele não tem tipos cadastrados, então não há catálogo de onde derivar. Canário
-`precos-one-day.test.ts` amarra o `atual` de lá ao `precoCentavos` do registry.
+O **One Day** tinha escada própria em `one-day/lotes.ts`; saiu com o encerramento (07/10).
 
 ## 7.2 Lote que vira por quantidade (VIP e Business)
 

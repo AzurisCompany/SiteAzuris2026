@@ -14,7 +14,7 @@ sobre preço ou venda. Este doc é o mapa do **código**.
 | metade | o que é | como renderiza |
 |---|---|---|
 | **Institucional** | home, serviços, cases, blog, produtos, comunidade, sobre, contato | estático (SSG) |
-| **Venda** | checkouts de DSS, One Day, combo, GU, ETT, Lakehouse, preparatório | `force-dynamic` — preço vem do banco a cada request |
+| **Venda** | checkouts de DSS (VIP, Business, camisetas — FullPass/One Day/combo encerrados), GU, café, ETT, Lakehouse, preparatório | `force-dynamic` — preço vem do banco a cada request |
 | **Admin** | `/admin/*` — painel financeiro e operacional | `force-dynamic`, atrás de senha única |
 
 Essa divisão explica quase toda decisão de cache do projeto: página que mostra preço **nunca**
@@ -56,8 +56,8 @@ linhas e delega pra `processarCheckout()`; a regra que importa (preço, cupom, l
 `/blog` · `/blog/[slug]` · `/produtos` · `/produtos/[slug]` · `/produtos/curso-pipelines` ·
 `/comunidade` · `/contato` · `/azuriz`
 
-**Venda:** `/dssbr-2026` · `/dssbr-2026/inscricao` (+ `/obrigado`) · `/dssbr-2026/one-day` ·
-`/dssbr-2026/fullpass-curso` · `/dssbr-2026/vip` · `/dssbr-2026/business` · `/gubigdata` (+ `/inscricao`) · `/ett/adesao` · `/ett/assinatura` ·
+**Venda:** `/dssbr-2026` · `/dssbr-2026/inscricao` (aviso de encerrado desde 08/10; `/obrigado` segue) · `/dssbr-2026/one-day` (308) ·
+`/dssbr-2026/fullpass-curso` (aviso) · `/dssbr-2026/vip` · `/dssbr-2026/business` · `/gubigdata` (+ `/inscricao`) · `/ett/adesao` · `/ett/assinatura` ·
 `/lakehouse-comunidade/inscricao` (+ `/obrigado`) · `/preparatorio-dados/reserva` · `/vendas`
 (gerador de link da vendedora)
 
@@ -68,7 +68,7 @@ cupons · links · ingressos · assinaturas · conciliação · financeiro · im
 
 | grupo | rotas |
 |---|---|
-| checkout | `/api/inscricao` (Lakehouse) · `/api/dssbr-2026/inscricao` · `/api/dss-one-day/inscricao` · `/api/dss-fullpass-curso/inscricao` · `/api/dss-vip/inscricao` · `/api/dss-business/inscricao` · `/api/gubigdata/inscricao` · `/api/ett/adesao/inscricao` · `/api/ett/assinatura` · `/api/preparatorio-dados/inscricao` |
+| checkout | `/api/inscricao` (Lakehouse) · `/api/dss-vip/inscricao` · `/api/dss-business/inscricao` · `/api/gubigdata/inscricao` · `/api/ett/adesao/inscricao` · `/api/ett/assinatura` · `/api/preparatorio-dados/inscricao` |
 | venda | `/api/vendas/link` (gera o link assinado da vendedora) |
 | Asaas | `/api/webhook/asaas` (idempotente; fecha status) |
 | admin | `login` · `migrate` · `sync` · `cobranca` (+ `atualizar`, `cancelar`, `trocar-meio`) · `importar-cobranca` · `ingressos` · `cupons` · `assinatura` · `nf` · `config` · `exportar` · `inscricoes/teste` · `email-teste` |
@@ -134,4 +134,6 @@ dois lados desencontram.
 6. **Cadastro é formulário, não caixa de texto livre.** Quem cadastra não deve precisar decorar
    formato — já custou três rodadas de retrabalho.
 
-Última revisão: **2026-08-14**.
+Última revisão: **2026-10-08** (FullPass, One Day e combo encerrados — ver [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md)).
+
+> Os exemplos que citam `POST /api/dssbr-2026/inscricao` descrevem a convenção; a rota foi apagada em 08/10.

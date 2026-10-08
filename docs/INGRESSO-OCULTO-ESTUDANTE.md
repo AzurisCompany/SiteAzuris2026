@@ -1,5 +1,9 @@
 # Ingresso oculto (“só por link”) — e o Estudante do DSS 2026
 
+> **ENCERRADO em 08/10/2026** junto com o FullPass (`e2365be`): `/dssbr-2026/inscricao?tipo=estudante`
+> mostra o aviso de vendas encerradas. O mecanismo de tipo oculto continua valendo pro GU e o café.
+> Ver [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md).
+
 > Extensão do catálogo de tipos de ingresso ([ADMIN-VENDAS-COBRANCA-INGRESSOS.md](./ADMIN-VENDAS-COBRANCA-INGRESSOS.md),
 > Onda C). Aqui só o que é novo: a flag `oculto` e o que ela sustenta.
 
@@ -93,4 +97,4 @@ preço do catálogo já sugerido. Tipo novo em `/admin/ingressos` aparece lá **
   outro, o checkout do DSS cai no preço único do registry — que hoje é o mesmo R$ 570,
   então a janela é invisível pra quem compra.
 
-Última revisão: **2026-08-14**.
+Última revisão: **2026-10-08**.

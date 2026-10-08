@@ -22,7 +22,7 @@ equipe). Em cada linha:
 | aviso **esgotado** | escada por quantidade sem vaga em nenhum lote |
 
 Tipo oculto (ex.: estudante R$ 400) ganha linha própria, com `?tipo=<tipo_id>` já montado — só nas
-páginas que aplicam o `?tipo=` (`aceitaTipoNoLink`: inscrição do FullPass, do GU e do café).
+páginas que aplicam o `?tipo=` (`aceitaTipoNoLink`: inscrição do GU e do café; a do FullPass saiu em 08/10 com o encerramento).
 
 Campo de busca filtra por grupo, nome ou URL.
 
@@ -40,3 +40,5 @@ Campo de busca filtra por grupo, nome ou URL.
 `src/lib/links-venda.ts` · `src/app/admin/(painel)/links/{page,LinksVenda}.tsx` ·
 `src/lib/__tests__/links-venda.test.ts` · item "Links" em `src/app/admin/(painel)/layout.tsx`.
 Botão de copiar reaproveita `copiarTexto` de `admin/(painel)/vendas/copiar.tsx`.
+
+**08/10/2026:** FullPass e FullPass + Curso saíram do catálogo (vendas encerradas, `e2365be`); o One Day já tinha saído em 07/10. Ver [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md).

@@ -12,7 +12,8 @@ pra esses ingressos."*
 
 > **Estado em 08/10:** Business no **Lote 3, R$ 1.279** (Lote 1 id 73 desligado em 29/09, Lote 2
 > id 74 desligado em 08/10 — ver §9). VIP no **Lote 2, R$ 1.275** (Lote 1 id 70 desligado em 02/10);
-> do Lote 2 pro 3 do VIP a virada continua automática, por quantidade.
+> do Lote 2 pro 3 do VIP a virada continua automática, por quantidade. Desde 08/10 VIP e Business são
+> os **únicos ingressos do DSS à venda** no site (FullPass encerrado — [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md)).
 
 ## 1. Links e lotes
 

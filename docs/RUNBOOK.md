@@ -68,9 +68,15 @@ esgotar** (feito no Business em 29/09), desligue o lote atual: o próximo vira v
 com as vagas dele inteiras. Ver
 [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md).
 
+### Encerrar as vendas de um produto
+Código + deploy, **nunca só o banco**: sem tipo ativo, o checkout cai no preço do registry e segue
+vendendo. Página vira `permanentRedirect` (com sucessor) ou o aviso `VendasEncerradas`; apaga a
+rota de API; `PRODUTOS_ENCERRADOS`; tira de `CHECKOUT_URL`, `links-venda.ts`, `cupom-produtos.ts` e
+da landing. Receita e exemplo (FullPass, 08/10) em [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md).
+
 ### Criar um ingresso reservado (só por link)
 `/admin/ingressos` → marque **oculto** → copie o link que o painel mostra
-(`/dssbr-2026/inscricao?tipo=<id>`). Ele não é secreto: quem adivinhar o id compra pelo mesmo
+(`<checkout>?tipo=<id>` — no DSS era `/dssbr-2026/inscricao`, encerrado em 08/10; hoje vale pro GU e o café). Ele não é secreto: quem adivinhar o id compra pelo mesmo
 preço. A barreira real é a conferência na entrada do evento.
 
 ### Dar um link de desconto pra alguém vender
@@ -129,4 +135,4 @@ abre direto no Excel pt-BR.
 - **Nada pode expirar sozinho:** ao cadastrar tipo, `vendas_ate` vazio. Um prazo esquecido já
   fechou o checkout do GU na cara do público no dia do evento.
 
-Última revisão: **2026-09-14**.
+Última revisão: **2026-10-08**.

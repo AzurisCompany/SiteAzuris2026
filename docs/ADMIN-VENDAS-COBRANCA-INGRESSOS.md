@@ -1,5 +1,9 @@
 # Admin — Cobrança avulsa, Tipos de ingresso e Dashboard por tipo
 
+> **08/10/2026:** o checkout do FullPass (`/dssbr-2026/inscricao`) foi encerrado e a API apagada
+> (`e2365be`). As seções sobre o checkout DSSBR abaixo são históricas; os tipos de `dss-2026` seguem
+> no admin e na cobrança avulsa. Ver [DSS-VENDAS-ENCERRADAS.md](./DSS-VENDAS-ENCERRADAS.md).
+
 > **Continua em** [ADMIN-FINANCEIRO-ONDAS-2026-07-09.md](./ADMIN-FINANCEIRO-ONDAS-2026-07-09.md) —
 > boleto/multi-meio, conciliação/saúde, editar cobrança, página financeiro (recebíveis/DRE), NF via Asaas e assinaturas.
 
