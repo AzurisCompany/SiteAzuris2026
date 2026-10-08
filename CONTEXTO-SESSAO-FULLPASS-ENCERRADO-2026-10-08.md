@@ -8,6 +8,7 @@
 | **FullPass + Estudante + combo FullPass + curso encerrados** | **EM PROD**: `e2365be`, deploy `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, verificado no ar |
 | docs | `c182bb7`, `b24b808` + este commit |
 | push | feito até `b24b808` |
+| **17 cobranças duplicadas** | **CANCELADAS** no Asaas + banco (tarde), via API do admin, sem deploy |
 
 `main` = produção. No site, o DSS vende só **VIP, Business e camisetas**.
 
@@ -91,8 +92,27 @@ admin (registro inteiro), sem deploy. Oferecido; aguardando OK.
 Também visto: tipos de `dss-2026` — `lote-3` (id 107) e `estudante` (id 20) ativos, `lote-1`/`lote-2`
 desligados. Correto (não há rota de venda; servem à cobrança avulsa).
 
-## 6. Ainda aberto
+## 6. Revisão das cobranças em aberto (tarde)
 
+Pedido: *"no nosso sistema [Clovis] aparece como pago, mas no Asaas aparece vencida"* e depois
+*"faça uma revisão de todas as faturas que estão como pendentes… ou se estão em duplicidade"*.
+
+- **Clovis pagou** (#20, fatura 849084254). A vencida no nome dele (849090975) é do **Lucas
+  Scottini**, que comprou com o CNPJ da Multiplike e caiu no cliente Asaas do Clovis
+  (`findOrCreateCustomer` busca por `cpfCnpj`). Lucas pagou depois com o CPF (#23).
+- **39 abertas** revisadas (pendentes + vencidas, com testes), cada uma cruzada com as vendas da
+  mesma pessoa. Resultado: 17 duplicadas · 9 testes vivos no Asaas · 4 testes só no banco ·
+  5 abandonos reais · **4 pendentes de verdade**.
+- **17 duplicadas CANCELADAS** com OK do Binhara (sync antes, `POST /api/admin/cobranca/cancelar`,
+  pagas de origem conferidas): 21 22 48 49 51 58 68 73 131 136 152 168 178 211 215 241 262.
+- Doc novo com receita + tabela completa:
+  **[docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md](./docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md)**;
+  RUNBOOK (receita + linha no diagnóstico) e README (índice) atualizados.
+
+## 7. Ainda aberto
+
+- **Cobranças:** cancelar os 9 testes vivos (#7 15 16 32 14 59 118 122 216) e marcar #216 como
+  teste — aguarda OK; contatar os 5 abandonos (#55 114 182 264 18) antes de cancelar.
 - **Desligar tipos 50/51 (café 06/10) e 35/36 (GU 24/09)** — prioridade, estão vendendo.
 - Herdado: PIX na chave CNPJ (decisão aberta) · prazo camiseta 20/10 × 15/10 · ~50 NFs a emitir ·
   erro `tsc` pré-existente em `checkout-produto.test.ts:26` · `InscricaoForm` com endpoint default

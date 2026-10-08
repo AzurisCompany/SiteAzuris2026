@@ -99,11 +99,18 @@ No detalhe da venda, **nova cobrança com estes dados** (nas listas, o link `nov
 produto, valor e descrição ficam em branco de propósito. A venda antiga não é tocada — se tiver que
 morrer, é o botão cancelar, decisão separada.
 
+### Limpar as cobranças em aberto
+Pendentes/vencidas com `teste=1` → achar a venda paga da mesma pessoa (documento, e-mail,
+sobrenome, domínio da empresa) → sync → `POST /api/admin/cobranca/cancelar`. Abandono real:
+contatar antes. Receita e a rodada de 08/10 em
+[ADMIN-REVISAO-COBRANCAS-ABERTAS.md](./ADMIN-REVISAO-COBRANCAS-ABERTAS.md).
+
 ## 4. Diagnóstico
 
 | sintoma | onde olhar |
 |---|---|
 | "pagou e não consta" | `/admin/vendas` → detalhe → **sincronizar** (`POST /api/admin/sync` com `{id}`); o webhook pode ter falhado |
+| admin diz "pago", Asaas mostra vencida no nome da mesma pessoa | outra pessoa comprou com o **mesmo CNPJ** e caiu no cliente Asaas dela; busque o CNPJ com `teste=1` ([revisão](./ADMIN-REVISAO-COBRANCAS-ABERTAS.md#1-o-caso-que-disparou-a-revisão)) |
 | status/taxas desatualizados em massa | `POST /api/admin/sync` com `{all: true}` (backfill) |
 | caixa não bate | `/admin/conciliacao` — e `/admin/importar` pra trazer cobrança criada direto no Asaas |
 | "vendas encerradas" indevido | `/api/cron/vigia-vendas?seco=1` logado, ou `/admin/ingressos`: prazo vencido ou lotação cheia |
