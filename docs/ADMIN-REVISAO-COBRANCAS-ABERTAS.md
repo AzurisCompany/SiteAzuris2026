@@ -87,11 +87,17 @@ Sync antes (nenhuma tinha sido paga), cancelamento, conferência das pagas de or
 | #215 | Rodrigo Baldner / Jufap | #217 (cobrança manual FullPass + One Day, R$ 912) |
 | #262 | Julio Motta, R$ 887 cartão | #263 R$ 957 |
 
+### Canceladas — testes (13)
+
+Com OK do Binhara, mesma sequência (sync → cancelar → conferir):
+
+- **Vivos no Asaas (9):** #7, #15, #16 (parcelamento apagado), #32, #14, #59, #118, #122, #216.
+  A **#216** (One Day R$ 290 do Binhara) não estava marcada como teste: marcada antes de cancelar.
+- **Só no banco (4):** #1, #2, #5, #6 (sandbox de maio) — a rota respondeu `nao-existia` e
+  encerrou só do nosso lado.
+
 ### Não mexidas — aguardando decisão
 
-- **Testes vivos no Asaas (9):** #7, #15, #16, #32 (pending); #14, #59, #118, #122, #216 (overdue).
-  **#216** (One Day R$ 290 do Binhara) **não está marcada como teste** — entra nos KPIs de vencidas.
-- **Testes só no banco (4):** #1, #2, #5, #6 (sandbox de maio). Nada a cancelar no Asaas.
 - **Abandono real — contatar antes de cancelar (5):**
 
   | # | quem | o quê | venceu |
@@ -103,6 +109,8 @@ Sync antes (nenhuma tinha sido paga), cancelamento, conferência das pagas de or
   | 18 | Marco Antonio Ribeiro Junior | Lakehouse R$ 550 cartão | 25/06 — **marcada teste, parece real** |
 
   FullPass fechado no site: se #114 ou #264 ainda quiserem, é cobrança avulsa.
+
+**Lista aberta depois da limpeza (08/10):** pending #18 260 290 292 295 · overdue #55 114 182 264.
 
 ### Pendentes de verdade (4)
 

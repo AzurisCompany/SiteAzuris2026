@@ -8,7 +8,7 @@
 | **FullPass + Estudante + combo FullPass + curso encerrados** | **EM PROD**: `e2365be`, deploy `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, verificado no ar |
 | docs | `c182bb7`, `b24b808` + este commit |
 | push | feito até `b24b808` |
-| **17 cobranças duplicadas** | **CANCELADAS** no Asaas + banco (tarde), via API do admin, sem deploy |
+| **17 duplicadas + 13 testes** | **CANCELADOS** no Asaas + banco (tarde), via API do admin, sem deploy |
 
 `main` = produção. No site, o DSS vende só **VIP, Business e camisetas**.
 
@@ -108,11 +108,13 @@ Pedido: *"no nosso sistema [Clovis] aparece como pago, mas no Asaas aparece venc
 - Doc novo com receita + tabela completa:
   **[docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md](./docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md)**;
   RUNBOOK (receita + linha no diagnóstico) e README (índice) atualizados.
+- **13 testes CANCELADOS** com OK: 9 vivos no Asaas (7 15 16 32 14 59 118 122 216 — a #216 foi
+  marcada teste antes) + 4 só no banco (1 2 5 6, `nao-existia`). Abertas agora: pending
+  18 260 290 292 295 · overdue 55 114 182 264.
 
 ## 7. Ainda aberto
 
-- **Cobranças:** cancelar os 9 testes vivos (#7 15 16 32 14 59 118 122 216) e marcar #216 como
-  teste — aguarda OK; contatar os 5 abandonos (#55 114 182 264 18) antes de cancelar.
+- **Cobranças:** contatar os 5 abandonos (#55 114 182 264 18) antes de cancelar.
 - **Desligar tipos 50/51 (café 06/10) e 35/36 (GU 24/09)** — prioridade, estão vendendo.
 - Herdado: PIX na chave CNPJ (decisão aberta) · prazo camiseta 20/10 × 15/10 · ~50 NFs a emitir ·
   erro `tsc` pré-existente em `checkout-produto.test.ts:26` · `InscricaoForm` com endpoint default
