@@ -6,7 +6,7 @@ Reconstrução completa do `azuris.com.br` substituindo a versão WordPress/Divi
 uma stack moderna, dark-first, focada em profissionais de dados.
 
 O que começou como site institucional hoje também **vende**: checkout próprio (Asaas) pro
-DSS 2026, One Day, GU BigData, ETT e o curso Lakehouse, com área administrativa financeira
+DSS 2026 (hoje só VIP e Business), GU BigData, ETT e o curso Lakehouse, com área administrativa financeira
 em `/admin`. O mapa disso está em
 **[docs/CATALOGO-PRECOS-E-VENDAS.md](./docs/CATALOGO-PRECOS-E-VENDAS.md)** — comece por ele.
 
@@ -65,9 +65,8 @@ Mapa completo — institucional, checkout e admin — em
 /servicos + 5 landings         Serviços
 /produtos  /produtos/[slug]    Ecossistema (7 produtos)
 /comunidade                    Hadoop.com.br, GU BigData, grupo de estudos
-/dssbr-2026 + /inscricao       DSS 2026 — landing e checkout do FullPass (Lote 3, R$ 887)
-/dssbr-2026/one-day            Passe de 1 dia (Lote 3, R$ 357)
-/dssbr-2026/fullpass-curso     Combo FullPass + portal do curso (R$ 850)
+/dssbr-2026                    DSS 2026 — landing (FullPass, One Day e combo ENCERRADOS em 07–08/10)
+/dssbr-2026/inscricao          Aviso de vendas encerradas (era o checkout do FullPass)
 /dssbr-2026/vip  /business      VIP e Business — lote vira sozinho por quantidade
 /gubigdata  /cafe-networking       Eventos presenciais no IEP (GU e DSSBR)
 /ett  /preparatorio-dados  /lakehouse-comunidade      Outros checkouts

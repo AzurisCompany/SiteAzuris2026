@@ -1,5 +1,10 @@
 # Onde mora cada preço, e como uma venda nasce
 
+> **08/10/2026 — vendas do FullPass (+ Estudante) e do combo FullPass + curso ENCERRADAS**
+> (`e2365be`). `/dssbr-2026/inscricao` e `/fullpass-curso` mostram aviso + links pro VIP/Business;
+> os POSTs foram removidos. Desligar os tipos no banco **não** fecha o FullPass (o checkout cai no
+> preço do registry) — por isso foi código. Venda pontual: cobrança avulsa. O One Day fechou em 07/10.
+
 Mapa geral do que a Azuris vende pelo site: **onde cada número vive**, quem lê quem, e o
 caminho completo de uma venda — do link até a linha no `/admin`.
 
@@ -293,4 +298,4 @@ Lote 2 sem ninguém mexer.
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-10-08** (Business pulou pro Lote 3).
+Última revisão: **2026-10-08** (Business no Lote 3; FullPass e combo encerrados).
