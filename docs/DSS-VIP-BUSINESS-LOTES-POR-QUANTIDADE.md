@@ -10,9 +10,9 @@ pra esses ingressos."*
 
 ---
 
-> **Estado em 02/10:** os dois estão no **Lote 2**, pulados na mão (ver §9): Business R$ 984
-> (Lote 1 id 73 desligado em 29/09) e VIP R$ 1.275 (Lote 1 id 70 desligado em 02/10). Do Lote 2
-> pro 3 a virada continua automática, por quantidade.
+> **Estado em 08/10:** Business no **Lote 3, R$ 1.279** (Lote 1 id 73 desligado em 29/09, Lote 2
+> id 74 desligado em 08/10 — ver §9). VIP no **Lote 2, R$ 1.275** (Lote 1 id 70 desligado em 02/10);
+> do Lote 2 pro 3 do VIP a virada continua automática, por quantidade.
 
 ## 1. Links e lotes
 
@@ -172,4 +172,10 @@ Mesma receita: `lote-1` (id 70) reenviado inteiro com `ativo:false`. Conferido n
 "vendendo agora", "restam 15", Lote 3 R$ 1.657 "em breve". Backup do antes em
 `backups/prod-2026-10-02-antes-vip-lote2/`. O card do dssbr.com.br, se disser R$ 957, ficou errado.
 
-Última revisão: **2026-10-02**.
+**Business, 08/10:** pedido *"encerrar o lote 2 e abrir o lote 3"*. Mesma receita: `lote-2` (id 74)
+reenviado inteiro com `ativo:false`; o Lote 3 (id 75) já estava ativo. Conferido no ar:
+`/dssbr-2026/business` mostra **R$ 1.279,00**, "Lote 3 · restam 10 ingressos". É o último lote:
+quando as 10 vagas acabarem, a página fica esgotada. Cobranças pendentes geradas no Lote 2 continuam
+em R$ 984. Desfazer: religar o `lote-2`. O card do dssbr.com.br, se disser R$ 984, ficou errado.
+
+Última revisão: **2026-10-08**.

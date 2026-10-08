@@ -146,10 +146,11 @@ um valor abaixo do cobrado seria propaganda ao contrário.
 | produto | checkout | Lote 1 | Lote 2 | Lote 3 | total |
 |---|---|---|---|---|---|
 | VIP (`dss-vip-2026`) | `/dssbr-2026/vip` | ~~10 × R$ 957~~ desligado | **15 × R$ 1.275 (vigente)** | 15 × R$ 1.657 | 40 |
-| Business (`dss-business-2026`) | `/dssbr-2026/business` | ~~10 × R$ 757~~ desligado | **10 × R$ 984 (vigente)** | 10 × R$ 1.279 | 30 |
+| Business (`dss-business-2026`) | `/dssbr-2026/business` | ~~10 × R$ 757~~ desligado | ~~10 × R$ 984~~ desligado | **10 × R$ 1.279 (vigente)** | 30 |
 
 **29/09:** o Business pulou pro Lote 2 por decisão do Binhara. O Lote 1 (id 73) foi desligado com as
-vagas ainda abertas; ele some da escada e o checkout vende R$ 984.
+vagas ainda abertas; ele some da escada e o checkout vende R$ 984. **08/10:** Lote 2 (id 74) desligado
+idem; o checkout vende o Lote 3, R$ 1.279 (último).
 
 **02/10:** o VIP fez o mesmo: Lote 1 (id 70) desligado, checkout vende o Lote 2 a R$ 1.275 (15 vagas).
 
@@ -292,4 +293,4 @@ Lote 2 sem ninguém mexer.
 | [CHECKOUT-PF-PJ-NOTA-FISCAL.md](./CHECKOUT-PF-PJ-NOTA-FISCAL.md) | PF/PJ, endereço e nota |
 | [EMAIL-TRANSACIONAL-RESEND.md](./EMAIL-TRANSACIONAL-RESEND.md) | e-mail de pagamento confirmado e vigia de vendas |
 
-Última revisão: **2026-09-29** (Business pulou pro Lote 2).
+Última revisão: **2026-10-08** (Business pulou pro Lote 3).
