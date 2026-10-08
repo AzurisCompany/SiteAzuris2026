@@ -121,7 +121,56 @@ Com OK do Binhara, mesma sequência (sync → cancelar → conferir):
 | 260 | Iandra Rocha (Energisa, PJ) | cobrança manual | R$ 1.774 boleto | 15/10 |
 | 290 | Vitor Rebello (SESI, PJ) | cobrança manual | R$ 1.685,30 boleto | 26/10 |
 
-## 4. O que fica pra depois
+## 4. Cruzamento completo banco × Asaas (08/10, noite)
+
+Feito **sem escrever nada** e sem a chave do Asaas de prod, em dois sentidos:
+
+- **Banco → Asaas:** as 295 vendas do banco (`/admin/vendas?teste=1&page=N`), e pra cada uma a
+  **página pública da fatura** (`asaas_invoice_url`, `https://www.asaas.com/i/<id>`). Ela diz a
+  verdade atual: *"Pagamento efetuado em …"*, *"Fatura cancelada"* (removida pelo fornecedor),
+  *"Aguardando Pagamento"*, *"Cobrança Vencida"*, *"Estornada"*. O "Status Asaas" do detalhe é só
+  o último sync/webhook gravado.
+- **Asaas → banco:** `/admin/importar?desde=2026-01-01` — lista o que existe no Asaas e não no banco
+  (215 cobranças de 2026 escaneadas).
+
+Limites: em parcelada, só a fatura da 1ª parcela foi aberta; a listagem do Asaas não traz cobrança
+apagada (o lado "só no Asaas" cobre só as vivas).
+
+### Bateu (290 de 295)
+
+| situação | qtde |
+|---|---|
+| pagas, iguais nos dois lados | 144 |
+| gratuitas (GU, café, reserva) — sem cobrança no Asaas | 92 |
+| canceladas nos dois lados | 22 + 13 testes |
+| estornadas nos dois lados | 1 (#33 CEUMA) + 4 testes (#8, #9, #110, #111) |
+| pendentes/vencidas iguais | 8 |
+
+### Inconsistências (3) — correção aguarda OK
+
+1. **#18 Marco Antonio Ribeiro Junior** (Lakehouse R$ 550 cartão): banco `pending` (marcada teste),
+   Asaas **"Fatura cancelada"**. Encerrar do nosso lado.
+   **Causa sistêmica:** `sincronizarInscricao` (`src/lib/asaas-sync.ts`) não olha o campo
+   `deleted` do pagamento — cobrança apagada no Asaas continua com `status` antigo e o sync mantém
+   `pending`. Só o webhook `PAYMENT_DELETED` fecha; se ele falhar, a linha fica pendente pra sempre.
+   Fix de uma linha (tratar `p.deleted === true` como `cancelled`), **precisa de deploy**.
+2. **GoCloud Soluções em Nuvem S/A** — R$ 10.000 PIX, **paga**, venc. 02/04 — só no Asaas.
+3. **Tiago Nelson** — "Curso Pipeline de dado + DSSBR", R$ 550 em 3x cartão, 3/3 pagas — só no Asaas.
+
+2 e 3 = receita recebida fora do `/admin` (falta no financeiro/DRE). Corrigir = botão "Importar" em
+`/admin/importar?desde=2026-01-01` (idempotente).
+
+### Em aberto no Asaas, sem duplicidade (8)
+
+Aguardando: #292 Diego Prando (Unimed Litoral) R$ 887 PIX, 10/10 · #295 Gabriel Vernalha camiseta
+R$ 55 PIX, 11/10 · #260 Iandra Rocha (Energisa) R$ 1.774 boleto, 15/10 · #290 Vitor Rebello (SESI)
+R$ 1.685,30 boleto, 26/10.
+
+Vencidas: #264 Gustavo Allemand (Volvo) R$ 887 PIX, 04/10 · #182 João Paulo Abadia (Checkpoint)
+Business R$ 757 PIX, 18/09 · #114 Daniel Pinheiro R$ 570 cartão, 15/08 · #55 Jussara Pinheiro
+(Maxpar) "2 ingressos FullPass" R$ 940 boleto, 26/07.
+
+## 5. O que fica pra depois
 
 - Cliente Asaas compartilhado por CNPJ: não há correção de código decidida. Opções: criar o
   cliente Asaas por **e-mail + documento** em vez de só documento, ou bloquear no checkout

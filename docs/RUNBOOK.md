@@ -111,6 +111,7 @@ contatar antes. Receita e a rodada de 08/10 em
 |---|---|
 | "pagou e não consta" | `/admin/vendas` → detalhe → **sincronizar** (`POST /api/admin/sync` com `{id}`); o webhook pode ter falhado |
 | admin diz "pago", Asaas mostra vencida no nome da mesma pessoa | outra pessoa comprou com o **mesmo CNPJ** e caiu no cliente Asaas dela; busque o CNPJ com `teste=1` ([revisão](./ADMIN-REVISAO-COBRANCAS-ABERTAS.md#1-o-caso-que-disparou-a-revisão)) |
+| linha "pendente" aqui, fatura "cancelada" no Asaas | cobrança apagada no painel do Asaas e webhook perdido; o sync **não** pega (ignora `deleted`). Encerre com `cobranca/cancelar`. Cruzamento completo: [revisão §4](./ADMIN-REVISAO-COBRANCAS-ABERTAS.md#4-cruzamento-completo-banco--asaas-0810-noite) |
 | status/taxas desatualizados em massa | `POST /api/admin/sync` com `{all: true}` (backfill) |
 | caixa não bate | `/admin/conciliacao` — e `/admin/importar` pra trazer cobrança criada direto no Asaas |
 | "vendas encerradas" indevido | `/api/cron/vigia-vendas?seco=1` logado, ou `/admin/ingressos`: prazo vencido ou lotação cheia |

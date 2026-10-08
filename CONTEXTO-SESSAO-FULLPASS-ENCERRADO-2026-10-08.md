@@ -7,8 +7,9 @@
 | Business no **Lote 3, R$ 1.279** (último) | **EM PROD**, mudança só no banco (sem deploy), verificada no ar |
 | **FullPass + Estudante + combo FullPass + curso encerrados** | **EM PROD**: `e2365be`, deploy `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, verificado no ar |
 | docs | `c182bb7`, `b24b808` + este commit |
-| push | feito até `b24b808` |
+| push | feito até `a1e7c0f`; o commit desta seção, não |
 | **17 duplicadas + 13 testes** | **CANCELADOS** no Asaas + banco (tarde), via API do admin, sem deploy |
+| cruzamento banco × Asaas | 290/295 batem; 3 inconsistências **não corrigidas** (aguardam OK) |
 
 `main` = produção. No site, o DSS vende só **VIP, Business e camisetas**.
 
@@ -112,9 +113,24 @@ Pedido: *"no nosso sistema [Clovis] aparece como pago, mas no Asaas aparece venc
   marcada teste antes) + 4 só no banco (1 2 5 6, `nao-existia`). Abertas agora: pending
   18 260 290 292 295 · overdue 55 114 182 264.
 
-## 7. Ainda aberto
+## 7. Cruzamento banco × Asaas (noite)
 
-- **Cobranças:** contatar os 5 abandonos (#55 114 182 264 18) antes de cancelar.
+Pedido: *"análise do que temos no Asaas… inconsistências entre os dois ambientes… lista das vencidas
+ou pendentes sem duplicada"*. Só leitura. Método e tabelas em
+[ADMIN-REVISAO-COBRANCAS-ABERTAS.md §4](./docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md#4-cruzamento-completo-banco--asaas-0810-noite):
+295 vendas do banco × página pública da fatura, e `/admin/importar` desde 01/01 (215 no Asaas).
+
+- **290/295 batem.** Inconsistências: **#18** (pendente aqui, cancelada no Asaas) · **GoCloud
+  R$ 10.000** e **Tiago Nelson 3x R$ 550**, pagas e só no Asaas.
+- **Bug achado:** o sync ignora `deleted` do Asaas → cobrança apagada no painel fica `pending` aqui.
+- **8 em aberto sem duplicada:** pendentes 292 295 260 290 · vencidas 264 182 114 55. Lista em
+  texto entregue pro Binhara copiar.
+
+## 8. Ainda aberto
+
+- **Corrigir (aguarda OK):** encerrar #18 · importar GoCloud + Tiago Nelson em `/admin/importar` ·
+  fix do `deleted` no `asaas-sync.ts` (deploy).
+- **Cobranças:** contatar as 4 vencidas (#55 114 182 264) antes de cancelar.
 - **Desligar tipos 50/51 (café 06/10) e 35/36 (GU 24/09)** — prioridade, estão vendendo.
 - Herdado: PIX na chave CNPJ (decisão aberta) · prazo camiseta 20/10 × 15/10 · ~50 NFs a emitir ·
   erro `tsc` pré-existente em `checkout-produto.test.ts:26` · `InscricaoForm` com endpoint default
