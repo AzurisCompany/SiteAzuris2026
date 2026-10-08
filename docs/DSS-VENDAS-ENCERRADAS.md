@@ -105,8 +105,11 @@ Estudante (R$ 400) sem nenhum passo no admin.
 
 ## 7. Pendências
 
-- **dssbr.com.br**: botões/cards que apontam pro checkout do FullPass, do combo ou do One Day
-  agora levam ao aviso — trocar lá (fora deste repo).
-- Tipos do café 06/10 (50/51) e do GU 24/09 (35/36) **ainda ativos** — evento passado à venda.
+- ~~dssbr.com.br~~ — **corrigido pelo Binhara e verificado em 08/10**: home sem link pros checkouts
+  encerrados (cards "vendas encerradas", FullPass com "lista de espera" no WhatsApp, botões só pra
+  VIP/Business, preços batendo); varredura das 146 URLs do sitemap sem nenhum link pra
+  `/inscricao`, `/fullpass-curso` ou `/one-day`.
+- Tipos do café 06/10 (50/51) e do GU 24/09 (35/36) **ainda ativos** — evento passado à venda; o
+  post do café no dssbr.com.br leva até `/cafe-networking`.
 
 Última revisão: **2026-10-08**.

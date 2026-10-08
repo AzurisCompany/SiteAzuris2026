@@ -159,4 +159,9 @@ Os tipos por evento hoje:
   Virou a receita "Trocar a apresentação da MESMA edição". Contexto:
   [`CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md`](../CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md).
 
-Última revisão: **2026-09-18**.
+> **08/10/2026 — passo 7 em atraso:** os tipos do café 06/10 (ids 50/51, `cafe-networking-2026-10`) e
+> do GU 24/09 (ids 35/36, `gubigdata-2026-09`) continuam **ativos** e `/cafe-networking/inscricao` e
+> `/gubigdata/inscricao` vendem R$ 30 pra evento que já aconteceu. O post do café no dssbr.com.br
+> ainda linka `/cafe-networking`. Desligar aguarda OK do Binhara.
+
+Última revisão: **2026-10-08**.

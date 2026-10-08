@@ -57,9 +57,45 @@ Tipos de `dss-2026` **continuam ativos no banco** de propósito: a cobrança avu
   `RUNBOOK.md`, `CUPONS-DESCONTO.md`, `INGRESSO-OCULTO-ESTUDANTE.md`, `ADMIN-LINKS-DE-VENDA.md`,
   `ADMIN-VENDAS-COBRANCA-INGRESSOS.md`, `DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md`.
 
-## 5. Ainda aberto
+## 5. Verificação do dssbr.com.br (depois da correção do Binhara)
 
-- **dssbr.com.br**: links pro checkout do FullPass/combo/One Day agora caem no aviso — trocar lá.
-- Tipos 50/51 (café 06/10) e 35/36 (GU 24/09) **ainda ativos** — perguntado de novo, sem resposta.
-- Herdado: PIX na chave CNPJ (decisão aberta) · card Business "40" × 30 no banco · prazo camiseta
-  20/10 × 15/10 · ~50 NFs a emitir · erro `tsc` pré-existente em `checkout-produto.test.ts:26`.
+Pedido: *"verifique os links que estavam abertos, agora está corrigido"*.
+
+**dssbr.com.br — OK:**
+- Home: nenhum `href` pra `/dssbr-2026/inscricao`, `/fullpass-curso` ou `/one-day`. Os botões de
+  compra apontam só pra `/dssbr-2026/vip` e `/dssbr-2026/business` (com UTM `utm_source=azuris`).
+- Cards: One Day "Lote 3 R$357 · vendas encerradas"; FullPass "Lote 3 R$887 · vendas encerradas"
+  com botão **"Entrar na lista de espera"** → WhatsApp (41) 99800-3687; Business "Lote 3 · último
+  lote R$ 1.279 · Lote 2 R$984 · esgotado"; VIP "Lote 2 R$ 1.275 · Lote 1 R$957 · esgotado ·
+  Lote 3 R$1.657". **Batem com os checkouts.**
+- CTA inline "Lote 2 · aberto" e banner dos cafés: **comentados** no HTML, não renderizam.
+- Varredura das **146 URLs do sitemap** (comentários HTML descontados): nenhum link pros checkouts
+  encerrados. Único link pra azuris.com.br em evento: o post
+  `/blog/cafe-networking-bindflow-outubro-2026/` → `/cafe-networking`.
+- **Resolvido de tabela:** "Business 40 × 30" — o card do Business não mostra mais quantidade; o
+  "Apenas 40 ingressos" que sobrou é do VIP (10+15+15 = 40, correto).
+
+**Café/GU — NÃO corrigido** (consulta na API do admin, 08/10):
+
+| id | produto | tipo | preço | estado |
+|---|---|---|---|---|
+| 50 | cafe-networking-2026-10 | geral | R$ 30 | **ativo** |
+| 51 | cafe-networking-2026-10 | convidado | grátis | **ativo** |
+| 35 | gubigdata-2026-09 | geral | R$ 30 | **ativo** |
+| 36 | gubigdata-2026-09 | associado | grátis | **ativo** |
+
+`/cafe-networking/inscricao` e `/gubigdata/inscricao` mostram R$ 30 e vendem eventos que já
+aconteceram — e o post do café no dssbr.com.br leva até lá. Desligar = `ativo:false` pela API do
+admin (registro inteiro), sem deploy. Oferecido; aguardando OK.
+
+Também visto: tipos de `dss-2026` — `lote-3` (id 107) e `estudante` (id 20) ativos, `lote-1`/`lote-2`
+desligados. Correto (não há rota de venda; servem à cobrança avulsa).
+
+## 6. Ainda aberto
+
+- **Desligar tipos 50/51 (café 06/10) e 35/36 (GU 24/09)** — prioridade, estão vendendo.
+- Herdado: PIX na chave CNPJ (decisão aberta) · prazo camiseta 20/10 × 15/10 · ~50 NFs a emitir ·
+  erro `tsc` pré-existente em `checkout-produto.test.ts:26` · `InscricaoForm` com endpoint default
+  apontando pra rota apagada (inofensivo: o ETT passa o seu).
+
+Última revisão: **2026-10-08**.
