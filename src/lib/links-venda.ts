@@ -28,9 +28,7 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
   {
     titulo: 'DSS 2026 — ingressos',
     links: [
-      { nome: 'Landing do DSS 2026', caminho: '/dssbr-2026', visibilidade: 'publico', nota: 'vitrine com os passes' },
-      { nome: 'FullPass (3 dias)', caminho: '/dssbr-2026/inscricao', slug: 'dss-2026', visibilidade: 'publico', aceitaTipoNoLink: true },
-      { nome: 'FullPass + Portal do Curso', caminho: '/dssbr-2026/fullpass-curso', slug: 'dss-fullpass-curso-2026', visibilidade: 'publico' },
+      { nome: 'Landing do DSS 2026', caminho: '/dssbr-2026', visibilidade: 'publico', nota: 'FullPass encerrado em 08/10; aponta pro VIP e o Business' },
       { nome: 'Ingresso VIP', caminho: '/dssbr-2026/vip', slug: 'dss-vip-2026', visibilidade: 'publico' },
       { nome: 'Ingresso Business', caminho: '/dssbr-2026/business', slug: 'dss-business-2026', visibilidade: 'publico' },
     ],

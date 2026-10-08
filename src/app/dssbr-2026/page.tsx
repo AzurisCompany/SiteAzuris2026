@@ -1,128 +1,28 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ArrowRight, MapPin, CalendarDays, Check, Users } from 'lucide-react'
-import { getProduto } from '@/lib/produtos'
-import { listarTiposPublicos, precosDoTipo } from '@/lib/tipos-ingresso'
 import { dssMetadata } from './metadata'
+import VendasEncerradas from './VendasEncerradas'
 
 const DSS = 'https://dssbr.com.br'
-const UTM = 'utm_source=azuris&utm_medium=landing&utm_campaign=dssbr-2026'
-const CHECKOUT_FULL = `/dssbr-2026/inscricao?${UTM}`
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
 const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
   'Oi! Vim pela página do DSSBR 2026 e quero saber sobre os pacotes especiais para grupos / compras corporativas.',
 )}`
 
-const brl = (v: number) => v.toFixed(2).replace('.', ',')
-
-// Landing lê o preço vigente dos MESMOS lugares que o checkout, pra nunca desincronizar:
-// FullPass vem do tipo de ingresso ATIVO no admin (Lote 3 R$887 hoje); o combo vem do
-// registry. O One Day saiu da vitrine em 07/10/2026 (vendas encerradas). force-dynamic
-// (igual ao checkout) garante que o preço mostrado é sempre o preço cobrado — sem risco
-// de fallback velho no build.
-export const dynamic = 'force-dynamic'
-
-const PRODUTO_FULL = getProduto('dss-2026')
-const PRODUTO_FULLPASS_CURSO = getProduto('dss-fullpass-curso-2026')
-const CHECKOUT_FULLPASS_CURSO = `/dssbr-2026/fullpass-curso?${UTM}`
-
-interface Pass {
-  id: string
-  nome: string
-  subtitulo: string
-  lote: string
-  pix: number
-  deVenda: number
-  cartao: number
-  maxParcelas: number
-  desconto: number
-  destaque: boolean
-  badge?: string
-  checkout: string
-  cta: string
-  inclui: string[]
-}
-
-/** Preço vigente do FullPass: tipo ATIVO no admin, com fallback no registry. */
-async function passFullPass(): Promise<Pass> {
-  let pix = Number((PRODUTO_FULL.precoCentavos / 100).toFixed(2))
-  let deVenda = PRODUTO_FULL.precoDeVendaCentavos / 100
-  let cartao = pix
-  let maxParcelas = PRODUTO_FULL.maxParcelas
-  let lote = 'Lote 2'
-  try {
-    const tipos = await listarTiposPublicos(PRODUTO_FULL.slug)
-    if (tipos.length > 0) {
-      const p = precosDoTipo(tipos[0])
-      pix = p.precoPixReais
-      deVenda = p.precoDeVendaReais
-      cartao = p.precoCartaoBaseReais
-      maxParcelas = p.maxParcelas
-      lote = tipos[0].nome
-    }
-  } catch {
-    // banco sem migração → usa o preço do registry (fallback acima)
-  }
-  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
-  return {
-    id: 'full',
-    nome: 'FullPass · 3 dias',
-    subtitulo: 'Acesso completo ao evento inteiro',
-    lote,
-    pix,
-    deVenda,
-    cartao,
-    maxParcelas,
-    desconto,
-    destaque: true,
-    badge: 'Mais completo',
-    checkout: CHECKOUT_FULL,
-    cta: 'Garantir FullPass',
-    inclui: [
-      'Acesso aos 3 dias de evento',
-      'Workshops hands-on, keynotes e tracks',
-      'Rodada de negócios e networking',
-      'Reembolso até 45 dias antes do evento',
-    ],
-  }
-}
-
-/** Combo (cross-sell): FullPass + portal do curso Pipeline. Preço fixo R$850, sem âncora. */
-function passFullPassCurso(): Pass {
-  const pix = Number((PRODUTO_FULLPASS_CURSO.precoCentavos / 100).toFixed(2))
-  const deVenda = PRODUTO_FULLPASS_CURSO.precoDeVendaCentavos / 100
-  const desconto = deVenda > pix ? Math.round((1 - pix / deVenda) * 100) : 0
-  return {
-    id: 'fullpass-curso',
-    nome: 'FullPass + Curso',
-    subtitulo: '3 dias + portal do curso Pipeline de Dados',
-    lote: 'Combo',
-    pix,
-    deVenda,
-    cartao: pix,
-    maxParcelas: PRODUTO_FULLPASS_CURSO.maxParcelas,
-    desconto,
-    destaque: false,
-    badge: 'Leva o curso junto',
-    checkout: CHECKOUT_FULLPASS_CURSO,
-    cta: 'Garantir combo',
-    inclui: [
-      'Acesso aos 3 dias de evento',
-      'Workshops hands-on, keynotes e tracks',
-      'Rodada de negócios e networking',
-      'Portal do curso Lakehouse: Pipeline na Prática',
-    ],
-  }
-}
+// Vendas do FullPass, do Estudante e do combo FullPass + curso ENCERRADAS em 08/10/2026
+// (o One Day já tinha fechado em 07/10). A seção de ingressos virou o aviso e aponta pro
+// VIP e o Business, que seguem vendendo — sem preço em texto fixo aqui: quem diz o preço
+// é a página de cada um. Página sem leitura de banco → pode ser estática de novo.
 
 export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos a partir de R$ 357.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos VIP e Business.',
   ogDescription:
-    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba. Ingressos a partir de R$ 357.',
+    'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba.',
 })
 
 const STATS = [
@@ -189,66 +89,7 @@ const LOGOS = [
 
 const PHOTOS = ['dss2025-000.jpg', 'dss2025-012.jpg', 'dss2025-008.jpg', 'dss2025-015.jpg', 'dss2025-018.jpg', 'dss2025-005.jpg']
 
-function IngressoCard({ p }: { p: Pass }) {
-  return (
-    <div
-      className={`flex flex-col rounded-2xl border bg-gradient-to-br from-deep to-ink p-8 ${
-        p.destaque ? 'border-cyan-brand/50' : 'border-slate/60'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <div className="text-xs uppercase tracking-widest text-cyan-brand">{p.nome}</div>
-        {p.badge && (
-          <span className="rounded-full bg-cyan-brand/10 px-3 py-1 text-xs font-semibold text-cyan-brand">{p.badge}</span>
-        )}
-      </div>
-      <div className="mt-2 text-sm text-foam/60">{p.subtitulo}</div>
-
-      <div className="mt-4 text-xs text-foam/40">
-        {p.lote}
-        {p.deVenda > p.pix && (
-          <>
-            {' · '}
-            <span className="line-through">R$ {brl(p.deVenda)}</span> no lote final
-          </>
-        )}
-      </div>
-      <div className="mt-1 text-4xl font-black">
-        R$ {brl(p.pix)} <span className="text-base font-semibold text-foam/50">no PIX</span>
-      </div>
-      <div className="mt-1 text-sm text-foam/60">
-        {p.desconto > 0 && <>{p.desconto}% off · </>}cartão R$ {brl(p.cartao)} em até {p.maxParcelas}x (1x à vista, 2x-
-        {p.maxParcelas}x com juros)
-      </div>
-
-      <ul className="mt-6 flex-1 space-y-2 text-sm text-foam/70">
-        {p.inclui.map((item) => (
-          <li key={item} className="flex gap-2">
-            <Check className="mt-0.5 size-4 shrink-0 text-emerald-accent" /> {item}
-          </li>
-        ))}
-      </ul>
-
-      <a
-        href={p.checkout}
-        className={`mt-7 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl ${
-          p.destaque
-            ? 'bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)]'
-            : 'border border-slate/60 bg-deep/60 hover:border-cyan-brand/50'
-        }`}
-      >
-        {p.cta}
-        <ArrowRight className="size-5" />
-      </a>
-    </div>
-  )
-}
-
-export default async function DssbrLandingPage() {
-  const full = await passFullPass()
-  const fullCurso = passFullPassCurso()
-  const PASSES: Pass[] = [full, fullCurso]
-
+export default function DssbrLandingPage() {
   return (
     <main className="min-h-screen bg-ink text-foam">
       {/* HERO */}
@@ -295,7 +136,7 @@ export default async function DssbrLandingPage() {
               href="#ingressos"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-7 py-4 text-base font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              Garantir minha vaga
+              Ver ingressos
               <ArrowRight className="size-5" />
             </a>
             <a href="#programacao" className="text-sm font-semibold text-foam/70 hover:text-cyan-brand transition-colors">
@@ -303,8 +144,7 @@ export default async function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            FullPass 3 dias R$ {brl(full.pix)} · combo
-            FullPass + curso R$ {fullCurso.pix.toFixed(0)} · PIX ou cartão em até {full.maxParcelas}x.
+            Inscrições do FullPass encerradas · ainda há ingressos VIP e Business.
           </p>
 
           {/* GRUPOS & CORPORATIVO */}
@@ -457,24 +297,12 @@ export default async function DssbrLandingPage() {
       {/* INGRESSOS */}
       <section id="ingressos" className="py-20 bg-deep/40 border-t border-slate/60">
         <div className="mx-auto max-w-5xl px-6">
-          <div className="text-center">
-            {/* Sem nome de lote no título nem na linha de apoio: o lote vigente é o que
-                o card mostra (vem do admin). Texto fixo aqui desencontra do preço abaixo. */}
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Garanta sua vaga no <span className="text-brand-gradient">DSS 2026</span>.
-            </h2>
-            <p className="mt-4 text-foam/70">O lote atual é o melhor preço — quando ele vira, o preço sobe. Escolha o ingresso que combina com você.</p>
+          <div className="mx-auto max-w-2xl">
+            <VendasEncerradas
+              titulo="Inscrições do FullPass encerradas"
+              waContexto="Oi! Vim pela página do DSSBR 2026, vi que as inscrições do FullPass encerraram e ainda quero ir."
+            />
           </div>
-
-          <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
-            {PASSES.map((p) => (
-              <IngressoCard key={p.id} p={p} />
-            ))}
-          </div>
-
-          <p className="mt-6 text-center text-xs text-foam/45">
-            Checkout seguro via Asaas · PIX ou cartão · inscrição individual.
-          </p>
 
           <p className="mt-10 text-center text-sm text-foam/50">
             Dúvidas? <a href="mailto:contato@dssbr.com.br" className="underline hover:text-cyan-brand">contato@dssbr.com.br</a>

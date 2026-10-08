@@ -9,7 +9,8 @@ export const dynamic = 'force-dynamic'
 // Produtos cujo checkout consome o catálogo de tipos. O `checkout` é a base do
 // link `?tipo=` dos ingressos ocultos.
 const PRODUTOS_COM_TIPOS: Array<{ slug: string; nome: string; checkout: string }> = [
-  { slug: 'dss-2026', nome: labelProduto('dss-2026'), checkout: CHECKOUT_URL['dss-2026'] },
+  // FullPass com vendas encerradas (08/10/2026): fica na lista pros tipos antigos, sem checkout no ar.
+  { slug: 'dss-2026', nome: labelProduto('dss-2026'), checkout: '/dssbr-2026/inscricao' },
   { slug: EVENTO_GU_SLUG, nome: labelProduto(EVENTO_GU_SLUG), checkout: CHECKOUT_URL[EVENTO_GU_SLUG] },
   { slug: CAFE_SLUG, nome: labelProduto(CAFE_SLUG), checkout: CHECKOUT_URL[CAFE_SLUG] },
   { slug: 'camiseta-dss-2026', nome: labelProduto('camiseta-dss-2026'), checkout: CHECKOUT_URL['camiseta-dss-2026'] },

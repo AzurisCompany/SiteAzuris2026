@@ -68,8 +68,6 @@ export function tabProduto(slug: string): string {
  */
 export const CHECKOUT_URL: Record<string, string> = {
   'lakehouse-comunidade': '/lakehouse-comunidade/inscricao',
-  'dss-2026': '/dssbr-2026/inscricao',
-  'dss-fullpass-curso-2026': '/dssbr-2026/fullpass-curso',
   'dss-vip-2026': '/dssbr-2026/vip',
   'dss-business-2026': '/dssbr-2026/business',
   'camiseta-dss-2026': '/dssbr-2026/camiseta',
@@ -96,6 +94,10 @@ export const PRODUTOS_ENCERRADOS = new Set<string>([
   // Passe One Day (Lote 3, R$357), vendas encerradas em 07/10/2026 — o DSS segue só
   // com FullPass, combo FullPass + curso, VIP e Business.
   'dss-one-day-2026',
+  // FullPass (Lote 3, R$887, + Estudante R$400) e combo FullPass + curso (R$850), vendas
+  // encerradas em 08/10/2026. O DSS segue no site só com VIP e Business.
+  'dss-2026',
+  'dss-fullpass-curso-2026',
 ])
 
 /** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).

@@ -47,6 +47,9 @@ export interface ProdutoConfig {
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
+  // VENDAS ENCERRADAS em 08/10/2026 (FullPass e Estudante): /dssbr-2026/inscricao virou
+  // aviso e o POST saiu. Fica aqui pelo histórico de vendas, pela cobrança avulsa e pelo
+  // e-mail de confirmação de PIX já gerado.
   'dss-2026': {
     slug: 'dss-2026',
     nome: 'Data Science Summit Brasil 2026',
@@ -121,6 +124,8 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   //
   // FULFILLMENT DO CURSO É MANUAL: a compra registra a inscrição; liberar o portal
   // é passo operacional do Binhara (não há automação ligando os dois).
+  // VENDAS ENCERRADAS em 08/10/2026, junto com o FullPass: /dssbr-2026/fullpass-curso
+  // virou aviso e o POST saiu. Fica pelo histórico e pela cobrança avulsa.
   'dss-fullpass-curso-2026': {
     slug: 'dss-fullpass-curso-2026',
     nome: 'DSS FullPass + Portal do Curso Pipeline',
