@@ -28,9 +28,8 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
   {
     titulo: 'DSS 2026 — ingressos',
     links: [
-      { nome: 'Landing do DSS 2026', caminho: '/dssbr-2026', visibilidade: 'publico', nota: 'FullPass encerrado em 08/10; aponta pro VIP e o Business' },
+      { nome: 'Landing do DSS 2026', caminho: '/dssbr-2026', visibilidade: 'publico', nota: 'FullPass encerrado em 08/10 e Business em 16/10; aponta pro VIP' },
       { nome: 'Ingresso VIP', caminho: '/dssbr-2026/vip', slug: 'dss-vip-2026', visibilidade: 'publico' },
-      { nome: 'Ingresso Business', caminho: '/dssbr-2026/business', slug: 'dss-business-2026', visibilidade: 'publico' },
     ],
   },
   {

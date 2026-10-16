@@ -15,7 +15,6 @@ export interface ProdutoComCupom {
 
 export const PRODUTOS_COM_CUPOM: ProdutoComCupom[] = [
   { slug: 'dss-vip-2026', nome: 'Ingresso VIP', caminho: '/dssbr-2026/vip' },
-  { slug: 'dss-business-2026', nome: 'Ingresso Business', caminho: '/dssbr-2026/business' },
 ]
 
 export function produtoComCupom(slug: string): ProdutoComCupom | undefined {

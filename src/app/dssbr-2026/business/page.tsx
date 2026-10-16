@@ -1,57 +1,36 @@
 import type { Metadata } from 'next'
-import { getProduto } from '@/lib/produtos'
-import CheckoutPorLotes from '../CheckoutPorLotes'
 import { dssMetadata } from '../metadata'
+import VendasEncerradas from '../VendasEncerradas'
 
-// Ingresso Business do DSS 2026: 30 ingressos em 3 lotes que viram sozinhos por
-// quantidade (10 a R$757 → 10 a R$984 → 10 a R$1.279). Os preços e as vagas vivem nos
-// tipos de ingresso (/admin/ingressos), não aqui. Benefícios: os mesmos do card
-// Business do dssbr.com.br.
-const PRODUTO = getProduto('dss-business-2026')
-
-const INCLUI = [
-  'Os 3 dias de evento (tudo do FullPass)',
-  'Coffee Break Premium',
-  'Agenda com expositores e patrocinadores',
-  'Área de coworking',
-  'Acervo pós-evento (slides)',
-]
-
+// VENDAS ENCERRADAS em 16/10/2026 — Ingresso Business (Lote 3, R$1.279, último lote).
+// A URL fica de pé com o aviso porque o link circulou (dssbr.com.br, WhatsApp, cupons).
+// O POST /api/dss-business/inscricao saiu junto; venda pontual segue pela cobrança avulsa
+// do admin. Os tipos `dss-business-2026` ficam no banco — a cobrança avulsa usa o catálogo.
 export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/business',
-  title: 'Ingresso Business — DSS 2026 · Data Science Summit Brasil',
-  description:
-    'Ingresso Business do DSS 2026 (27–29/out, Curitiba): coffee break premium, coworking e agenda com expositores. PIX ou cartão em até 3x.',
-  noindex: true, // página de checkout, sem indexação — mas com card do congresso no WhatsApp
+  title: 'Ingresso Business encerrado — DSS 2026 · Data Science Summit Brasil',
+  description: 'As inscrições do ingresso Business do DSS 2026 (27–29/out, Curitiba) pelo site estão encerradas.',
+  noindex: true,
 })
 
-export const dynamic = 'force-dynamic'
-
-export default async function BusinessPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ d?: string; c?: string }>
-}) {
+export default function BusinessEncerradoPage() {
   return (
-    <CheckoutPorLotes
-      cupomEntrada={await searchParams}
-      produto={PRODUTO}
-      endpoint="/api/dss-business/inscricao"
-      gaItem={{ id: 'dss-business-2026', name: 'DSS 2026 — Ingresso Business' }}
-      h1={
-        <>
-          Ingresso <span className="text-[var(--azuris-cyan)]">Business</span> · DSS 2026
-        </>
-      }
-      subtitulo={
-        <>
-          <strong className="text-[var(--text-primary)]">Experiência premium</strong> nos 3 dias do Data Science Summit
-          Brasil. Inscrição individual.
-        </>
-      }
-      resumoLabel="Business · 27 a 29 de outubro · IEP, Curitiba"
-      inclui={INCLUI}
-      waContexto="Oi! Estava no checkout do ingresso Business do DSS 2026 e quero falar sobre ingressos Business."
-    />
+    <main className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        <a
+          href="/dssbr-2026"
+          className="text-sm text-[var(--text-secondary)] hover:text-[var(--azuris-cyan)] transition-colors"
+        >
+          ← voltar pro DSS 2026
+        </a>
+        <div className="mt-6">
+          <VendasEncerradas
+            titulo="Ingresso Business encerrado"
+            encerrado="ingresso Business"
+            waContexto="Oi! Abri o checkout do ingresso Business do DSS 2026, vi que as inscrições encerraram e ainda quero ir."
+          />
+        </div>
+      </div>
+    </main>
   )
 }

@@ -163,6 +163,8 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
     tipoObrigatorio: true,
   },
+  // VENDAS ENCERRADAS em 16/10/2026 (Lote 3, R$1.279): /dssbr-2026/business virou aviso
+  // e o POST saiu. Fica pelo histórico, pelo e-mail de PIX já gerado e pela cobrança avulsa.
   'dss-business-2026': {
     slug: 'dss-business-2026',
     nome: 'DSS 2026 — Ingresso Business',

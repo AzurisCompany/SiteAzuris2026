@@ -1,4 +1,4 @@
-# DSS 2026: vendas encerradas (One Day, FullPass, Estudante, combo)
+# DSS 2026: vendas encerradas (One Day, FullPass, Estudante, combo, Business)
 
 O que o site do DSS 2026 parou de vender, quando, como foi fechado e o que sobrou. Escrito em
 08/10/2026, quando o FullPass fechou e o site passou a vender só **VIP, Business e camisetas**.
@@ -18,6 +18,7 @@ O que o site do DSS 2026 parou de vender, quando, como foi fechado e o que sobro
 | **08/10** | **FullPass** (`dss-2026`, tipo `lote-3`) | R$ 887 (Lote 3) | `e2365be` | `/dssbr-2026/inscricao` → **aviso** |
 | **08/10** | **Estudante** (`dss-2026`, tipo oculto `estudante`) | R$ 400 | `e2365be` | `/dssbr-2026/inscricao?tipo=estudante` → **aviso** |
 | **08/10** | **combo FullPass + curso** (`dss-fullpass-curso-2026`) | R$ 850 | `e2365be` | `/dssbr-2026/fullpass-curso` → **aviso** + link pro curso avulso |
+| **16/10** | **Business** (`dss-business-2026`, Lote 3) | R$ 1.279 | ver §8 | `/dssbr-2026/business` → **aviso** |
 
 Deploy de 08/10: `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, rodado pelo Binhara. Push feito (`b24b808`).
 
@@ -112,4 +113,26 @@ Estudante (R$ 400) sem nenhum passo no admin.
 - Tipos do café 06/10 (50/51) e do GU 24/09 (35/36) **ainda ativos** — evento passado à venda; o
   post do café no dssbr.com.br leva até `/cafe-networking`.
 
-Última revisão: **2026-10-08**.
+## 8. Business encerrado (16/10/2026)
+
+Pedido do Binhara: "só vamos vender agora o VIP". Mesma receita do §5:
+
+| onde | mudança |
+|---|---|
+| `src/app/dssbr-2026/business/page.tsx` | virou o aviso (estático, `noindex`) |
+| `src/app/api/dss-business/inscricao/route.ts` | **apagado** → POST 404 |
+| `src/app/dssbr-2026/VendasEncerradas.tsx` | prop `encerrado` (o que fechou, default "FullPass"); botões só pro **VIP** |
+| `src/app/dssbr-2026/page.tsx` | hero e seção de ingressos: "FullPass e Business encerrados · ainda há VIP"; descrição "Ingresso VIP" |
+| `src/lib/admin-queries.ts` | `dss-business-2026` em `PRODUTOS_ENCERRADOS`, fora do `CHECKOUT_URL` |
+| `src/lib/links-venda.ts` · `src/lib/cupom-produtos.ts` | Business sai de `/admin/links`, `/admin/cupons` e `/vendas` |
+
+**Ficou:** registro em `produtos.ts`, e-mail de confirmação, preço sugerido e opção na cobrança
+avulsa, e os 3 tipos `dss-business-2026` no banco (a cobrança avulsa usa o catálogo). PIX já
+gerado continua pagável na fatura e o webhook confirma.
+
+**No site, o DSS vende agora só o VIP e as camisetas.**
+
+Pendente fora do repo: `dssbr.com.br` ainda pode linkar `/dssbr-2026/business` — o link cai no
+aviso (não quebra), mas o card Business de lá precisa virar "vendas encerradas".
+
+Última revisão: **2026-10-16**.

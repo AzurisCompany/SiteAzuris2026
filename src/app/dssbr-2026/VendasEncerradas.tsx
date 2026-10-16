@@ -1,23 +1,26 @@
 import { ArrowRight } from 'lucide-react'
 
 // Aviso de vendas encerradas do DSS 2026 — FullPass, Estudante e combo FullPass + curso
-// fecharam em 08/10/2026. Serve a landing e as URLs de checkout que já circularam
-// (`/dssbr-2026/inscricao`, `?tipo=estudante`, `/fullpass-curso`, e os redirects do
-// One Day): link velho cai aqui, não num 404. VIP e Business seguem vendendo — sem
-// preço em texto fixo, quem diz o preço é a página de cada um.
+// fecharam em 08/10/2026; o Business, em 16/10/2026. Serve a landing e as URLs de
+// checkout que já circularam (`/dssbr-2026/inscricao`, `?tipo=estudante`,
+// `/fullpass-curso`, `/business` e os redirects do One Day): link velho cai aqui, não
+// num 404. Só o VIP segue vendendo — sem preço em texto fixo, quem diz o preço é a
+// página dele.
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
 
 const AINDA_A_VENDA = [
   { nome: 'Ingresso VIP', href: '/dssbr-2026/vip' },
-  { nome: 'Ingresso Business', href: '/dssbr-2026/business' },
 ]
 
 export default function VendasEncerradas({
   titulo,
+  encerrado = 'FullPass',
   waContexto,
 }: {
   titulo: string
+  /** o que fechou — vai no texto ("As inscrições do FullPass pelo site estão encerradas") */
+  encerrado?: string
   /** texto que abre a conversa no WhatsApp */
   waContexto: string
 }) {
@@ -29,9 +32,9 @@ export default function VendasEncerradas({
       </div>
       <h2 className="mt-2 text-2xl font-bold">{titulo}</h2>
       <p className="mt-3 text-sm text-[var(--text-secondary)]">
-        As inscrições do <strong className="text-[var(--text-primary)]">FullPass</strong> pelo site estão
-        encerradas. Ainda quer ir? Fale com a gente no WhatsApp — ou garanta um dos ingressos que ainda
-        estão à venda.
+        As inscrições do <strong className="text-[var(--text-primary)]">{encerrado}</strong> pelo site estão
+        encerradas. Ainda quer ir? Fale com a gente no WhatsApp — ou garanta o ingresso que ainda está à
+        venda.
       </p>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">

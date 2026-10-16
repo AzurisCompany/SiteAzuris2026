@@ -12,15 +12,15 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
 )}`
 
 // Vendas do FullPass, do Estudante e do combo FullPass + curso ENCERRADAS em 08/10/2026
-// (o One Day já tinha fechado em 07/10). A seção de ingressos virou o aviso e aponta pro
-// VIP e o Business, que seguem vendendo — sem preço em texto fixo aqui: quem diz o preço
-// é a página de cada um. Página sem leitura de banco → pode ser estática de novo.
+// (o One Day já tinha fechado em 07/10; o Business fechou em 16/10). A seção de ingressos
+// virou o aviso e aponta pro VIP, o único que segue vendendo — sem preço em texto fixo
+// aqui: quem diz o preço é a página dele. Página sem leitura de banco → pode ser estática de novo.
 
 export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingressos VIP e Business.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingresso VIP.',
   ogDescription:
     'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba.',
 })
@@ -144,7 +144,7 @@ export default function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            Inscrições do FullPass encerradas · ainda há ingressos VIP e Business.
+            Inscrições do FullPass e do Business encerradas · ainda há ingressos VIP.
           </p>
 
           {/* GRUPOS & CORPORATIVO */}
@@ -299,8 +299,9 @@ export default function DssbrLandingPage() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="mx-auto max-w-2xl">
             <VendasEncerradas
-              titulo="Inscrições do FullPass encerradas"
-              waContexto="Oi! Vim pela página do DSSBR 2026, vi que as inscrições do FullPass encerraram e ainda quero ir."
+              titulo="Inscrições do FullPass e do Business encerradas"
+              encerrado="FullPass e do Business"
+              waContexto="Oi! Vim pela página do DSSBR 2026, vi que as inscrições do FullPass e do Business encerraram e ainda quero ir."
             />
           </div>
 

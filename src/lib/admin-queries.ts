@@ -69,7 +69,6 @@ export function tabProduto(slug: string): string {
 export const CHECKOUT_URL: Record<string, string> = {
   'lakehouse-comunidade': '/lakehouse-comunidade/inscricao',
   'dss-vip-2026': '/dssbr-2026/vip',
-  'dss-business-2026': '/dssbr-2026/business',
   'camiseta-dss-2026': '/dssbr-2026/camiseta',
   'camiseta-congressista-dss-2026': '/dssbr-2026/camiseta-congressista',
   'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
@@ -98,6 +97,9 @@ export const PRODUTOS_ENCERRADOS = new Set<string>([
   // encerradas em 08/10/2026. O DSS segue no site só com VIP e Business.
   'dss-2026',
   'dss-fullpass-curso-2026',
+  // Business (Lote 3, R$1.279), vendas encerradas em 16/10/2026. O DSS segue no site só
+  // com o VIP e as camisetas.
+  'dss-business-2026',
 ])
 
 /** Monta link wa.me a partir do telefone gravado (só dígitos, sem DDI).
