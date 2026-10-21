@@ -8,7 +8,8 @@ import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
 import InscricaoForm from './inscricao/InscricaoForm'
 import CupomAviso, { type EntradaCupom } from './CupomAviso'
 
-// Corpo dos checkouts VIP e Business do DSS 2026: lote que vira sozinho por
+// SEM USO desde 21/10/2026 (VIP e Business encerrados); fica pra um `git revert` voltar
+// sem reescrever nada. Corpo dos checkouts VIP e Business do DSS 2026: lote que vira sozinho por
 // quantidade ([[lotes-quantidade]]). A página mostra a escada e vende SÓ o lote
 // vigente; o servidor confere de novo no POST (checkout-produto, `tipoObrigatorio`).
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687

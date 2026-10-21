@@ -43,7 +43,8 @@ export async function POST(request: Request) {
   // link do One Day não abre desconto no VIP. Todos com o MESMO prazo.
   const produtos = cupom.produtos.map(produtoComCupom).filter((p) => p != null)
   if (produtos.length === 0) {
-    return NextResponse.json({ error: 'Cupom cadastrado num produto sem página de checkout.' }, { status: 500 })
+    // Hoje (21/10/2026) é o caminho de todo cupom: os ingressos do DSS encerraram no site.
+    return NextResponse.json({ error: 'As vendas desse ingresso pelo site encerraram.' }, { status: 410 })
   }
 
   const agora = Date.now()

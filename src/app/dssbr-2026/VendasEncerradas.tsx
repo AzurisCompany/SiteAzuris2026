@@ -1,17 +1,11 @@
-import { ArrowRight } from 'lucide-react'
-
 // Aviso de vendas encerradas do DSS 2026 — FullPass, Estudante e combo FullPass + curso
-// fecharam em 08/10/2026; o Business, em 16/10/2026. Serve a landing e as URLs de
-// checkout que já circularam (`/dssbr-2026/inscricao`, `?tipo=estudante`,
-// `/fullpass-curso`, `/business` e os redirects do One Day): link velho cai aqui, não
-// num 404. Só o VIP segue vendendo — sem preço em texto fixo, quem diz o preço é a
-// página dele.
+// fecharam em 08/10/2026; o Business, em 16/10/2026; o VIP, em 21/10/2026. Serve a
+// landing e as URLs de checkout que já circularam (`/dssbr-2026/inscricao`,
+// `?tipo=estudante`, `/fullpass-curso`, `/business`, `/vip` e os redirects do One Day):
+// link velho cai aqui, não num 404. Nenhum ingresso segue à venda no site — quem ainda
+// quer ir fala no WhatsApp e vira cobrança avulsa.
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
-
-const AINDA_A_VENDA = [
-  { nome: 'Ingresso VIP', href: '/dssbr-2026/vip' },
-]
 
 export default function VendasEncerradas({
   titulo,
@@ -33,21 +27,10 @@ export default function VendasEncerradas({
       <h2 className="mt-2 text-2xl font-bold">{titulo}</h2>
       <p className="mt-3 text-sm text-[var(--text-secondary)]">
         As inscrições do <strong className="text-[var(--text-primary)]">{encerrado}</strong> pelo site estão
-        encerradas. Ainda quer ir? Fale com a gente no WhatsApp — ou garanta o ingresso que ainda está à
-        venda.
+        encerradas. Ainda quer ir? Fale com a gente no WhatsApp.
       </p>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        {AINDA_A_VENDA.map((i) => (
-          <a
-            key={i.href}
-            href={i.href}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--azuris-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--azuris-cyan)]"
-          >
-            {i.nome}
-            <ArrowRight className="size-4" />
-          </a>
-        ))}
         <a
           href={wa}
           target="_blank"

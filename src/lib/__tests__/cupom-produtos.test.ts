@@ -11,11 +11,10 @@ describe('produtos que aceitam cupom', () => {
   })
 
   it('normaliza o que vem do admin: só slugs conhecidos, sem repetir, na ordem da lista', () => {
-    expect(normalizarProdutos(['dss-vip-2026', 'dss-vip-2026', 'inventado'])).toEqual(['dss-vip-2026'])
-    // Business encerrado em 16/10/2026: idem
-    expect(normalizarProdutos(['dss-business-2026', 'dss-vip-2026'])).toEqual(['dss-vip-2026'])
-    // FullPass encerrado em 08/10/2026: cupom antigo que ainda o cite perde o produto
-    expect(normalizarProdutos(['dss-2026', 'dss-vip-2026'])).toEqual(['dss-vip-2026'])
+    // VIP encerrado em 21/10/2026 (o último): nenhum ingresso aceita cupom, então cupom
+    // antigo que cite FullPass (08/10), Business (16/10) ou VIP perde o produto
+    expect(PRODUTOS_COM_CUPOM).toEqual([])
+    expect(normalizarProdutos(['dss-vip-2026', 'dss-business-2026', 'dss-2026', 'inventado'])).toEqual([])
     expect(normalizarProdutos('dss-vip-2026')).toEqual([])
     expect(normalizarProdutos(undefined)).toEqual([])
   })

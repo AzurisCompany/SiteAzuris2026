@@ -12,15 +12,15 @@ const WA_CORP = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
 )}`
 
 // Vendas do FullPass, do Estudante e do combo FullPass + curso ENCERRADAS em 08/10/2026
-// (o One Day já tinha fechado em 07/10; o Business fechou em 16/10). A seção de ingressos
-// virou o aviso e aponta pro VIP, o único que segue vendendo — sem preço em texto fixo
-// aqui: quem diz o preço é a página dele. Página sem leitura de banco → pode ser estática de novo.
+// (o One Day já tinha fechado em 07/10; o Business fechou em 16/10 e o VIP, o último, em
+// 21/10). A seção de ingressos virou o aviso: nenhum ingresso à venda no site, quem ainda
+// quer ir fala no WhatsApp. Página sem leitura de banco → pode ser estática de novo.
 
 export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026',
   title: 'DSS 2026 — Data Science Summit Brasil · 27 a 29/out · Curitiba',
   description:
-    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba. Ingresso VIP.',
+    'A 5ª edição do Data Science Summit Brasil. 3 dias com as big techs e os times que colocam IA em produção nas maiores empresas do país. 27 a 29 de outubro, IEP Curitiba.',
   ogDescription:
     'For & by the AI industry. 3 dias com cases reais de IA em produção. 27 a 29/out · Curitiba.',
 })
@@ -136,7 +136,7 @@ export default function DssbrLandingPage() {
               href="#ingressos"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-7 py-4 text-base font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              Ver ingressos
+              Ainda quer ir?
               <ArrowRight className="size-5" />
             </a>
             <a href="#programacao" className="text-sm font-semibold text-foam/70 hover:text-cyan-brand transition-colors">
@@ -144,7 +144,7 @@ export default function DssbrLandingPage() {
             </a>
           </div>
           <p className="mt-3 text-sm text-foam/50">
-            Inscrições do FullPass e do Business encerradas · ainda há ingressos VIP.
+            Inscrições pelo site encerradas · fale com a gente no WhatsApp.
           </p>
 
           {/* GRUPOS & CORPORATIVO */}
@@ -299,9 +299,9 @@ export default function DssbrLandingPage() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="mx-auto max-w-2xl">
             <VendasEncerradas
-              titulo="Inscrições do FullPass e do Business encerradas"
-              encerrado="FullPass e do Business"
-              waContexto="Oi! Vim pela página do DSSBR 2026, vi que as inscrições do FullPass e do Business encerraram e ainda quero ir."
+              titulo="Inscrições encerradas"
+              encerrado="DSS 2026"
+              waContexto="Oi! Vim pela página do DSSBR 2026, vi que as inscrições encerraram e ainda quero ir."
             />
           </div>
 

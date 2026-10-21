@@ -1,4 +1,4 @@
-# DSS 2026: vendas encerradas (One Day, FullPass, Estudante, combo, Business)
+# DSS 2026: vendas encerradas (One Day, FullPass, Estudante, combo, Business, VIP)
 
 O que o site do DSS 2026 parou de vender, quando, como foi fechado e o que sobrou. Escrito em
 08/10/2026, quando o FullPass fechou e o site passou a vender só **VIP, Business e camisetas**.
@@ -18,7 +18,8 @@ O que o site do DSS 2026 parou de vender, quando, como foi fechado e o que sobro
 | **08/10** | **FullPass** (`dss-2026`, tipo `lote-3`) | R$ 887 (Lote 3) | `e2365be` | `/dssbr-2026/inscricao` → **aviso** |
 | **08/10** | **Estudante** (`dss-2026`, tipo oculto `estudante`) | R$ 400 | `e2365be` | `/dssbr-2026/inscricao?tipo=estudante` → **aviso** |
 | **08/10** | **combo FullPass + curso** (`dss-fullpass-curso-2026`) | R$ 850 | `e2365be` | `/dssbr-2026/fullpass-curso` → **aviso** + link pro curso avulso |
-| **16/10** | **Business** (`dss-business-2026`, Lote 3) | R$ 1.279 | ver §8 | `/dssbr-2026/business` → **aviso** |
+| **16/10** | **Business** (`dss-business-2026`, Lote 3) | R$ 1.279 | `2986201` (§8) | `/dssbr-2026/business` → **aviso** |
+| **21/10** | **VIP** (`dss-vip-2026`, Lote 3) | R$ 1.657 | ver §9 | `/dssbr-2026/vip` → **aviso** |
 
 Deploy de 08/10: `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, rodado pelo Binhara. Push feito (`b24b808`).
 
@@ -135,4 +136,31 @@ gerado continua pagável na fatura e o webhook confirma.
 Pendente fora do repo: `dssbr.com.br` ainda pode linkar `/dssbr-2026/business` — o link cai no
 aviso (não quebra), mas o card Business de lá precisa virar "vendas encerradas".
 
-Última revisão: **2026-10-16**.
+## 9. VIP encerrado (21/10/2026) — nenhum ingresso à venda no site
+
+Pedido do Binhara: "encerrar as vendas do VIP". Era o último ingresso; mesma receita do §5:
+
+| onde | mudança |
+|---|---|
+| `src/app/dssbr-2026/vip/page.tsx` | virou o aviso (estático, `noindex`) |
+| `src/app/api/dss-vip/inscricao/route.ts` | **apagado** → POST 404 |
+| `src/app/dssbr-2026/VendasEncerradas.tsx` | sem botões de ingresso (`AINDA_A_VENDA` saiu): só o WhatsApp |
+| `src/app/dssbr-2026/page.tsx` | CTA do hero "Ainda quer ir?" → `#ingressos`; "Inscrições pelo site encerradas"; descrição sem "Ingresso VIP" |
+| `src/lib/admin-queries.ts` | `dss-vip-2026` em `PRODUTOS_ENCERRADOS`, fora do `CHECKOUT_URL` |
+| `src/lib/links-venda.ts` | VIP sai de `/admin/links` |
+| `src/lib/cupom-produtos.ts` | `PRODUTOS_COM_CUPOM` fica **vazio**: `/admin/cupons` recusa cupom novo ("Marca ao menos um tipo de ingresso") e `/vendas` responde 410 "As vendas desse ingresso pelo site encerraram" |
+| `src/app/dssbr-2026/CheckoutPorLotes.tsx` | sem uso; fica pro `git revert` voltar sem reescrever |
+
+**Ficou:** registro em `produtos.ts`, e-mail de confirmação, opção e preço sugerido na cobrança
+avulsa, e os 3 tipos `dss-vip-2026` no banco. PIX já gerado continua pagável e o webhook confirma.
+
+**No site, o DSS vende agora só a camiseta de palestrante** (a de congressista fechou sozinha em
+20/10 pelo `vendas_ate`). Ingresso daqui pra frente = WhatsApp + cobrança avulsa.
+
+Pendente fora do repo: cards VIP/Business do `dssbr.com.br` → "vendas encerradas" (o link cai no
+aviso, não quebra).
+
+Desfazer: `git revert <commit do §9>` + deploy; os tipos no banco não foram tocados, então o VIP
+volta no Lote 3 com as vagas que sobraram.
+
+Última revisão: **2026-10-21**.

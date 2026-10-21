@@ -13,9 +13,10 @@ export interface ProdutoComCupom {
   caminho: string
 }
 
-export const PRODUTOS_COM_CUPOM: ProdutoComCupom[] = [
-  { slug: 'dss-vip-2026', nome: 'Ingresso VIP', caminho: '/dssbr-2026/vip' },
-]
+// VIP, o último ingresso do DSS com cupom, encerrou em 21/10/2026: lista vazia. Cupom
+// novo é recusado na API ("Marca ao menos um tipo de ingresso") e o link da vendedora
+// responde que as vendas encerraram.
+export const PRODUTOS_COM_CUPOM: ProdutoComCupom[] = []
 
 export function produtoComCupom(slug: string): ProdutoComCupom | undefined {
   return PRODUTOS_COM_CUPOM.find((p) => p.slug === slug)

@@ -147,6 +147,8 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
   // mesmo tempo, com `limite_qtd` (semeados pela migração); o checkout vende o primeiro
   // com vaga. O preço daqui NUNCA é cobrado (`tipoObrigatorio`) — é só o "a partir de"
   // de quando o banco não responde, e por isso é o do Lote 1.
+  // VENDAS ENCERRADAS em 21/10/2026 (Lote 3, R$1.657): /dssbr-2026/vip virou aviso e o
+  // POST saiu. Fica pelo histórico, pelo e-mail de PIX já gerado e pela cobrança avulsa.
   'dss-vip-2026': {
     slug: 'dss-vip-2026',
     nome: 'DSS 2026 — Ingresso VIP',
