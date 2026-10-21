@@ -8,6 +8,7 @@ import DadosNota, { notaInicial, notaParaPayload, type NotaValue } from '@/compo
 import {
   OPCOES_COBRANCA,
   getOpcaoCobranca,
+  mensagemCobranca,
   opcaoId,
   PROPOSTA_SLUG,
   type OpcaoCobranca,
@@ -181,28 +182,10 @@ export default function CobrancaForm({
   }
 
   // Mensagem pronta pro cliente (WhatsApp / copiar).
-  const mensagem = useMemo(() => {
-    if (!resultado) return ''
-    const primeiroNome = nome.trim().split(/\s+/)[0] || ''
-    const linhaParc =
-      resultado.billing_type !== 'CREDIT_CARD'
-        ? ''
-        : resultado.installments > 1
-          ? `\nParcelado em ${resultado.installments}x de ${brl(resultado.installmentValue)}${
-              resultado.com_juros === false ? ' sem juros' : ''
-            }.`
-          : '\nNo cartão você pode parcelar na própria fatura.'
-    const metodoNota =
-      resultado.billing_type === 'UNDEFINED' ? ' (PIX, boleto ou cartão)'
-        : resultado.billing_type === 'PIX' ? ' (PIX)'
-        : resultado.billing_type === 'BOLETO' ? ' (boleto)'
-        : ''
-    return (
-      `Olá${primeiroNome ? ', ' + primeiroNome : ''}! Segue o link pra pagamento — ${descricao.trim()}.\n` +
-      `Valor: ${brl(resultado.valor)}${metodoNota}.${linhaParc}\n\n` +
-      `${resultado.invoiceUrl}\n\nQualquer dúvida, é só chamar. — Azuris`
-    )
-  }, [resultado, nome, descricao])
+  const mensagem = useMemo(
+    () => (resultado ? mensagemCobranca({ ...resultado, nome, descricao }) : ''),
+    [resultado, nome, descricao],
+  )
 
   const waUrl = useMemo(() => {
     const d = onlyDigits(telefone)

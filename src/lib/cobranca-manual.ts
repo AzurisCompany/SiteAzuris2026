@@ -204,3 +204,46 @@ export interface PrecoSugerido {
   dica: string
 }
 export type PrecosSugeridos = Record<string, PrecoSugerido>
+
+/** O que a mensagem pro cliente precisa saber da cobrança. */
+export interface DadosMensagemCobranca {
+  nome: string
+  descricao: string
+  /** total da cobrança, em reais */
+  valor: number
+  billing_type: string
+  installments: number
+  /** valor de cada parcela, em reais — sem ele (lista de cobranças) sai só "Nx" */
+  installmentValue?: number
+  com_juros?: boolean
+  invoiceUrl: string
+}
+
+const reais = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+/**
+ * Mensagem pronta pro cliente (WhatsApp / copiar). Uma só pro formulário, logo depois de
+ * gerar, e pra lista de cobranças — que remonta a mesma mensagem quando o navegador
+ * fechou antes de copiar.
+ */
+export function mensagemCobranca(c: DadosMensagemCobranca): string {
+  const primeiroNome = c.nome.trim().split(/\s+/)[0] || ''
+  const linhaParc =
+    c.billing_type !== 'CREDIT_CARD'
+      ? ''
+      : c.installments > 1
+        ? `\nParcelado em ${c.installments}x${c.installmentValue ? ` de ${reais(c.installmentValue)}` : ''}${
+            c.com_juros === false ? ' sem juros' : ''
+          }.`
+        : '\nNo cartão você pode parcelar na própria fatura.'
+  const metodoNota =
+    c.billing_type === 'UNDEFINED' ? ' (PIX, boleto ou cartão)'
+      : c.billing_type === 'PIX' ? ' (PIX)'
+      : c.billing_type === 'BOLETO' ? ' (boleto)'
+      : ''
+  return (
+    `Olá${primeiroNome ? ', ' + primeiroNome : ''}! Segue o link pra pagamento — ${c.descricao.trim()}.\n` +
+    `Valor: ${reais(c.valor)}${metodoNota}.${linhaParc}\n\n` +
+    `${c.invoiceUrl}\n\nQualquer dúvida, é só chamar. — Azuris`
+  )
+}

@@ -1,15 +1,37 @@
 import Link from 'next/link'
 import { brl, whatsappUrl, tabProduto, STATUS_LABEL, STATUS_COR } from '@/lib/admin-queries'
 import { labelBilling } from '@/lib/billing'
-import { descricaoManual } from '@/lib/cobranca-manual'
+import { descricaoManual, mensagemCobranca } from '@/lib/cobranca-manual'
 import { dadosClienteTexto } from '@/lib/dados-cliente'
 import type { InscricaoRow } from '@/lib/db'
 import SyncRowButton from './SyncRowButton'
 import CancelarButton from '../vendas/CancelarButton'
 import CopiarClienteButton from '../vendas/CopiarClienteButton'
+import CopiarMensagemButton from './CopiarMensagemButton'
 
 function descricao(insc: InscricaoRow): string {
   return descricaoManual(insc.como_conheceu) || insc.como_conheceu || '—'
+}
+
+/** A mesma mensagem que o form mostra logo depois de gerar — pra quando o navegador fechou antes. */
+function mensagem(insc: InscricaoRow): string | null {
+  if (!insc.asaas_invoice_url) return null
+  return mensagemCobranca({
+    nome: insc.nome,
+    descricao: descricao(insc),
+    valor: insc.valor_centavos / 100,
+    billing_type: insc.billing_type,
+    installments: insc.installments,
+    invoiceUrl: insc.asaas_invoice_url,
+  })
+}
+
+/** wa.me já com a mensagem, enquanto a cobrança está em aberto; senão só abre a conversa. */
+function waComMensagem(insc: InscricaoRow): string | null {
+  const wa = whatsappUrl(insc.telefone)
+  const msg = mensagem(insc)
+  if (!wa || !msg || (insc.status !== 'pending' && insc.status !== 'overdue')) return wa
+  return `${wa}${wa.includes('?') ? '&' : '?'}text=${encodeURIComponent(msg)}`
 }
 
 function fmtData(iso: string): string {
@@ -89,12 +111,19 @@ export default function ListaCobrancas({ rows, total }: { rows: InscricaoRow[]; 
                         fatura
                       </a>
                     )}
+                    {(r.status === 'pending' || r.status === 'overdue') && mensagem(r) && (
+                      <CopiarMensagemButton texto={mensagem(r)!} />
+                    )}
                     {whatsappUrl(r.telefone) && (
                       <a
-                        href={whatsappUrl(r.telefone) ?? undefined}
+                        href={waComMensagem(r) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="Abrir WhatsApp do cliente"
+                        title={
+                          r.status === 'pending' || r.status === 'overdue'
+                            ? 'Abrir WhatsApp do cliente com a mensagem e o link de pagamento'
+                            : 'Abrir WhatsApp do cliente'
+                        }
                         className="rounded-lg border border-[var(--accent-emerald)]/40 px-2.5 py-1 text-xs font-semibold text-[var(--accent-emerald)] transition-colors hover:bg-[var(--accent-emerald)]/10"
                       >
                         wpp

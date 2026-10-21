@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   OPCOES_COBRANCA,
   getOpcaoCobranca,
+  mensagemCobranca,
   opcaoId,
   opcoesComTipos,
   precosDosTipos,
@@ -145,5 +146,24 @@ describe('precosSugeridosCobranca', () => {
   it('a dica diz de onde veio o número', () => {
     expect(precos['lakehouse-comunidade'].dica).toContain('preço único') // não há mais faixa de comunidade
     expect(precos['dss-2026'].dica).toContain('Lote 3') // lote vigente do preço cheio
+  })
+})
+
+describe('mensagemCobranca', () => {
+  const base = { nome: 'Liane Maria Schneider', descricao: 'DSSBR - 3 Ingressos Vip', valor: 3825, installments: 1, invoiceUrl: 'https://www.asaas.com/i/abc' }
+
+  it('cliente escolhe o meio: primeiro nome, valor, meios e o link', () => {
+    const m = mensagemCobranca({ ...base, billing_type: 'UNDEFINED' })
+    expect(m).toContain('Olá, Liane!')
+    expect(m).toContain('DSSBR - 3 Ingressos Vip.')
+    expect(m).toMatch(/Valor: R\$\s?3\.825,00 \(PIX, boleto ou cartão\)\./)
+    expect(m).toContain('https://www.asaas.com/i/abc')
+  })
+
+  it('cartão parcelado: com valor da parcela no form, só "Nx" na lista', () => {
+    expect(mensagemCobranca({ ...base, billing_type: 'CREDIT_CARD', installments: 3, installmentValue: 1275, com_juros: false })).toMatch(
+      /Parcelado em 3x de R\$\s?1\.275,00 sem juros\./,
+    )
+    expect(mensagemCobranca({ ...base, billing_type: 'CREDIT_CARD', installments: 3 })).toContain('Parcelado em 3x.')
   })
 })
