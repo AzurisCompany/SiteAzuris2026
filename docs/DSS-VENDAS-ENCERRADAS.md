@@ -19,7 +19,7 @@ O que o site do DSS 2026 parou de vender, quando, como foi fechado e o que sobro
 | **08/10** | **Estudante** (`dss-2026`, tipo oculto `estudante`) | R$ 400 | `e2365be` | `/dssbr-2026/inscricao?tipo=estudante` → **aviso** |
 | **08/10** | **combo FullPass + curso** (`dss-fullpass-curso-2026`) | R$ 850 | `e2365be` | `/dssbr-2026/fullpass-curso` → **aviso** + link pro curso avulso |
 | **16/10** | **Business** (`dss-business-2026`, Lote 3) | R$ 1.279 | `2986201` (§8) | `/dssbr-2026/business` → **aviso** |
-| **21/10** | **VIP** (`dss-vip-2026`, Lote 3) | R$ 1.657 | ver §9 | `/dssbr-2026/vip` → **aviso** |
+| **21/10** | **VIP** (`dss-vip-2026`, Lote 3) | R$ 1.657 | `6cce6a5` (§9) | `/dssbr-2026/vip` → **aviso** |
 
 Deploy de 08/10: `dpl_6oqT2qZRc6dXdf39z4P4fHjP6NP8`, rodado pelo Binhara. Push feito (`b24b808`).
 
