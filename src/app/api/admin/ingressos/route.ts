@@ -38,7 +38,8 @@ export async function POST(request: Request) {
   }
 
   if (!b.produto_slug || typeof b.produto_slug !== 'string') return NextResponse.json({ error: 'produto_slug obrigatório' }, { status: 400 })
-  if (!b.nome || b.nome.trim().length < 2) return NextResponse.json({ error: 'Nome do tipo inválido' }, { status: 400 })
+  // 1 letra vale: os tamanhos de camiseta (P, M, G) são tipos. Com `< 2` eles não podiam ser editados (22/10).
+  if (!b.nome || typeof b.nome !== 'string' || !b.nome.trim()) return NextResponse.json({ error: 'Nome do tipo inválido' }, { status: 400 })
   // tipo_id derivado do nome se não vier (e nunca muda depois — é a chave lógica).
   const tipo_id = (b.tipo_id && b.tipo_id.trim() ? slugify(b.tipo_id) : slugify(b.nome))
   if (!tipo_id) return NextResponse.json({ error: 'Não consegui gerar o identificador do tipo' }, { status: 400 })
