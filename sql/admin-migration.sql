@@ -225,3 +225,10 @@ VALUES
   ('camiseta-congressista-dss-2026', 'gg', 'GG', 'Tamanho GG', 7000, 3, 3, '2026-10-20', NULL),
   ('camiseta-congressista-dss-2026', 'xgg', 'XGG', 'Tamanho XGG', 7000, 3, 4, '2026-10-20', NULL)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
+-- PRE-LOAD do DSS 2027: FullPass R$550, 50 ingressos (limite_qtd conta pagos + pendentes),
+-- até 3x no cartão com juros. Idempotente; NÃO sobrescreve edição do admin.
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('dss-2027-preload', 'fullpass-preload', 'FullPass Pre-Load', 'FullPass DSS 2027', 55000, 3, 0, NULL, 50)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;

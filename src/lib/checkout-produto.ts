@@ -11,6 +11,7 @@ import { type BillingType, buscarCompraPagaDoDocumento, buscarInscricaoGratuita,
 import { cpfCnpjValido } from '@/lib/validacao-doc'
 import { onlyDigits, todayPlusDays, hojeBRT } from '@/lib/format'
 import { criarCobranca } from '@/lib/cobranca-pipeline'
+import { getPixQrCode } from '@/lib/asaas'
 import { valorParcela, totalComJuros, MAX_PARCELAS } from '@/lib/parcelamento'
 import { getProduto } from '@/lib/produtos'
 import {
@@ -247,7 +248,14 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
   const endereco = enderecoParaAsaas(extras.nf_endereco)
 
   const resultado = await criarCobranca({
-    dedupe: { curso_slug: PRODUTO.slug, cpf_cnpj: cpf, valor_centavos: valorCobradoCentavos, tipo_ingresso: tipoIngresso },
+    dedupe: {
+      curso_slug: PRODUTO.slug,
+      cpf_cnpj: cpf,
+      valor_centavos: valorCobradoCentavos,
+      tipo_ingresso: tipoIngresso,
+      // Com PIX na tela, a duplicada tem que ser PIX — a de cartão não tem QR pra mostrar.
+      ...(PRODUTO.pixNaTela ? { billing_type: billing } : {}),
+    },
     inscricao: {
       curso_slug: PRODUTO.slug,
       lote: 'unico',
@@ -293,7 +301,14 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
     const d = resultado.inscricao
     return {
       status: 200,
-      body: { ok: true, invoiceUrl: d.asaas_invoice_url, paymentId: d.asaas_payment_id, valor: d.valor_centavos / 100, duplicada: true },
+      body: {
+        ok: true,
+        invoiceUrl: d.asaas_invoice_url,
+        paymentId: d.asaas_payment_id,
+        valor: d.valor_centavos / 100,
+        duplicada: true,
+        ...(billing === 'PIX' && d.asaas_payment_id ? await pixDaTela(PRODUTO.pixNaTela, d.asaas_payment_id) : {}),
+      },
     }
   }
   if (resultado.tipo === 'erro_db') return erro(500, 'Falha ao registrar inscrição. Tenta de novo.')
@@ -311,6 +326,27 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
 
   return {
     status: 200,
-    body: { ok: true, invoiceUrl: resultado.payment.invoiceUrl, paymentId: resultado.payment.id, valor: valorCobradoReais },
+    body: {
+      ok: true,
+      invoiceUrl: resultado.payment.invoiceUrl,
+      paymentId: resultado.payment.id,
+      valor: valorCobradoReais,
+      ...(billing === 'PIX' ? await pixDaTela(PRODUTO.pixNaTela, resultado.payment.id) : {}),
+    },
+  }
+}
+
+/**
+ * `{ pix }` pro checkout com `pixNaTela`; `{}` pros outros. A cobrança já existe: se o
+ * QR não vier, o navegador cai na fatura do Asaas (`invoiceUrl`), como todo checkout.
+ */
+async function pixDaTela(pixNaTela: boolean | undefined, paymentId: string): Promise<Record<string, unknown>> {
+  if (!pixNaTela) return {}
+  try {
+    const qr = await getPixQrCode(paymentId)
+    return { pix: { qrCodeBase64: qr.encodedImage, copiaECola: qr.payload, expiraEm: qr.expirationDate ?? null } }
+  } catch (e) {
+    console.error(`QR Code PIX da cobrança ${paymentId} indisponível (segue pela fatura):`, e)
+    return {}
   }
 }

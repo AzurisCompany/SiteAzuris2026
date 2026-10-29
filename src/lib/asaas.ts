@@ -255,6 +255,25 @@ export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail>
   return p as AsaasPaymentDetail
 }
 
+export interface AsaasPixQrCode {
+  /** PNG do QR Code em base64, sem o prefixo `data:` */
+  encodedImage: string
+  /** o "copia e cola" (BR Code) */
+  payload: string
+  expirationDate?: string
+}
+
+/** QR Code + copia-e-cola de uma cobrança PIX (GET /payments/{id}/pixQrCode). É o PIX
+ *  DESTA cobrança — pago por ele, o webhook liga o pagamento à venda, coisa que um PIX
+ *  na chave CNPJ não faz. */
+export async function getPixQrCode(paymentId: string): Promise<AsaasPixQrCode> {
+  const r = await asaasFetch(`/payments/${encodeURIComponent(paymentId)}/pixQrCode`, { method: 'GET' })
+  const encodedImage = reqStr(r, 'encodedImage', 'getPixQrCode')
+  const payload = reqStr(r, 'payload', 'getPixQrCode')
+  const exp = (r as { expirationDate?: unknown }).expirationDate
+  return { encodedImage, payload, expirationDate: typeof exp === 'string' ? exp : undefined }
+}
+
 /** Lista todas as parcelas de um parcelamento (GET /payments?installment={id}). */
 export async function getInstallmentPayments(installmentId: string): Promise<AsaasPaymentDetail[]> {
   const r = (await asaasFetch(

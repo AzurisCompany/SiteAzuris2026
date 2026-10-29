@@ -88,6 +88,15 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-business-2026'].enderecoObrigatorioPJ,
   },
   {
+    // Pre-Load do DSS 2027. Com o tipo carimbado, a venda manual conta nos 50 ingressos
+    // do checkout público — sem ele, o WhatsApp venderia o 51º.
+    slug: 'dss-2027-preload',
+    tipo_ingresso: 'fullpass-preload',
+    label: 'Pre-Load DSS 2027',
+    descricaoPadrao: PRODUTOS['dss-2027-preload'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['dss-2027-preload'].enderecoObrigatorioPJ,
+  },
+  {
     // Camiseta do DSS 2026 (palestrante): o tamanho vai no tipo, e o valor digitado é o
     // TOTAL do pedido — a cobrança avulsa não multiplica pela quantidade.
     slug: 'camiseta-dss-2026',

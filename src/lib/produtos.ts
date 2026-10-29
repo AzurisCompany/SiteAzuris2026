@@ -44,6 +44,14 @@ export interface ProdutoConfig {
    * quantidade. Ausente = uma unidade por venda, como todo ingresso.
    */
   quantidadeMax?: number
+  /**
+   * PIX pago na NOSSA tela: o checkout devolve o QR Code e o copia-e-cola da cobrança
+   * (`GET /payments/{id}/pixQrCode`) e a página espera a confirmação ali mesmo, em vez
+   * de mandar o comprador pra fatura do Asaas. A fatura mostra o CNPJ da Azuris no
+   * cabeçalho e tem gente que paga na chave CNPJ — pagamento que não se liga a cobrança
+   * nenhuma ([[reference_fatura_asaas_cnpj]]). Cartão continua indo pra fatura.
+   */
+  pixNaTela?: boolean
 }
 
 export const PRODUTOS: Record<string, ProdutoConfig> = {
@@ -224,6 +232,28 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     telefoneObrigatorio: true, // é por WhatsApp que se combina a retirada
     enderecoObrigatorioPJ: false, // compra pessoal de R$70: não trava por endereço
     quantidadeMax: 10,
+  },
+  // PRE-LOAD do DSS 2027: FullPass vendido durante/logo depois do DSS 2026, antes de
+  // existir data, local ou grade do 2027 — por isso a página não promete nenhum dos três.
+  // 50 ingressos: é o `limite_qtd` do tipo `fullpass-preload` (semeado pela migração,
+  // editável em /admin/ingressos), contando pagos + pendentes. R$550 no PIX ou no
+  // cartão 1x; 2x–3x com juros. Primeiro checkout com o PIX na nossa tela (`pixNaTela`).
+  'dss-2027-preload': {
+    slug: 'dss-2027-preload',
+    nome: 'DSS 2027 — FullPass Pre-Load',
+    descricao: 'FullPass · data e local a anunciar',
+    precoCentavos: 55000, // R$ 550,00 (fallback; o preço que vale é o do tipo)
+    precoDeVendaCentavos: 0, // sem âncora: não existe preço de 2027 pra riscar ainda
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0, // cartão 1x = PIX; só juros no parcelamento (2x–3x)
+    maxParcelas: 3,
+    asaasDescricao: 'Ingresso DSS 2027 — Data Science Summit Brasil (FullPass Pre-Load)',
+    voltarUrl: 'https://dssbr.com.br',
+    voltarLabel: '← voltar pro DSS',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: true, // ingresso corporativo quase sempre vira nota
+    tipoObrigatorio: true, // só vende pelo tipo — é ele que conta os 50
+    pixNaTela: true,
   },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados

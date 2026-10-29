@@ -36,6 +36,7 @@ describe('conteudoCompraConfirmada', () => {
       'dss-business-2026',
       'camiseta-dss-2026',
       'camiseta-congressista-dss-2026',
+      'dss-2027-preload',
       'dss-one-day-curso-2026',
       'gubigdata-2026-08',
       'gubigdata-2026-07',

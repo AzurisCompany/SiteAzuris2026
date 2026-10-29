@@ -87,6 +87,18 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
       }
 
+    case 'dss-2027-preload':
+      return {
+        assunto: 'FullPass Pre-Load confirmado — DSS 2027',
+        titulo: `Você já está no DSS 2027, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu FullPass Pre-Load do Data Science Summit Brasil 2027.`,
+        paragrafos: [
+          'Seu FullPass dá acesso a todos os dias do evento. Data, local e grade ainda serão anunciados — avisamos por este e-mail.',
+          'Guarde este e-mail: ele é o seu comprovante.',
+        ],
+        cta: { label: 'Ver o DSS', url: 'https://dssbr.com.br' },
+      }
+
     case 'dss-vip-2026':
       return {
         assunto: 'Ingresso VIP confirmado — DSS 2026',

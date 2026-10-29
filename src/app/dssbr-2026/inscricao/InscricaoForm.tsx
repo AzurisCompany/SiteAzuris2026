@@ -5,6 +5,7 @@ import { gaEvent } from '@/lib/gtag'
 import { valorParcela, totalComJuros } from '@/lib/parcelamento'
 import CamposExtras, { extrasInicial, extrasParaPayload, type ExtrasValue } from '@/components/checkout/CamposExtras'
 import CampoDocumento, { type PessoaTipo } from '@/components/checkout/CampoDocumento'
+import PixNaTela, { type PixDaCobranca } from '@/components/checkout/PixNaTela'
 import type { DegrauLote } from '@/lib/escada-lotes'
 
 /** Default: espelha PRODUTOS['dss-2026'].enderecoObrigatorioPJ — ingresso corporativo vira nota.
@@ -51,6 +52,9 @@ interface Props {
   quantidadeMax?: number
   /** título do seletor de tipos (default: "Tipo de ingresso"; na camiseta, "Tamanho") */
   rotuloTipo?: string
+  /** produto com `pixNaTela` no registry: endpoint de status da cobrança. Com ele, o PIX
+   *  é pago nesta tela (QR + copia-e-cola) em vez de redirecionar pra fatura do Asaas. */
+  pixStatusEndpoint?: string
 }
 
 type BillingType = 'PIX' | 'CREDIT_CARD'
@@ -81,6 +85,7 @@ export default function InscricaoForm({
   enderecoObrigatorioPJ = ENDERECO_OBRIGATORIO_PJ_PADRAO,
   quantidadeMax,
   rotuloTipo = 'Tipo de ingresso',
+  pixStatusEndpoint,
 }: Props) {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -99,6 +104,7 @@ export default function InscricaoForm({
   const [extras, setExtras] = useState<ExtrasValue>(extrasInicial)
   const [submitting, setSubmitting] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+  const [pixTela, setPixTela] = useState<{ pix: PixDaCobranca; paymentId: string; valor: number; invoiceUrl?: string } | null>(null)
 
   const [utm, setUtm] = useState<{ source?: string; medium?: string; campaign?: string; content?: string; term?: string }>({})
 
@@ -191,6 +197,11 @@ export default function InscricaoForm({
             },
           ],
         })
+        if (pixStatusEndpoint && data.pix && data.paymentId) {
+          setPixTela({ pix: data.pix, paymentId: data.paymentId, valor: data.valor ?? valorCobradoReais, invoiceUrl: data.invoiceUrl })
+          setSubmitting(false)
+          return
+        }
         window.location.assign(data.invoiceUrl)
       } else {
         setErro('Resposta inesperada do servidor.')
@@ -200,6 +211,18 @@ export default function InscricaoForm({
       setErro('Erro de rede. Tenta de novo.')
       setSubmitting(false)
     }
+  }
+
+  if (pixTela && pixStatusEndpoint) {
+    return (
+      <PixNaTela
+        pix={pixTela.pix}
+        paymentId={pixTela.paymentId}
+        valorReais={pixTela.valor}
+        statusEndpoint={pixStatusEndpoint}
+        invoiceUrl={pixTela.invoiceUrl}
+      />
+    )
   }
 
   return (

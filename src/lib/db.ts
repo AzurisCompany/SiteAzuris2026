@@ -287,6 +287,9 @@ export interface ChaveDedupe {
   cpf_cnpj: string
   valor_centavos: number
   tipo_ingresso?: string | null
+  /** só casa cobrança do mesmo meio. Ausente = qualquer meio (comportamento antigo).
+   *  PIX e cartão 1x têm o mesmo valor: sem isto, quem troca de meio recebe a outra. */
+  billing_type?: BillingType
   janelaMin?: number
 }
 
@@ -299,6 +302,7 @@ export async function buscarCobrancaDuplicada(k: ChaveDedupe): Promise<Inscricao
        AND cpf_cnpj = ${k.cpf_cnpj}
        AND valor_centavos = ${k.valor_centavos}
        AND tipo_ingresso IS NOT DISTINCT FROM ${k.tipo_ingresso ?? null}
+       AND (${k.billing_type ?? null}::text IS NULL OR billing_type = ${k.billing_type ?? null})
        AND asaas_payment_id IS NOT NULL
        AND status <> 'cancelled'
        AND created_at > NOW() - make_interval(mins => ${janela})
@@ -525,6 +529,20 @@ export async function atualizarNf(
 /** Marca uma inscrição pendente como cancelada (ex.: cobrança no Asaas falhou). */
 export async function cancelarInscricao(id: number): Promise<void> {
   await sql`UPDATE inscricoes SET status = 'cancelled', updated_at = NOW() WHERE id = ${id}`
+}
+
+/** Status da venda pelo id da cobrança no Asaas — o que a tela do PIX consulta
+ *  enquanto espera o webhook. Só o status: o id é tudo que o navegador tem. */
+export async function statusPorAsaasId(
+  curso_slug: string,
+  asaas_payment_id: string
+): Promise<InscricaoStatus | null> {
+  const rows = (await sql`
+    SELECT status FROM inscricoes
+     WHERE asaas_payment_id = ${asaas_payment_id} AND curso_slug = ${curso_slug}
+     LIMIT 1
+  `) as Array<{ status: InscricaoStatus }>
+  return rows[0]?.status ?? null
 }
 
 export async function atualizarStatusPorAsaasId(

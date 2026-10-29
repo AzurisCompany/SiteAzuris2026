@@ -15,6 +15,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-business-2026': 'DSS 2026 — Ingresso Business',
   'camiseta-dss-2026': 'DSS 2026 — Camiseta (palestrantes)',
   'camiseta-congressista-dss-2026': 'DSS 2026 — Camiseta (congressistas)',
+  'dss-2027-preload': 'DSS 2027 — FullPass Pre-Load',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'cafe-networking-2026-10': 'DSSBR — Café de Networking 06/10',
@@ -41,6 +42,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-business-2026': 'Business DSS',
   'camiseta-dss-2026': 'Camiseta DSS',
   'camiseta-congressista-dss-2026': 'Camiseta Congressista',
+  'dss-2027-preload': 'Pre-Load DSS 2027',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'cafe-networking-2026-10': 'Café DSSBR 06/10',
@@ -70,6 +72,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'lakehouse-comunidade': '/lakehouse-comunidade/inscricao',
   'camiseta-dss-2026': '/dssbr-2026/camiseta',
   'camiseta-congressista-dss-2026': '/dssbr-2026/camiseta-congressista',
+  'dss-2027-preload': '/dssbr-2027/preload',
   'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
   'ett-adesao': '/ett/adesao',
@@ -177,6 +180,10 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     'camiseta-dss-2026': {
       centavos: PRODUTOS['camiseta-dss-2026'].precoCentavos,
       dica: 'por unidade (palestrante) — multiplique pela quantidade; escolha o tamanho no tipo',
+    },
+    'dss-2027-preload': {
+      centavos: PRODUTOS['dss-2027-preload'].precoCentavos,
+      dica: 'FullPass Pre-Load · conta nos 50 do tipo — confira o restante em /admin/ingressos',
     },
     'camiseta-congressista-dss-2026': {
       centavos: PRODUTOS['camiseta-congressista-dss-2026'].precoCentavos,
