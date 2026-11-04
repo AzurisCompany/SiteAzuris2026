@@ -123,6 +123,14 @@ export default async function PreloadDss2027Page() {
           </div>
         )}
 
+        <p className="mt-6 text-sm text-[var(--text-secondary)]">
+          Quer o curso junto?{' '}
+          <a href="/dssbr-2027/fullpass-curso" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
+            FullPass + nova turma do curso Lakehouse: Pipeline na Prática por R$ 755
+          </a>
+          .
+        </p>
+
         <p className="mt-8 text-xs text-[var(--text-muted)] text-center">
           Pagamento processado pelo Asaas com segurança. Seus dados são usados apenas pra emissão da cobrança e pra
           comunicação sobre o DSS 2027.

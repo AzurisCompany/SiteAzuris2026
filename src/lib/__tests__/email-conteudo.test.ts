@@ -37,6 +37,7 @@ describe('conteudoCompraConfirmada', () => {
       'camiseta-dss-2026',
       'camiseta-congressista-dss-2026',
       'dss-2027-preload',
+      'dss-2027-fullpass-curso',
       'certificado-elite-digital-dss-2026',
       'certificado-elite-impresso-dss-2026',
       'dss-one-day-curso-2026',

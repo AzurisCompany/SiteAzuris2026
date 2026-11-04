@@ -16,6 +16,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'camiseta-dss-2026': 'DSS 2026 — Camiseta (palestrantes)',
   'camiseta-congressista-dss-2026': 'DSS 2026 — Camiseta (congressistas)',
   'dss-2027-preload': 'DSS 2027 — FullPass Pre-Load',
+  'dss-2027-fullpass-curso': 'DSS 2027 — FullPass + Curso Pipeline (nova turma)',
   'certificado-elite-digital-dss-2026': 'DSS 2026 — Upgrade Elite (certificado digital)',
   'certificado-elite-impresso-dss-2026': 'DSS 2026 — Upgrade Elite (certificado impresso)',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
@@ -45,6 +46,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'camiseta-dss-2026': 'Camiseta DSS',
   'camiseta-congressista-dss-2026': 'Camiseta Congressista',
   'dss-2027-preload': 'Pre-Load DSS 2027',
+  'dss-2027-fullpass-curso': 'FullPass 2027 + Curso',
   'certificado-elite-digital-dss-2026': 'Certificado Digital',
   'certificado-elite-impresso-dss-2026': 'Certificado Impresso',
   'dss-one-day-curso-2026': 'One Day + Curso',
@@ -77,6 +79,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'camiseta-dss-2026': '/dssbr-2026/camiseta',
   'camiseta-congressista-dss-2026': '/dssbr-2026/camiseta-congressista',
   'dss-2027-preload': '/dssbr-2027/preload',
+  'dss-2027-fullpass-curso': '/dssbr-2027/fullpass-curso',
   'certificado-elite-digital-dss-2026': '/dssbr-2026/certificado-elite/digital',
   'certificado-elite-impresso-dss-2026': '/dssbr-2026/certificado-elite/impresso',
   'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
@@ -190,6 +193,10 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     'dss-2027-preload': {
       centavos: PRODUTOS['dss-2027-preload'].precoCentavos,
       dica: 'FullPass Pre-Load · conta nos 50 do tipo — confira o restante em /admin/ingressos',
+    },
+    'dss-2027-fullpass-curso': {
+      centavos: PRODUTOS['dss-2027-fullpass-curso'].precoCentavos,
+      dica: 'combo FullPass 2027 + curso (nova turma) · não conta nos 50 do Pre-Load · liberar o curso na mão',
     },
     'certificado-elite-digital-dss-2026': {
       centavos: PRODUTOS['certificado-elite-digital-dss-2026'].precoCentavos,

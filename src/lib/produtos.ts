@@ -255,6 +255,28 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     tipoObrigatorio: true, // só vende pelo tipo — é ele que conta os 50
     pixNaTela: true,
   },
+  // COMBO DSS 2027: FullPass (Pre-Load) + vaga na nova turma do curso "Lakehouse: Pipeline
+  // na Prática" ([[project_curso_lakehouse_pages]]). R$755 — retomada do combo do DSS 2026
+  // (FullPass + portal, R$850, encerrado em 08/10). Sozinhos: Pre-Load R$550 + curso R$750.
+  // NÃO conta nos 50 do Pre-Load (produto próprio, sem tipo). Preço fixo aqui, sem âncora.
+  // Página sem data/local/dias do 2027 (não definidos) e sem data de turma (curso evergreen).
+  // FULFILLMENT DO CURSO É MANUAL: liberar o acesso é passo operacional do Binhara.
+  'dss-2027-fullpass-curso': {
+    slug: 'dss-2027-fullpass-curso',
+    nome: 'DSS 2027 — FullPass + Curso Pipeline (nova turma)',
+    descricao: 'FullPass DSS 2027 + curso Lakehouse: Pipeline na Prática · data e local a anunciar',
+    precoCentavos: 75500, // R$ 755,00 — combo (o que se paga, PIX ou cartão 1x)
+    precoDeVendaCentavos: 0, // sem âncora riscada; o valor é comunicado na nota da página
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 3, // 1x à vista · 2x–3x com juros
+    asaasDescricao: 'Ingresso DSS 2027 — FullPass + curso Lakehouse: Pipeline na Prática (nova turma)',
+    voltarUrl: 'https://dssbr.com.br',
+    voltarLabel: '← voltar pro DSS',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: true, // combo corporativo quase sempre vira nota
+    pixNaTela: true,
+  },
   // UPGRADE ELITE do DSS 2026: o certificado do congresso, vendido depois do evento a
   // quem participou. Dois produtos (não dois tipos) de propósito: a regra de 1 compra
   // paga por CPF é por produto, e quem levou o digital pode querer o impresso também.

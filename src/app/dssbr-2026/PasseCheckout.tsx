@@ -35,6 +35,8 @@ interface Props {
   notaValor?: ReactNode
   /** `?d=`/`?c=` da URL — link de vendedora ou de parceiro ([[cupons]]) */
   cupomEntrada?: EntradaCupom
+  /** produto com `pixNaTela`: endpoint de status — o PIX é pago na nossa tela */
+  pixStatusEndpoint?: string
 }
 
 export default async function PasseCheckout({
@@ -49,6 +51,7 @@ export default async function PasseCheckout({
   waContexto,
   notaValor,
   cupomEntrada,
+  pixStatusEndpoint,
 }: Props) {
   // O desconto entra no preço-base; o servidor recalcula tudo de novo no POST.
   const { aplicado: cupom, recusa } = await resolverDesconto(
@@ -165,6 +168,7 @@ export default async function PasseCheckout({
           precoCartaoBaseReais={precoCartaoBaseReais}
           maxParcelas={produto.maxParcelas}
           endpoint={endpoint}
+          pixStatusEndpoint={pixStatusEndpoint}
           gaItem={gaItem}
           cupom={cupom && cupomEntrada?.d ? cupomEntrada.d : undefined}
           cupomCodigo={cupom && !cupomEntrada?.d ? cupom.codigo : undefined}

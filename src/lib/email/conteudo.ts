@@ -99,6 +99,19 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver o DSS', url: 'https://dssbr.com.br' },
       }
 
+    case 'dss-2027-fullpass-curso':
+      return {
+        assunto: 'FullPass + curso confirmados — DSS 2027',
+        titulo: `Tudo certo, ${nome}!`,
+        destaque: `Recebemos ${valor} do combo FullPass DSS 2027 + curso Lakehouse: Pipeline na Prática.`,
+        paragrafos: [
+          'Seu FullPass dá acesso a todos os dias do DSS 2027. Data, local e grade ainda serão anunciados — avisamos por este e-mail.',
+          'A sua vaga na nova turma do curso "Lakehouse: Pipeline na Prática" é liberada por nós, na mão — o acesso chega no seu e-mail em até 1 dia útil.',
+          'Se em 1 dia útil o acesso não tiver chegado, responde este e-mail que a gente destrava.',
+        ],
+        cta: { label: 'Ver o DSS', url: 'https://dssbr.com.br' },
+      }
+
     case 'certificado-elite-digital-dss-2026':
       return {
         assunto: 'Upgrade Elite confirmado — certificado digital DSS 2026',

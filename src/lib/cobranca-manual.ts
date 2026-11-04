@@ -97,6 +97,13 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-2027-preload'].enderecoObrigatorioPJ,
   },
   {
+    // Combo DSS 2027 + curso: preço fixo, sem tipo (não conta nos 50 do Pre-Load).
+    slug: 'dss-2027-fullpass-curso',
+    label: 'FullPass 2027 + Curso',
+    descricaoPadrao: PRODUTOS['dss-2027-fullpass-curso'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['dss-2027-fullpass-curso'].enderecoObrigatorioPJ,
+  },
+  {
     slug: 'certificado-elite-digital-dss-2026',
     label: 'Certificado Elite — digital',
     descricaoPadrao: PRODUTOS['certificado-elite-digital-dss-2026'].asaasDescricao,

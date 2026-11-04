@@ -39,6 +39,13 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
     ],
   },
   {
+    titulo: 'DSS 2027',
+    links: [
+      { nome: 'FullPass Pre-Load — R$ 550 (50 ingressos)', caminho: '/dssbr-2027/preload', slug: 'dss-2027-preload', visibilidade: 'link-direto' },
+      { nome: 'FullPass + Curso Pipeline (nova turma) — R$ 755', caminho: '/dssbr-2027/fullpass-curso', slug: 'dss-2027-fullpass-curso', visibilidade: 'link-direto', nota: 'liberar o curso na mão depois do pagamento' },
+    ],
+  },
+  {
     titulo: 'DSS 2026 — Upgrade Elite (certificado)',
     links: [
       { nome: 'Certificado — escolher (digital ou impresso)', caminho: '/dssbr-2026/certificado-elite', visibilidade: 'link-direto' },

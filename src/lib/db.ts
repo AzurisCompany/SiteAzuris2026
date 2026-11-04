@@ -161,7 +161,7 @@ export async function determinarLoteAtivo(): Promise<{
  * dois — R$ 750, único: o preço de comunidade (R$ 550) foi encerrado junto com o bônus
  * do ingresso do DSSBR. O perfil continua existindo por dois motivos: ele grava
  * `tipo_ingresso` (quem veio da comunidade x quem veio de fora) e escolhe o balde de
- * vagas. Quem quer curso + congresso agora compra o combo 'dss-fullpass-curso-2026'.
+ * vagas. Quem quer curso + congresso compra o combo 'dss-2027-fullpass-curso' (R$755).
  */
 export type PerfilLakehouse = 'membro' | 'nao-membro'
 
