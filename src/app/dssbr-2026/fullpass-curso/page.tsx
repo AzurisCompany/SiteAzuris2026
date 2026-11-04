@@ -33,7 +33,11 @@ export default function FullPassCursoEncerradoPage() {
           />
         </div>
         <p className="mt-6 text-sm text-[var(--text-secondary)]">
-          Quer só o curso?{' '}
+          O combo voltou com o DSS 2027:{' '}
+          <a href="/dssbr-2027/fullpass-curso" className="underline hover:text-[var(--azuris-cyan)]">
+            FullPass 2027 + nova turma do curso
+          </a>
+          . Quer só o curso?{' '}
           <a href="/lakehouse-comunidade" className="underline hover:text-[var(--azuris-cyan)]">
             Lakehouse: Pipeline na Prática
           </a>{' '}

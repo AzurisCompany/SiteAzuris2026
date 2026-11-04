@@ -4,6 +4,10 @@
 // `?tipo=estudante`, `/fullpass-curso`, `/business`, `/vip` e os redirects do One Day):
 // link velho cai aqui, não num 404. Nenhum ingresso segue à venda no site — quem ainda
 // quer ir fala no WhatsApp e vira cobrança avulsa.
+//
+// Desde 04/11/2026 o aviso também vende o DSS 2027 (Pre-Load e combo FullPass + curso):
+// todo link velho do 2026 vira porta de entrada do 2027. Preços lidos do registry.
+import { getProduto } from '@/lib/produtos'
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
 
@@ -19,6 +23,8 @@ export default function VendasEncerradas({
   waContexto: string
 }) {
   const wa = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(waContexto)}`
+  const preload = getProduto('dss-2027-preload').precoCentavos / 100
+  const combo = getProduto('dss-2027-fullpass-curso').precoCentavos / 100
   return (
     <div className="rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6 text-left">
       <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
@@ -39,6 +45,31 @@ export default function VendasEncerradas({
         >
           Falar no WhatsApp
         </a>
+      </div>
+
+      <div className="mt-6 border-t border-[var(--azuris-surface)] pt-5">
+        <div className="text-xs uppercase tracking-widest text-[var(--azuris-cyan)]">O DSS 2027 já está à venda</div>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          Data, local e grade ainda serão anunciados — o FullPass já está à venda antes de abrir qualquer lote.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <a
+            href="/dssbr-2027/preload"
+            className="block rounded-xl border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] p-4 transition-colors hover:border-[var(--azuris-cyan)]"
+          >
+            <div className="text-sm font-semibold text-[var(--text-primary)]">FullPass Pre-Load</div>
+            <div className="text-2xl font-black">R$ {preload}</div>
+            <div className="text-xs text-[var(--text-muted)]">ingressos limitados →</div>
+          </a>
+          <a
+            href="/dssbr-2027/fullpass-curso"
+            className="block rounded-xl border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-ink)] p-4 transition-colors hover:border-[var(--azuris-cyan)]"
+          >
+            <div className="text-sm font-semibold text-[var(--text-primary)]">FullPass + Curso Pipeline</div>
+            <div className="text-2xl font-black">R$ {combo}</div>
+            <div className="text-xs text-[var(--text-muted)]">com a nova turma do curso Lakehouse →</div>
+          </a>
+        </div>
       </div>
     </div>
   )

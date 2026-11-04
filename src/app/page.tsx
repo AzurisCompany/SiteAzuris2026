@@ -9,6 +9,9 @@ import { HowWeWork } from "@/components/sections/HowWeWork";
 import { Community } from "@/components/sections/Community";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/Footer";
+import { getProduto } from "@/lib/produtos";
+
+const COMBO_REAIS = getProduto("dss-2027-fullpass-curso").precoCentavos / 100;
 
 export default function HomePage() {
   return (
@@ -21,7 +24,7 @@ export default function HomePage() {
         <section className="relative py-16 md:py-20 bg-deep/40">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-xs uppercase tracking-[0.18em] text-cyan-brand mb-3">
-              Curso · turma de lançamento · Lote 1 aberto
+              Curso · nova turma aberta
             </div>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight max-w-3xl">
               Lakehouse: Pipeline na Prática — do zero ao dashboard, no seu ritmo
@@ -34,7 +37,7 @@ export default function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <a
-                href="/lakehouse-comunidade/inscricao?utm_source=home&utm_medium=secao&utm_campaign=lakehouse-t1-l1"
+                href="/lakehouse-comunidade/inscricao?utm_source=home&utm_medium=secao&utm_campaign=lakehouse-nova-turma"
                 className="inline-flex items-center gap-2 rounded-xl bg-cyan-brand px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-mist"
               >
                 Garantir vaga →
@@ -44,6 +47,12 @@ export default function HomePage() {
                 className="inline-flex items-center gap-2 rounded-xl border border-cyan-brand/40 bg-cyan-brand/10 px-6 py-3 text-sm font-semibold text-cyan-brand transition-colors hover:bg-cyan-brand/20"
               >
                 Conhecer o curso
+              </a>
+              <a
+                href="/dssbr-2027/fullpass-curso?utm_source=home&utm_medium=secao&utm_campaign=combo-dss2027"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate/60 px-6 py-3 text-sm font-semibold text-foam/80 transition-colors hover:border-cyan-brand hover:text-cyan-brand"
+              >
+                Curso + FullPass DSS 2027 por R$ {COMBO_REAIS} →
               </a>
             </div>
           </div>

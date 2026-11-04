@@ -56,9 +56,9 @@ const PRODUCTS: Product[] = [
   {
     name: "Lakehouse: Pipeline na Prática",
     tagline:
-      "5 semanas hands-on. MinIO + Iceberg + Spark + Airflow + Superset. Turma 1 começa 22/jun/2026.",
+      "Hands-on, no seu ritmo: MinIO + Iceberg + Spark + Airflow + Superset. Aulas gravadas + encontros ao vivo + mentorias 1:1.",
     href: "/produtos/curso-pipelines",
-    badge: "🔥 Turma 1 aberta",
+    badge: "🔥 Nova turma aberta",
     className: "md:col-span-2",
     emoji: "🚀",
   },

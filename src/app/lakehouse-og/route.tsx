@@ -82,7 +82,7 @@ export async function GET() {
               background: "#14b7de14",
             }}
           >
-            Turma 1 · 22/06/2026
+            Nova turma aberta
           </div>
         </div>
 
@@ -123,7 +123,7 @@ export async function GET() {
             maxWidth: "920px",
           }}
         >
-          Curso online ao vivo · do zero ao dashboard em 5 semanas
+          Curso online · do zero ao dashboard, no seu ritmo
         </div>
 
         {/* Stack chips */}

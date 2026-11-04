@@ -81,10 +81,10 @@ export function CourseFloatingBanner() {
 
         <div className="min-w-0 flex-1">
           <div className="text-[11px] uppercase tracking-widest text-cyan-brand">
-            Curso · Lote 1 aberto
+            Curso · nova turma aberta
           </div>
           <Link
-            href="/lakehouse-comunidade/?utm_source=floating&utm_medium=banner&utm_campaign=lakehouse-t1-l1"
+            href="/lakehouse-comunidade/?utm_source=floating&utm_medium=banner&utm_campaign=lakehouse-nova-turma"
             onClick={onCta}
             className="group inline-flex items-center gap-1 text-sm font-semibold text-foam transition-colors hover:text-cyan-brand"
           >

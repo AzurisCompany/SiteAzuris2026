@@ -108,7 +108,7 @@ export default function CursoPage() {
                   Ementa detalhada
                 </a>
                 <Link
-                  href="/lakehouse-comunidade/inscricao?utm_source=produtos&utm_medium=hero&utm_campaign=lakehouse-t1-l1"
+                  href="/lakehouse-comunidade/inscricao?utm_source=produtos&utm_medium=hero&utm_campaign=lakehouse-nova-turma"
                   className="inline-flex items-center gap-2 rounded-md border border-slate/80 bg-deep/40 backdrop-blur-sm px-6 py-3.5 text-base font-medium hover:border-cyan-brand/60 transition-all"
                 >
                   Quero garantir vaga

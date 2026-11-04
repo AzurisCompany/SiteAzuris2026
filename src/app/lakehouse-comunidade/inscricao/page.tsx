@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { determinarLotePorPerfil, normalizarPerfil } from '@/lib/db'
 import InscricaoForm from './InscricaoForm'
+import { getProduto } from '@/lib/produtos'
+
+const COMBO_REAIS = getProduto('dss-2027-fullpass-curso').precoCentavos / 100
 
 export const metadata: Metadata = {
   title: 'Inscrição — Lakehouse: Pipeline na Prática | Azuris',
@@ -79,14 +82,21 @@ export default async function InscricaoPage({
             </div>
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
               <span className="text-[var(--azuris-cyan)]">●</span>
-              Ingresso Data Science Summit Brasil 2026 incluso (R$ 520)
-            </div>
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <span className="text-[var(--azuris-cyan)]">●</span>
               Pix à vista com 5% off · Cartão em até 5x (1x à vista, 2x-5x com juros)
             </div>
           </div>
         </div>
+
+        {/* Cross-sell do combo DSS 2027 + curso (desde 04/11/2026) */}
+        <a
+          href="/dssbr-2027/fullpass-curso?utm_source=curso&utm_medium=checkout&utm_campaign=combo-dss2027"
+          className="mt-6 block rounded-2xl border border-[var(--azuris-cyan)]/40 bg-[var(--azuris-deep)] p-5 text-sm text-[var(--text-secondary)] transition-colors hover:border-[var(--azuris-cyan)]"
+        >
+          <strong className="text-[var(--text-primary)]">Quer o DSS 2027 junto?</strong> O combo FullPass do Data Science
+          Summit Brasil 2027 + esta nova turma do curso sai por{' '}
+          <strong className="text-[var(--text-primary)]">R$ {COMBO_REAIS}</strong>.{' '}
+          <span className="font-semibold text-[var(--azuris-cyan)]">Ver o combo →</span>
+        </a>
 
         <InscricaoForm perfilInicial={perfilInicial} precos={precos} />
 
