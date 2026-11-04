@@ -13,7 +13,11 @@ export async function sincronizarInscricao(row: { asaas_payment_id: string | nul
   if (!row.asaas_payment_id) return { ok: false, error: 'inscrição sem asaas_payment_id' }
   try {
     const p = await getPayment(row.asaas_payment_id)
-    const status = mapAsaasStatus(p.status)
+    // Cobrança apagada no painel do Asaas volta com `deleted: true` e o status antigo
+    // (PENDING/OVERDUE): sem isto ela ficava pendente aqui pra sempre (caso #18, 08/10).
+    // Dinheiro que entrou (pago/estornado) manda mais que o "apagada".
+    const mapeado = mapAsaasStatus(p.status)
+    const status = p.deleted === true && mapeado !== 'paid' && mapeado !== 'refunded' ? 'cancelled' : mapeado
     const bruto = typeof p.value === 'number' ? Math.round(p.value * 100) : null
     const liquido = typeof p.netValue === 'number' ? Math.round(p.netValue * 100) : null
     const taxa = bruto != null && liquido != null ? bruto - liquido : null
@@ -21,7 +25,7 @@ export async function sincronizarInscricao(row: { asaas_payment_id: string | nul
     const paid_at = status === 'paid' ? pago ?? new Date().toISOString() : null
     await consolidarAsaas(row.asaas_payment_id, {
       status,
-      asaas_status: p.status,
+      asaas_status: p.deleted === true && status === 'cancelled' ? 'DELETED' : p.status,
       valor_liquido_centavos: liquido,
       taxa_centavos: taxa,
       due_date: p.dueDate ?? null,

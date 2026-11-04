@@ -64,6 +64,23 @@ export default function AcoesCobranca({ id, invoiceUrl, telefone, nome, descrica
   const [novoLink, setNovoLink] = useState<string | null>(null)
   const [copiadoTroca, setCopiadoTroca] = useState(false)
 
+  // Os campos nascem das props, e o `router.refresh()` depois de salvar/regerar troca as
+  // props SEM remontar o componente: sem isto os campos ficavam com os valores de antes
+  // (bug que deixou o LAET em R$437,50). Quando a cobrança muda, os campos se realinham —
+  // ajuste durante o render (padrão do React), não em effect. Mensagens (ok, link novo)
+  // ficam: são o resultado da ação que acabou de rodar.
+  const snapshot = [valorReais, dueDate, installments, billingType, descricao].join('|')
+  const [snapshotVisto, setSnapshotVisto] = useState(snapshot)
+  if (snapshotVisto !== snapshot) {
+    setSnapshotVisto(snapshot)
+    setVenc(dueDate ?? hoje)
+    setValorRaw(valorReais.toFixed(2).replace('.', ','))
+    setNovoMeio(billingType)
+    setNovasParcelas(installments)
+    setBaseRaw(valorReais.toFixed(2).replace('.', ','))
+    setNovaDescricao(descricao)
+  }
+
   const baseNum = useMemo(() => parseValor(baseRaw), [baseRaw])
   const meioCartao = novoMeio === 'CREDIT_CARD'
   const parcelasEfetivas = meioCartao ? Math.min(Math.max(novasParcelas, 1), MAX_PARCELAS) : 1

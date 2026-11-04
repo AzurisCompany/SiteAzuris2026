@@ -247,6 +247,9 @@ export interface AsaasPaymentDetail extends AsaasPayment {
   paymentDate?: string | null
   clientPaymentDate?: string | null
   confirmedDate?: string | null
+  /** true quando a cobrança foi apagada no painel do Asaas. O GET continua devolvendo o
+   *  pagamento, com o `status` de ANTES de apagar (PENDING/OVERDUE) — só este campo avisa. */
+  deleted?: boolean
 }
 
 export async function getPayment(paymentId: string): Promise<AsaasPaymentDetail> {
