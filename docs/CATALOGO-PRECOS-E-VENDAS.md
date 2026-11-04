@@ -177,6 +177,27 @@ tipo" do painel conta **pedidos** por tamanho, não unidades — a grade de prod
 quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor digitado é o
 **total** do pedido.
 
+**DSS 2027 — FullPass Pre-Load** (tipo `fullpass-preload`, desde 29/10)
+
+| produto | checkout | preço | limite |
+|---|---|---|---|
+| Pre-Load (`dss-2027-preload`) | `/dssbr-2027/preload` | R$ 550 · até 3x com juros | 50 (`limite_qtd`, pagos + pendentes) |
+
+Primeiro checkout com **PIX na nossa tela** (`pixNaTela` no registry): QR + copia-e-cola da
+cobrança, sem passar pela fatura do Asaas (que mostra o CNPJ da Azuris).
+
+**DSS 2026 — Upgrade Elite: certificado** (registry, preço fixo; desde 04/11)
+
+| produto | checkout | preço |
+|---|---|---|
+| Certificado digital (`certificado-elite-digital-dss-2026`) | `/dssbr-2026/certificado-elite/digital` (link direto, `noindex`) | R$ 30 · cartão 1x |
+| Certificado impresso (`certificado-elite-impresso-dss-2026`) | `/dssbr-2026/certificado-elite/impresso` (link direto, `noindex`) | R$ 50 · cartão 1x |
+
+Escolha entre os dois em `/dssbr-2026/certificado-elite`. **Dois produtos, não dois tipos**: a
+regra de 1 compra paga por CPF (§4.1) é por produto, e quem leva o digital pode querer o
+impresso. Sem tipo no banco → mudar preço = editar `PRODUTOS` + deploy. PIX na tela, status
+compartilhado em `/api/dss-certificado-elite/status`. Não confere se o comprador participou.
+
 **Preço único (registry, exige deploy pra mudar)**
 
 | produto | preço | observação |
