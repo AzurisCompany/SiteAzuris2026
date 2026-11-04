@@ -97,6 +97,18 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['dss-2027-preload'].enderecoObrigatorioPJ,
   },
   {
+    slug: 'certificado-elite-digital-dss-2026',
+    label: 'Certificado Elite — digital',
+    descricaoPadrao: PRODUTOS['certificado-elite-digital-dss-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['certificado-elite-digital-dss-2026'].enderecoObrigatorioPJ,
+  },
+  {
+    slug: 'certificado-elite-impresso-dss-2026',
+    label: 'Certificado Elite — impresso',
+    descricaoPadrao: PRODUTOS['certificado-elite-impresso-dss-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['certificado-elite-impresso-dss-2026'].enderecoObrigatorioPJ,
+  },
+  {
     // Camiseta do DSS 2026 (palestrante): o tamanho vai no tipo, e o valor digitado é o
     // TOTAL do pedido — a cobrança avulsa não multiplica pela quantidade.
     slug: 'camiseta-dss-2026',

@@ -255,6 +255,42 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     tipoObrigatorio: true, // só vende pelo tipo — é ele que conta os 50
     pixNaTela: true,
   },
+  // UPGRADE ELITE do DSS 2026: o certificado do congresso, vendido depois do evento a
+  // quem participou. Dois produtos (não dois tipos) de propósito: a regra de 1 compra
+  // paga por CPF é por produto, e quem levou o digital pode querer o impresso também.
+  // Preço fixo aqui no registry (sem tipo no banco); 1x, PIX na nossa tela.
+  'certificado-elite-digital-dss-2026': {
+    slug: 'certificado-elite-digital-dss-2026',
+    nome: 'DSS 2026 — Upgrade Elite: certificado digital',
+    descricao: 'Certificado digital do Data Science Summit Brasil 2026',
+    precoCentavos: 3000, // R$ 30,00
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 1,
+    asaasDescricao: 'Upgrade Elite DSS 2026 — certificado digital',
+    voltarUrl: '/dssbr-2026/certificado-elite',
+    voltarLabel: '← ver as opções de certificado',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: false, // compra pessoal de R$30: não trava por endereço
+    pixNaTela: true,
+  },
+  'certificado-elite-impresso-dss-2026': {
+    slug: 'certificado-elite-impresso-dss-2026',
+    nome: 'DSS 2026 — Upgrade Elite: certificado impresso',
+    descricao: 'Certificado impresso do Data Science Summit Brasil 2026',
+    precoCentavos: 5000, // R$ 50,00
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 1,
+    asaasDescricao: 'Upgrade Elite DSS 2026 — certificado impresso',
+    voltarUrl: '/dssbr-2026/certificado-elite',
+    voltarLabel: '← ver as opções de certificado',
+    telefoneObrigatorio: true, // é por WhatsApp que se combina a entrega do impresso
+    enderecoObrigatorioPJ: false,
+    pixNaTela: true,
+  },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
   // no admin (geral R$30 / associado grátis); este registro é o fallback e a config.

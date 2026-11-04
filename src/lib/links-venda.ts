@@ -39,6 +39,14 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
     ],
   },
   {
+    titulo: 'DSS 2026 — Upgrade Elite (certificado)',
+    links: [
+      { nome: 'Certificado — escolher (digital ou impresso)', caminho: '/dssbr-2026/certificado-elite', visibilidade: 'link-direto' },
+      { nome: 'Certificado digital — R$ 30', caminho: '/dssbr-2026/certificado-elite/digital', slug: 'certificado-elite-digital-dss-2026', visibilidade: 'link-direto' },
+      { nome: 'Certificado impresso — R$ 50', caminho: '/dssbr-2026/certificado-elite/impresso', slug: 'certificado-elite-impresso-dss-2026', visibilidade: 'link-direto' },
+    ],
+  },
+  {
     titulo: 'Eventos presenciais',
     links: [
       { nome: 'GU BigData — página do encontro', caminho: '/gubigdata', visibilidade: 'publico' },

@@ -99,6 +99,30 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         cta: { label: 'Ver o DSS', url: 'https://dssbr.com.br' },
       }
 
+    case 'certificado-elite-digital-dss-2026':
+      return {
+        assunto: 'Upgrade Elite confirmado — certificado digital DSS 2026',
+        titulo: `Upgrade confirmado, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu Upgrade Elite: certificado digital do Data Science Summit Brasil 2026.`,
+        paragrafos: [
+          'O certificado digital chega por este e-mail.',
+          'Guarde este e-mail: ele é o seu comprovante.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+
+    case 'certificado-elite-impresso-dss-2026':
+      return {
+        assunto: 'Upgrade Elite confirmado — certificado impresso DSS 2026',
+        titulo: `Upgrade confirmado, ${nome}!`,
+        destaque: `Recebemos ${valor} do seu Upgrade Elite: certificado impresso do Data Science Summit Brasil 2026.`,
+        paragrafos: [
+          'A gente chama você no WhatsApp cadastrado pra combinar a entrega do certificado impresso.',
+          'Guarde este e-mail: ele é o seu comprovante.',
+        ],
+        cta: { label: 'Ver a página do DSS 2026', url: 'https://azuris.com.br/dssbr-2026' },
+      }
+
     case 'dss-vip-2026':
       return {
         assunto: 'Ingresso VIP confirmado — DSS 2026',
