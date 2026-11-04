@@ -67,7 +67,7 @@ export default function PixNaTela({ pix, paymentId, valorReais, statusEndpoint, 
       <div className="mt-8 rounded-2xl border border-[var(--accent-emerald)]/40 bg-[var(--accent-emerald)]/5 p-6 text-center">
         <div className="text-2xl font-bold text-[var(--accent-emerald)]">Pagamento confirmado!</div>
         <p className="mt-3 text-sm text-[var(--text-secondary)]">
-          Recebemos {brl(valorReais)}. Seu ingresso está garantido — a confirmação chega no seu e-mail em instantes.
+          Recebemos {brl(valorReais)}. Sua compra está confirmada — o comprovante chega no seu e-mail em instantes.
         </p>
       </div>
     )
@@ -80,7 +80,7 @@ export default function PixNaTela({ pix, paymentId, valorReais, statusEndpoint, 
         <div className="mt-1 text-3xl font-black">{brl(valorReais)}</div>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Escaneie o QR Code no app do seu banco. Use <strong>este</strong> QR ou o código abaixo — PIX feito direto na
-          chave da empresa não se liga ao seu ingresso.
+          chave da empresa não se liga à sua compra.
         </p>
       </div>
 
