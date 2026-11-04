@@ -1,4 +1,4 @@
-# Sessão 04/11/2026 — Upgrade Elite (certificado), combo DSS 2027 + curso, revisão do site
+# Sessão 04/11/2026 — Upgrade Elite, combo DSS 2027 + curso, revisão do site, PIX real e pendências do admin
 
 ## Estado no fim da sessão
 
@@ -12,7 +12,10 @@
 | banco | **nada mudou** — sem migração, sem tipo cadastrado |
 | combo FullPass DSS 2027 + curso R$ 755 (`dss-2027-fullpass-curso`) | **EM PROD** — `/dssbr-2027/fullpass-curso`: `a47c953`, deploy `7xe6fvli8` |
 | revisão do site (curso "nova turma" + combo nas vitrines) | **EM PROD** — `d79182d` + `ce485e0`, deploy `l35tqwl2k`, verificado |
-| pagamento real | **nenhum ainda** nos 4 produtos novos — Binhara vai pagar R$ 30 no digital |
+| PIX real | **OK** — venda #336, R$ 30 no certificado digital, paga 22:54 (RECEIVED); tela confirmou sozinha; e-mail Resend enviado (`01a1a8c5-…`) |
+| texto da tela do PIX ("sua compra", não "seu ingresso") | **EM PROD** — `3d4de19`, deploy `r9ysi6pej` |
+| fix do sync (cobrança apagada no Asaas) + fix dos campos do "Regerar" | ver §8 — commit/deploy registrados lá |
+| GoCloud R$ 10.000 e Tiago Nelson 3x | **importados** em prod: vendas #337 e #338 |
 
 ## 1. Releitura
 
@@ -89,11 +92,56 @@ Verificação: vitest 327/327, build ok; no ar, as 5 páginas com o texto novo e
 Certificado: digital **por e-mail**, impresso **combinado no WhatsApp**, "Elite" **genérico**
 — todos confirmados, textos mantidos.
 
-## 6. Em aberto
+## 6. PIX real (certificado digital)
+
+Binhara pagou R$ 30 em `/dssbr-2026/certificado-elite/digital`:
+- QR + copia-e-cola na nossa tela (sem fatura do Asaas) → venda #336 `pending`;
+- pago → webhook → #336 `paid` (Asaas `RECEIVED`, 04/11 22:54) → a tela trocou sozinha pra
+  "Pagamento confirmado!";
+- e-mail nosso: log de prod `E-mail de confirmação enviado (inscricao 336 …, resend 01a1a8c5-…)`.
+  O e-mail que o Binhara colou era o **comprovante do Asaas** (Fatura 958992554), não o nosso.
+
+Valida o `pixNaTela` de ponta a ponta (Pre-Load e combo usam o mesmo fluxo). A #336 é venda real
+no CPF do Binhara (estornar no Asaas se quiser).
+
+Achados no caminho:
+- A tela dizia "Seu ingresso está garantido" / "não se liga ao seu ingresso" também no
+  certificado → `3d4de19`: "Sua compra está confirmada" / "não se liga à sua compra".
+- O recebedor no app do banco aparece como **"ALESSANDRO DE OLIVEIRA BI…"** (nome da conta Asaas),
+  não "Azuris". Se mudar, é no cadastro do Asaas, não no site.
+- Pra achar o envio do e-mail sem banco: `vercel logs --environment production --since 2h -q "<id>" -x`.
+
+## 7. Perguntas interativas (2ª rodada)
+
+- Deploy da revisão: **sim** · turma: **sem data** · vagas: **30** · combo: **sem teto**.
+- Certificado: digital **por e-mail**, impresso **WhatsApp**, "Elite" **genérico**.
+- Combo nos cupons das vendedoras: **não** (já é promoção).
+- Banner flutuante / callout do blog com o combo: **não**.
+
+## 8. Pendências do admin (itens 1–4 da lista de 08/10)
+
+Pedido: *"pode fazer essas"*.
+
+1. **Sync ignorava cobrança apagada** → `src/lib/asaas-sync.ts`: `deleted: true` = `cancelled`
+   (exceto pago/estornado), `asaas_status = 'DELETED'`. Campo `deleted` em `AsaasPaymentDetail`.
+   Teste novo `src/lib/__tests__/asaas-sync-deleted.test.ts` (4 casos). O webhook já tratava
+   `PAYMENT_DELETED`; o furo era só no sync.
+2. **#18 / GoCloud / Tiago Nelson** → GoCloud e Tiago importados pela API do admin
+   (`/api/admin/importar-cobranca`): **#337** e **#338**, ambos `RECEIVED`. A #18 se resolve com o
+   fix do item 1 + sync da venda depois do deploy.
+3. **Vencidas #55 #114 #182 #264** → **mantidas** (decisão do Binhara; a #55 ele cobra direto).
+4. **Campos velhos no "Regerar"** → `AcoesCobranca.tsx` realinha os campos quando valor /
+   vencimento / parcelas / meio / descrição mudam (ajuste durante o render, sem effect).
+
+Verificação: vitest 331/331, eslint e tsc sem erro novo.
+Detalhe em `docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md` §4.1 e `docs/ADMIN-TROCAR-MEIO-PAGAMENTO.md`.
+
+## 9. Em aberto
 
 1. ~~Textos de entrega~~ e ~~"Elite"~~ — confirmados em 04/11 (ver §5).
 2. **Não confere se o comprador participou do DSS 2026** — qualquer CPF compra.
-3. **1 PIX real** de ponta a ponta — Binhara vai pagar R$ 30 no certificado digital; conferir
-   no admin (status pago + e-mail). Cobre o fluxo dos 4 produtos novos.
+3. ~~1 PIX real~~ — feito (§6).
 4. Liberar o curso na mão a cada combo vendido.
-5. Herdado: Pre-Load DSS 2027 também sem PIX real; camiseta congressista fechou sozinha em 27/10.
+5. Vencidas #55 #114 #182 #264 seguem abertas por decisão; não cancelar sem novo OK.
+6. Herdado, fora desta sessão: deploy automático pelo GitHub, 403 do painel Tráfego, chave do
+   PostHog, erros de lint/tsc pré-existentes (banner flutuante; `oculto` em `checkout-produto.test.ts`).

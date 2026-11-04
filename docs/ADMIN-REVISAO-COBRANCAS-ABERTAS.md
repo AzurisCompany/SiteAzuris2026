@@ -146,7 +146,7 @@ apagada (o lado "só no Asaas" cobre só as vivas).
 | estornadas nos dois lados | 1 (#33 CEUMA) + 4 testes (#8, #9, #110, #111) |
 | pendentes/vencidas iguais | 8 |
 
-### Inconsistências (3) — correção aguarda OK
+### Inconsistências (3) — RESOLVIDAS em 04/11 (ver §4.1)
 
 1. **#18 Marco Antonio Ribeiro Junior** (Lakehouse R$ 550 cartão): banco `pending` (marcada teste),
    Asaas **"Fatura cancelada"**. Encerrar do nosso lado.
@@ -170,6 +170,26 @@ Vencidas: #264 Gustavo Allemand (Volvo) R$ 887 PIX, 04/10 · #182 João Paulo Ab
 Business R$ 757 PIX, 18/09 · #114 Daniel Pinheiro R$ 570 cartão, 15/08 · #55 Jussara Pinheiro
 (Maxpar) "2 ingressos FullPass" R$ 940 boleto, 26/07.
 
+### 4.1 Resolução (04/11/2026)
+
+OK do Binhara em 04/11 (*"pode fazer essas"*):
+
+| caso | o que foi feito | resultado |
+|---|---|---|
+| **#18** (apagada no Asaas, pendente aqui) | fix do sync: `sincronizarInscricao` trata `deleted: true` como `cancelled` | ver o "Estado" no CONTEXTO de 04/11 (sync depois do deploy) |
+| **GoCloud** R$ 10.000 PIX | `POST /api/admin/importar-cobranca` `{asaas_payment_id: "pay_s33d5okw0e6zranf"}` | **venda #337**, paga 26/03, balde avulso |
+| **Tiago Nelson** 3x R$ 550 | idem com `{installment_id: "b48cf496-d05f-4c80-8599-1999e8a2104f"}` | **venda #338**, paga 10/07, 1 venda = soma das 3 parcelas |
+
+**O fix do sync** (`src/lib/asaas-sync.ts`, teste `asaas-sync-deleted.test.ts`): o GET de uma
+cobrança apagada no painel devolve `deleted: true` com o `status` de antes (PENDING/OVERDUE). Agora
+o sync grava `cancelled` + `asaas_status = 'DELETED'`. Exceção: se o status mapeado é `paid` ou
+`refunded`, o dinheiro manda e o "apagada" é ignorado. O webhook já fechava (`PAYMENT_DELETED` →
+`cancelled`); o furo era só quando o webhook não chegava e o sync era o único caminho.
+
+**Vencidas sem compra** (#55 Maxpar R$ 940, #114 R$ 570, #182 Business R$ 757, #264 R$ 887):
+**mantidas vencidas** por decisão do Binhara em 04/11, mesmo com o DSS 2026 já realizado. A #55 ele
+cobra direto. Não cancelar sem novo OK.
+
 ## 5. O que fica pra depois
 
 - Cliente Asaas compartilhado por CNPJ: não há correção de código decidida. Opções: criar o
@@ -177,4 +197,4 @@ Business R$ 757 PIX, 18/09 · #114 Daniel Pinheiro R$ 570 cartão, 15/08 · #55 
   um segundo comprador com o mesmo CNPJ e mandar pro WhatsApp de grupos.
 - "Marcar teste" não cancela no Asaas. Vale a tela de teste avisar quando a cobrança ainda está viva lá.
 
-Última revisão: **2026-10-08**.
+Última revisão: **2026-11-04**.

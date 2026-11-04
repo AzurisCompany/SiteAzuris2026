@@ -58,3 +58,15 @@ Zero mudança de schema — só usa colunas que já existem. Não precisa rodar 
 O fluxo **não foi exercitado contra a API do Asaas** (só `tsc`/ESLint limpos). Testar em sandbox/prod com 1 cobrança de teste:
 PIX → cartão 3x (confere que a antiga some no painel Asaas e a nova aparece parcelada); e cartão parcelado → PIX
 (confere que o **parcelamento inteiro** foi apagado, não sobrou parcela). Depois marcar `is_teste`.
+
+## Bug corrigido em 04/11/2026: campos velhos depois de salvar/regerar
+
+Os campos do bloco (e do "editar vencimento/valor") nasciam das props via `useState(prop)`. O
+`router.refresh()` depois de salvar ou regerar entrega props novas **sem remontar** o componente,
+então os campos continuavam com os valores de antes — e uma segunda ação mandava o valor velho. Foi
+assim que o LAET (#48) ficou em R$ 437,50.
+
+Fix em `AcoesCobranca.tsx`: um `snapshot` de valor/vencimento/parcelas/meio/descrição; quando muda,
+os campos se realinham **durante o render** (padrão do React pra "ajustar estado quando a prop
+muda" — não em `useEffect`, que o lint do projeto reprova). As mensagens (ok, link novo) não são
+resetadas: são o resultado da ação que acabou de rodar.
