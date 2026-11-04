@@ -186,6 +186,22 @@ quantidade. Retirada no credenciamento; sem frete. Na cobrança avulsa, o valor 
 Primeiro checkout com **PIX na nossa tela** (`pixNaTela` no registry): QR + copia-e-cola da
 cobrança, sem passar pela fatura do Asaas (que mostra o CNPJ da Azuris).
 
+**DSS 2027 — Combo FullPass + curso Pipeline (nova turma)** (registry, preço fixo; desde 04/11)
+
+| produto | checkout | preço | limite |
+|---|---|---|---|
+| Combo (`dss-2027-fullpass-curso`) | `/dssbr-2027/fullpass-curso` (`noindex`) | R$ 755 · até 3x com juros · sem âncora | **sem teto** — não conta nos 50 do Pre-Load |
+
+Retomada do combo do DSS 2026 (FullPass + portal, R$ 850, encerrado em 08/10). A nota da
+página mostra os preços separados (Pre-Load R$ 550 + curso R$ 750), lidos do registry e de
+`PRECO_POR_PERFIL`. "Nova turma" **sem data** (curso evergreen). **Sem cupom** de vendedora (o
+combo já é promoção; decisão de 04/11). PIX na tela via `PasseCheckout` + `pixStatusEndpoint`.
+**Liberar o curso é manual**; o e-mail promete acesso em até 1 dia útil.
+
+Onde o combo aparece: landing do curso (card no lugar da antiga "Turma 2 · R$ 1.197"),
+checkout do curso, home (seção do curso), Pre-Load e todo aviso de venda encerrada do DSS
+2026 (`VendasEncerradas`, junto do Pre-Load). Banner flutuante e callout do blog: **só o curso**.
+
 **DSS 2026 — Upgrade Elite: certificado** (registry, preço fixo; desde 04/11)
 
 | produto | checkout | preço |
