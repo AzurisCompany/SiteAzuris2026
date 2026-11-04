@@ -176,7 +176,7 @@ OK do Binhara em 04/11 (*"pode fazer essas"*):
 
 | caso | o que foi feito | resultado |
 |---|---|---|
-| **#18** (apagada no Asaas, pendente aqui) | fix do sync: `sincronizarInscricao` trata `deleted: true` como `cancelled` | ver o "Estado" no CONTEXTO de 04/11 (sync depois do deploy) |
+| **#18** (apagada no Asaas, pendente aqui) | fix do sync: `sincronizarInscricao` trata `deleted: true` como `cancelled` | deploy `jwqp4okha` + sync da #18 → **`cancelled`**, `asaas_status` `DELETED` |
 | **GoCloud** R$ 10.000 PIX | `POST /api/admin/importar-cobranca` `{asaas_payment_id: "pay_s33d5okw0e6zranf"}` | **venda #337**, paga 26/03, balde avulso |
 | **Tiago Nelson** 3x R$ 550 | idem com `{installment_id: "b48cf496-d05f-4c80-8599-1999e8a2104f"}` | **venda #338**, paga 10/07, 1 venda = soma das 3 parcelas |
 

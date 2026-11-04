@@ -14,7 +14,7 @@
 | revisão do site (curso "nova turma" + combo nas vitrines) | **EM PROD** — `d79182d` + `ce485e0`, deploy `l35tqwl2k`, verificado |
 | PIX real | **OK** — venda #336, R$ 30 no certificado digital, paga 22:54 (RECEIVED); tela confirmou sozinha; e-mail Resend enviado (`01a1a8c5-…`) |
 | texto da tela do PIX ("sua compra", não "seu ingresso") | **EM PROD** — `3d4de19`, deploy `r9ysi6pej` |
-| fix do sync (cobrança apagada no Asaas) + fix dos campos do "Regerar" | ver §8 — commit/deploy registrados lá |
+| fix do sync (cobrança apagada no Asaas) + fix dos campos do "Regerar" | **EM PROD** — `66bce69`, deploy `jwqp4okha`; #18 sincronizada: PENDING → `cancelled` / `DELETED` |
 | GoCloud R$ 10.000 e Tiago Nelson 3x | **importados** em prod: vendas #337 e #338 |
 
 ## 1. Releitura
@@ -133,7 +133,8 @@ Pedido: *"pode fazer essas"*.
 4. **Campos velhos no "Regerar"** → `AcoesCobranca.tsx` realinha os campos quando valor /
    vencimento / parcelas / meio / descrição mudam (ajuste durante o render, sem effect).
 
-Verificação: vitest 331/331, eslint e tsc sem erro novo.
+Verificação: vitest 331/331, eslint e tsc sem erro novo, build ok. Deploy `jwqp4okha`; depois,
+`POST /api/admin/sync {id:18}` → `{"ok":true,"status":"cancelled"}`, detalhe da #18 mostra `DELETED`.
 Detalhe em `docs/ADMIN-REVISAO-COBRANCAS-ABERTAS.md` §4.1 e `docs/ADMIN-TROCAR-MEIO-PAGAMENTO.md`.
 
 ## 9. Em aberto
