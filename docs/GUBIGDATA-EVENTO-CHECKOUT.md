@@ -157,4 +157,12 @@ Feita pela receita acima, com duas correções de rota:
 - O encontro de 26/08 ficou **10 dias vendendo depois de acontecer** (tipos ativos, sem
   `vendas_ate`, que é a política da casa). O passo 7 da receita existe por causa disso.
 
-Última revisão: **2026-09-05**.
+## Troca de 24/09 → 19/11 (2026-11-06)
+
+Receita dos 7 passos sem desvio: `evento.ts` (slug `gubigdata-2026-11`), registry, rótulos/aba/
+CHECKOUT_URL + 24/09 em `PRODUTOS_ENCERRADOS`, `case` do e-mail, seed na migração, banner e foto
+baixados do post do GU (`banner-novembro.jpg`, `iago-pimentel.jpg`). Tipos 238/239 criados em
+prod pela API do admin; o passo 7 já tinha sido feito em 09/10. O post do GU já linkava
+`/gubigdata/inscricao`. O post não cita preço: mantido Geral R$ 30 + associado grátis.
+
+Última revisão: **2026-11-06**.

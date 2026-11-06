@@ -127,12 +127,12 @@ oculto. **Comissão e campanha** (vendedora, parceiro) → cupom. Ver
 ⚠️ **Isto é uma foto, não a verdade.** A verdade vive em `/admin/ingressos`, `/admin/cupons` e
 no registry. Se esta seção divergir do painel, o painel está certo.
 
-**Encontro GU BigData 24/09** (tipos, `/admin/ingressos`)
+**Encontro GU BigData 19/11** (tipos, `/admin/ingressos`, ids 238/239)
 
 | tipo | preço | parcelas | vagas | prazo |
 |---|---|---|---|---|
 | Geral | R$ 30 | 3x | sem limite | sem prazo |
-| Associado IEP / GU / DSSBR | grátis | — | sem limite | sem prazo |
+| Associado IEP / GU / AWS UG Curitiba / DSSBR | grátis | — | sem limite | sem prazo |
 
 **DSS 2026** (tipos, `/admin/ingressos`)
 
@@ -223,7 +223,7 @@ compartilhado em `/api/dss-certificado-elite/status`. Não confere se o comprado
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
 | ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
 | Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10**, com a Bindflow (`cafe-networking-2026-10`; até 18/09 era a Arlequim, mesmo produto); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
-| GU BigData | R$ 30 / grátis | encontro em cartaz é **24/09** (`gubigdata-2026-09`); os tipos vivem no catálogo, o registry é só fallback. Os de 30/07 e 26/08 são eventos passados — ver `PRODUTOS_ENCERRADOS` |
+| GU BigData | R$ 30 / grátis | encontro em cartaz é **19/11** (`gubigdata-2026-11`); os tipos vivem no catálogo, o registry é só fallback. Os de 30/07, 26/08 e 24/09 são eventos passados — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |
 | Lakehouse | R$ 750 | **preço único desde 25/08/2026** — acabaram o preço de comunidade (R$ 550) e o bônus do ingresso do DSSBR incluso. O perfil membro/não-membro sobrou só pra segmentar vaga e histórico. Canário: `precos-lakehouse.test.ts` |
 

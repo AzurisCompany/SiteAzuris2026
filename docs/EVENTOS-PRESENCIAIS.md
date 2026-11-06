@@ -5,7 +5,7 @@ Hoje serve **dois** eventos, com a mesma estrutura e marcas diferentes:
 
 | rota | evento | produtor | em cartaz |
 |---|---|---|---|
-| `/gubigdata` | Encontro presencial do GU Big Data & IA | GU Big Data & IA | **24/09/2026** — Churn Antes que Aconteça (Onetopia + Tecnofit) |
+| `/gubigdata` | Encontro presencial do GU Big Data & IA | GU Big Data & IA | **19/11/2026** — Sua IA corporativa parou no chat? (Iago Pimentel, Amazon Quick; com AWS User Group Curitiba) |
 | `/cafe-networking` | Café da manhã de networking do DSSBR | Data Science Summit Brasil | **06/10/2026** — Bindflow (Lucas Moraes), AtendeVet: telemedicina veterinária com IA |
 
 Em produção: GU desde 2026-07-11, café desde 2026-09-05.
@@ -121,8 +121,8 @@ Os tipos por evento hoje:
 
 | evento | tipo | preço | parcelas | vagas |
 |---|---|---|---|---|
-| GU 24/09 | Geral | R$ 30 | 3x | sem limite |
-| GU 24/09 | Associado IEP, GU BigData e Participante DSSBR | grátis | — | sem limite |
+| GU 19/11 | Geral (id 238) | R$ 30 | 3x | sem limite |
+| GU 19/11 | Associado IEP, GU BigData, AWS User Group Curitiba e Participante DSSBR (id 239) | grátis | — | sem limite |
 | Café 06/10 | Geral | R$ 30 | 3x | sem limite |
 | Café 06/10 | Convidado e associado | grátis | — | sem limite |
 
@@ -159,9 +159,14 @@ Os tipos por evento hoje:
   Virou a receita "Trocar a apresentação da MESMA edição". Contexto:
   [`CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md`](../CONTEXTO-SESSAO-CAFE-BINDFLOW-2026-09-18.md).
 
-> **08/10/2026 — passo 7 em atraso:** os tipos do café 06/10 (ids 50/51, `cafe-networking-2026-10`) e
+- **2026-11-06** — encontro de 19/11 (`gubigdata-2026-11`, commit `ae517ef`, deploy `428wsefq2`): Iago
+  Pimentel, Amazon Quick, realização GU + AWS User Group Curitiba. Tipos 238/239 criados pela API do admin
+  antes do deploy; os de 24/09 (35/36) já estavam inativos desde 09/10. "Membro AWS User Group Curitiba"
+  entrou no select de associação. Contexto: [`CONTEXTO-SESSAO-GU-19-11-2026-11-06.md`](../CONTEXTO-SESSAO-GU-19-11-2026-11-06.md).
+
+> **08/10/2026 — passo 7 em atraso (RESOLVIDO 09/10):** os tipos do café 06/10 (ids 50/51, `cafe-networking-2026-10`) e
 > do GU 24/09 (ids 35/36, `gubigdata-2026-09`) continuam **ativos** e `/cafe-networking/inscricao` e
 > `/gubigdata/inscricao` vendem R$ 30 pra evento que já aconteceu. O post do café no dssbr.com.br
 > ainda linka `/cafe-networking`. Desligar aguarda OK do Binhara.
 
-Última revisão: **2026-10-08**.
+Última revisão: **2026-11-06**.
