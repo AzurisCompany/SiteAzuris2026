@@ -8,7 +8,7 @@
 
 import type { EventoPresencial, MarcaEvento } from '@/lib/eventos/tipos'
 
-export const EVENTO_GU_SLUG = 'gubigdata-2026-09'
+export const EVENTO_GU_SLUG = 'gubigdata-2026-11'
 
 /** Quem assina o evento: o grupo de usuários, não a Azuris (que só processa a inscrição). */
 export const MARCA_GU: MarcaEvento = {
@@ -28,24 +28,24 @@ export const EVENTO_GU = {
   apiUrl: '/api/gubigdata/inscricao',
   tituloCurto: 'Encontro Presencial GU Big Data & IA',
   titulo:
-    'Encontro Presencial GU Big Data & IA – 24 de setembro: Churn Antes que Aconteça, o case Onetopia + Tecnofit',
-  chamada: 'Um case real de Advanced Analytics e IA em produção, contado por quem construiu.',
+    'Encontro Presencial GU Big Data & IA – 19 de novembro: Sua IA corporativa parou no chat? Agentes, automações e apps com o Amazon Quick',
+  chamada: 'Do chat ao agente que acessa os dados da empresa — com demonstração ao vivo.',
   /** Tema curto do encontro — usado no card da /comunidade e no compartilhamento. */
-  tema: 'Churn Antes que Aconteça — o case Onetopia + Tecnofit',
+  tema: 'Sua IA corporativa parou no chat? Agentes, automações e apps com o Amazon Quick',
   /** O encontro foi remarcado: a peça de divulgação leva selo "nova data". */
   novaData: false,
-  /** "24 de setembro" — como o dia aparece no meio de um título. */
-  dataTitulo: '24 de setembro',
-  dataLonga: '24 de setembro de 2026, quinta',
-  dataCurta: '24/09',
+  /** "19 de novembro" — como o dia aparece no meio de um título. */
+  dataTitulo: '19 de novembro',
+  dataLonga: '19 de novembro de 2026, quinta',
+  dataCurta: '19/11',
   inicio: '18h30',
   horario: '18h30 às 21h00',
   /** Descrição da página do evento (indexável) — não repetir data em texto solto. */
   metaDescricao:
-    'Dia 24/09 às 18h30 no IEP, Curitiba: a Onetopia apresenta o case de previsão de churn e LTV construído para a Tecnofit, com Marcio Viana e Leandro Krukoski. Ingresso Geral R$ 30 · gratuito para associados IEP, GU BigData e participantes DSSBR.',
+    'Dia 19/11 às 18h30 no IEP, Curitiba: Iago Pimentel mostra ao vivo como sair do chat e criar agentes, automações e apps conectados aos dados da empresa com o Amazon Quick. GU BigData & IA + AWS User Group Curitiba. Ingresso Geral R$ 30 · gratuito para associados.',
   /** Descrição do checkout (noindex) — só o essencial pra quem já decidiu. */
   checkoutDescricao:
-    'Encontro presencial do GU BigData & IA em 24/09 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para associados.',
+    'Encontro presencial do GU BigData & IA com o AWS User Group Curitiba em 19/11 no IEP, Curitiba. Ingresso Geral R$ 30 (PIX ou cartão em até 3x) ou gratuito para associados.',
   local: {
     sigla: 'IEP',
     nome: 'IEP — Instituto de Engenharia do Paraná',
@@ -55,44 +55,40 @@ export const EVENTO_GU = {
       'https://www.google.com/maps/search/?api=1&query=IEP+Instituto+de+Engenharia+do+Paran%C3%A1+Rua+Emiliano+Perneta+174+Curitiba',
   },
   banner: {
-    src: '/gubigdata/banner-setembro.jpg',
+    src: '/gubigdata/banner-novembro.jpg',
     largura: 1672,
     altura: 941,
-    alt: 'Encontro Presencial GU Big Data & IA — 24 de setembro: Churn Antes que Aconteça, o case Onetopia + Tecnofit',
+    alt: 'Encontro Presencial GU Big Data & IA — 19 de novembro: Sua IA corporativa parou no chat? Agentes, automações e apps com o Amazon Quick, com Iago Pimentel',
   },
   /** Parágrafos da seção "Descrição do evento" — texto puro (ver gotcha do SSR com <strong>). */
   descricao: [
-    'No encontro de 24 de setembro, a Onetopia apresenta um case real desenvolvido para a Tecnofit, uma das principais plataformas de gestão para academias e negócios fitness.',
-    'A palestra mostra como Advanced Analytics e Inteligência Artificial foram aplicados para antecipar o risco de cancelamento de alunos, calcular o valor dos clientes ao longo do tempo (LTV) e transformar dados de frequência e pagamento em ações práticas para os gestores das academias.',
-    'Cada alerta é transparente: além de classificar o aluno por nível de risco, a solução apresenta os principais motivos que geraram o alerta e recomenda a abordagem de retenção — o gestor entende o porquê, não só o número. O resultado foi entregue como um dashboard one-page integrado nativamente ao sistema da Tecnofit, via Embedded Analytics, e inclui o módulo Discover, que compara os indicadores da academia com os do mercado da própria região.',
-    'O projeto entrou em produção durante o Fitness Brasil, respondendo ao vivo a consultas de diferentes unidades da base da Tecnofit — e ganhou dois novos segmentos de clientes enquanto o evento ainda acontecia. Na palestra, a Onetopia abre os bastidores: decisões técnicas e de negócio, desafios da implantação e o que se aprende ao transformar um MVP analítico em parte de um produto usado pelo mercado.',
-    'Como todo encontro do GU, o formato é conteúdo + troca de experiências + networking com líderes, especialistas e a comunidade de dados de Curitiba.',
+    'Muita empresa já usa IA generativa, mas parou no chat: um assistente que não acessa os dados da empresa conhece pouco do negócio.',
+    'Neste encontro, o GU BigData & IA e o AWS User Group Curitiba mostram como ir além: com conectores e servidores MCP, o Amazon Quick transforma pedidos em linguagem natural em chat agents, flows, automações, aplicações e integrações que acessam dados corporativos e executam tarefas.',
+    'A palestra é prática, com demonstração ao vivo e os ativos criados na tela. Temas: a diferença entre um chatbot genérico e uma IA conectada ao contexto da empresa; como conectores e MCP aproximam a IA dos dados; criar um agente a partir de uma descrição em português; quando usar chat agent, flow, automação ou aplicação; como transformar uma conversa em solução reutilizável pela equipe; e os cuidados ao conectar IA, dados e processos corporativos.',
+    'Para profissionais de dados, desenvolvedores e cloud, gestores de tecnologia e inovação, estudantes e empresas que querem levar os experimentos de IA para processos integrados.',
+    'Como todo encontro do GU, o formato é conteúdo + troca de experiências + networking com a comunidade de dados de Curitiba. Depois do encontro, jantar por adesão (local informado no dia).',
   ],
   agenda: [
     { hora: '18h30', item: 'Credenciamento e networking' },
-    { hora: '19h00', item: 'Abertura — GU Big Data & IA' },
+    { hora: '19h00', item: 'Abertura — GU BigData & IA, AWS User Group Curitiba e apoiadores' },
     {
       hora: '19h15',
-      item: 'Palestra: Churn Antes que Aconteça — como dados e IA transformam retenção e LTV na Tecnofit — Marcio Viana e Leandro Krukoski (Onetopia)',
+      item: 'Palestra: Sua IA corporativa parou no chat? Agentes, automações e apps com o Amazon Quick — Iago Pimentel (demonstração ao vivo)',
     },
-    { hora: '20h15', item: 'Perguntas e troca de experiências (painel)' },
-    { hora: '21h00', item: 'Encerramento e networking' },
+    { hora: '20h30', item: 'Perguntas e discussão (painel)' },
+    { hora: '21h00', item: 'Encerramento, networking e fotos' },
+    { hora: '21h20', item: 'Jantar por adesão (local informado no encontro)' },
   ],
   palestrantes: [
     {
-      nome: 'Marcio Viana',
-      foto: '/gubigdata/marcio-viana.jpg',
-      tema: 'A visão de negócio por trás do projeto: como dados, tecnologia e IA apoiam decisões estratégicas. C-Level, CEO e conselheiro de administração na Onetopia.',
-    },
-    {
-      nome: 'Leandro Krukoski',
-      foto: '/gubigdata/leandro-krukoski.jpg',
-      tema: 'Os desafios técnicos: construção da solução analítica, integração ao ambiente da Tecnofit e a entrada em produção. Líder de Dados, Tecnologia e Transformação Digital na Onetopia.',
+      nome: 'Iago Pimentel',
+      foto: '/gubigdata/iago-pimentel.jpg',
+      tema: 'Atua com tecnologia, dados, cloud e IA no ambiente corporativo. Mostra na prática como conectar agentes de IA às informações e aos processos da empresa.',
     },
   ],
   realizacao:
-    'Realização: IEP — Instituto de Engenharia do Paraná · Organização: GU Big Data & IA, Rede Sol e SUCESU PR.',
-  associacoes: ['Associado IEP', 'Membro GU BigData & IA', 'Participante DSSBR'],
+    'Realização: GU Big Data & IA e AWS User Group Curitiba · Local: IEP — Instituto de Engenharia do Paraná.',
+  associacoes: ['Associado IEP', 'Membro GU BigData & IA', 'Membro AWS User Group Curitiba', 'Participante DSSBR'],
   // Ingresso de R$30 de evento de comunidade: mostra PF/PJ, mas não trava a inscrição
   // por endereço. Espelha PRODUTOS[EVENTO_GU_SLUG] — o form não pode discordar do servidor.
   enderecoObrigatorioPJ: false,

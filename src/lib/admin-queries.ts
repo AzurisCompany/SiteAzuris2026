@@ -22,6 +22,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'cafe-networking-2026-10': 'DSSBR — Café de Networking 06/10',
+  'gubigdata-2026-11': 'GU BigData — Encontro 19/11',
   'gubigdata-2026-09': 'GU BigData — Encontro 24/09',
   'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
@@ -52,6 +53,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'cafe-networking-2026-10': 'Café DSSBR 06/10',
+  'gubigdata-2026-11': 'GU BigData 19/11',
   'gubigdata-2026-09': 'GU BigData 24/09',
   'gubigdata-2026-08': 'GU BigData 26/08',
   'gubigdata-2026-07': 'GU BigData 30/07',
@@ -82,7 +84,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'dss-2027-fullpass-curso': '/dssbr-2027/fullpass-curso',
   'certificado-elite-digital-dss-2026': '/dssbr-2026/certificado-elite/digital',
   'certificado-elite-impresso-dss-2026': '/dssbr-2026/certificado-elite/impresso',
-  'gubigdata-2026-09': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
+  'gubigdata-2026-11': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
   'ett-adesao': '/ett/adesao',
   'ett-assinatura': '/ett/assinatura',
@@ -96,6 +98,7 @@ export const CHECKOUT_URL: Record<string, string> = {
  * /gubigdata pro encontro de julho mandaria o admin pra página de outro evento.
  */
 export const PRODUTOS_ENCERRADOS = new Set<string>([
+  'gubigdata-2026-09',
   'gubigdata-2026-08',
   'gubigdata-2026-07',
   // Combo One Day + curso (R$360), encerrado em 25/08/2026: o combo com curso passou
