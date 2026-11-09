@@ -4,13 +4,13 @@
 
 | o quê | estado |
 |---|---|
-| ETT (ativação, Dedicação, Aceleração) | commit `3f36c61` — **NÃO DEPLOYADO** |
-| e-mail em inscrição gratuita | commit `a953ae5` — **NÃO DEPLOYADO** |
+| ETT (ativação, Dedicação, Aceleração) | commit `3f36c61` — **EM PROD** (deploy gk94yifxt, verificado no ar) |
+| e-mail em inscrição gratuita | commit `a953ae5` — **EM PROD** |
 | docs + este contexto | commit seguinte (docs) |
 | tipo `ett-aceleracao/aceleracao` em prod | **NÃO CRIADO** (escrita via API negada ao Claude) |
-| push | **pendente** |
+| push | feito até `40d1e6c` |
 
-Deploy: `vercel --prod` do Claude deu "Not authorized" e depois foi negado pelo modo auto.
+Deploy: o 1º `vercel --prod` deu "Not authorized"; com o "pode publicar" do Binhara, o Claude publicou (gk94yifxt). Verificado: 3 páginas 200, R$ 97,00, `/ett/adesao` → 307 com UTM. Migrate pela API negado ao Claude.
 
 ## 1. Releitura
 
