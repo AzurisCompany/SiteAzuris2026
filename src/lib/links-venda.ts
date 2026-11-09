@@ -67,8 +67,9 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
     links: [
       { nome: 'Curso Lakehouse — inscrição', caminho: '/lakehouse-comunidade/inscricao', visibilidade: 'publico', nota: 'lote no próprio fluxo do curso' },
       { nome: 'Curso Lakehouse — página', caminho: '/lakehouse-comunidade', visibilidade: 'publico' },
-      { nome: 'ETT — adesão', caminho: '/ett/adesao', slug: 'ett-adesao', visibilidade: 'publico' },
-      { nome: 'ETT — assinatura', caminho: '/ett/assinatura', visibilidade: 'publico' },
+      { nome: 'ETT — ativação acompanhada (R$97)', caminho: '/ett/ativacao', slug: 'ett-adesao', visibilidade: 'publico' },
+      { nome: 'ETT — Trilha de Dedicação (R$37/mês)', caminho: '/ett/assinatura', visibilidade: 'publico' },
+      { nome: 'ETT — Trilha de Aceleração (R$0)', caminho: '/ett/aceleracao', visibilidade: 'publico', nota: 'inscrição sem pagamento' },
       { nome: 'Preparatório de Dados — reserva', caminho: '/preparatorio-dados/reserva', visibilidade: 'publico', nota: 'captação de lead, sem pagamento' },
     ],
   },

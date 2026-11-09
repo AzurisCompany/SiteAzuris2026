@@ -7,14 +7,15 @@ import AssinaturaEttForm from './AssinaturaEttForm'
 
 // Checkout da Trilha de Dedicação do ETT — R$37/mês ou R$370/ano. É o único
 // checkout público recorrente do site: nasce uma subscription no Asaas, não um
-// pagamento avulso ([[ett]]). A adesão é a outra página: /ett/adesao.
+// pagamento avulso ([[ett]]). Vem DEPOIS da ativação acompanhada (/ett/ativacao, R$97);
+// a alternativa sem mensalidade é /ett/aceleracao.
 const MENSAL = getPlanoEtt('mensal')!
 const ANUAL = getPlanoEtt('anual')!
-const ADESAO = getProduto('ett-adesao')
+const ATIVACAO = getProduto('ett-adesao')
 
 const INCLUI = [
-  'ETT Player completo — as 10 ferramentas',
-  'Encontros online e presenciais',
+  'ETT Player completo — todas as ferramentas',
+  'Plano de prática personalizado',
   'O sistema acompanha e registra sua evolução',
   'Acompanhamento e feedback das ferramentas',
 ]
@@ -22,7 +23,7 @@ const INCLUI = [
 export const metadata: Metadata = {
   title: 'Trilha de Dedicação — English Talk Time',
   description:
-    'Assinatura da Trilha de Dedicação do English Talk Time: R$ 37/mês ou R$ 370/ano. ETT Player completo, encontros online e presenciais. Cancela quando quiser.',
+    'Assinatura da Trilha de Dedicação do English Talk Time: R$ 37/mês ou R$ 370/ano, depois da ativação acompanhada. ETT Player completo e plano de prática personalizado. Cancela quando quiser.',
   robots: { index: false, follow: false }, // checkout; a página indexável é englishtalktime.com.br
 }
 
@@ -31,6 +32,7 @@ export const dynamic = 'force-dynamic'
 export default function EttAssinaturaPage() {
   return (
     <EttShell
+      exigeAtivacao
       h1={
         <>
           Trilha de <span className="text-[var(--azuris-cyan)]">Dedicação</span> · ETT
@@ -38,17 +40,21 @@ export default function EttAssinaturaPage() {
       }
       subtitulo={
         <>
-          Pra quem quer tudo no próprio ritmo, sem rotina obrigatória —{' '}
-          <strong className="text-[var(--text-primary)]">1h de dedicação por dia</strong>. Vale a partir do dia 31.
+          Sem rotina obrigatória — <strong className="text-[var(--text-primary)]">1h de dedicação por dia</strong>.
+          Acesso às ferramentas no seu próprio ritmo.
         </>
       }
       rodape={
         <>
-          Ainda não fez a adesão?{' '}
-          <Link href="/ett/adesao" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
-            Comece pela adesão de R$ {ADESAO.precoCentavos / 100}
+          Não quer pagar mensalidade?{' '}
+          <Link href="/ett/aceleracao" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
+            Trilha de Aceleração: R$ 0
           </Link>{' '}
-          — os 30 primeiros dias de plataforma já vêm inclusos.
+          pra quem topa manter a rotina. Ainda não fez a ativação?{' '}
+          <Link href="/ett/ativacao" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
+            Comece por ela (R$ {ATIVACAO.precoCentavos / 100})
+          </Link>
+          .
         </>
       }
     >
@@ -56,7 +62,7 @@ export default function EttAssinaturaPage() {
         label="Trilha de Dedicação"
         preco={`R$ ${(MENSAL.valorCentavos / 100).toFixed(2).replace('.', ',')}`}
         unidade={MENSAL.unidade}
-        nota={`No anual saem R$ ${ANUAL.valorCentavos / 100} — dois meses de desconto. Cancela quando quiser, direto no checkout.`}
+        nota={`Anual por R$ ${ANUAL.valorCentavos / 100} — dois meses de desconto. Cancela quando quiser, direto no checkout.`}
         inclui={INCLUI}
       />
 

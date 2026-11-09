@@ -50,12 +50,12 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
   switch (d.produtoSlug) {
     case 'ett-adesao':
       return {
-        assunto: 'Adesão confirmada — English Talk Time',
+        assunto: 'Ativação confirmada — English Talk Time',
         titulo: `Pagamento confirmado, ${nome}!`,
-        destaque: `Recebemos ${valor} da sua adesão ao English Talk Time.`,
+        destaque: `Recebemos ${valor} da sua ativação acompanhada no English Talk Time.`,
         paragrafos: [
-          'Sua adesão dá 2 encontros de 1 hora individuais, material didático personalizado, entrada nos encontros de conversação, conta no ETT Player e na sala do ETT Speak, e os 30 primeiros dias de plataforma.',
-          'A liberação da sua conta e o agendamento dos dois encontros são feitos por nós, na mão — chamamos você no WhatsApp em até 1 dia útil pra combinar os horários.',
+          'É o seu 1º mês: 30 dias com todas as ferramentas do ETT Player, 2 sessões individuais de 1 hora de orientação, Level Check e plano de prática montados com você, material personalizado e conta no ETT Player e na sala do ETT Speak. No dia 31 você escolhe uma trilha — Dedicação ou Aceleração.',
+          'A liberação da sua conta e o agendamento das duas sessões são feitos por nós, na mão — chamamos você no WhatsApp em até 1 dia útil pra combinar os horários.',
           'Não precisa fazer nada agora. Se em 1 dia útil ninguém tiver falado com você, responde este e-mail que a gente resolve.',
         ],
         cta: { label: 'Conhecer o ETT', url: 'https://englishtalktime.com.br' },
@@ -67,7 +67,7 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
         titulo: `Assinatura ativa, ${nome}!`,
         destaque: `Recebemos ${valor} do primeiro ciclo da sua Trilha de Dedicação.`,
         paragrafos: [
-          'Você tem o ETT Player completo — as 10 ferramentas —, os encontros online e presenciais, e o acompanhamento da sua evolução pelo sistema.',
+          'Você tem o ETT Player completo — todas as ferramentas —, plano de prática personalizado e o acompanhamento da sua evolução pelo sistema. Os encontros continuam abertos a todos.',
           'Se pagou no cartão, a renovação é automática. No PIX ou boleto, a cobrança do próximo ciclo chega por e-mail antes do vencimento.',
           'Pra cancelar, é só responder este e-mail ou chamar no WhatsApp — sem multa e sem letra miúda.',
         ],

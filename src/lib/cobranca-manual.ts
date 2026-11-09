@@ -155,7 +155,7 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
   },
   {
     slug: 'ett-adesao',
-    label: 'ETT Adesão',
+    label: 'ETT Ativação',
     descricaoPadrao: PRODUTOS['ett-adesao'].asaasDescricao,
     // Pessoa física; PJ que quiser nota preenche endereço por opção.
     enderecoObrigatorioPJ: PRODUTOS['ett-adesao'].enderecoObrigatorioPJ,

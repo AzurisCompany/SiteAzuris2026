@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "hadoop.com.br" },
     ],
   },
+  async redirects() {
+    return [
+      // A "adesão" virou "ativação acompanhada" em 09/11/2026; links antigos (site do
+      // ETT, WhatsApp) continuam funcionando. Query string (utm, ?c=) vai junto.
+      { source: "/ett/adesao", destination: "/ett/ativacao", permanent: false },
+      { source: "/ett/dedicacao", destination: "/ett/assinatura", permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       {

@@ -37,9 +37,9 @@ describe('planos da assinatura do ETT', () => {
 })
 
 describe('produtos do ETT no painel', () => {
-  it('adesão é cobrança única de R$67, sem desconto e sem âncora', () => {
+  it('ativação acompanhada é cobrança única de R$97, sem desconto e sem âncora', () => {
     const p = PRODUTOS['ett-adesao']
-    expect(p.precoCentavos).toBe(6700)
+    expect(p.precoCentavos).toBe(9700)
     expect(p.pixDescontoPct).toBe(0)
     expect(p.cartaoAcrescimoPct).toBe(0)
     expect(p.precoDeVendaCentavos).toBe(0)
@@ -49,8 +49,16 @@ describe('produtos do ETT no painel', () => {
     expect(PRODUTOS['ett-adesao'].enderecoObrigatorioPJ).toBe(false)
   })
 
-  it('os dois slugs têm aba no painel — senão a venda cai numa aba sem nome', () => {
+  it('os três slugs têm aba no painel — senão a venda cai numa aba sem nome', () => {
     expect(PRODUTO_TAB['ett-adesao']).toBeTruthy()
     expect(PRODUTO_TAB[ETT_ASSINATURA_SLUG]).toBeTruthy()
+    expect(PRODUTO_TAB['ett-aceleracao']).toBeTruthy()
+  })
+
+  it('Trilha de Aceleração não cobra nada — preço zero no registry', () => {
+    const p = PRODUTOS['ett-aceleracao']
+    expect(p.precoCentavos).toBe(0)
+    expect(p.precoDeVendaCentavos).toBe(0)
+    expect(p.telefoneObrigatorio).toBe(true)
   })
 })

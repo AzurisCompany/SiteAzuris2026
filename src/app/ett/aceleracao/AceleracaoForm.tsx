@@ -1,0 +1,170 @@
+'use client'
+
+import { useState, type FormEvent } from 'react'
+import { CheckCircle2 } from 'lucide-react'
+import { gaEvent } from '@/lib/gtag'
+import { maskPhone } from '@/lib/format'
+
+const CAMPO =
+  'w-full rounded-lg border border-[var(--azuris-surface)] bg-[var(--azuris-ink)] px-3 py-2.5 text-sm placeholder:text-[var(--text-muted)] focus:border-[var(--azuris-cyan)] focus:outline-none'
+
+export default function AceleracaoForm() {
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [ciente, setCiente] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [confirmado, setConfirmado] = useState<null | { duplicada: boolean }>(null)
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    setErro(null)
+    setSubmitting(true)
+
+    // UTM lida no envio (não num effect): é o único momento em que importa.
+    const params = new URLSearchParams(window.location.search)
+    const utm = {
+      source: params.get('utm_source') ?? undefined,
+      medium: params.get('utm_medium') ?? undefined,
+      campaign: params.get('utm_campaign') ?? undefined,
+      content: params.get('utm_content') ?? undefined,
+      term: params.get('utm_term') ?? undefined,
+    }
+
+    try {
+      const res = await fetch('/api/ett/aceleracao/inscricao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: nome.trim(),
+          email: email.trim().toLowerCase(),
+          telefone,
+          tipo: 'aceleracao',
+          consentimento: consent,
+          utm,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setErro(data?.error ?? 'Falha ao registrar a inscrição. Tenta de novo.')
+        setSubmitting(false)
+        return
+      }
+
+      if (data.gratuito) {
+        if (!data.duplicada) {
+          gaEvent('generate_lead', { currency: 'BRL', value: 0, items: [{ item_id: 'ett-aceleracao', item_name: 'ETT — Trilha de Aceleração', quantity: 1 }] })
+        }
+        setConfirmado({ duplicada: !!data.duplicada })
+      } else {
+        setErro('Resposta inesperada do servidor.')
+      }
+      setSubmitting(false)
+    } catch {
+      setErro('Erro de rede. Tenta de novo.')
+      setSubmitting(false)
+    }
+  }
+
+  if (confirmado) {
+    return (
+      <div className="mt-8 rounded-2xl border border-[var(--accent-emerald)] bg-[var(--azuris-deep)] p-8 text-center">
+        <CheckCircle2 className="mx-auto size-12 text-[var(--accent-emerald)]" />
+        <h2 className="mt-4 text-2xl font-bold">
+          {confirmado.duplicada ? 'Você já está inscrito!' : 'Inscrição registrada!'}
+        </h2>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          {confirmado.duplicada
+            ? 'Esse e-mail já estava inscrito na Trilha de Aceleração — não precisa fazer de novo.'
+            : 'Pronto. A gente chama você no WhatsApp em até 1 dia útil pra liberar a trilha e combinar como a meta é acompanhada.'}
+        </p>
+        <p className="mt-3 text-xs text-[var(--text-muted)]">Nada foi cobrado — a Aceleração custa R$ 0.</p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="mt-8 space-y-5 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
+      <h2 className="text-lg font-bold">Seus dados</h2>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">Nome</label>
+        <input type="text" required value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" className={CAMPO} />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">E-mail</label>
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="voce@empresa.com"
+          className={CAMPO}
+        />
+        <p className="mt-1 text-xs text-[var(--text-muted)]">Use o mesmo e-mail da sua conta no ETT Player.</p>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-[var(--text-secondary)]">WhatsApp</label>
+        <input
+          type="tel"
+          required
+          inputMode="numeric"
+          value={telefone}
+          onChange={(e) => setTelefone(maskPhone(e.target.value))}
+          placeholder="(41) 99999-9999"
+          className={CAMPO}
+        />
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          O acompanhamento da meta e os avisos do ETT acontecem por aqui.
+        </p>
+      </div>
+
+      <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
+        <input
+          type="checkbox"
+          required
+          checked={ciente}
+          onChange={(e) => setCiente(e.target.checked)}
+          className="mt-0.5 size-4 accent-[var(--azuris-cyan)]"
+        />
+        <span>
+          Entendi a regra: a trilha começa depois da ativação acompanhada, a meta é 1h de dedicação por dia (20 dias
+          válidos por mês) e, se eu parar, a bolsa entra em pausa — sem multa e sem cobrança retroativa.
+        </span>
+      </label>
+
+      <label className="flex items-start gap-2 text-xs text-[var(--text-secondary)]">
+        <input
+          type="checkbox"
+          required
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-0.5 size-4 accent-[var(--azuris-cyan)]"
+        />
+        <span>
+          Autorizo a Azuris a usar meu e-mail e meu WhatsApp pra falar comigo sobre o English Talk Time (LGPD). Sem
+          repasse pra terceiros.
+        </span>
+      </label>
+
+      {erro && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-sm text-red-300">{erro}</div>}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded-xl bg-gradient-to-r from-[var(--azuris-cyan)] to-[var(--accent-violet)] px-6 py-4 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:transform-none"
+      >
+        {submitting ? 'Registrando…' : 'Entrar na Trilha de Aceleração (R$ 0)'}
+      </button>
+
+      <p className="text-center text-xs text-[var(--text-muted)]">
+        Sem pagamento e sem cartão — o preço é a sua dedicação.
+      </p>
+    </form>
+  )
+}

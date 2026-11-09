@@ -408,25 +408,47 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     // regra do GU — o atrito custa mais que a nota).
     enderecoObrigatorioPJ: false,
   },
-  // Adesão do English Talk Time ([[project_ecosystem]]). Cobrada UMA VEZ — não vira
-  // mensalidade. Dá 2 encontros individuais de 1h, material personalizado, entrada nos
-  // encontros de conversação, conta no ETT Player/Speak e os 30 primeiros dias de
-  // plataforma. A mensalidade (Trilha de Dedicação, R$39/mês) é OUTRO produto, recorrente,
-  // que NÃO passa por aqui: assinatura tem checkout próprio em /api/ett/assinatura ([[ett]]).
+  // ATIVAÇÃO ACOMPANHADA do English Talk Time ([[project_ecosystem]]) — até 09/11/2026 se
+  // chamava "Adesão" (R$67). O slug continua 'ett-adesao' de propósito: é a mesma linha
+  // de produto, e trocar o slug partiria o histórico de vendas em duas abas.
+  // Cobrada UMA VEZ, é o 1º mês: 30 dias com todas as ferramentas + 2 sessões individuais
+  // de orientação de 1h. No dia 31 a pessoa escolhe uma trilha — Dedicação (R$37/mês,
+  // recorrente, checkout próprio em /api/ett/assinatura, [[ett]]) ou Aceleração (R$0,
+  // 'ett-aceleracao' abaixo).
   'ett-adesao': {
     slug: 'ett-adesao',
-    nome: 'English Talk Time — Adesão',
-    descricao: 'Pagamento único · 2h de mentoria individual + 30 dias de plataforma',
-    precoCentavos: 6700, // R$ 67,00 — preço único da adesão (PIX ou cartão 1x)
+    nome: 'English Talk Time — Ativação acompanhada',
+    descricao: 'Pagamento único · seu 1º mês com 2 sessões individuais de orientação',
+    precoCentavos: 9700, // R$ 97,00 — preço único da ativação (PIX ou cartão 1x)
     precoDeVendaCentavos: 0, // sem âncora riscada — o preço é o preço
     pixDescontoPct: 0,
     cartaoAcrescimoPct: 0,
     maxParcelas: 3, // 1x à vista · 2x–3x com juros
-    asaasDescricao: 'ETT — Adesão (2 encontros individuais, material e 30 dias de plataforma)',
+    asaasDescricao: 'ETT — Ativação acompanhada (1º mês: 30 dias de plataforma + 2 sessões individuais)',
     voltarUrl: 'https://englishtalktime.com.br',
     voltarLabel: '← voltar pro English Talk Time',
     telefoneObrigatorio: true, // o ETT roda no WhatsApp; sem telefone não dá pra marcar os encontros
     enderecoObrigatorioPJ: false, // produto de pessoa física; PJ pede nota por exceção
+  },
+  // Trilha de Aceleração do ETT — R$0, "custa 1h da sua dedicação por dia" (20 dias
+  // válidos/mês; parou, a bolsa pausa, sem multa). NUNCA gera cobrança: o único tipo
+  // ('aceleracao') é gratuito e cai no fluxo sem CPF e sem Asaas de [[checkout-produto]].
+  // Pré-requisito é a ativação acompanhada — conferido por operação, não por código
+  // (quem entrou antes da ativação existir está isento e não teria a compra no banco).
+  'ett-aceleracao': {
+    slug: 'ett-aceleracao',
+    nome: 'English Talk Time — Trilha de Aceleração',
+    descricao: 'R$ 0 · 1h de dedicação por dia no lugar da mensalidade',
+    precoCentavos: 0,
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 1,
+    asaasDescricao: 'ETT — Trilha de Aceleração (sem cobrança)',
+    voltarUrl: 'https://englishtalktime.com.br',
+    voltarLabel: '← voltar pro English Talk Time',
+    telefoneObrigatorio: true, // a meta é acompanhada pelo WhatsApp
+    enderecoObrigatorioPJ: false, // não cobra nada — não há nota
   },
   // Lista de espera do curso preparatório (Python/SQL/Docker) — pré-requisito do
   // Lakehouse. Reserva de interesse: NUNCA gera cobrança, só captura o lead pelo

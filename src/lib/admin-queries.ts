@@ -26,8 +26,9 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'gubigdata-2026-09': 'GU BigData — Encontro 24/09',
   'gubigdata-2026-08': 'GU BigData — Encontro 26/08',
   'gubigdata-2026-07': 'GU BigData — Encontro 30/07',
-  'ett-adesao': 'English Talk Time — Adesão',
+  'ett-adesao': 'English Talk Time — Ativação acompanhada',
   'ett-assinatura': 'ETT — Trilha de Dedicação',
+  'ett-aceleracao': 'ETT — Trilha de Aceleração',
   'preparatorio-dados': 'Preparatório (reservas)',
   proposta: 'Proposta customizada',
   assinatura: 'Assinatura',
@@ -57,8 +58,9 @@ export const PRODUTO_TAB: Record<string, string> = {
   'gubigdata-2026-09': 'GU BigData 24/09',
   'gubigdata-2026-08': 'GU BigData 26/08',
   'gubigdata-2026-07': 'GU BigData 30/07',
-  'ett-adesao': 'ETT Adesão',
+  'ett-adesao': 'ETT Ativação',
   'ett-assinatura': 'ETT Assinatura', // ciclos da Trilha de Dedicação ([[ett]])
+  'ett-aceleracao': 'ETT Aceleração', // inscrições gratuitas, sem cobrança
   'preparatorio-dados': 'Preparatório',
   proposta: 'Propostas',
   assinatura: 'Assinaturas', // recorrências avulsas criadas no admin (sem produto)
@@ -86,8 +88,9 @@ export const CHECKOUT_URL: Record<string, string> = {
   'certificado-elite-impresso-dss-2026': '/dssbr-2026/certificado-elite/impresso',
   'gubigdata-2026-11': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
-  'ett-adesao': '/ett/adesao',
+  'ett-adesao': '/ett/ativacao',
   'ett-assinatura': '/ett/assinatura',
+  'ett-aceleracao': '/ett/aceleracao',
   'preparatorio-dados': '/preparatorio-dados/reserva',
 }
 

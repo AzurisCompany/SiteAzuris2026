@@ -155,6 +155,11 @@ const STATEMENTS: string[] = [
    VALUES
      ('preparatorio-dados', 'reserva', 'Reserva de interesse', 'Sem pagamento — aviso na abertura e desconto de fundador', 0, 1, 0, NULL, NULL)
    ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
+  // Seed da Trilha de Aceleração do ETT — único tipo, gratuito (idempotente; NÃO sobrescreve edições do admin).
+  `INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+   VALUES
+     ('ett-aceleracao', 'aceleracao', 'Trilha de Aceleração', 'R$ 0 — 1h de dedicação por dia, 20 dias válidos por mês', 0, 1, 0, NULL, NULL)
+   ON CONFLICT (produto_slug, tipo_id) DO NOTHING`,
   // Recria a view de vagas excluindo registros de teste (não devem consumir vaga real).
   `CREATE OR REPLACE VIEW v_vagas_por_lote AS
      SELECT lote,

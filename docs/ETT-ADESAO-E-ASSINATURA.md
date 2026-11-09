@@ -1,12 +1,29 @@
-# ETT no gateway — adesão (R$67) e assinatura (R$37/mês)
+# ETT no gateway — ativação (R$97), Dedicação (R$37/mês) e Aceleração (R$0)
 
-Dois produtos do English Talk Time passando pelo checkout da Azuris. Preços e copy
+Três produtos do English Talk Time passando pelo checkout da Azuris. Preços e copy
 vêm da home do englishtalktime.com.br.
 
 | Produto | URL | Preço | Natureza |
 |---|---|---|---|
-| Adesão | `/ett/adesao` | R$ 67 | cobrança **única** (PIX ou cartão 1–3x) |
+| Ativação acompanhada (era "Adesão") | `/ett/ativacao` | R$ 97 | cobrança **única**, é o 1º mês (PIX ou cartão 1–3x) |
 | Trilha de Dedicação | `/ett/assinatura` | R$ 37/mês ou R$ 370/ano | **recorrente** (subscription no Asaas) |
+| Trilha de Aceleração | `/ett/aceleracao` | R$ 0 | inscrição **gratuita** (sem CPF, sem Asaas) |
+
+## Mudança de 09/11/2026
+
+- A "Adesão" de R$67 virou **Ativação acompanhada de R$97**: 30 dias com todas as
+  ferramentas + 2 sessões individuais de orientação de 1h. **Slug continua
+  `ett-adesao`** (mesmo histórico de vendas, mesma aba) e a API continua
+  `/api/ett/adesao/inscricao`. `/ett/adesao` → 307 pra `/ett/ativacao` (next.config,
+  query string preservada). `/ett/dedicacao` → `/ett/assinatura`.
+- **Trilha de Aceleração** nova: produto `ett-aceleracao`, tipo único `aceleracao`
+  (R$0). Página tolerante: sem o tipo ativo no banco, mostra "abrem em breve" + WhatsApp.
+  Seed em `sql/admin-migration.sql` e no `POST /api/admin/migrate`. Não manda e-mail
+  (fluxo gratuito não manda, igual GU associado).
+- As duas trilhas mostram "Antes, a ativação" no topo. **Não é trava de código**: quem
+  entrou antes da ativação existir está isento e não teria a compra no banco — conferir
+  é operação.
+- A isenção ("quem já está numa trilha gratuita não passa a pagar") ficou só na ativação.
 
 Ambas `noindex` — a página indexável é o site do ETT; estas são só checkout.
 

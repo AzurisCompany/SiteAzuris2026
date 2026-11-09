@@ -161,6 +161,12 @@ VALUES
   ('preparatorio-dados', 'reserva', 'Reserva de interesse', 'Sem pagamento — aviso na abertura e desconto de fundador', 0, 1, 0, NULL, NULL)
 ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
 
+-- Seed da Trilha de Aceleração do ETT — único tipo, gratuito (idempotente; NÃO sobrescreve edições do admin).
+INSERT INTO tipos_ingresso (produto_slug, tipo_id, nome, descricao, preco_centavos, max_parcelas, ordem, vendas_ate, limite_qtd)
+VALUES
+  ('ett-aceleracao', 'aceleracao', 'Trilha de Aceleração', 'R$ 0 — 1h de dedicação por dia, 20 dias válidos por mês', 0, 1, 0, NULL, NULL)
+ON CONFLICT (produto_slug, tipo_id) DO NOTHING;
+
 -- Cupons de desconto (vendedoras e parceiros) — ver docs/CUPONS-DESCONTO.md.
 -- A tabela guarda a REGRA, não os links. O link de vendedora é um token assinado com
 -- prazo próprio; o de parceiro é o código puro (?c=CODIGO), sem prazo. Em ambos os

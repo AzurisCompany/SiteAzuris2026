@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react'
+import { getProduto } from '@/lib/produtos'
 
-// Moldura comum dos dois checkouts do English Talk Time (adesão e assinatura).
+// Moldura comum dos checkouts do English Talk Time (ativação, Dedicação e Aceleração).
 // Mesmo tema escuro dos outros checkouts do site; o que muda é a linguagem —
 // aqui não é ingresso de evento, é entrada num programa que continua todo mês.
 //
-// A isenção de quem já está numa trilha gratuita aparece nas duas telas de
-// propósito: é a dúvida nº 1 de quem chega pela home do ETT.
+// `isencao`: quem entrou antes da ativação paga existir não passa a pagar — só faz
+// sentido na tela da ativação. `exigeAtivacao`: as duas trilhas começam no dia 31,
+// depois da ativação; o aviso fica no topo pra ninguém assinar achando que pulou etapa.
 
 export const WA_ETT = '5541998003687' // +55 (41) 99800-3687
+
+const ATIVACAO_REAIS = getProduto('ett-adesao').precoCentavos / 100
 
 export default function EttShell({
   voltarLabel = '← voltar pro English Talk Time',
@@ -16,6 +20,9 @@ export default function EttShell({
   subtitulo,
   children,
   rodape,
+  isencao = false,
+  exigeAtivacao = false,
+  semCobranca = false,
 }: {
   voltarLabel?: string
   voltarUrl?: string
@@ -24,6 +31,10 @@ export default function EttShell({
   children: ReactNode
   /** linha final da página (cross-link pro outro produto, dúvidas etc.) */
   rodape?: ReactNode
+  isencao?: boolean
+  exigeAtivacao?: boolean
+  /** trilha de R$0: o rodapé não fala de pagamento */
+  semCobranca?: boolean
 }) {
   return (
     <main className="min-h-screen bg-[var(--azuris-ink)] text-[var(--text-primary)]">
@@ -39,18 +50,32 @@ export default function EttShell({
         <p className="mt-3 text-sm text-[var(--text-secondary)]">{subtitulo}</p>
 
         {/* Isenção de quem já está dentro — a pergunta que trava a compra. */}
-        <p className="mt-4 rounded-xl border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 p-4 text-sm text-[var(--text-secondary)]">
-          <strong className="text-[var(--text-primary)]">Quem já está numa trilha gratuita não passa a pagar.</strong>{' '}
-          Se você se cadastrou antes desta página mudar, sua adesão está isenta. Não existe cobrança retroativa.
-        </p>
+        {isencao && (
+          <p className="mt-4 rounded-xl border border-[var(--accent-emerald)]/30 bg-[var(--accent-emerald)]/5 p-4 text-sm text-[var(--text-secondary)]">
+            <strong className="text-[var(--text-primary)]">Quem já está numa trilha gratuita não passa a pagar.</strong>{' '}
+            Se você se cadastrou antes desta página mudar, está isento da ativação. Não existe cobrança retroativa.
+          </p>
+        )}
+
+        {exigeAtivacao && (
+          <p className="mt-4 rounded-xl border border-[var(--azuris-cyan)]/30 bg-[var(--azuris-cyan)]/5 p-4 text-sm text-[var(--text-secondary)]">
+            <strong className="text-[var(--text-primary)]">Antes, a ativação.</strong> Pra entrar nesta trilha, primeiro
+            você faz a{' '}
+            <a href="/ett/ativacao" className="font-semibold text-[var(--azuris-cyan)] hover:underline">
+              ativação acompanhada de R$ {ATIVACAO_REAIS}
+            </a>
+            , que é o seu 1º mês. A trilha começa no dia 31.
+          </p>
+        )}
 
         {children}
 
         {rodape && <div className="mt-8 text-center text-sm text-[var(--text-secondary)]">{rodape}</div>}
 
         <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
-          Pagamento processado pelo Asaas com segurança. Seus dados são usados apenas pra emissão da cobrança e contato
-          sobre o programa.
+          {semCobranca
+            ? 'Nada é cobrado nesta trilha. Seus dados são usados apenas pra contato sobre o programa.'
+            : 'Pagamento processado pelo Asaas com segurança. Seus dados são usados apenas pra emissão da cobrança e contato sobre o programa.'}
         </p>
       </div>
     </main>

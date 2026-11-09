@@ -1,7 +1,8 @@
 // English Talk Time — assinatura recorrente (Trilha de Dedicação).
 //
-// A adesão de R$70 é cobrança única e vive no registry comum ([[produtos]], slug
-// 'ett-adesao'), passando pelo checkout genérico. A MENSALIDADE não passa lá: ela
+// A ativação acompanhada (R$97, era a "adesão") é cobrança única e vive no registry
+// comum ([[produtos]], slug 'ett-adesao'), passando pelo checkout genérico. A Trilha
+// de Aceleração (R$0) também: 'ett-aceleracao', fluxo gratuito. A MENSALIDADE não passa lá: ela
 // vira uma subscription no Asaas, que gera um ciclo por mês. Por isso este arquivo
 // separado — é a fonte da verdade do preço e do ciclo, lida SEMPRE no servidor.
 //
