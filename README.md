@@ -21,7 +21,7 @@ em `/admin`. O mapa disso está em
 - [BANCO-DE-DADOS.md](./docs/BANCO-DE-DADOS.md) — tabelas, colunas que fazem mais do que parecem, migração
 - [AMBIENTE-E-INFRA.md](./docs/AMBIENTE-E-INFRA.md) — variáveis, deploy, crons, DNS, analytics
 - [SITE-INSTITUCIONAL.md](./docs/SITE-INSTITUCIONAL.md) — home, blog, cases, produtos, SEO
-- [EMAIL-TRANSACIONAL-RESEND.md](./docs/EMAIL-TRANSACIONAL-RESEND.md) — confirmação de pagamento e vigia de vendas
+- [EMAIL-TRANSACIONAL-RESEND.md](./docs/EMAIL-TRANSACIONAL-RESEND.md) — confirmação de pagamento, inscrição gratuita e vigia de vendas
 - [GOOGLE-TAG-MANAGER.md](./docs/GOOGLE-TAG-MANAGER.md) — GTM em toda página (regra do [AGENTS.md](./AGENTS.md))
 
 **Vendas e preço**
@@ -33,7 +33,7 @@ em `/admin`. O mapa disso está em
 - [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./docs/DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md) — VIP e Business, lote que vira sozinho por quantidade
 - [DSS-VENDAS-ENCERRADAS.md](./docs/DSS-VENDAS-ENCERRADAS.md) — One Day, FullPass, Estudante e combo fechados (07–08/10): como, por quê, receita e desfazer
 - [EVENTOS-PRESENCIAIS.md](./docs/EVENTOS-PRESENCIAIS.md) — a página de evento que serve o GU e o café do DSSBR
-- [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
+- [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) (ativação R$97, Dedicação, Aceleração R$0) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
 
 **Admin**
 - [ADMIN-VENDAS-COBRANCA-INGRESSOS.md](./docs/ADMIN-VENDAS-COBRANCA-INGRESSOS.md) — cobrança avulsa, tipos de ingresso, filtros e abas

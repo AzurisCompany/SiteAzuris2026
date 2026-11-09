@@ -22,7 +22,7 @@ cobrava R$ 570.
 | fonte | onde | quem usa | muda com |
 |---|---|---|---|
 | **Catálogo de tipos** (`tipos_ingresso`) | banco, editável em `/admin/ingressos` | DSS 2026, GU BigData, reserva do preparatório | **sem deploy** |
-| **Registry** (`src/lib/produtos.ts`) | código | adesão ETT (One Day e combos: encerrados) — e **fallback** de todo mundo | deploy |
+| **Registry** (`src/lib/produtos.ts`) | código | ativação ETT (One Day e combos: encerrados) — e **fallback** de todo mundo | deploy |
 | **Lote do Lakehouse** (`determinarLoteAtivo` + `PRECO_POR_PERFIL`, `src/lib/db.ts`) | código + vagas no banco | curso Lakehouse | deploy |
 
 **A regra de precedência, num produto que tem tipos:** existe tipo ativo → o preço é dele.
@@ -43,7 +43,7 @@ tipos_ingresso ──┬──> /dssbr-2026 (landing, "a partir de")
                  ├──> /preparatorio-dados/reserva
                  └──> /admin/cobranca (opções + preço sugerido)
 
-produtos.ts ─────┬──> /ett/adesao (preço único; One Day e combo encerrados)
+produtos.ts ─────┬──> /ett/ativacao (preço único; One Day e combo encerrados)
                  └──> fallback de qualquer checkout quando não há tipo
 
 db.ts (lotes) ───────> /lakehouse-comunidade/inscricao
@@ -221,7 +221,7 @@ compartilhado em `/api/dss-certificado-elite/status`. Não confere se o comprado
 | ~~One Day~~ | ~~R$ 357~~ | **encerrado em 07/10/2026** (`f10f6bc`): `/dssbr-2026/one-day` → 308 → inscrição (aviso); `one-day/lotes.ts` e o canário foram apagados |
 | ~~FullPass + portal do curso~~ | ~~R$ 850~~ | **encerrado em 08/10/2026** (`e2365be`), página vira aviso. Histórico: combo desde 27/09/2026 (era R$ 750); sem âncora; **fulfillment do portal é manual**. ⚠️ Fica **abaixo** do FullPass sozinho (R$ 887) — decisão do Binhara; o canário `precos-lakehouse.test.ts` trava esse fato e a nota da página diz "no combo, com o portal do curso junto, fica R$ 850" |
 | ~~One Day + portal do curso~~ | ~~R$ 360~~ | **encerrado em 25/08/2026**: em `PRODUTOS_ENCERRADOS`, checkout removido, `/dssbr-2026/one-day-curso` redireciona pro combo vigente |
-| ETT adesão | R$ 67 | assinatura (R$ 37/mês) é outro fluxo, `/ett/assinatura` |
+| ETT ativação acompanhada | R$ 97 | era "adesão" R$ 67 até 09/11/2026; slug `ett-adesao`, página `/ett/ativacao` (`/ett/adesao` redireciona). Depois dela: Dedicação R$ 37/mês ou R$ 370/ano (`/ett/assinatura`, recorrente) ou Aceleração R$ 0 (`/ett/aceleracao`, tipo gratuito `aceleracao`) |
 | Café DSSBR | R$ 30 / grátis | edição em cartaz é **06/10**, com a Bindflow (`cafe-networking-2026-10`; até 18/09 era a Arlequim, mesmo produto); Geral R$ 30 e Convidado grátis. Mesma mecânica do GU — ver [EVENTOS-PRESENCIAIS.md](./EVENTOS-PRESENCIAIS.md) |
 | GU BigData | R$ 30 / grátis | encontro em cartaz é **19/11** (`gubigdata-2026-11`); os tipos vivem no catálogo, o registry é só fallback. Os de 30/07, 26/08 e 24/09 são eventos passados — ver `PRODUTOS_ENCERRADOS` |
 | Preparatório | R$ 0 | reserva de interesse, nunca cobra |

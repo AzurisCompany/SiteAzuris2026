@@ -45,7 +45,20 @@ entrega pela API devolve `401 restricted_api_key` — pra isso, o painel do Rese
 
 ## Onde o e-mail nasce
 
-Webhook do Asaas → status vira `paid` → `notificarPagamentoConfirmado(row)`.
+**Regra (Binhara, 09/11/2026): toda compra ou inscrição gera e-mail — inclusive a de R$ 0.**
+
+- **Pago:** webhook do Asaas → status vira `paid` → `notificarPagamentoConfirmado(row)`.
+  Cobre todo produto do registry, cobrança avulsa e ciclos de assinatura.
+- **Gratuito** (tipo de R$ 0 — Aceleração do ETT, associado do GU, convidado do café,
+  reserva do preparatório): sem Asaas não há webhook, então o próprio
+  `processarCheckout` chama `notificarInscricaoGratuita(insc)` logo depois de
+  `confirmarInscricaoGratuita`. Texto em `conteudoInscricaoGratuita()` — fala de
+  inscrição, nunca "Recebemos R$ 0,00". Mesma trava `email_confirmacao_em`.
+  Desde `a953ae5`.
+
+Produto novo: se for pago, cai no webhook sozinho (crie o `case` em
+`conteudoCompraConfirmada` pra não cair no genérico); se tiver tipo gratuito, crie o
+ramo em `conteudoInscricaoGratuita`.
 
 Duas garantias que valem lembrar:
 
@@ -65,6 +78,9 @@ não existe. Produto sem texto próprio cai num genérico curto — melhor dizer
 e certo do que prometer fulfillment que não existe.
 
 ## Testar
+
+> Vitest: `server-only` é stub (`src/test/server-only-stub.ts`, alias em
+> `vitest.config.ts`) — sem isso, qualquer teste que importa o checkout quebra.
 
 ```bash
 # config (sem expor a key)
@@ -104,8 +120,10 @@ Destino do alerta: `EMAIL_ALERTAS`, com fallback pra `EMAIL_RESPONDER_PARA`.
 
 ## O que NÃO foi feito
 
-- **Só o e-mail de pagamento confirmado.** Inscrição gratuita (associado do GU,
-  reserva do preparatório) continua sem aviso nenhum.
+- ~~Só o e-mail de pagamento confirmado~~ — resolvido em 09/11/2026 (`a953ae5`):
+  inscrição gratuita também manda.
+- **Baixa manual no admin / importação do Asaas** não disparam e-mail (não passam
+  pelo webhook nem pelo checkout).
 - **Sem retentativa própria:** se o Resend falhar, a reserva é devolvida e o
   reenvio depende do Asaas mandar o webhook de novo.
 - **Sem preview local** (`react-email` CLI não foi instalado — dev dependency
