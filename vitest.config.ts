@@ -8,6 +8,10 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
   },
   resolve: {
-    alias: { '@': resolve(__dirname, 'src') },
+    alias: {
+      '@': resolve(__dirname, 'src'),
+      // `server-only` lança fora do bundler do Next; nos testes vira módulo vazio.
+      'server-only': resolve(__dirname, 'src/test/server-only-stub.ts'),
+    },
   },
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { conteudoCompraConfirmada, primeiroNome, valorBRL } from '@/lib/email/conteudo'
+import { conteudoCompraConfirmada, conteudoInscricaoGratuita, primeiroNome, valorBRL } from '@/lib/email/conteudo'
 import { PRODUTO_TAB } from '@/lib/admin-queries'
 
 describe('primeiroNome', () => {
@@ -112,5 +112,22 @@ describe('camiseta do DSS 2026 — congressista', () => {
     expect(c.destaque).toContain('tamanho G')
     expect(c.destaque).toContain('R$ 140,00')
     expect(c.paragrafos.join(' ')).toContain('credenciamento')
+  })
+})
+
+describe('conteudoInscricaoGratuita', () => {
+  const slugs = ['ett-aceleracao', 'gubigdata-2026-11', 'cafe-networking-2026-10', 'preparatorio-dados', 'qualquer-coisa']
+  it('nunca fala em valor recebido — não houve pagamento', () => {
+    for (const produtoSlug of slugs) {
+      const c = conteudoInscricaoGratuita({ nome: 'Ana Souza', produtoSlug })
+      const texto = [c.assunto, c.titulo, c.destaque, ...c.paragrafos].join(' ')
+      expect(texto, produtoSlug).not.toMatch(/R\$ 0,00|Recebemos/)
+      expect(c.titulo, produtoSlug).toContain('Ana')
+    }
+  })
+  it('Aceleração lembra que vem depois da ativação e da regra da pausa', () => {
+    const t = conteudoInscricaoGratuita({ nome: 'Ana', produtoSlug: 'ett-aceleracao' }).paragrafos.join(' ')
+    expect(t).toContain('ativação')
+    expect(t).toContain('pausa')
   })
 })

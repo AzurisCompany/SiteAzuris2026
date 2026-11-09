@@ -5,7 +5,7 @@
 // erro e loga — quem chama não precisa de try/catch nem de await pra correção.
 
 import { reservarEnvioConfirmacao, liberarEnvioConfirmacao, type InscricaoRow } from '@/lib/db'
-import { conteudoCompraConfirmada } from '@/lib/email/conteudo'
+import { conteudoCompraConfirmada, conteudoInscricaoGratuita } from '@/lib/email/conteudo'
 import { enviarCompraConfirmada } from '@/lib/email/enviar'
 
 /**
@@ -41,5 +41,31 @@ export async function notificarPagamentoConfirmado(row: InscricaoRow): Promise<v
     console.error(`Falha ao enviar confirmação da inscricao ${row.id}: ${r.erro}`)
   } catch (e) {
     console.error('Falha inesperada ao notificar pagamento confirmado:', e)
+  }
+}
+
+/**
+ * Confirmação de inscrição GRATUITA (tipo de R$ 0). Sem Asaas não há webhook, então
+ * quem chama é o próprio checkout, logo depois de confirmar a inscrição. Mesma trava
+ * de `email_confirmacao_em` — e mesma regra: nunca derruba a inscrição.
+ */
+export async function notificarInscricaoGratuita(row: Pick<InscricaoRow, 'id' | 'email' | 'nome' | 'curso_slug'>): Promise<void> {
+  try {
+    if (!row.email || !row.email.includes('@')) return
+    if (!(await reservarEnvioConfirmacao(row.id))) return
+
+    const r = await enviarCompraConfirmada({
+      para: row.email,
+      conteudo: conteudoInscricaoGratuita({ nome: row.nome, produtoSlug: row.curso_slug }),
+    })
+
+    if (r.ok) {
+      console.log(`E-mail de inscrição gratuita enviado (inscricao ${row.id}, ${row.email}, resend ${r.id})`)
+      return
+    }
+    await liberarEnvioConfirmacao(row.id).catch(() => {})
+    console.error(`Falha ao enviar confirmação gratuita da inscricao ${row.id}: ${r.erro}`)
+  } catch (e) {
+    console.error('Falha inesperada ao notificar inscrição gratuita:', e)
   }
 }

@@ -26,6 +26,7 @@ import {
 import { escadaPorQuantidade } from '@/lib/lotes-quantidade'
 import { normalizarExtras, validarExtras, enderecoParaAsaas, type ExtrasInput } from '@/lib/checkout-extras'
 import { resolverDesconto, aplicarDesconto } from '@/lib/cupons'
+import { notificarInscricaoGratuita } from '@/lib/email/notificar'
 
 export interface CheckoutBody extends ExtrasInput {
   nome: string
@@ -169,6 +170,9 @@ export async function processarCheckout(produtoSlug: string, body: CheckoutBody)
         consentimento_em: new Date().toISOString(),
       })
       await confirmarInscricaoGratuita(insc.id)
+      // E-mail de confirmação: toda inscrição avisa, inclusive a de R$ 0. Engole o
+      // próprio erro — falha de e-mail não desfaz a inscrição.
+      await notificarInscricaoGratuita(insc)
       return { status: 200, body: { ok: true, gratuito: true } }
     } catch (e) {
       console.error('Falha ao registrar inscrição gratuita:', e)

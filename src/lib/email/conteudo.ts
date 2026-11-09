@@ -269,3 +269,67 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
       }
   }
 }
+
+/**
+ * Inscrição GRATUITA confirmada (tipo de R$ 0: Trilha de Aceleração do ETT, associado
+ * do GU, convidado do café, reserva do preparatório). Não passa pelo Asaas, então não
+ * tem webhook nem "Recebemos R$ 0,00" — o texto fala de inscrição, não de pagamento.
+ */
+export function conteudoInscricaoGratuita(d: Pick<DadosCompra, 'nome' | 'produtoSlug'>): ConteudoEmail {
+  const nome = primeiroNome(d.nome)
+
+  if (d.produtoSlug === 'ett-aceleracao') {
+    return {
+      assunto: 'Inscrição confirmada — Trilha de Aceleração (ETT)',
+      titulo: `Inscrição confirmada, ${nome}!`,
+      destaque: 'Você está na Trilha de Aceleração do English Talk Time — R$ 0, com a meta de 1h de dedicação por dia.',
+      paragrafos: [
+        'A trilha começa depois da ativação acompanhada (o seu 1º mês). Se você ainda não fez a ativação, a gente te explica o caminho no WhatsApp.',
+        'A meta são 20 dias válidos por mês, e presença nos encontros conta. Se parar, a bolsa entra em pausa — sem multa e sem cobrança retroativa.',
+        'A liberação é feita por nós, na mão — chamamos você no WhatsApp em até 1 dia útil. Se ninguém falar com você nesse prazo, responde este e-mail.',
+      ],
+      cta: { label: 'Conhecer o ETT', url: 'https://englishtalktime.com.br' },
+    }
+  }
+
+  if (d.produtoSlug.startsWith('gubigdata-')) {
+    return {
+      assunto: 'Inscrição confirmada — GU BigData & IA',
+      titulo: `Inscrição confirmada, ${nome}!`,
+      destaque: 'Sua inscrição gratuita no encontro do GU BigData & IA está confirmada.',
+      paragrafos: [
+        'A gratuidade é confirmada na entrada — leve um comprovante da associação que você informou.',
+        'Apresente este e-mail na entrada. A gente se vê lá.',
+      ],
+      cta: { label: 'Ver a página do encontro', url: 'https://azuris.com.br/gubigdata' },
+    }
+  }
+
+  if (d.produtoSlug.startsWith('cafe-networking-')) {
+    return {
+      assunto: 'Inscrição confirmada — Café de Networking do DSSBR',
+      titulo: `Inscrição confirmada, ${nome}!`,
+      destaque: 'Sua inscrição gratuita no café de networking do DSSBR está confirmada.',
+      paragrafos: ['Apresente este e-mail na entrada. A gente se vê lá.'],
+    }
+  }
+
+  if (d.produtoSlug === 'preparatorio-dados') {
+    return {
+      assunto: 'Reserva registrada — Curso Preparatório de Dados',
+      titulo: `Reserva registrada, ${nome}!`,
+      destaque: 'Você está na lista do Curso Preparatório de Dados (Python, SQL e Docker).',
+      paragrafos: [
+        'Nada foi cobrado — reservar não é comprar. Quando o preparatório abrir, você é avisado antes de todo mundo, com o desconto de fundador.',
+        'Pra sair da lista, é só responder este e-mail.',
+      ],
+    }
+  }
+
+  return {
+    assunto: 'Inscrição confirmada — Azuris',
+    titulo: `Inscrição confirmada, ${nome}!`,
+    destaque: 'Sua inscrição gratuita está confirmada. Nada foi cobrado.',
+    paragrafos: ['Este e-mail é o seu comprovante. Qualquer dúvida, é só responder aqui.'],
+  }
+}
