@@ -40,6 +40,7 @@ describe('conteudoCompraConfirmada', () => {
       'dss-2027-fullpass-curso',
       'certificado-elite-digital-dss-2026',
       'certificado-elite-impresso-dss-2026',
+      'slides-elite-dss-2026',
       'dss-one-day-curso-2026',
       'gubigdata-2026-08',
       'gubigdata-2026-07',

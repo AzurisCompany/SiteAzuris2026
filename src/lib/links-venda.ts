@@ -48,9 +48,10 @@ export const GRUPOS_LINKS: GrupoLinks[] = [
   {
     titulo: 'DSS 2026 — Upgrade Elite (certificado)',
     links: [
-      { nome: 'Certificado — escolher (digital ou impresso)', caminho: '/dssbr-2026/certificado-elite', visibilidade: 'link-direto' },
+      { nome: 'Upgrade Elite — escolher (certificado digital, impresso ou slides)', caminho: '/dssbr-2026/certificado-elite', visibilidade: 'link-direto' },
       { nome: 'Certificado digital — R$ 30', caminho: '/dssbr-2026/certificado-elite/digital', slug: 'certificado-elite-digital-dss-2026', visibilidade: 'link-direto' },
       { nome: 'Certificado impresso — R$ 50', caminho: '/dssbr-2026/certificado-elite/impresso', slug: 'certificado-elite-impresso-dss-2026', visibilidade: 'link-direto' },
+      { nome: 'Slides — R$ 30', caminho: '/dssbr-2026/certificado-elite/slides', slug: 'slides-elite-dss-2026', visibilidade: 'link-direto' },
     ],
   },
   {

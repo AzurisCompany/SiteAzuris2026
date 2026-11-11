@@ -208,8 +208,9 @@ checkout do curso, home (seção do curso), Pre-Load e todo aviso de venda encer
 |---|---|---|
 | Certificado digital (`certificado-elite-digital-dss-2026`) | `/dssbr-2026/certificado-elite/digital` (link direto, `noindex`) | R$ 30 · cartão 1x |
 | Certificado impresso (`certificado-elite-impresso-dss-2026`) | `/dssbr-2026/certificado-elite/impresso` (link direto, `noindex`) | R$ 50 · cartão 1x |
+| Slides (`slides-elite-dss-2026`, desde 11/11) | `/dssbr-2026/certificado-elite/slides` (link direto, `noindex`) | R$ 30 · cartão 1x · acesso por e-mail |
 
-Escolha entre os dois em `/dssbr-2026/certificado-elite`. **Dois produtos, não dois tipos**: a
+Escolha entre os três em `/dssbr-2026/certificado-elite`. **Produtos separados, não tipos**: a
 regra de 1 compra paga por CPF (§4.1) é por produto, e quem leva o digital pode querer o
 impresso. Sem tipo no banco → mudar preço = editar `PRODUTOS` + deploy. PIX na tela, status
 compartilhado em `/api/dss-certificado-elite/status`. Não confere se o comprador participou.

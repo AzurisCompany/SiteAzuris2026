@@ -313,6 +313,24 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: false,
     pixNaTela: true,
   },
+  // Upgrade Elite — slides: acesso aos slides das palestras do DSS 2026. Produto próprio
+  // pelo mesmo motivo dos certificados (1 compra paga por CPF é por produto).
+  'slides-elite-dss-2026': {
+    slug: 'slides-elite-dss-2026',
+    nome: 'DSS 2026 — Upgrade Elite: slides',
+    descricao: 'Slides das palestras do Data Science Summit Brasil 2026',
+    precoCentavos: 3000, // R$ 30,00
+    precoDeVendaCentavos: 0,
+    pixDescontoPct: 0,
+    cartaoAcrescimoPct: 0,
+    maxParcelas: 1,
+    asaasDescricao: 'Upgrade Elite DSS 2026 — slides',
+    voltarUrl: '/dssbr-2026/certificado-elite',
+    voltarLabel: '← ver as opções do Upgrade Elite',
+    telefoneObrigatorio: true,
+    enderecoObrigatorioPJ: false,
+    pixNaTela: true,
+  },
   // Evento do grupo de usuários GU BigData & IA (não é produto Azuris — a Azuris
   // só processa a inscrição). Os preços reais vêm dos tipos de ingresso cadastrados
   // no admin (geral R$30 / associado grátis); este registro é o fallback e a config.

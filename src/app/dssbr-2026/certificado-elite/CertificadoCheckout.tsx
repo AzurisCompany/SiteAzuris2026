@@ -1,19 +1,34 @@
 import { getProduto } from '@/lib/produtos'
 import InscricaoForm from '../inscricao/InscricaoForm'
 
-// UPGRADE ELITE do DSS 2026 — checkout do certificado. Um componente, dois produtos
-// (digital R$30 · impresso R$50), cada um com link próprio. Preço fixo no registry,
+// UPGRADE ELITE do DSS 2026 — um componente, três produtos (certificado digital R$30 ·
+// impresso R$50 · slides R$30), cada um com link próprio. Preço fixo no registry,
 // sem tipo no banco: a página nem consulta o banco. 1x no cartão, PIX na nossa tela.
-export type Formato = 'digital' | 'impresso'
+export type Formato = 'digital' | 'impresso' | 'slides'
 
 const SLUG: Record<Formato, string> = {
   digital: 'certificado-elite-digital-dss-2026',
   impresso: 'certificado-elite-impresso-dss-2026',
+  slides: 'slides-elite-dss-2026',
+}
+
+// O que aparece no título e no card de preço.
+const ITEM: Record<Formato, string> = {
+  digital: 'certificado digital',
+  impresso: 'certificado impresso',
+  slides: 'slides das palestras',
+}
+
+const DESCRICAO: Record<Formato, string> = {
+  digital: 'O certificado do Data Science Summit Brasil 2026, para quem participou do congresso.',
+  impresso: 'O certificado do Data Science Summit Brasil 2026, para quem participou do congresso.',
+  slides: 'Os slides das palestras do Data Science Summit Brasil 2026, para quem participou do congresso.',
 }
 
 const ENTREGA: Record<Formato, string> = {
   digital: 'O certificado digital chega no e-mail cadastrado.',
   impresso: 'Depois do pagamento, a gente chama você no WhatsApp cadastrado pra combinar a entrega.',
+  slides: 'O acesso aos slides chega no e-mail cadastrado.',
 }
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
@@ -24,7 +39,7 @@ export default function CertificadoCheckout({ formato }: { formato: Formato }) {
   const PRODUTO = getProduto(SLUG[formato])
   const preco = PRODUTO.precoCentavos / 100
   const waUrl = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
-    `Oi! Estava no checkout do certificado ${formato} (Upgrade Elite) do DSS 2026 e tenho uma dúvida.`,
+    `Oi! Estava no checkout do Upgrade Elite (${ITEM[formato]}) do DSS 2026 e tenho uma dúvida.`,
   )}`
 
   return (
@@ -38,14 +53,14 @@ export default function CertificadoCheckout({ formato }: { formato: Formato }) {
         </a>
 
         <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">
-          Upgrade <span className="text-[var(--azuris-cyan)]">Elite</span> — certificado {formato}
+          Upgrade <span className="text-[var(--azuris-cyan)]">Elite</span> — {ITEM[formato]}
         </h1>
         <p className="mt-3 text-sm text-[var(--text-secondary)]">
-          O certificado do Data Science Summit Brasil 2026, para quem participou do congresso. {ENTREGA[formato]}
+          {DESCRICAO[formato]} {ENTREGA[formato]}
         </p>
 
         <div className="mt-8 rounded-2xl border border-[var(--azuris-surface)] bg-[var(--azuris-deep)] p-6">
-          <div className="text-xs uppercase tracking-widest text-[var(--azuris-cyan)]">Certificado {formato}</div>
+          <div className="text-xs uppercase tracking-widest text-[var(--azuris-cyan)]">{ITEM[formato]}</div>
           <div className="text-4xl font-black">{brl(preco)}</div>
           <div className="text-xs text-[var(--text-muted)]">PIX ou cartão à vista</div>
         </div>
