@@ -209,12 +209,22 @@ checkout do curso, home (seção do curso), Pre-Load e todo aviso de venda encer
 | Certificado digital (`certificado-elite-digital-dss-2026`) | `/dssbr-2026/certificado-elite/digital` (link direto, `noindex`) | R$ 30 · cartão 1x |
 | Certificado impresso (`certificado-elite-impresso-dss-2026`) | `/dssbr-2026/certificado-elite/impresso` (link direto, `noindex`) | R$ 50 · cartão 1x |
 | Slides (`slides-elite-dss-2026`, desde 11/11) | `/dssbr-2026/certificado-elite/slides` (link direto, `noindex`) | R$ 30 · cartão 1x · acesso por e-mail |
-| Vídeos (`videos-elite-dss-2026`, desde 12/11) | `/dssbr-2026/certificado-elite/videos` (link direto, `noindex`) | R$ 50 · cartão 1x · acesso por e-mail |
 
-Escolha entre os quatro em `/dssbr-2026/certificado-elite`. **Produtos separados, não tipos**: a
+Escolha entre os três em `/dssbr-2026/certificado-elite`. **Produtos separados, não tipos**: a
 regra de 1 compra paga por CPF (§4.1) é por produto, e quem leva o digital pode querer o
 impresso. Sem tipo no banco → mudar preço = editar `PRODUTOS` + deploy. PIX na tela, status
 compartilhado em `/api/dss-certificado-elite/status`. Não confere se o comprador participou.
+
+**DSS 2026 — Upgrade vídeos** (registry, preço fixo; desde 12/11)
+
+| produto | checkout | preço |
+|---|---|---|
+| Vídeos das palestras (`upgrade-videos-dss-2026`) | `/dssbr-2026/upgrade-videos` (link direto, `noindex`) | R$ 50 · cartão 1x · link de download por e-mail |
+
+**Não é Upgrade Elite**: vale pra qualquer tipo de ingresso, por isso URL própria e fora da página
+de escolha do Elite. Reusa o `CertificadoCheckout` (formato `videos`), POST em
+`/api/dss-upgrade-videos`, status no mesmo `/api/dss-certificado-elite/status`. Entrega manual: o
+link de download vai por e-mail depois do pagamento. Não confere se o comprador participou.
 
 **Preço único (registry, exige deploy pra mudar)**
 

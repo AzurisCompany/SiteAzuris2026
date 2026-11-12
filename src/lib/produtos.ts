@@ -331,20 +331,20 @@ export const PRODUTOS: Record<string, ProdutoConfig> = {
     enderecoObrigatorioPJ: false,
     pixNaTela: true,
   },
-  // Upgrade Elite — vídeos: acesso às gravações das palestras do DSS 2026. Produto próprio
-  // pelo mesmo motivo dos certificados (1 compra paga por CPF é por produto).
-  'videos-elite-dss-2026': {
-    slug: 'videos-elite-dss-2026',
-    nome: 'DSS 2026 — Upgrade Elite: vídeos',
+  // Upgrade de vídeos: download das gravações das palestras do DSS 2026. NÃO é parte do
+  // Upgrade Elite — vale pra qualquer tipo de ingresso, por isso mora em /dssbr-2026/upgrade-videos.
+  'upgrade-videos-dss-2026': {
+    slug: 'upgrade-videos-dss-2026',
+    nome: 'DSS 2026 — Upgrade vídeos',
     descricao: 'Gravações das palestras do Data Science Summit Brasil 2026',
     precoCentavos: 5000, // R$ 50,00
     precoDeVendaCentavos: 0,
     pixDescontoPct: 0,
     cartaoAcrescimoPct: 0,
     maxParcelas: 1,
-    asaasDescricao: 'Upgrade Elite DSS 2026 — vídeos',
-    voltarUrl: '/dssbr-2026/certificado-elite',
-    voltarLabel: '← ver as opções do Upgrade Elite',
+    asaasDescricao: 'Upgrade DSS 2026 — vídeos das palestras',
+    voltarUrl: '/dssbr-2026',
+    voltarLabel: '← voltar pro DSS 2026',
     telefoneObrigatorio: true,
     enderecoObrigatorioPJ: false,
     pixNaTela: true,

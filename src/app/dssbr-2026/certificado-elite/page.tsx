@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import { getProduto } from '@/lib/produtos'
 import { dssMetadata } from '../metadata'
 
-// Upgrade Elite do DSS 2026: escolha entre o certificado digital, o impresso, os slides e os vídeos.
+// Upgrade Elite do DSS 2026: escolha entre o certificado digital, o impresso e os slides.
 // Cada um tem checkout próprio (ver CertificadoCheckout). Link direto, fora do índice.
 export const metadata: Metadata = dssMetadata({
   path: '/dssbr-2026/certificado-elite',
   title: 'Upgrade Elite · DSS 2026',
-  description: 'Upgrade Elite do Data Science Summit Brasil 2026: certificado digital (R$ 30), impresso (R$ 50), slides (R$ 30) ou vídeos das palestras (R$ 50).',
+  description: 'Upgrade Elite do Data Science Summit Brasil 2026: certificado digital (R$ 30), impresso (R$ 50) ou slides das palestras (R$ 30).',
   noindex: true,
 })
 
@@ -15,7 +15,6 @@ const OPCOES = [
   { formato: 'digital', item: 'Certificado digital', slug: 'certificado-elite-digital-dss-2026', entrega: 'chega no seu e-mail' },
   { formato: 'impresso', item: 'Certificado impresso', slug: 'certificado-elite-impresso-dss-2026', entrega: 'entrega combinada pelo WhatsApp' },
   { formato: 'slides', item: 'Slides das palestras', slug: 'slides-elite-dss-2026', entrega: 'acesso no seu e-mail' },
-  { formato: 'videos', item: 'Vídeos das palestras', slug: 'videos-elite-dss-2026', entrega: 'acesso no seu e-mail' },
 ] as const
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -34,10 +33,10 @@ export default function CertificadoElitePage() {
           Upgrade <span className="text-[var(--azuris-cyan)]">Elite</span> — DSS 2026
         </h1>
         <p className="mt-3 text-sm text-[var(--text-secondary)]">
-          Para quem participou do Data Science Summit Brasil 2026: o certificado (digital ou impresso), os slides e os vídeos das palestras. Cada um tem sua compra.
+          Para quem participou do Data Science Summit Brasil 2026: o certificado (digital ou impresso) e os slides das palestras. Cada um tem sua compra.
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {OPCOES.map((o) => (
             <a
               key={o.formato}

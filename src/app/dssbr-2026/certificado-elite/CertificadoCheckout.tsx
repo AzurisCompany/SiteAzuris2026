@@ -1,8 +1,9 @@
 import { getProduto } from '@/lib/produtos'
 import InscricaoForm from '../inscricao/InscricaoForm'
 
-// UPGRADE ELITE do DSS 2026 — um componente, quatro produtos (certificado digital R$30 ·
-// impresso R$50 · slides R$30 · vídeos R$50), cada um com link próprio. Preço fixo no registry,
+// UPGRADES do DSS 2026 — um componente, quatro produtos: Upgrade Elite (certificado digital R$30 ·
+// impresso R$50 · slides R$30) e o upgrade de vídeos (R$50, qualquer ingresso, em
+// /dssbr-2026/upgrade-videos), cada um com link próprio. Preço fixo no registry,
 // sem tipo no banco: a página nem consulta o banco. 1x no cartão, PIX na nossa tela.
 export type Formato = 'digital' | 'impresso' | 'slides' | 'videos'
 
@@ -10,7 +11,7 @@ const SLUG: Record<Formato, string> = {
   digital: 'certificado-elite-digital-dss-2026',
   impresso: 'certificado-elite-impresso-dss-2026',
   slides: 'slides-elite-dss-2026',
-  videos: 'videos-elite-dss-2026',
+  videos: 'upgrade-videos-dss-2026',
 }
 
 // O que aparece no título e no card de preço.
@@ -32,7 +33,18 @@ const ENTREGA: Record<Formato, string> = {
   digital: 'O certificado digital chega no e-mail cadastrado.',
   impresso: 'Depois do pagamento, a gente chama você no WhatsApp cadastrado pra combinar a entrega.',
   slides: 'O acesso aos slides chega no e-mail cadastrado.',
-  videos: 'O acesso aos vídeos chega no e-mail cadastrado.',
+  videos: 'O link para baixar os vídeos chega no e-mail cadastrado.',
+}
+
+// Só o certificado e os slides são "Elite"; o de vídeos é upgrade avulso.
+const MARCA: Record<Formato, string> = { digital: 'Elite', impresso: 'Elite', slides: 'Elite', videos: 'vídeos' }
+
+// Rota do POST. O de vídeos tem rota própria, fora de /dss-certificado-elite.
+const ENDPOINT: Record<Formato, string> = {
+  digital: '/api/dss-certificado-elite/digital',
+  impresso: '/api/dss-certificado-elite/impresso',
+  slides: '/api/dss-certificado-elite/slides',
+  videos: '/api/dss-upgrade-videos',
 }
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687
@@ -43,7 +55,7 @@ export default function CertificadoCheckout({ formato }: { formato: Formato }) {
   const PRODUTO = getProduto(SLUG[formato])
   const preco = PRODUTO.precoCentavos / 100
   const waUrl = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(
-    `Oi! Estava no checkout do Upgrade Elite (${ITEM[formato]}) do DSS 2026 e tenho uma dúvida.`,
+    `Oi! Estava no checkout do Upgrade ${MARCA[formato]} (${ITEM[formato]}) do DSS 2026 e tenho uma dúvida.`,
   )}`
 
   return (
@@ -57,7 +69,7 @@ export default function CertificadoCheckout({ formato }: { formato: Formato }) {
         </a>
 
         <h1 className="mt-6 text-3xl sm:text-4xl font-bold leading-tight">
-          Upgrade <span className="text-[var(--azuris-cyan)]">Elite</span> — {ITEM[formato]}
+          Upgrade <span className="text-[var(--azuris-cyan)]">{MARCA[formato]}</span>{formato === 'videos' ? '' : ` — ${ITEM[formato]}`}
         </h1>
         <p className="mt-3 text-sm text-[var(--text-secondary)]">
           {DESCRICAO[formato]} {ENTREGA[formato]}
@@ -74,7 +86,7 @@ export default function CertificadoCheckout({ formato }: { formato: Formato }) {
           precoPixReais={preco}
           precoCartaoBaseReais={preco}
           maxParcelas={PRODUTO.maxParcelas}
-          endpoint={`/api/dss-certificado-elite/${formato}`}
+          endpoint={ENDPOINT[formato]}
           pixStatusEndpoint="/api/dss-certificado-elite/status"
           gaItem={{ id: PRODUTO.slug, name: PRODUTO.nome }}
           enderecoObrigatorioPJ={PRODUTO.enderecoObrigatorioPJ}

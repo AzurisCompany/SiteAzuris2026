@@ -122,10 +122,10 @@ export const OPCOES_COBRANCA: OpcaoCobranca[] = [
     enderecoObrigatorioPJ: PRODUTOS['slides-elite-dss-2026'].enderecoObrigatorioPJ,
   },
   {
-    slug: 'videos-elite-dss-2026',
-    label: 'Upgrade Elite — vídeos',
-    descricaoPadrao: PRODUTOS['videos-elite-dss-2026'].asaasDescricao,
-    enderecoObrigatorioPJ: PRODUTOS['videos-elite-dss-2026'].enderecoObrigatorioPJ,
+    slug: 'upgrade-videos-dss-2026',
+    label: 'Upgrade vídeos (DSS 2026)',
+    descricaoPadrao: PRODUTOS['upgrade-videos-dss-2026'].asaasDescricao,
+    enderecoObrigatorioPJ: PRODUTOS['upgrade-videos-dss-2026'].enderecoObrigatorioPJ,
   },
   {
     // Camiseta do DSS 2026 (palestrante): o tamanho vai no tipo, e o valor digitado é o
