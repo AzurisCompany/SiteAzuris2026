@@ -7,7 +7,7 @@ import { statusPorAsaasId } from '@/lib/db'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const SLUGS = ['certificado-elite-digital-dss-2026', 'certificado-elite-impresso-dss-2026', 'slides-elite-dss-2026']
+const SLUGS = ['certificado-elite-digital-dss-2026', 'certificado-elite-impresso-dss-2026', 'slides-elite-dss-2026', 'videos-elite-dss-2026']
 
 export async function GET(request: Request) {
   const id = new URL(request.url).searchParams.get('id') ?? ''

@@ -20,6 +20,7 @@ export const PRODUTO_LABEL: Record<string, string> = {
   'certificado-elite-digital-dss-2026': 'DSS 2026 — Upgrade Elite (certificado digital)',
   'certificado-elite-impresso-dss-2026': 'DSS 2026 — Upgrade Elite (certificado impresso)',
   'slides-elite-dss-2026': 'DSS 2026 — Upgrade Elite (slides)',
+  'videos-elite-dss-2026': 'DSS 2026 — Upgrade Elite (vídeos)',
   'dss-one-day-curso-2026': 'DSS 2026 — One Day + Portal do Curso',
   'lakehouse-comunidade': 'Lakehouse: Pipeline na Prática',
   'cafe-networking-2026-10': 'DSSBR — Café de Networking 06/10',
@@ -53,6 +54,7 @@ export const PRODUTO_TAB: Record<string, string> = {
   'certificado-elite-digital-dss-2026': 'Certificado Digital',
   'certificado-elite-impresso-dss-2026': 'Certificado Impresso',
   'slides-elite-dss-2026': 'Slides Elite',
+  'videos-elite-dss-2026': 'Vídeos Elite',
   'dss-one-day-curso-2026': 'One Day + Curso',
   'lakehouse-comunidade': 'Curso',
   'cafe-networking-2026-10': 'Café DSSBR 06/10',
@@ -89,6 +91,7 @@ export const CHECKOUT_URL: Record<string, string> = {
   'certificado-elite-digital-dss-2026': '/dssbr-2026/certificado-elite/digital',
   'certificado-elite-impresso-dss-2026': '/dssbr-2026/certificado-elite/impresso',
   'slides-elite-dss-2026': '/dssbr-2026/certificado-elite/slides',
+  'videos-elite-dss-2026': '/dssbr-2026/certificado-elite/videos',
   'gubigdata-2026-11': '/gubigdata/inscricao', // /gubigdata é sempre o encontro CORRENTE
   'cafe-networking-2026-10': '/cafe-networking/inscricao', // /cafe-networking é sempre a edição CORRENTE
   'ett-adesao': '/ett/ativacao',
@@ -218,6 +221,10 @@ export function precosSugeridosCobranca(): PrecosSugeridos {
     'slides-elite-dss-2026': {
       centavos: PRODUTOS['slides-elite-dss-2026'].precoCentavos,
       dica: 'Upgrade Elite · slides das palestras (preço fixo no registry)',
+    },
+    'videos-elite-dss-2026': {
+      centavos: PRODUTOS['videos-elite-dss-2026'].precoCentavos,
+      dica: 'Upgrade Elite · vídeos das palestras (preço fixo no registry)',
     },
     'camiseta-congressista-dss-2026': {
       centavos: PRODUTOS['camiseta-congressista-dss-2026'].precoCentavos,

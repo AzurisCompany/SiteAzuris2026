@@ -69,7 +69,7 @@ Mapa completo — institucional, checkout e admin — em
 /dssbr-2026                    DSS 2026 — landing (FullPass, One Day e combo ENCERRADOS em 07–08/10)
 /dssbr-2026/inscricao          Aviso de vendas encerradas (era o checkout do FullPass)
 /dssbr-2026/vip  /business      VIP e Business — ENCERRADOS (16 e 21/10)
-/dssbr-2026/certificado-elite  Upgrade Elite — certificado digital R$30 / impresso R$50 / slides R$30
+/dssbr-2026/certificado-elite  Upgrade Elite — certificado digital R$30 / impresso R$50 / slides R$30 / vídeos R$50
 /dssbr-2027/preload            DSS 2027 — FullPass Pre-Load R$550, 50 ingressos, PIX na tela
 /gubigdata  /cafe-networking       Eventos presenciais no IEP (GU e DSSBR)
 /ett  /preparatorio-dados  /lakehouse-comunidade      Outros checkouts

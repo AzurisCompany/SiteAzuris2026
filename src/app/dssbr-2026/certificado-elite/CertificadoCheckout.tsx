@@ -1,15 +1,16 @@
 import { getProduto } from '@/lib/produtos'
 import InscricaoForm from '../inscricao/InscricaoForm'
 
-// UPGRADE ELITE do DSS 2026 — um componente, três produtos (certificado digital R$30 ·
-// impresso R$50 · slides R$30), cada um com link próprio. Preço fixo no registry,
+// UPGRADE ELITE do DSS 2026 — um componente, quatro produtos (certificado digital R$30 ·
+// impresso R$50 · slides R$30 · vídeos R$50), cada um com link próprio. Preço fixo no registry,
 // sem tipo no banco: a página nem consulta o banco. 1x no cartão, PIX na nossa tela.
-export type Formato = 'digital' | 'impresso' | 'slides'
+export type Formato = 'digital' | 'impresso' | 'slides' | 'videos'
 
 const SLUG: Record<Formato, string> = {
   digital: 'certificado-elite-digital-dss-2026',
   impresso: 'certificado-elite-impresso-dss-2026',
   slides: 'slides-elite-dss-2026',
+  videos: 'videos-elite-dss-2026',
 }
 
 // O que aparece no título e no card de preço.
@@ -17,18 +18,21 @@ const ITEM: Record<Formato, string> = {
   digital: 'certificado digital',
   impresso: 'certificado impresso',
   slides: 'slides das palestras',
+  videos: 'vídeos das palestras',
 }
 
 const DESCRICAO: Record<Formato, string> = {
   digital: 'O certificado do Data Science Summit Brasil 2026, para quem participou do congresso.',
   impresso: 'O certificado do Data Science Summit Brasil 2026, para quem participou do congresso.',
   slides: 'Os slides das palestras do Data Science Summit Brasil 2026, para quem participou do congresso.',
+  videos: 'As gravações das palestras do Data Science Summit Brasil 2026, para quem participou do congresso.',
 }
 
 const ENTREGA: Record<Formato, string> = {
   digital: 'O certificado digital chega no e-mail cadastrado.',
   impresso: 'Depois do pagamento, a gente chama você no WhatsApp cadastrado pra combinar a entrega.',
   slides: 'O acesso aos slides chega no e-mail cadastrado.',
+  videos: 'O acesso aos vídeos chega no e-mail cadastrado.',
 }
 
 const WA_PHONE = '5541998003687' // +55 (41) 99800-3687

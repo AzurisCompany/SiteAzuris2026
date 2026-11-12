@@ -17,7 +17,7 @@ import { EVENTO_GU_SLUG } from '@/app/gubigdata/evento'
 import { CAFE_SLUG } from '@/app/cafe-networking/evento'
 
 describe('OPCOES_COBRANCA', () => {
-  it('cobre os baldes: curso, DSS (full, One Day, VIP, Business, Pre-Load 2027, combo 2027 + curso, certificados e slides Elite, camisetas), GU, café, ETT e customizado', () => {
+  it('cobre os baldes: curso, DSS (full, One Day, VIP, Business, Pre-Load 2027, combo 2027 + curso, certificados, slides e vídeos Elite, camisetas), GU, café, ETT e customizado', () => {
     expect(OPCOES_COBRANCA.map((o) => o.slug)).toEqual([
       'lakehouse-comunidade',
       'dss-2026',
@@ -29,6 +29,7 @@ describe('OPCOES_COBRANCA', () => {
       'certificado-elite-digital-dss-2026',
       'certificado-elite-impresso-dss-2026',
       'slides-elite-dss-2026',
+      'videos-elite-dss-2026',
       'camiseta-dss-2026',
       'camiseta-congressista-dss-2026',
       'dss-one-day-curso-2026',
