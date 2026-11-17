@@ -33,7 +33,7 @@ em `/admin`. O mapa disso está em
 - [DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md](./docs/DSS-VIP-BUSINESS-LOTES-POR-QUANTIDADE.md) — VIP e Business, lote que vira sozinho por quantidade
 - [DSS-VENDAS-ENCERRADAS.md](./docs/DSS-VENDAS-ENCERRADAS.md) — One Day, FullPass, Estudante e combo fechados (07–08/10): como, por quê, receita e desfazer
 - [EVENTOS-PRESENCIAIS.md](./docs/EVENTOS-PRESENCIAIS.md) — a página de evento que serve o GU e o café do DSSBR
-- [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) (ativação R$97, Dedicação, Aceleração R$0) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
+- [GUBIGDATA-EVENTO-CHECKOUT.md](./docs/GUBIGDATA-EVENTO-CHECKOUT.md) (geral, associado e online R$15 com transmissão + gravação) · [ETT-ADESAO-E-ASSINATURA.md](./docs/ETT-ADESAO-E-ASSINATURA.md) (ativação R$97, Dedicação, Aceleração R$0) · [FIT-ALUNO-E-PREPARATORIO.md](./docs/FIT-ALUNO-E-PREPARATORIO.md)
 
 **Admin**
 - [ADMIN-VENDAS-COBRANCA-INGRESSOS.md](./docs/ADMIN-VENDAS-COBRANCA-INGRESSOS.md) — cobrança avulsa, tipos de ingresso, filtros e abas
