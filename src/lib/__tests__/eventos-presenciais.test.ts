@@ -82,10 +82,10 @@ describe.each(EVENTOS)('$nome — evento em cartaz', ({ evento, assuntoContem, p
     expect(c.assunto).toMatch(assuntoContem)
   })
 
-  it('a migração semeia os dois tipos da edição — e nenhum deles expira sozinho', () => {
+  it('a migração semeia os tipos da edição (geral + gratuito, e o online quando houver) — e nenhum expira sozinho', () => {
     const migracao = readFileSync(join(RAIZ, 'src/app/api/admin/migrate/route.ts'), 'utf8')
     const seed = migracao.split('\n').filter((l) => l.includes(`'${evento.slug}'`))
-    expect(seed.length, `sem seed de tipos pro ${evento.slug} na migração`).toBe(2)
+    expect(seed.length, `sem seed de tipos pro ${evento.slug} na migração`).toBeGreaterThanOrEqual(2)
     expect(seed.some((l) => l.includes("'geral'")), 'sem o ingresso Geral').toBe(true)
     expect(seed.filter((l) => l.includes("'geral'")).length, 'mais de um tipo pago').toBe(1)
     // 30/07: os dois tipos tinham vendas_ate e fecharam o checkout à meia-noite do dia

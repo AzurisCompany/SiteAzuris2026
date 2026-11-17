@@ -40,6 +40,17 @@ export const EVENTO_GU = {
   dataCurta: '19/11',
   inicio: '18h30',
   horario: '18h30 às 21h00',
+  /**
+   * Ingresso ONLINE (tipo `online` no banco): transmissão ao vivo + gravação. Horário em
+   * UTC pro link "Adicionar à Google Agenda" do e-mail (18h30–21h00 BRT = 21h30–00h00 UTC).
+   * `url` null = link ainda não definido: o e-mail promete mandar antes do encontro.
+   * Preencher a `url` (e fazer deploy) faz o link ir direto no e-mail e no evento da agenda.
+   */
+  transmissao: {
+    inicioUTC: '20261119T213000Z',
+    fimUTC: '20261120T000000Z',
+    url: null,
+  },
   /** Descrição da página do evento (indexável) — não repetir data em texto solto. */
   metaDescricao:
     'Dia 19/11 às 18h30 no IEP, Curitiba: Iago Pimentel mostra ao vivo como sair do chat e criar agentes, automações e apps conectados aos dados da empresa com o Amazon Quick. GU BigData & IA + AWS User Group Curitiba. Ingresso Geral R$ 30 · gratuito para associados.',

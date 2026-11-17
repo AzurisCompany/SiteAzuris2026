@@ -6,6 +6,10 @@
 // fulfillment MANUAL (alguém abre a conta na mão) — prometer acesso imediato ali
 // seria mentira. Por isso o texto muda por `curso_slug` em vez de ser genérico.
 
+import { EVENTO_GU } from '@/app/gubigdata/evento'
+import type { Transmissao } from '@/lib/eventos/tipos'
+import { linkGoogleAgenda } from '@/lib/eventos/agenda'
+
 export interface DadosCompra {
   nome: string
   /** curso_slug da inscrição */
@@ -258,6 +262,7 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
     case 'gubigdata-2026-09':
     case 'gubigdata-2026-08':
     case 'gubigdata-2026-07':
+      if (d.tipoIngresso === 'online') return conteudoGuOnline(nome, valor)
       return {
         assunto: 'Inscrição confirmada — GU BigData & IA',
         titulo: `Inscrição confirmada, ${nome}!`,
@@ -291,6 +296,40 @@ export function conteudoCompraConfirmada(d: DadosCompra): ConteudoEmail {
           'Este e-mail é o seu comprovante. Qualquer dúvida sobre o que foi contratado, é só responder aqui.',
         ],
       }
+  }
+}
+
+/**
+ * Ingresso ONLINE do GU (tipo `online`): não tem "apresente na entrada" — tem link de
+ * transmissão, gravação e o botão da Google Agenda. Os dados vêm do encontro CORRENTE
+ * (`EVENTO_GU.transmissao`): o tipo só é vendido no encontro em cartaz.
+ */
+function conteudoGuOnline(nome: string, valor: string): ConteudoEmail {
+  const t: Transmissao = EVENTO_GU.transmissao
+  const quando = `${EVENTO_GU.dataLonga}, ${EVENTO_GU.horario} (horário de Brasília)`
+  const linkTexto = t.url
+    ? `Link da transmissão: ${t.url}`
+    : 'O link da transmissão chega por e-mail e no convite da Google Agenda antes do encontro.'
+  return {
+    assunto: 'Acesso online confirmado — GU BigData & IA',
+    titulo: `Acesso online confirmado, ${nome}!`,
+    destaque: `Recebemos ${valor} do seu acesso online ao encontro do GU BigData & IA: transmissão ao vivo + gravação.`,
+    paragrafos: [
+      `${EVENTO_GU.tema} — ${quando}.`,
+      linkTexto,
+      'Depois do encontro, a gravação também chega por e-mail — vale pra quem não puder assistir ao vivo.',
+      'Use o botão abaixo pra guardar o horário na sua Google Agenda. Guarde este e-mail: ele é o seu comprovante.',
+    ],
+    cta: {
+      label: 'Adicionar à Google Agenda',
+      url: linkGoogleAgenda({
+        titulo: `GU BigData & IA (online) — ${EVENTO_GU.tema}`,
+        inicioUTC: t.inicioUTC,
+        fimUTC: t.fimUTC,
+        detalhes: `Transmissão ao vivo do encontro do GU BigData & IA. ${linkTexto} Página: https://azuris.com.br/gubigdata`,
+        local: t.url ?? 'Online — link enviado por e-mail',
+      }),
+    },
   }
 }
 

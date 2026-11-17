@@ -91,4 +91,15 @@ export interface EventoPresencial {
   associacoes: readonly string[]
   /** Espelha `PRODUTOS[slug].enderecoObrigatorioPJ` — o form não pode discordar do servidor. */
   enderecoObrigatorioPJ: boolean
+  /** Evento com ingresso online (transmissão + gravação). Ausente = só presencial. */
+  transmissao?: Transmissao
+}
+
+/** Dados do ingresso online — alimentam o e-mail e o link da Google Agenda. */
+export interface Transmissao {
+  /** `AAAAMMDDTHHMMSSZ` (UTC), formato que a Google Agenda aceita em `dates=`. */
+  inicioUTC: string
+  fimUTC: string
+  /** Link da transmissão; null = ainda não definido (vai por e-mail antes do encontro). */
+  url: string | null
 }

@@ -165,4 +165,12 @@ baixados do post do GU (`banner-novembro.jpg`, `iago-pimentel.jpg`). Tipos 238/2
 prod pela API do admin; o passo 7 já tinha sido feito em 09/10. O post do GU já linkava
 `/gubigdata/inscricao`. O post não cita preço: mantido Geral R$ 30 + associado grátis.
 
-Última revisão: **2026-11-06**.
+## Ingresso online (2026-11-17)
+
+Terceiro tipo do encontro de 19/11: `online`, R$ 15, 1x, que dá a transmissão ao vivo e a gravação. É só uma linha a mais no catálogo; página e checkout não mudaram, porque já listam o que estiver no banco.
+
+- O e-mail de confirmação muda pelo `tipo_ingresso`: `conteudoGuOnline` em `lib/email/conteudo.ts`. Não tem "apresente na entrada"; tem o link e o botão "Adicionar à Google Agenda".
+- O horário (UTC) e o link vêm de `EVENTO_GU.transmissao`. Com `url: null`, o e-mail promete mandar o link antes do encontro. Preencher a `url` e fazer deploy põe o link no e-mail e no evento da agenda.
+- Na troca de encontro: atualizar `transmissao` (ou removê-la) e, se houver online, semear o tipo `online` junto dos outros dois. O canário aceita 2 ou mais tipos, mas só um `geral`.
+
+Última revisão: **2026-11-17**.

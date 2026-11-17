@@ -133,6 +133,9 @@ no registry. Se esta seção divergir do painel, o painel está certo.
 |---|---|---|---|---|
 | Geral | R$ 30 | 3x | sem limite | sem prazo |
 | Associado IEP / GU / AWS UG Curitiba / DSSBR | grátis | — | sem limite | sem prazo |
+| Online — transmissão ao vivo + gravação (`online`, 17/11) | R$ 15 | 1x | sem limite | sem prazo |
+
+O ingresso online manda um e-mail próprio: link da transmissão (ou a promessa de mandar, enquanto `EVENTO_GU.transmissao.url` for null), gravação depois do encontro e botão "Adicionar à Google Agenda" (`lib/eventos/agenda.ts`). O convite da agenda com o link, se for mandado, é manual.
 
 **DSS 2026** (tipos, `/admin/ingressos`)
 

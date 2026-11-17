@@ -133,3 +133,27 @@ describe('conteudoInscricaoGratuita', () => {
     expect(t).toContain('pausa')
   })
 })
+
+describe('GU — ingresso online (transmissão + gravação)', () => {
+  const online = conteudoCompraConfirmada({ nome: 'Ana Souza', produtoSlug: 'gubigdata-2026-11', valorCentavos: 1500, tipoIngresso: 'online' })
+
+  it('não manda apresentar na entrada; fala de transmissão e gravação', () => {
+    const t = [online.destaque, ...online.paragrafos].join(' ')
+    expect(online.assunto).toContain('online')
+    expect(online.destaque).toContain('R$ 15,00')
+    expect(t).toContain('gravação')
+    expect(t).not.toContain('entrada')
+  })
+
+  it('CTA abre a Google Agenda com o horário do encontro em UTC', () => {
+    const u = new URL(online.cta!.url)
+    expect(u.hostname).toBe('calendar.google.com')
+    expect(u.searchParams.get('action')).toBe('TEMPLATE')
+    expect(u.searchParams.get('dates')).toBe('20261119T213000Z/20261120T000000Z')
+  })
+
+  it('ingresso presencial do mesmo encontro continua com o texto de sempre', () => {
+    const geral = conteudoCompraConfirmada({ nome: 'Ana', produtoSlug: 'gubigdata-2026-11', valorCentavos: 3000, tipoIngresso: 'geral' })
+    expect(geral.paragrafos.join(' ')).toContain('entrada')
+  })
+})
