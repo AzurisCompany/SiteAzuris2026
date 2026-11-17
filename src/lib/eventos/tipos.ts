@@ -102,4 +102,6 @@ export interface Transmissao {
   fimUTC: string
   /** Link da transmissão; null = ainda não definido (vai por e-mail antes do encontro). */
   url: string | null
+  /** Passo a passo depois de abrir o link (ex.: qual botão e qual sala). */
+  instrucoes?: string
 }

@@ -308,7 +308,7 @@ function conteudoGuOnline(nome: string, valor: string): ConteudoEmail {
   const t: Transmissao = EVENTO_GU.transmissao
   const quando = `${EVENTO_GU.dataLonga}, ${EVENTO_GU.horario} (horário de Brasília)`
   const linkTexto = t.url
-    ? `Link da transmissão: ${t.url}`
+    ? `Link da transmissão: ${t.url}${t.instrucoes ? ` — ${t.instrucoes}` : ''}`
     : 'O link da transmissão chega por e-mail e no convite da Google Agenda antes do encontro.'
   return {
     assunto: 'Acesso online confirmado — GU BigData & IA',

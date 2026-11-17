@@ -157,3 +157,16 @@ describe('GU — ingresso online (transmissão + gravação)', () => {
     expect(geral.paragrafos.join(' ')).toContain('entrada')
   })
 })
+
+describe('GU online — link e passo a passo', () => {
+  it('leva o link da transmissão e a sala no e-mail e na agenda', () => {
+    const c = conteudoCompraConfirmada({ nome: 'Ana', produtoSlug: 'gubigdata-2026-11', valorCentavos: 1500, tipoIngresso: 'online' })
+    const t = c.paragrafos.join(' ')
+    expect(t).toContain('https://live.dssbr.com.br/palco')
+    expect(t).toContain('Estou fora do evento')
+    expect(t).toContain('Auditório')
+    const u = new URL(c.cta!.url)
+    expect(u.searchParams.get('location')).toBe('https://live.dssbr.com.br/palco')
+    expect(u.searchParams.get('details')).toContain('Auditório')
+  })
+})

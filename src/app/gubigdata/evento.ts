@@ -49,7 +49,8 @@ export const EVENTO_GU = {
   transmissao: {
     inicioUTC: '20261119T213000Z',
     fimUTC: '20261120T000000Z',
-    url: null,
+    url: 'https://live.dssbr.com.br/palco',
+    instrucoes: 'Ao abrir o link, clique em "Estou fora do evento" e entre na sala Auditório.',
   },
   /** Descrição da página do evento (indexável) — não repetir data em texto solto. */
   metaDescricao:
